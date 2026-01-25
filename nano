@@ -1,0 +1,1554 @@
+<style>
+  :root{
+    --bg-body:#050505;
+    --bg-panel:#111111;
+    --bg-card:#181818;
+    --bg-input:#222222;
+    --border:#2b2b2b;
+    --accent:#2b6cff;
+    --accent-hover:#1a5cff;
+    --text-main:#ffffff;
+    --text-sec:#a0a0a0;
+    --radius:16px;
+  }
+
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+  #lf-nano * { box-sizing:border-box; }
+
+  #lf-nano{
+    background:var(--bg-body);
+    color:var(--text-main);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    min-height:calc(100vh - 74px);
+  }
+
+  #lf-main{ padding:26px 18px 40px; max-width:1400px; margin:0 auto; }
+
+  #lf-workspace{
+    display:grid;
+    grid-template-columns:420px 1fr;
+    gap:0;
+    border:1px solid var(--border);
+    border-radius:22px;
+    overflow:hidden;
+    background:var(--bg-panel);
+    min-height:calc(100vh - 74px - 52px);
+  }
+
+  .lf-side{
+    padding:20px;
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    max-height:calc(100vh - 74px - 52px);
+    overflow:auto;
+  }
+
+  .lf-back{
+    background:transparent;
+    border:0;
+    color:var(--text-sec);
+    font-weight:900;
+    cursor:pointer;
+    padding:0;
+    font-size:13px;
+  }
+
+  .lf-h2{ font-size:16px; font-weight:1000; margin:0; }
+
+  .lf-field label{
+    display:block;
+    font-size:12px;
+    font-weight:900;
+    color:var(--text-sec);
+    margin-bottom:8px;
+  }
+
+  .lf-input-wrap {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .lf-field textarea,
+  .lf-field select{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
+    padding:12px 12px;
+    border-radius:12px;
+    font-size:14px;
+    display:block;
+  }
+  
+  .lf-input-wrap textarea {
+    border: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+
+  .lf-prompt-loader {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(10, 10, 10, 0.65);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+
+  .lf-prompt-loader::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg, 
+      transparent 0%, 
+      rgba(43, 108, 255, 0.15) 40%, 
+      rgba(43, 108, 255, 0.3) 50%, 
+      rgba(43, 108, 255, 0.15) 60%, 
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shine 2s infinite linear;
+    pointer-events: none;
+  }
+
+  @keyframes shine {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .lf-prompt-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .lf-prompt-text span {
+    animation: pulseOp 1.5s infinite ease-in-out;
+  }
+  @keyframes pulseOp { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  .lf-row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .lf-drop{
+    border:2px dashed var(--border);
+    border-radius:14px;
+    padding:16px 14px;
+    cursor:pointer;
+    background:rgba(255,255,255,.02);
+    transition:.15s;
+    text-align:center;
+  }
+  .lf-drop:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.06); }
+
+  .lf-drop .big{ font-weight:1000; }
+  .lf-drop .sub{ font-size:12px; color:var(--text-sec); margin-top:6px; }
+
+  .lf-thumbs{
+    display:none;
+    margin-top:12px;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-start;
+  }
+  .lf-thumbbox{
+    width:62px; height:62px;
+    border-radius:12px;
+    overflow:hidden;
+    position:relative;
+    border:1px solid rgba(255,255,255,.10);
+    background:#000;
+    flex:0 0 auto;
+  }
+  .lf-thumbbox img{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+    opacity:.98;
+  }
+  .lf-thumbbox .x{
+    position:absolute;
+    top:6px; right:6px;
+    width:18px; height:18px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.55);
+    color:#fff;
+    font-weight:1000;
+    font-size:12px;
+    line-height:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    user-select:none;
+    opacity:0;
+    transform:scale(.96);
+    transition:.12s;
+  }
+  .lf-thumbbox:hover .x{ opacity:1; transform:scale(1); }
+
+  .lf-actions{ margin-top:auto; display:flex; flex-direction:column; gap:10px; }
+
+  .lf-chk{
+    display:flex; align-items:center; gap:10px;
+    cursor:pointer; user-select:none;
+    font-size:13px; font-weight:700; color:var(--text-sec);
+    padding:4px 0;
+  }
+  .lf-chk input{
+    width:18px; height:18px; margin:0;
+    accent-color:var(--accent); cursor:pointer;
+  }
+  .lf-chk:hover{ color:#fff; }
+
+  .lf-btn{
+    width:100%;
+    padding:14px 14px;
+    border-radius:14px;
+    border:0;
+    background:var(--accent);
+    color:#fff;
+    font-weight:1000;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  .lf-btn:hover{ background:var(--accent-hover); }
+  .lf-btn.secondary{ background:#2a2a2a; color:#ddd; }
+  .lf-btn.secondary:hover{ background:#333; }
+
+  .lf-cost{
+    font-size:12px;
+    padding:3px 10px;
+    border-radius:999px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.10);
+  }
+
+  .lf-status{
+    text-align:center;
+    font-size:12px;
+    color:var(--text-sec);
+    min-height:18px;
+  }
+  .lf-status.err{ color:#ff5a6b; font-weight:1000; }
+  .lf-status.ok{ color:#9be28a; font-weight:1000; }
+
+  .lf-main{
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    position:relative;
+  }
+
+  .lf-empty{
+    color:#3a3a3a;
+    text-align:center;
+    font-weight:900;
+  }
+
+  .lf-result{
+    display:none;
+    width:min(920px, 95%);
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 0 50px rgba(0,0,0,.6);
+    background:#0b0b0b;
+  }
+  .lf-result img, .lf-result video{
+    width:100%;
+    display:block;
+    max-height:75vh;
+    object-fit:contain;
+    background:#000;
+  }
+
+  .lf-resbar{
+    padding:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    border-top:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+  }
+  .lf-resbar a{
+    text-decoration:none;
+    background:var(--accent);
+    color:#fff;
+    padding:10px 14px;
+    border-radius:12px;
+    font-weight:1000;
+  }
+
+  .lf-loader{
+    position:absolute; inset:0;
+    background:rgba(0,0,0,.78);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    z-index:30;
+    backdrop-filter: blur(4px);
+  }
+  .lf-spin{
+    width:46px;height:46px;
+    border-radius:999px;
+    border:4px solid #2b2b2b;
+    border-top-color:var(--accent);
+    animation:lfspin 1s linear infinite;
+  }
+  @keyframes lfspin{ to{ transform:rotate(360deg); } }
+  .lf-wait{ font-weight:1000; }
+  .lf-time{ font-size:12px; color:var(--text-sec); }
+
+  .hidden{ display:none !important; }
+
+  @media(max-width:1000px){
+    #lf-workspace{ grid-template-columns:1fr; }
+    .lf-side{ border-right:0; border-bottom:1px solid var(--border); max-height:none; }
+    .lf-main{ min-height:420px; }
+  }
+
+  /* ✅ Aspect picker (Higgsfield-like) */
+  .lf-aspectlist{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .lf-aspectitem{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.02);
+    cursor:pointer;
+    transition:.12s;
+    user-select:none;
+  }
+  .lf-aspectitem:hover{
+    border-color:rgba(43,108,255,.45);
+    background:rgba(43,108,255,.06);
+  }
+  .lf-aspectleft{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .lf-aspectbox{
+    width:16px;height:16px;
+    border-radius:5px;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(0,0,0,.35);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+  }
+  .lf-aspectitem.active .lf-aspectbox{
+    border-color:rgba(43,108,255,.9);
+    box-shadow:0 0 0 2px rgba(43,108,255,.18);
+  }
+  .lf-aspectdot{
+    width:8px;height:8px;
+    border-radius:999px;
+    background:transparent;
+  }
+  .lf-aspectitem.active .lf-aspectdot{
+    background:var(--accent);
+  }
+  .lf-aspectlabel{
+    font-weight:900;
+    font-size:13px;
+    color:#fff;
+  }
+  .lf-aspectright{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .lf-badge{
+    font-size:12px;
+    font-weight:1000;
+    padding:4px 10px;
+    border-radius:999px;
+    background:rgba(180,255,0,.12);
+    border:1px solid rgba(180,255,0,.25);
+    color:#d7ff4a;
+  }
+  .lf-check{
+    font-weight:1000;
+    color:#9be28a;
+    opacity:0;
+  }
+  .lf-aspectitem.active .lf-check{
+    opacity:1;
+  }
+</style>
+
+<div id="lf-nano">
+  <div id="lf-main">
+    <div id="lf-workspace">
+      <div class="lf-side">
+        <button class="lf-back" id="btn-back" type="button">← Back to Flow</button>
+        <div class="lf-h2">Nano Banana Pro (Image)</div>
+
+        <div class="lf-field">
+          <label>Prompt</label>
+          <div class="lf-input-wrap">
+            <textarea id="scene" rows="5" placeholder="Describe what you want..."></textarea>
+            <div class="lf-prompt-loader" id="promptLoader">
+              <div class="lf-prompt-text">
+                <span>✨ Генерация промта...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lf-field">
+          <label>Reference Images (optional)</label>
+          <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+          <div class="lf-drop" id="drop">
+            <div class="big" id="dropTitle">Upload images</div>
+            <div class="sub" id="dropSub">Click or drag&drop • up to 14 images</div>
+            <div class="lf-thumbs" id="thumbs"></div>
+          </div>
+        </div>
+
+        <div class="lf-field">
+          <label>Resolution</label>
+          <select id="res">
+            <option value="1K">1K</option>
+            <option value="2K" selected>2K</option>
+            <option value="4K">4K</option>
+          </select>
+        </div>
+
+        <div class="lf-field">
+          <label>Aspect ratio</label>
+
+          <div class="lf-aspectlist" id="aspectList">
+            <div class="lf-aspectitem active" data-aspect="16:9">
+              <div class="lf-aspectleft">
+                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
+                <div class="lf-aspectlabel">16:9</div>
+              </div>
+              <div class="lf-aspectright">
+                <span class="lf-badge">Cinematic</span>
+                <span class="lf-check">✓</span>
+              </div>
+            </div>
+
+            <div class="lf-aspectitem" data-aspect="21:9">
+              <div class="lf-aspectleft">
+                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
+                <div class="lf-aspectlabel">21:9</div>
+              </div>
+              <div class="lf-aspectright">
+                <span class="lf-badge">Cinematic</span>
+                <span class="lf-check">✓</span>
+              </div>
+            </div>
+
+            <div class="lf-aspectitem" data-aspect="9:16">
+              <div class="lf-aspectleft">
+                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
+                <div class="lf-aspectlabel">9:16</div>
+              </div>
+              <div class="lf-aspectright">
+                <span class="lf-check">✓</span>
+              </div>
+            </div>
+
+            <div class="lf-aspectitem" data-aspect="1:1">
+              <div class="lf-aspectleft">
+                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
+                <div class="lf-aspectlabel">1:1</div>
+              </div>
+              <div class="lf-aspectright">
+                <span class="lf-check">✓</span>
+              </div>
+            </div>
+
+            <div class="lf-aspectitem" data-aspect="4:3">
+              <div class="lf-aspectleft">
+                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
+                <div class="lf-aspectlabel">4:3</div>
+              </div>
+              <div class="lf-aspectright">
+                <span class="lf-check">✓</span>
+              </div>
+            </div>
+
+            <div class="lf-aspectitem" data-aspect="3:2">
+              <div class="lf-aspectleft">
+                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
+                <div class="lf-aspectlabel">3:2</div>
+              </div>
+              <div class="lf-aspectright">
+                <span class="lf-check">✓</span>
+              </div>
+            </div>
+
+            <div class="lf-aspectitem" data-aspect="2:3">
+              <div class="lf-aspectleft">
+                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
+                <div class="lf-aspectlabel">2:3</div>
+              </div>
+              <div class="lf-aspectright">
+                <span class="lf-check">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:8px;color:var(--text-sec);font-size:12px;">
+            Tip: choose <b>16:9</b> or <b>21:9</b> for a cinematic frame.
+          </div>
+        </div>
+
+        <div class="lf-h2" style="margin-top:4px;">Cinematic Studio</div>
+
+        <div class="lf-field">
+          <label>Camera preset</label>
+          <select id="camPreset"></select>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Focal length</label>
+            <select id="focal">
+              <option value="24">24mm (wide)</option>
+              <option value="35" selected>35mm (classic)</option>
+              <option value="50">50mm (natural)</option>
+              <option value="85">85mm (portrait)</option>
+              <option value="135">135mm (tele)</option>
+            </select>
+          </div>
+
+          <div class="lf-field">
+            <label>Aperture</label>
+            <select id="aperture">
+              <option value="f/1.4">f/1.4 (very shallow DOF)</option>
+              <option value="f/2.0" selected>f/2.0 (shallow DOF)</option>
+              <option value="f/2.8">f/2.8 (balanced)</option>
+              <option value="f/4.0">f/4.0 (medium)</option>
+              <option value="f/5.6">f/5.6 (deeper)</option>
+              <option value="f/8">f/8 (deep)</option>
+              <option value="f/11">f/11 (very deep)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Film grain</label>
+            <select id="grain">
+              <option value="off">Off</option>
+              <option value="subtle" selected>Subtle</option>
+              <option value="medium">Medium</option>
+            </select>
+          </div>
+
+          <div class="lf-field">
+            <label>Exposure style</label>
+            <select id="exposure">
+              <option value="natural" selected>Natural</option>
+              <option value="lowkey">Low-key</option>
+              <option value="highkey">High-key</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Anamorphic flare</label>
+            <select id="flare">
+              <option value="off">Off</option>
+              <option value="subtle" selected>Subtle</option>
+              <option value="strong">Strong</option>
+            </select>
+          </div>
+          <div class="lf-field">
+            <label>Bloom / halation</label>
+            <select id="bloom">
+              <option value="off">Off</option>
+              <option value="subtle" selected>Subtle</option>
+              <option value="strong">Strong</option>
+            </select>
+          </div>
+        </div>
+        <div class="lf-actions">
+          <label class="lf-chk">
+            <input type="checkbox" id="styleOnly" checked>
+            Style-only transform (keep scene)
+          </label>
+
+          <button class="lf-btn" id="run" type="button">
+            Generate <span class="lf-cost" id="cost">—</span>
+          </button>
+          
+          <button class="lf-btn secondary" id="gptPrompt" type="button">
+              ✨ GPT → Build Prompt
+          </button>
+
+          <button class="lf-btn secondary" id="stop" type="button" style="display:none">Stop</button>
+          <div class="lf-status" id="statusText"></div>
+        </div>
+      </div>
+
+      <div class="lf-main">
+        <div class="lf-empty" id="empty">
+          <div style="font-size:56px;opacity:.35;">✨</div>
+          <div style="margin-top:8px;">Result will appear here</div>
+        </div>
+
+        <div class="lf-result" id="result">
+          <video id="outVideo" controls playsinline class="hidden"></video>
+          <img id="outImg" class="hidden" alt="result" />
+          <div class="lf-resbar">
+            <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
+            <a id="download" href="#" target="_blank" download>Download</a>
+          </div>
+        </div>
+
+        <div class="lf-loader" id="loader">
+          <div class="lf-spin"></div>
+          <div class="lf-wait">Waiting…</div>
+          <div class="lf-time" id="loaderTime">01:00</div>
+          <div class="lf-time" id="loaderSub">Sending task…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const BASE = location.origin;
+  const BACKEND_BASE = "https://api.lightfull.ai";
+
+  const ETA_SECONDS = 60;
+  const PRESET_ID = "nano_banana_pro";
+  const INPUTS_BUCKET = "inputs";
+
+  const MAX_IMAGES = 14;
+
+  const LF_ENGINE_PROMPT = `
+GLOBAL CONSTRAINT:
+- Generate a clean cinematic FRAME (a film still).
+- NEVER render any text, UI, logs, code, watermarks, subtitles, labels, typography.
+- No posters, no banners.
+
+CORE GOAL:
+- If an input image is provided: preserve the SAME SUBJECT identity.
+- Apply the user request as a photographed scene (not illustration).
+
+STRICT ORDER (execute in order):
+STEP 1 — CONTENT & COMPOSITION
+STEP 2 — GEOMETRY & OPTICS
+STEP 3 — TEXTURE PASS (grain only)
+
+ANTI-AI LOOK:
+- Avoid HDR, avoid over-sharpening, avoid plastic skin, avoid “AI glossy” look.
+- Keep natural film-like contrast and believable exposure.
+`.trim();
+
+  const LF_CAMERA_PRESETS = {
+    "IMAX_PANAVISION_ANAMORPHIC": {
+      label: "IMAX Film • Panavision Anamorphic",
+      camera: "IMAX 65mm film camera",
+      lens: "Panavision anamorphic (C-Series character)",
+      notes: "real anamorphic optics: blue horizontal streak flare, elliptical bokeh, subtle halation/bloom around highlights, gentle vignette, slight chromatic aberration, filmic contrast"
+    },
+    "ARRI_ALEXA_SPHERICAL": {
+      label: "ARRI Alexa • Modern Spherical",
+      camera: "ARRI Alexa-style digital cinema camera",
+      lens: "modern spherical prime lens",
+      notes: "neutral filmic digital, soft highlight roll-off, no HDR"
+    },
+    "VINTAGE_35_FILM": {
+      label: "Vintage 35mm Film • Classic Prime",
+      camera: "35mm film camera",
+      lens: "vintage prime lens",
+      notes: "gentle bloom, softer micro-contrast, organic texture"
+    },
+    "CONTROLLED_COMMERCIAL": {
+      label: "Controlled Commercial • Clean Studio",
+      camera: "high-end digital cinema camera",
+      lens: "sharp modern prime",
+      notes: "controlled speculars, clean detail (still filmic, not glossy)"
+    }
+  };
+
+  function exposureBlock(mode){
+    switch(String(mode||"natural")){
+      case "lowkey":
+        return "low-key exposure, deep shadows with detail, controlled highlights, cinematic contrast";
+      case "highkey":
+        return "high-key exposure, bright soft light, gentle contrast, preserved highlights";
+      default:
+        return "natural exposure, balanced contrast, preserved highlights, realistic shadows";
+    }
+  }
+
+  function grainBlock(level){
+    switch(String(level||"subtle")){
+      case "off": return "no film grain";
+      case "medium": return "medium film grain (LUMA ONLY), organic texture, no color noise";
+      default: return "subtle film grain (LUMA ONLY), organic texture, no color noise";
+    }
+  }
+
+  function flareBlock(level){
+    switch(String(level||"subtle")){
+      case "off":
+        return "no anamorphic streak flare";
+      case "strong":
+        return "strong but realistic anamorphic streak flare originating ONLY from bright highlights (torch flame), not a sci-fi laser line";
+      default:
+        return "subtle anamorphic streak flare originating ONLY from bright highlights (torch flame), not a sci-fi laser line";
+    }
+  }
+
+  function bloomBlock(level){
+    switch(String(level||"subtle")){
+      case "off":
+        return "no bloom, no halation";
+      case "strong":
+        return "strong but realistic halation/bloom ONLY around highlights, film-like glow, not dreamy haze";
+      default:
+        return "subtle halation/bloom ONLY around highlights, film-like glow";
+    }
+  }
+
+  function normalizeUserPrompt(p){
+    let s = String(p||"").trim();
+    s = s.replace(/^use the input image as a locked base reference\.\s*/i, "");
+    s = s.replace(/^use the input image as a locked base( reference)?\.\s*/i, "");
+    return s.trim();
+  }
+
+  function buildFinalPrompt({ userPrompt, hasImage, presetKey, focalMm, aperture, grain, exposure, aspect, res, styleOnly, flare, bloom }) {
+    const P = LF_CAMERA_PRESETS[presetKey] || LF_CAMERA_PRESETS.IMAX_PANAVISION_ANAMORPHIC;
+    const up = normalizeUserPrompt(userPrompt);
+
+    const identityWardrobeLock = hasImage ? `
+IDENTITY + WARDROBE LOCK (ABSOLUTE):
+- Preserve the exact same person identity from the input image.
+- Keep face structure, facial features, eye shape, nose, mouth, beard, hairstyle consistent.
+- Preserve clothing/outfit type, layers, materials, and overall look.
+- Do NOT replace wardrobe with a different coat/jacket/armor unless explicitly requested by the user.
+- Preserve body proportions and silhouette.
+` : `
+NO INPUT IMAGE:
+- Create a new scene from scratch according to USER_TEXT.
+`;
+
+    const styleOnlyBlock = styleOnly ? `
+STYLE-ONLY TRANSFORM (STRICT):
+- Do NOT change scene content, wardrobe, props, or add/remove objects.
+- Keep composition and background layout consistent.
+- Only adjust lighting, atmosphere, camera optics (lens/DOF), and texture/grain.
+` : `
+CONTENT TRANSFORM:
+- You may change environment/atmosphere and staging as requested, BUT keep identity locked if input image exists.
+- Preserve wardrobe unless user explicitly requests wardrobe change.
+`;
+
+    const cameraPhysical = `
+PHYSICAL CAMERA SIMULATION:
+- This is photographed live-action, not illustration.
+- Focal length affects perspective/compression realistically.
+- Aperture affects depth of field/bokeh realistically.
+- Torch/fire (if present) behaves as a real key light with warm falloff.
+`;
+
+    const isAnamorphic = presetKey === "IMAX_PANAVISION_ANAMORPHIC";
+    const useFlare = isAnamorphic && String(flare||"subtle") !== "off";
+    const anamorphicOpticsPack = useFlare ? `
+ANAMORPHIC OPTICS (CONTROLLED):
+- Create the anamorphic streak flare ONLY from the torch flame highlight.
+- The flare must be realistic, not a neon sci-fi line. Do NOT add random blue lines.
+- If the flare becomes too strong, reduce intensity automatically.
+` : "";
+
+    const camBlock = `
+CINEMATIC CAMERA SETUP:
+- Camera: ${P.camera}
+- Lens: ${P.lens}
+- Focal length: ${focalMm}mm
+- Aperture: ${aperture}
+- Aspect ratio: ${aspect}
+- Output: ${res}
+- Exposure: ${exposureBlock(exposure)}
+- Texture: ${grainBlock(grain)}
+- Flare: ${flareBlock(flare)}
+- Halation/Bloom: ${bloomBlock(bloom)}
+- Notes: ${P.notes}
+`.trim();
+
+    return `
+${LF_ENGINE_PROMPT}
+
+${identityWardrobeLock.trim()}
+
+${styleOnlyBlock.trim()}
+
+${cameraPhysical.trim()}
+${anamorphicOpticsPack.trim()}
+
+USER_TEXT:
+${up || "High-quality cinematic film still."}
+
+TECHNICAL_PARAMETERS:
+- CAMERA_PRESET: ${presetKey}
+- FOCAL_LENGTH_MM: ${focalMm}
+- APERTURE: ${aperture}
+- ASPECT_RATIO: ${aspect}
+- OUTPUT: ${res}
+
+CAMERA_PRESET_BLOCK:
+${camBlock}
+`.trim();
+  }
+
+  /* ----------------------------------------------------------- */
+
+  const $ = (id)=>document.getElementById(id);
+
+  const fileEl = $("file");
+  const drop = $("drop");
+  const thumbsEl = $("thumbs");
+  const dropTitle = $("dropTitle");
+  const dropSub = $("dropSub");
+
+  const sceneEl = $("scene");
+  const promptLoader = $("promptLoader");
+  
+  // ✅ NEW: Aspect List Elements
+  const aspectListEl = $("aspectList");
+  let selectedAspect = "16:9";
+
+  const resEl = $("res");
+  const styleChk = $("styleOnly");
+
+  // Cinematic UI
+  const camPresetEl = $("camPreset");
+  const focalEl = $("focal");
+  const apertureEl = $("aperture");
+  const grainEl = $("grain");
+  const exposureEl = $("exposure");
+
+  const flareEl = $("flare");
+  const bloomEl = $("bloom");
+
+  const runBtn = $("run");
+  const gptBtn = $("gptPrompt");
+  const stopBtn = $("stop");
+  const statusText = $("statusText");
+
+  const empty = $("empty");
+  const result = $("result");
+  const outVideo = $("outVideo");
+  const outImg = $("outImg");
+  const download = $("download");
+  const meta = $("meta");
+
+  const loader = $("loader");
+  const loaderTime = $("loaderTime");
+  const loaderSub = $("loaderSub");
+
+  let selectedFiles = [];
+  let currentJobId = null;
+  let abortPoll = false;
+  let pollTimer = null;
+  let timer = null;
+  let timeLeft = ETA_SECONDS;
+
+  let cachedImageUrls = [];
+  let cachedSignature = "";
+
+  $("btn-back").addEventListener("click", ()=>location.href = BASE + "/flow#image");
+
+  (function initCinematicPresets(){
+    if (!camPresetEl) return;
+    camPresetEl.innerHTML = "";
+    Object.keys(LF_CAMERA_PRESETS).forEach((k)=>{
+      const opt = document.createElement("option");
+      opt.value = k;
+      opt.textContent = LF_CAMERA_PRESETS[k].label;
+      camPresetEl.appendChild(opt);
+    });
+    camPresetEl.value = "IMAX_PANAVISION_ANAMORPHIC";
+  })();
+
+  // ✅ NEW: Aspect Ratio Logic
+  function setAspect(val){
+    selectedAspect = String(val || "16:9");
+    const items = aspectListEl ? Array.from(aspectListEl.querySelectorAll(".lf-aspectitem")) : [];
+    items.forEach(it => it.classList.toggle("active", it.dataset.aspect === selectedAspect));
+  }
+  if (aspectListEl){
+    aspectListEl.addEventListener("click", (e)=>{
+      const item = e.target.closest(".lf-aspectitem");
+      if (!item) return;
+      setAspect(item.dataset.aspect);
+    });
+  }
+  setAspect("16:9");
+
+  function setStatus(t, kind){
+    statusText.textContent = t || "";
+    statusText.classList.remove("err","ok");
+    if (kind) statusText.classList.add(kind);
+  }
+
+  function resetResult(){
+    empty.style.display = "block";
+    result.style.display = "none";
+    outVideo.classList.add("hidden");
+    outImg.classList.add("hidden");
+    outVideo.pause();
+    outVideo.removeAttribute("src");
+    outImg.removeAttribute("src");
+    download.href="#";
+    meta.textContent="";
+  }
+
+  function isVideoUrl(url){
+    const u = String(url||"").toLowerCase();
+    return u.includes(".mp4") || u.includes(".webm") || u.includes(".mov") || u.includes("fal.media");
+  }
+
+  function showResult(url, status){
+    empty.style.display = "none";
+    result.style.display = "block";
+    download.href = url;
+    meta.textContent = `status: ${status} • jobId: ${currentJobId}`;
+
+    outVideo.classList.add("hidden");
+    outImg.classList.add("hidden");
+    outVideo.pause();
+    outVideo.removeAttribute("src");
+    outImg.removeAttribute("src");
+
+    if (isVideoUrl(url)) {
+      outVideo.src = url;
+      outVideo.classList.remove("hidden");
+      outVideo.load();
+      outVideo.play().catch(()=>{});
+    } else {
+      outImg.src = url;
+      outImg.classList.remove("hidden");
+    }
+  }
+
+  function showLoader(on){
+    loader.style.display = on ? "flex" : "none";
+    if (on) startTimer(ETA_SECONDS);
+    if (!on) stopTimer();
+  }
+  
+  function showPromptLoader(on){
+    promptLoader.style.display = on ? "flex" : "none";
+  }
+
+  function startTimer(sec){
+    stopTimer();
+    timeLeft = Math.max(0, Math.floor(sec));
+    const tick = ()=>{
+      const m = Math.floor(timeLeft/60);
+      const s = String(timeLeft%60).padStart(2,"0");
+      loaderTime.textContent = `${m}:${s}`;
+      timeLeft = Math.max(0, timeLeft-1);
+    };
+    tick();
+    timer = setInterval(tick, 1000);
+  }
+
+  function stopTimer(){
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+
+  function uuid(){
+    if (crypto && crypto.randomUUID) return crypto.randomUUID();
+    return Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function formatSize(bytes){
+    const kb = Math.round(bytes/1024);
+    if (kb < 1024) return kb + " KB";
+    return (kb/1024).toFixed(1) + " MB";
+  }
+
+  function ensureLimit(files){
+    if (files.length <= MAX_IMAGES) return files;
+    return files.slice(0, MAX_IMAGES);
+  }
+
+  function dedupeBySignature(files){
+    const seen = new Set();
+    const out = [];
+    for (const f of files){
+      const key = `${f.name}|${f.size}|${f.lastModified}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(f);
+    }
+    return out;
+  }
+
+  function addFiles(files){
+    const imgs = Array.from(files || []).filter(f => f && f.type && f.type.startsWith("image/"));
+    if (!imgs.length) return;
+
+    const merged = selectedFiles.concat(imgs);
+    const limited = ensureLimit(dedupeBySignature(merged));
+    if (limited.length < merged.length){
+      setStatus(`Max ${MAX_IMAGES} images. Extra files ignored.`, "err");
+      setTimeout(()=>setStatus(""), 1600);
+    }
+    selectedFiles = limited;
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = [];
+    cachedSignature = "";
+  }
+
+  function removeFileAt(idx){
+    const f = selectedFiles[idx];
+    if (f && f.__previewUrl) {
+      try { URL.revokeObjectURL(f.__previewUrl); } catch(e){}
+    }
+    selectedFiles.splice(idx, 1);
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = [];
+    cachedSignature = "";
+  }
+
+  function clearFiles(){
+    for (const f of selectedFiles){
+      if (f && f.__previewUrl){
+        try { URL.revokeObjectURL(f.__previewUrl); } catch(e){}
+      }
+    }
+    selectedFiles = [];
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = [];
+    cachedSignature = "";
+  }
+
+  function renderThumbs(){
+    thumbsEl.innerHTML = "";
+    if (!selectedFiles.length){
+      thumbsEl.style.display = "none";
+      return;
+    }
+
+    thumbsEl.style.display = "flex";
+
+    selectedFiles.forEach((file, idx) => {
+      const box = document.createElement("div");
+      box.className = "lf-thumbbox";
+
+      if (!file.__previewUrl){
+        try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
+      }
+
+      const img = document.createElement("img");
+      img.alt = file.name || "image";
+      img.src = file.__previewUrl || "";
+
+      const x = document.createElement("div");
+      x.className = "x";
+      x.textContent = "×";
+      x.title = "Remove";
+      x.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        removeFileAt(idx);
+      });
+
+      box.appendChild(img);
+      box.appendChild(x);
+      thumbsEl.appendChild(box);
+    });
+  }
+
+  function updateDropText(){
+    if (!selectedFiles.length){
+      dropTitle.textContent = "Upload images";
+      dropSub.textContent = "Click or drag&drop • up to 14 images";
+      return;
+    }
+    const count = selectedFiles.length;
+    const totalBytes = selectedFiles.reduce((s,f)=>s+(f?.size||0), 0);
+
+    dropTitle.textContent = `${count} image${count>1?"s":""} selected`;
+    dropSub.textContent = `Total: ${formatSize(totalBytes)} • Click to add more • Drag&drop works`;
+  }
+
+  async function getSessionOrRedirect(){
+    const sb = window.sb;
+    if (!sb) { location.href = BASE + "/login"; throw new Error("No supabase client"); }
+    const { data } = await sb.auth.getSession();
+    const s = data?.session;
+    if (!s) { location.href = BASE + "/login"; throw new Error("No session"); }
+    return s;
+  }
+
+  async function refreshSessionSafe(){
+    const sb = window.sb;
+    try { await sb.auth.refreshSession(); } catch(e){}
+    return getSessionOrRedirect();
+  }
+
+  async function fetchJsonWithAuth(url, options={}){
+    let s = await getSessionOrRedirect();
+    let r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+
+    if (r.status===401 || r.status===403){
+      s = await refreshSessionSafe();
+      r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+    }
+
+    const raw = await r.text();
+    let j={}; try{ j=raw?JSON.parse(raw):{} }catch(_){}
+
+    if (!r.ok || j?.ok===false){
+      const err = new Error(j.error || ("HTTP "+r.status));
+      err.status = r.status;
+      err.data = j;
+      err.raw = raw;
+      throw err;
+    }
+    return j;
+  }
+
+  async function uploadReferenceToInputs(file){
+    const sb = window.sb;
+    const session = await getSessionOrRedirect();
+
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "png";
+    const path = `${session.user.id}/${uuid()}.${safeExt}`;
+
+    let up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, {
+      upsert:false,
+      contentType: file.type || "application/octet-stream"
+    });
+
+    if (up?.error && (up.error.statusCode === 401 || up.error.statusCode === 403)){
+      await refreshSessionSafe();
+      up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, {
+        upsert:false,
+        contentType: file.type || "application/octet-stream"
+      });
+    }
+
+    if (up.error) throw up.error;
+
+    const pub = sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
+    return pub.data.publicUrl;
+  }
+
+  async function uploadAllSelectedOrThrow(){
+    if (!selectedFiles.length) return [];
+    loaderSub.textContent = `Uploading ${selectedFiles.length} image(s)…`;
+
+    const urls = [];
+    for (let i=0; i<selectedFiles.length; i++){
+      loaderSub.textContent = `Uploading ${i+1}/${selectedFiles.length}…`;
+      const url = await uploadReferenceToInputs(selectedFiles[i]);
+      urls.push(url);
+    }
+    return urls;
+  }
+
+  function filesSignature(files){
+    return (files||[]).map(f => `${f.name}|${f.size}|${f.lastModified}`).join("||");
+  }
+
+  async function getOrUploadImageUrls(){
+    if (!selectedFiles.length) return [];
+
+    const sig = filesSignature(selectedFiles);
+    if (cachedSignature === sig && cachedImageUrls.length === selectedFiles.length){
+      return cachedImageUrls;
+    }
+
+    const urls = await uploadAllSelectedOrThrow();
+    cachedSignature = sig;
+    cachedImageUrls = urls;
+    return urls;
+  }
+
+  function calcCost(){
+    const res = String(resEl.value || "2K");
+    const cost = (res === "4K") ? 2 : 1;
+    $("cost").textContent = cost + " Cr";
+  }
+
+  /* -----------------------------------------------------------
+      ✅ GPT PROMPT BUILDER
+      ----------------------------------------------------------- */
+
+  function nanoPromptBuilderSystem(){
+    return `
+You are a PROMPT BUILDER for "Nano Banana Pro (Image)".
+
+ABSOLUTE RULES:
+- You are NOT a chat assistant. Do NOT answer general questions.
+- Do NOT ask clarifying questions.
+- Output ONLY between tags: <PROMPT>...</PROMPT> (no extra text).
+- The final output PROMPT MUST BE IN ENGLISH, regardless of user's language.
+- If the user request is NOT about image generation/editing, output: <PROMPT>DECLINED</PROMPT>
+
+PRIMARY GOAL:
+Write a prompt that transforms the provided reference image(s) according to the user's intent.
+Do NOT re-describe the image in detail. Only a minimal subject hint is allowed (<= 10 words).
+
+WHEN REFERENCE IMAGES ARE PROVIDED (default behavior):
+- Treat the input image as a locked base reference.
+- Preserve character identity, pose, silhouette, and composition.
+- Preserve clothing/outfit and materials unless user explicitly requests wardrobe change.
+- Change only what the user requests (style/render/lighting/materials/environment).
+
+OUTPUT FORMAT (single paragraph, no bullets):
+Start with: "Use the input image as a locked base reference."
+Then: "TASK: ..." describing the transformation.
+Then: "KEEP: ..." (identity/pose/composition/wardrobe).
+Then: "CHANGE: ..." (style/render/lighting/camera/grade).
+Then: "AVOID: ..." (negative constraints, especially illustration/lineart, HDR, glossy).
+
+Keep it compact but unambiguous.
+`.trim();
+  }
+
+  function enforceCinematicRealism(prompt, userText){
+    const t = (userText||"").toLowerCase();
+    const wantsRealism = /реал|кин|cinema|cinematic|photo|photoreal|live[- ]action/.test(t);
+    if (!wantsRealism) return prompt;
+    if (prompt.toLowerCase().includes("avoid:")) return prompt;
+    const add = ` AVOID: illustration, cartoon, anime, painterly, lineart, comic, cel-shaded, CGI look, over-sharpening, HDR, plastic skin, "AI glossy" look.`;
+    return prompt + add;
+  }
+
+  function extractPromptTag(text){
+    const s = String(text||"");
+    const a = "<PROMPT>";
+    const b = "</PROMPT>";
+    const i = s.indexOf(a);
+    const j = s.indexOf(b);
+    if (i !== -1 && j !== -1 && j > i) return s.slice(i+a.length, j).trim();
+    return s.trim();
+  }
+
+  async function gptStart(prompt, image_urls){
+    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/chatgpt_start_json", {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({
+        prompt,
+        image_urls,
+        system_prompt: nanoPromptBuilderSystem(),
+        reasoning_effort: "minimal",
+        model: "nano"
+      })
+    });
+    return data.jobId;
+  }
+
+  async function gptPoll(jobId){
+    const t0 = Date.now();
+    const maxMs = 90000;
+
+    while (true){
+      if (Date.now() - t0 > maxMs) throw new Error("GPT timeout");
+
+      const s = await fetchJsonWithAuth(BACKEND_BASE + "/api/chatgpt_status?jobId=" + encodeURIComponent(jobId), {
+        method: "GET"
+      });
+
+      if (s.status === "succeeded") return String(s.text || "").trim();
+      if (s.status === "failed" || s.status === "canceled") throw new Error(s.error || "GPT failed");
+      await new Promise(r => setTimeout(r, 900));
+    }
+  }
+
+  async function buildPromptNano(){
+    gptBtn.disabled = true;
+    runBtn.disabled = true;
+
+    setStatus("", "");
+    showPromptLoader(true);
+
+    try{
+      let userRequest = (sceneEl.value || "").trim();
+
+      if (styleChk.checked) {
+        userRequest += " \n[INSTRUCTION: STYLE-ONLY. Preserve identity, clothing/wardrobe, composition, and background layout. Do NOT add/remove objects. Only adjust lighting, atmosphere, camera optics, film grain.]";
+      }
+
+      const image_urls = await getOrUploadImageUrls();
+
+      const jobId = await gptStart(userRequest || "Make a high-quality image based on the reference.", image_urls);
+      const raw = await gptPoll(jobId);
+      let built = extractPromptTag(raw);
+
+      if (built === "DECLINED"){
+        showPromptLoader(false);
+        setStatus("GPT работает только для генерации промтов (не чат). Опиши, что хочешь получить на изображении.", "err");
+        return;
+      }
+
+      built = enforceCinematicRealism(built, sceneEl.value);
+      sceneEl.value = built;
+      setStatus("Prompt generated ✓", "ok");
+    } finally {
+      showPromptLoader(false);
+      gptBtn.disabled = false;
+      runBtn.disabled = false;
+    }
+  }
+
+  /* -----------------------------------------------------------
+      END GPT LOGIC
+      ----------------------------------------------------------- */
+
+  async function startJob(){
+    runBtn.disabled = true;
+    gptBtn.disabled = true;
+    stopBtn.style.display = "block";
+    abortPoll = false;
+    currentJobId = null;
+    if (pollTimer) clearTimeout(pollTimer);
+
+    resetResult();
+    setStatus("");
+    showLoader(true);
+    loaderSub.textContent = "Preparing…";
+
+    const fd = new FormData();
+    fd.append("presetId", PRESET_ID);
+
+    const userPromptRaw = (sceneEl.value||"").trim() || "high quality, detailed";
+    const hasImage = !!selectedFiles.length;
+
+    const presetKey = String(camPresetEl?.value || "IMAX_PANAVISION_ANAMORPHIC");
+    const focalMm = Number(focalEl?.value || 35);
+    const aperture = String(apertureEl?.value || "f/2.0");
+    const grain = String(grainEl?.value || "subtle");
+    const exposure = String(exposureEl?.value || "natural");
+    
+    const flare = String(flareEl?.value || "subtle");
+    const bloom = String(bloomEl?.value || "subtle");
+
+    // ✅ Aspect is now from selectedAspect
+    const resVal = String(resEl.value || "2K");
+
+    const finalPrompt = buildFinalPrompt({
+      userPrompt: userPromptRaw,
+      hasImage,
+      presetKey,
+      focalMm,
+      aperture,
+      grain,
+      exposure,
+      aspect: selectedAspect, // ✅ Passed selectedAspect
+      res: resVal,
+      styleOnly: !!styleChk.checked,
+      flare,
+      bloom
+    });
+
+    fd.append("scene", finalPrompt);
+
+    // ✅ Passed selectedAspect to backend
+    fd.append("aspect_ratio", selectedAspect);
+    fd.append("resolution", resVal);
+    fd.append("output_format", "png");
+    fd.append("safety_filter_level", "block_only_high");
+
+    let urls = [];
+    if (selectedFiles.length){
+      urls = await getOrUploadImageUrls();
+      if (urls.length === 1){
+        fd.append("image_input_url", urls[0]);
+      } else {
+        urls.forEach(u => fd.append("image_input_urls", u));
+        fd.append("image_input_url", urls[0]);
+      }
+    }
+
+    loaderSub.textContent = "Sending task…";
+
+    let data;
+    try{
+      data = await fetchJsonWithAuth(BACKEND_BASE + "/api/start", {
+        method: "POST",
+        body: fd
+      });
+    } catch(e){
+      showLoader(false);
+      runBtn.disabled = false;
+      gptBtn.disabled = false;
+      stopBtn.style.display = "none";
+
+      if (e.status === 402 && e.data) {
+        const need = e.data.required ?? "?";
+        const have = e.data.credits ?? 0;
+        setStatus(`Not enough credits • need ${need} Cr • you have ${have} Cr`, "err");
+        return;
+      }
+
+      setStatus("Error", "err");
+      alert("Start error:\n\n" + (e?.message||e));
+      return;
+    }
+
+    currentJobId = data.jobId;
+
+    if (typeof data.cost !== "undefined" && typeof data.credits_left !== "undefined") {
+      setStatus(`Started • cost ${data.cost} Cr • left ${data.credits_left} Cr`, "ok");
+    } else {
+      setStatus("jobId: " + currentJobId, "");
+    }
+
+    pollStatus();
+  }
+
+  async function pollStatus(){
+    abortPoll = false;
+
+    const tick = async ()=>{
+      if (abortPoll) return;
+
+      try{
+        const data = await fetchJsonWithAuth(BACKEND_BASE + `/api/status?jobId=${encodeURIComponent(currentJobId)}`, {
+          method:"GET"
+        });
+
+        loaderSub.textContent = "status: " + data.status;
+
+        if (data.status === "succeeded"){
+          showLoader(false);
+          runBtn.disabled = false;
+          gptBtn.disabled = false;
+          stopBtn.style.display = "none";
+          setStatus("Done", "ok");
+          if (data.output_url) showResult(data.output_url, data.status);
+          return;
+        }
+
+        if (data.status === "failed" || data.status === "canceled"){
+          showLoader(false);
+          runBtn.disabled = false;
+          gptBtn.disabled = false;
+          stopBtn.style.display = "none";
+          setStatus("Failed", "err");
+          return;
+        }
+
+        pollTimer = setTimeout(tick, 1200);
+      } catch(e){
+        showLoader(false);
+        runBtn.disabled = false;
+        gptBtn.disabled = false;
+        stopBtn.style.display = "none";
+        setStatus("Status error", "err");
+        alert("Status error:\n\n" + (e?.message || e));
+      }
+    };
+
+    tick();
+  }
+
+  drop.addEventListener("click", ()=>fileEl.click());
+
+  fileEl.addEventListener("change", (e)=>{
+    const files = Array.from(e.target.files || []);
+    fileEl.value = "";
+    addFiles(files);
+  });
+
+  ["dragenter","dragover"].forEach(evt=>{
+    drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="rgba(43,108,255,.55)"; });
+  });
+  ["dragleave","drop"].forEach(evt=>{
+    drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="var(--border)"; });
+  });
+  drop.addEventListener("drop",(ev)=>{
+    const files = ev.dataTransfer?.files;
+    addFiles(files);
+  });
+
+  runBtn.addEventListener("click", async ()=>{
+    try{ await startJob(); }
+    catch(e){
+      showLoader(false);
+      runBtn.disabled=false;
+      gptBtn.disabled=false;
+      stopBtn.style.display="none";
+      setStatus("Error", "err");
+      alert("Start error:\n\n" + (e?.message||e));
+    }
+  });
+
+  gptBtn.addEventListener("click", async ()=>{
+    try { await buildPromptNano(); }
+    catch(e){
+      showPromptLoader(false);
+      setStatus("GPT error", "err");
+      alert("GPT error:\n\n" + (e?.message || e));
+      gptBtn.disabled = false;
+      runBtn.disabled = false;
+    }
+  });
+
+  stopBtn.addEventListener("click", ()=>{
+    abortPoll = true;
+    if (pollTimer) clearTimeout(pollTimer);
+    showLoader(false);
+    runBtn.disabled = false;
+    gptBtn.disabled = false;
+    stopBtn.style.display = "none";
+    setStatus("Stopped");
+  });
+
+  drop.addEventListener("contextmenu", (e)=>{
+    e.preventDefault();
+    if (!selectedFiles.length) return;
+    if (confirm("Clear selected images?")) clearFiles();
+  });
+
+  resEl.addEventListener("change", calcCost);
+  calcCost();
+  updateDropText();
+})();
+</script>
