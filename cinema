@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Creation Suite</title>
+<style>
+  :root{
+    --bg-body:#050505;
+    --bg-panel:#111111;
+    --bg-card:#181818;
+    --bg-input:#222222;
+    --border:#2b2b2b;
+    --accent:#2b6cff;
+    --accent-hover:#1a5cff;
+    --text-main:#ffffff;
+    --text-sec:#a0a0a0;
+    --radius:16px;
+  }
+  body { margin:0; background:var(--bg-body); color:var(--text-main); font-family:Inter,system-ui,-apple-system,sans-serif; }
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+  #lf-ad *{ box-sizing:border-box; }
+
+  #lf-ad{
+    min-height:calc(100vh - 74px);
+  }
+
+  #lf-ad .wrap{
+    max-width:1680px;
+    margin:0 auto;
+    padding:18px 18px 34px;
+  }
+
+  #lf-ad .workspace{
+    display:grid;
+    grid-template-columns: 1fr 390px;
+    gap:14px;
+    min-height:calc(100vh - 74px - 54px);
+  }
+
+  /* LEFT */
+  #lf-ad .viewportCard{
+    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+    border:1px solid var(--border);
+    border-radius:22px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    min-height:560px;
+  }
+
+  #lf-ad .topbar{
+    height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+    backdrop-filter: blur(4px);
+  }
+  #lf-ad .topbar .left{
+    display:flex; gap:10px; align-items:center;
+    min-width:0;
+  }
+  #lf-ad .pill{
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    padding:7px 10px;
+    border-radius:999px;
+    color:#fff;
+    font-weight:900;
+    font-size:12px;
+  }
+  #lf-ad .title{
+    font-weight:1000;
+    font-size:13px;
+    color:rgba(255,255,255,.88);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  #lf-ad .topbar .right{ display:flex; gap:10px; align-items:center; }
+
+  #lf-ad .btnIcon{
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    border-radius:12px;
+    padding:10px 12px;
+    cursor:pointer;
+    font-weight:900;
+    font-size:13px;
+    user-select:none;
+  }
+  #lf-ad .btnIcon:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.12); }
+  #lf-ad .btnIcon.active{ border-color:rgba(43,108,255,.85); background:rgba(43,108,255,.22); }
+
+  #lf-ad .stageWrap{
+    flex:1;
+    position:relative;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px;
+  }
+
+  #lf-ad .frame{
+    position:relative;
+    width:min(1400px, 100%);
+    aspect-ratio: 16 / 9;
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.10);
+    background:
+      radial-gradient(circle at 30% 20%, rgba(43,108,255,.10), transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(175,82,222,.08), transparent 42%),
+      #060606;
+  }
+
+  #lf-ad canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  #bgCanvas{ z-index:1; }
+  #drawCanvas{ z-index:2; }
+  #glCanvas{ z-index:3; }
+
+  /* RIGHT */
+  #lf-ad .panel{
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:22px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    min-height:560px;
+  }
+  #lf-ad .panelInner{
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    overflow:auto;
+  }
+
+  #lf-ad .h2{ font-size:14px; font-weight:1000; margin:0; }
+
+  #lf-ad .field label{
+    display:block;
+    font-size:12px;
+    font-weight:900;
+    color:var(--text-sec);
+    margin-bottom:8px;
+  }
+
+  #lf-ad textarea,
+  #lf-ad select,
+  #lf-ad input[type="range"]{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
+    padding:12px 12px;
+    border-radius:12px;
+    font-size:14px;
+    display:block;
+  }
+  #lf-ad textarea{ resize:vertical; min-height:92px; }
+
+  #lf-ad .drop{
+    border:1px dashed rgba(255,255,255,.18);
+    border-radius:14px;
+    padding:12px 12px;
+    cursor:pointer;
+    background:rgba(255,255,255,.02);
+    transition:.15s;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  #lf-ad .drop:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.06); }
+  #lf-ad .drop .t{ font-weight:1000; font-size:13px; }
+  #lf-ad .drop .s{ font-size:12px; color:var(--text-sec); margin-top:3px; }
+
+  /* PREVIEW IMAGE STYLE */
+  #prodPreview {
+    width: 100%;
+    height: auto;
+    max-height: 140px;
+    object-fit: contain;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: none;
+  }
+  #prodPreview.visible { display: block; }
+
+  #lf-ad .miniBtn{
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    border-radius:12px;
+    padding:10px 12px;
+    cursor:pointer;
+    font-weight:900;
+    font-size:13px;
+    user-select:none;
+    white-space:nowrap;
+  }
+  #lf-ad .miniBtn:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.12); }
+
+  #lf-ad .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #lf-ad .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+
+  #lf-ad .palette{ display:flex; flex-wrap:wrap; gap:8px; }
+  #lf-ad .swatch{
+    width:22px; height:22px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.16);
+    cursor:pointer;
+  }
+  #lf-ad .swatch.active{
+    outline:2px solid rgba(43,108,255,.85);
+    outline-offset:2px;
+  }
+
+  #lf-ad .toggle{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.04);
+    border-radius:14px;
+    padding:10px 12px;
+  }
+  #lf-ad .toggle .tt{ font-weight:1000; font-size:13px; }
+  #lf-ad .toggle .st{ color:var(--text-sec); font-size:12px; margin-top:3px; }
+  #lf-ad .switch{
+    width:48px; height:28px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.06);
+    position:relative;
+    cursor:pointer;
+    flex:0 0 auto;
+  }
+  #lf-ad .switch::after{
+    content:"";
+    width:22px; height:22px; border-radius:999px;
+    background:#fff;
+    position:absolute;
+    top:2px; left:2px;
+    transition:.15s;
+  }
+  #lf-ad .switch.on{
+    background:rgba(43,108,255,.35);
+    border-color:rgba(43,108,255,.55);
+  }
+  #lf-ad .switch.on::after{ left:24px; background:#fff; }
+
+  #lf-ad .btn{
+    width:100%;
+    padding:14px 14px;
+    border-radius:14px;
+    border:0;
+    background:var(--accent);
+    color:#fff;
+    font-weight:1000;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  #lf-ad .btn:hover{ background:var(--accent-hover); }
+  #lf-ad .btn.secondary{ background:#2a2a2a; color:#ddd; }
+  #lf-ad .btn.secondary:hover{ background:#333; }
+
+  #lf-ad .cost{
+    font-size:12px;
+    padding:3px 10px;
+    border-radius:999px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.10);
+  }
+
+  #lf-ad .status{
+    text-align:center;
+    font-size:12px;
+    color:var(--text-sec);
+    min-height:18px;
+  }
+  #lf-ad .status.err{ color:#ff5a6b; font-weight:1000; }
+  #lf-ad .status.ok{ color:#9be28a; font-weight:1000; }
+
+  #lf-ad .loader{
+    position:absolute; inset:0;
+    background:rgba(0,0,0,.78);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    z-index:50;
+    backdrop-filter: blur(4px);
+  }
+  #lf-ad .spin{
+    width:46px;height:46px;
+    border-radius:999px;
+    border:4px solid #2b2b2b;
+    border-top-color:var(--accent);
+    animation:lfspin 1s linear infinite;
+  }
+  @keyframes lfspin{ to{ transform:rotate(360deg); } }
+  #lf-ad .wait{ font-weight:1000; }
+  #lf-ad .time{ font-size:12px; color:var(--text-sec); }
+
+  #lf-ad .resultOverlay{
+    position:absolute; inset:0;
+    display:none;
+    background:rgba(0,0,0,.78);
+    backdrop-filter: blur(4px);
+    z-index:60;
+    padding:18px;
+    align-items: center;
+    justify-content: center;
+  }
+  #lf-ad .resultCard{
+    width:min(1100px, 96%);
+    margin:0 auto;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+    overflow:hidden;
+    background:#0b0b0b;
+    box-shadow:0 0 55px rgba(0,0,0,.7);
+  }
+  #lf-ad .resultCard img, #lf-ad .resultCard video{
+    width:100%;
+    display:block;
+    max-height:75vh;
+    object-fit:contain;
+    background:#000;
+  }
+  #lf-ad .resbar{
+    padding:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    border-top:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+  }
+  #lf-ad .resbar a{
+    text-decoration:none;
+    background:var(--accent);
+    color:#fff;
+    padding:10px 14px;
+    border-radius:12px;
+    font-weight:1000;
+  }
+
+  /* HELP MODAL STYLES */
+  #lf-ad .helpCard{
+    width:min(420px, 90%);
+    background:#111;
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:30px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.8);
+    display:flex; flex-direction:column; gap:20px;
+  }
+  #lf-ad .help-title{ font-size:18px; font-weight:1000; margin-bottom:10px; color:#fff; }
+  #lf-ad .help-list{ display:flex; flex-direction:column; gap:16px; }
+  #lf-ad .help-item{ display:flex; gap:14px; }
+  #lf-ad .help-icon{
+    flex:0 0 24px; width:24px; height:24px;
+    border-radius:6px; background:rgba(255,255,255,0.1);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:bold; color:var(--accent);
+  }
+  #lf-ad .help-content .ht{ font-weight:800; font-size:14px; color:#fff; margin-bottom:4px; }
+  #lf-ad .help-content .hs{ font-size:13px; color:var(--text-sec); line-height:1.4; }
+
+  .hidden{ display:none !important; }
+
+  @media(max-width:1100px){
+    #lf-ad .workspace{ grid-template-columns: 1fr; }
+    #lf-ad .frame{ width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="lf-ad">
+  <div class="wrap">
+    <div class="workspace">
+      <div class="viewportCard">
+        <div class="topbar">
+          <div class="left">
+            <span class="pill">Product Creation</span>
+            <span class="title" id="stateText">View • 3D OFF</span>
+          </div>
+          <div class="right">
+            <button class="btnIcon" id="btnDraw" type="button">Draw</button>
+            <button class="btnIcon" id="btn3D" type="button">3D</button>
+            <button class="btnIcon" id="btnHelp" type="button">Help</button>
+          </div>
+        </div>
+
+        <div class="stageWrap">
+          <div class="frame" id="frame">
+            <canvas id="bgCanvas"></canvas>
+            <canvas id="drawCanvas"></canvas>
+            <canvas id="glCanvas"></canvas>
+
+            <div class="loader" id="loader">
+              <div class="spin"></div>
+              <div class="wait">Waiting…</div>
+              <div class="time" id="loaderTime">01:00</div>
+              <div class="time" id="loaderSub">Sending task…</div>
+            </div>
+
+            <div class="resultOverlay" id="resultOverlay" style="display:none;">
+              <div class="resultCard">
+                <video id="outVideo" controls playsinline class="hidden"></video>
+                <img id="outImg" class="hidden" alt="result"/>
+                <div class="resbar">
+                  <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <button class="btnIcon" id="closeResult" type="button">Close</button>
+                    <a id="download" href="#" target="_blank" download>Download</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="resultOverlay" id="helpOverlay" style="display:none; z-index:70;">
+                <div class="helpCard" id="helpCardInner">
+                    <div class="help-title">Product Creator — Quick Guide</div>
+                    <div class="help-list">
+                        <div class="help-item">
+                            <div class="help-icon">1</div>
+                            <div class="help-content">
+                                <div class="ht">Add product</div>
+                                <div class="hs">Загрузите изображение продукта или свой .glb-файл.</div>
+                            </div>
+                        </div>
+                        <div class="help-item">
+                            <div class="help-icon">2</div>
+                            <div class="help-content">
+                                <div class="ht">Place in 3D</div>
+                                <div class="hs">Включите 3D mode и точно разместите продукт в кадре.</div>
+                            </div>
+                        </div>
+                         <div class="help-item">
+                            <div class="help-icon">3</div>
+                            <div class="help-content">
+                                <div class="ht">Pose Mode</div>
+                                <div class="hs">Если загружена модель с ригом (например Human), вы можете менять позу костей. Кликните на желтый шар для выбора.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn" id="closeHelp" type="button" style="margin-top:10px;">Got it</button>
+                </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panelInner">
+
+          <div class="h2">Inputs</div>
+
+          <div class="field">
+            <label>Background (optional)</label>
+            <input type="file" id="bgFile" accept="image/png,image/jpeg,image/webp" hidden />
+            <div class="drop" id="bgDrop">
+              <div>
+                <div class="t" id="bgTitle">Upload background</div>
+                <div class="s" id="bgSub">Optional</div>
+              </div>
+              <div class="miniBtn" id="bgClear" type="button">Clear</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Product (reference)</label>
+            <input type="file" id="prodFile" accept="image/png,image/jpeg,image/webp" hidden />
+            <div class="drop" id="prodDrop">
+              <div>
+                <div class="t" id="prodTitle">Upload product</div>
+                <div class="s" id="prodSub">This image will be used to replace the 3D primitive</div>
+              </div>
+              <div class="miniBtn" id="prodClear" type="button">Clear</div>
+            </div>
+            <img id="prodPreview" alt="Product Preview" />
+          </div>
+
+          <div class="field">
+            <label>Prompt (optional)</label>
+            <textarea id="scene" placeholder=""></textarea>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Aspect</label>
+              <select id="aspect">
+                <option value="16:9" selected>16:9</option>
+                <option value="9:16">9:16</option>
+                <option value="1:1">1:1</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Resolution</label>
+              <select id="res">
+                <option value="1K">1K</option>
+                <option value="2K" selected>2K</option>
+                <option value="4K">4K</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="h2">Draw</div>
+
+          <div class="palette" id="palette"></div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Brush size</label>
+              <input type="range" id="brushSize" min="2" max="80" value="14" />
+            </div>
+            <div class="field">
+              <label>Opacity</label>
+              <input type="range" id="brushOpacity" min="0.05" max="1" step="0.05" value="0.9" />
+            </div>
+          </div>
+
+          <div class="row2">
+            <button class="btn secondary" id="btnEraser" type="button">Eraser</button>
+            <button class="btn secondary" id="btnClearDraw" type="button">Clear draw</button>
+          </div>
+
+          <div class="h2">3D (Product Primitive)</div>
+
+          <div class="toggle">
+            <div>
+              <div class="tt">3D primitive</div>
+              <div class="st">OFF by default • Primitive = PRODUCT</div>
+            </div>
+            <div class="switch" id="prodSwitch" title="Toggle 3D"></div>
+          </div>
+
+          <div class="field" style="margin-top:10px;">
+            <label>Custom 3D Model (.glb)</label>
+            <input type="file" id="customModelFile" accept=".glb,.gltf" hidden />
+            <div class="drop" id="modelDrop">
+              <div>
+                <div class="t" id="modelName">Upload .GLB</div>
+                <div class="s">Replaces primitive</div>
+              </div>
+              <div class="miniBtn" id="modelClear" type="button">Clear</div>
+            </div>
+          </div>
+          
+          <button class="btn secondary" id="btnAddHuman" type="button" style="margin-top:10px;">Add Human (Rigged)</button>
+
+          <div id="poseUI" style="display:none; margin-top:10px; border-top:1px solid var(--border); padding-top:14px; gap:10px; flex-direction:column;">
+             <div class="toggle">
+                <div>
+                   <div class="tt">Pose Mode</div>
+                   <div class="st">Click yellow spheres to rotate</div>
+                </div>
+                <div class="switch" id="poseSwitch"></div>
+             </div>
+             
+             <div class="field">
+                <label>Selected Bone</label>
+                <select id="boneSelect"></select>
+             </div>
+             <button class="btn secondary" id="btnResetPose" type="button">Reset Pose</button>
+          </div>
+
+          <div class="row3" style="margin-top:10px;">
+            <button class="btnIcon" id="tMove" type="button">Move</button>
+            <button class="btnIcon" id="tRot" type="button">Rotate</button>
+            <button class="btnIcon" id="tScale" type="button">Scale</button>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Primitive</label>
+              <select id="primType">
+                <option value="box" selected>Box</option>
+                <option value="cylinder">Cylinder</option>
+                <option value="plane">Plane</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Opacity</label>
+              <input type="range" id="primOpacity" min="0.05" max="0.6" step="0.05" value="0.25" />
+            </div>
+          </div>
+
+          <div class="row2">
+            <button class="btn secondary" id="btnCenter3D" type="button">Center</button>
+            <button class="btn secondary" id="btnReset3D" type="button">Reset</button>
+          </div>
+
+          <div class="h2">Generate</div>
+           
+          <button class="btn secondary" id="btnPreviewAI" type="button" style="margin-bottom:10px;">Preview</button>
+
+          <button class="btn" id="run" type="button">
+            Generate <span class="cost" id="cost">—</span>
+          </button>
+
+          <button class="btn secondary" id="stop" type="button" style="display:none;">Stop</button>
+
+          <div class="status" id="statusText"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/TransformControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+
+<script>
+(() => {
+  window.addEventListener("load", () => {
+    const BASE = location.origin;
+    const BACKEND_BASE = "https://api.lightfull.ai";
+
+    const ETA_SECONDS = 60;
+    const PRESET_ID = "nano_banana_pro";
+    const INPUTS_BUCKET = "inputs";
+    // NEW Human Model URL
+    const HUMAN_URL = "https://vqnmzstiaosqeoltcwbq.supabase.co/storage/v1/object/public/assets_models/human%203.glb";
+
+    // --- BONE CONFIGURATION ---
+    const BONE_MAPPING = {
+        "mixamorig_Head_06": "Голова",
+        "mixamorig_Neck_05": "Шея",
+        "mixamorig_Spine1_03": "Грудь",
+        "mixamorig_Spine_02": "Спина (Низ)",
+        "mixamorig_Hips_01": "Таз",
+        
+        "mixamorig_LeftShoulder_010": "Плечо (Левое)",
+        "mixamorig_RightShoulder_034": "Плечо (Правое)",
+        
+        "mixamorig_LeftArm_011": "Рука Верх (Левая)",
+        "mixamorig_RightArm_035": "Рука Верх (Правая)",
+        
+        "mixamorig_LeftForeArm_012": "Предплечье (Левое)",
+        "mixamorig_RightForeArm_036": "Предплечье (Правое)",
+        
+        "mixamorig_LeftHand_013": "Кисть (Левая)",
+        "mixamorig_RightHand_037": "Кисть (Правая)",
+        
+        "mixamorig_LeftUpLeg_062": "Бедро (Левое)",
+        "mixamorig_RightUpLeg_058": "Бедро (Правое)",
+        
+        "mixamorig_LeftLeg_063": "Голень (Левая)",
+        "mixamorig_RightLeg_00": "Голень (Правая)",
+        
+        "mixamorig_LeftFoot_064": "Стопа (Левая)",
+        "mixamorig_RightFoot_059": "Стопа (Правая)"
+    };
+    
+    // Ordered list of IDs for UI
+    const ALLOWED_BONES = Object.keys(BONE_MAPPING);
+
+    const $ = (id)=>document.getElementById(id);
+
+    const frame = $("frame");
+    const bgCanvas = $("bgCanvas");
+    const drawCanvas = $("drawCanvas");
+    const glCanvas = $("glCanvas");
+
+    const bgCtx = bgCanvas.getContext("2d");
+    const dCtx  = drawCanvas.getContext("2d");
+
+    const stateText = $("stateText");
+    const btnDraw = $("btnDraw");
+    const btn3D = $("btn3D");
+    const btnHelp = $("btnHelp");
+
+    const bgFile = $("bgFile");
+    const bgDrop = $("bgDrop");
+    const bgTitle = $("bgTitle");
+    const bgSub = $("bgSub");
+    const bgClear = $("bgClear");
+
+    const prodFile = $("prodFile");
+    const prodDrop = $("prodDrop");
+    const prodTitle = $("prodTitle");
+    const prodSub = $("prodSub");
+    const prodClear = $("prodClear");
+    const prodPreview = $("prodPreview"); 
+
+    const sceneEl = $("scene");
+    const aspectEl = $("aspect");
+    const resEl = $("res");
+
+    const paletteEl = $("palette");
+    const brushSizeEl = $("brushSize");
+    const brushOpacityEl = $("brushOpacity");
+    const btnEraser = $("btnEraser");
+    const btnClearDraw = $("btnClearDraw");
+
+    const prodSwitch = $("prodSwitch");
+    const tMove = $("tMove");
+    const tRot = $("tRot");
+    const tScale = $("tScale");
+    const primTypeEl = $("primType");
+    const primOpacityEl = $("primOpacity");
+    const btnCenter3D = $("btnCenter3D");
+    const btnReset3D = $("btnReset3D");
+
+    const customModelFile = $("customModelFile");
+    const modelDrop = $("modelDrop");
+    const modelName = $("modelName");
+    const modelClear = $("modelClear");
+
+    const btnAddHuman = $("btnAddHuman");
+    const poseUI = $("poseUI");
+    const poseSwitch = $("poseSwitch");
+    const boneSelect = $("boneSelect");
+    const btnResetPose = $("btnResetPose");
+
+    const btnPreviewAI = $("btnPreviewAI");
+    const runBtn = $("run");
+    const stopBtn = $("stop");
+    const statusText = $("statusText");
+    const costEl = $("cost");
+
+    const loader = $("loader");
+    const loaderTime = $("loaderTime");
+    const loaderSub = $("loaderSub");
+
+    const resultOverlay = $("resultOverlay");
+    const outVideo = $("outVideo");
+    const outImg = $("outImg");
+    const download = $("download");
+    const meta = $("meta");
+    const closeResult = $("closeResult");
+
+    const helpOverlay = $("helpOverlay");
+    const closeHelp = $("closeHelp");
+    const helpCardInner = $("helpCardInner");
+
+    const THREE_OK = !!(window.THREE && THREE.OrbitControls && THREE.TransformControls && THREE.GLTFLoader);
+    if (!THREE_OK){
+      console.warn("Three.js controls not loaded");
+      setStatus("3D disabled (Three controls not loaded)", "err");
+      btn3D.disabled = true;
+    }
+
+    // ---- state ----
+    let mode = "view"; 
+    let eraser = false;
+    let brushColor = "#ffffff";
+    const palette = ["#ffffff","#ff3b30","#ff9500","#ffd60a","#34c759","#2b6cff","#af52de","#00c7be","#a0a0a0","#000000"];
+
+    let bgImage = null;
+    let bgFileObj = null;
+    let productFileObj = null;
+    let productImg = null;
+
+    let drawing = false;
+    let lastX = 0, lastY = 0;
+    let product3DEnabled = false;
+    
+    // Rig State
+    // rig = { root, skinned, bones: [], bindPose: [], controlBalls: [] }
+    let rig = null; 
+    let poseMode = false;
+
+    let currentJobId = null;
+    let abortPoll = false;
+    let pollTimer = null;
+    let timer = null;
+    let timeLeft = ETA_SECONDS;
+
+    // ---------------- utils ----------------
+    function setStatus(t, kind){
+      statusText.textContent = t || "";
+      statusText.classList.remove("err","ok");
+      if (kind) statusText.classList.add(kind);
+    }
+
+    function showLoader(on){
+      loader.style.display = on ? "flex" : "none";
+      if (on) startTimer(ETA_SECONDS);
+      if (!on) stopTimer();
+    }
+
+    function startTimer(sec){
+      stopTimer();
+      timeLeft = Math.max(0, Math.floor(sec));
+      const tick = ()=>{
+        const m = Math.floor(timeLeft/60);
+        const s = String(timeLeft%60).padStart(2,"0");
+        loaderTime.textContent = `${m}:${s}`;
+        timeLeft = Math.max(0, timeLeft-1);
+      };
+      tick();
+      timer = setInterval(tick, 1000);
+    }
+    function stopTimer(){
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    function uuid(){
+      if (crypto && crypto.randomUUID) return crypto.randomUUID();
+      return Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
+
+    function formatSize(bytes){
+      const kb = Math.round(bytes/1024);
+      if (kb < 1024) return kb + " KB";
+      return (kb/1024).toFixed(1) + " MB";
+    }
+
+    function isVideoUrl(url){
+      const u = String(url||"").toLowerCase();
+      return u.includes(".mp4") || u.includes(".webm") || u.includes(".mov") || u.includes("fal.media");
+    }
+
+    function showResult(url, status){
+      resultOverlay.style.display = "flex";
+      download.href = url;
+      meta.textContent = `status: ${status} • jobId: ${currentJobId}`;
+      outVideo.classList.add("hidden");
+      outImg.classList.add("hidden");
+      outVideo.pause();
+      outVideo.removeAttribute("src");
+      outImg.removeAttribute("src");
+      if (isVideoUrl(url)) {
+        outVideo.src = url;
+        outVideo.classList.remove("hidden");
+        outVideo.load();
+        outVideo.play().catch(()=>{});
+      } else {
+        outImg.src = url;
+        outImg.classList.remove("hidden");
+      }
+    }
+
+    closeResult.addEventListener("click", ()=>{ resultOverlay.style.display = "none"; });
+
+    function calcCost(){
+      const res = String(resEl.value || "2K");
+      const cost = (res === "4K") ? 2 : 1;
+      costEl.textContent = cost + " Cr";
+    }
+
+    function setMode(next){
+      if (mode === next && next !== 'view') next = 'view';
+      mode = next;
+      btnDraw.classList.toggle("active", next==="draw");
+      btn3D.classList.toggle("active", next==="3d");
+      if (next === "draw") {
+        drawCanvas.style.pointerEvents = "auto";
+        glCanvas.style.pointerEvents = "none";
+      } else {
+        drawCanvas.style.pointerEvents = "none";
+        glCanvas.style.pointerEvents = "auto";
+      }
+      let label = "View";
+      if (next === "draw") label = "Draw";
+      if (next === "3d") label = "3D Edit";
+      stateText.textContent = `${label} • 3D ${product3DEnabled ? "ON" : "OFF"}`;
+      update3DVisibility();
+    }
+
+    // ---------------- aspect + resize ----------------
+    function applyAspect(){
+      const a = aspectEl.value;
+      if (a === "16:9") frame.style.aspectRatio = "16 / 9";
+      if (a === "9:16") frame.style.aspectRatio = "9 / 16";
+      if (a === "1:1") frame.style.aspectRatio = "1 / 1";
+      resizeAll();
+      if (THREE_OK) onResize3D();
+    }
+
+    function resizeAll(){
+      const rect = frame.getBoundingClientRect();
+      const w = Math.max(2, Math.floor(rect.width));
+      const h = Math.max(2, Math.floor(rect.height));
+      const saved = drawCanvas.toDataURL("image/png");
+      for (const c of [bgCanvas, drawCanvas, glCanvas]){
+        c.width = w;
+        c.height = h;
+      }
+      redrawBackground();
+      const img = new Image();
+      img.onload = ()=>{
+        dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
+        dCtx.drawImage(img, 0,0, drawCanvas.width, drawCanvas.height);
+      };
+      img.src = saved;
+    }
+
+    const ro = new ResizeObserver(()=>{ resizeAll(); if(THREE_OK) onResize3D(); });
+    ro.observe(frame);
+
+    // ---------------- background ----------------
+    function redrawBackground(){
+      const w = bgCanvas.width, h = bgCanvas.height;
+      bgCtx.clearRect(0,0,w,h);
+      if (!bgImage) return;
+      const iw = bgImage.naturalWidth || bgImage.width;
+      const ih = bgImage.naturalHeight || bgImage.height;
+      const s = Math.max(w/iw, h/ih);
+      const dw = iw*s, dh = ih*s;
+      const dx = (w - dw)/2;
+      const dy = (h - dh)/2;
+      bgCtx.drawImage(bgImage, dx, dy, dw, dh);
+    }
+
+    async function loadImageFromFile(file){
+      return new Promise((resolve, reject)=>{
+        const img = new Image();
+        img.onload = ()=>resolve(img);
+        img.onerror = reject;
+        img.crossOrigin = "anonymous";
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    async function setBackground(file){
+      bgFileObj = file;
+      bgImage = await loadImageFromFile(file);
+      redrawBackground();
+      bgTitle.textContent = "Background loaded";
+      bgSub.textContent = (file?.name ? file.name : "—") + " • " + formatSize(file.size||0);
+    }
+
+    function clearBackground(){
+      if (bgImage && bgImage.src && bgImage.src.startsWith("blob:")){
+        try{ URL.revokeObjectURL(bgImage.src); }catch(e){}
+      }
+      bgImage = null;
+      bgFileObj = null;
+      redrawBackground();
+      bgTitle.textContent = "Upload background";
+      bgSub.textContent = "Optional";
+    }
+
+    // ---------------- draw ----------------
+    function buildPalette(){
+      paletteEl.innerHTML = "";
+      palette.forEach((c, idx)=>{
+        const s = document.createElement("div");
+        s.className = "swatch" + (idx===0 ? " active" : "");
+        s.style.background = c;
+        s.addEventListener("click", ()=>{
+          brushColor = c;
+          eraser = false;
+          btnEraser.classList.remove("active");
+          [...paletteEl.children].forEach(x=>x.classList.remove("active"));
+          s.classList.add("active");
+        });
+        paletteEl.appendChild(s);
+      });
+      brushColor = palette[0];
+    }
+
+    function pointerPos(ev, canvas){
+      const rect = canvas.getBoundingClientRect();
+      const x = (ev.clientX - rect.left) * (canvas.width / rect.width);
+      const y = (ev.clientY - rect.top) * (canvas.height / rect.height);
+      return { x, y };
+    }
+
+    function drawLine(x0,y0,x1,y1){
+      const size = Number(brushSizeEl.value||14);
+      const op = Number(brushOpacityEl.value||0.9);
+      dCtx.save();
+      dCtx.lineCap = "round";
+      dCtx.lineJoin = "round";
+      dCtx.lineWidth = size;
+      dCtx.globalAlpha = op;
+      if (eraser){
+        dCtx.globalCompositeOperation = "destination-out";
+        dCtx.strokeStyle = "rgba(0,0,0,1)";
+      } else {
+        dCtx.globalCompositeOperation = "source-over";
+        dCtx.strokeStyle = brushColor;
+      }
+      dCtx.beginPath();
+      dCtx.moveTo(x0,y0);
+      dCtx.lineTo(x1,y1);
+      dCtx.stroke();
+      dCtx.restore();
+    }
+
+    drawCanvas.addEventListener("mousedown", (ev)=>{
+      if (mode !== "draw") return;
+      drawing = true;
+      const p = pointerPos(ev, drawCanvas);
+      lastX = p.x; lastY = p.y;
+    });
+    window.addEventListener("mousemove", (ev)=>{
+      if (!drawing || mode !== "draw") return;
+      const p = pointerPos(ev, drawCanvas);
+      drawLine(lastX,lastY,p.x,p.y);
+      lastX = p.x; lastY = p.y;
+    });
+    window.addEventListener("mouseup", ()=>{ drawing = false; });
+    drawCanvas.addEventListener("touchstart", (ev)=>{
+      if (mode !== "draw") return;
+      ev.preventDefault();
+      drawing = true;
+      const t = ev.touches[0];
+      const p = pointerPos(t, drawCanvas);
+      lastX = p.x; lastY = p.y;
+    }, { passive:false });
+    drawCanvas.addEventListener("touchmove", (ev)=>{
+      if (!drawing || mode !== "draw") return;
+      ev.preventDefault();
+      const t = ev.touches[0];
+      const p = pointerPos(t, drawCanvas);
+      drawLine(lastX,lastY,p.x,p.y);
+      lastX = p.x; lastY = p.y;
+    }, { passive:false });
+    drawCanvas.addEventListener("touchend", ()=>{ drawing = false; });
+
+    btnEraser.addEventListener("click", ()=>{
+      eraser = !eraser;
+      btnEraser.classList.toggle("active", eraser);
+    });
+    btnClearDraw.addEventListener("click", ()=>{
+      if (!confirm("Clear drawings?")) return;
+      dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
+    });
+
+    // ---------------- 3D placeholder ----------------
+    let renderer, scene, camera, orbit, transform;
+    let productMesh = null; // Can be Mesh or Group
+    const defaultCam = {
+      pos: new THREE.Vector3(0, 0.9, 2.6),
+      look: new THREE.Vector3(0, 0.55, 0)
+    };
+
+    function init3D(){
+      renderer = new THREE.WebGLRenderer({
+        canvas: glCanvas,
+        alpha: true,
+        antialias: true,
+        preserveDrawingBuffer: true
+      });
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      renderer.setSize(glCanvas.width, glCanvas.height, false);
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(42, glCanvas.width/glCanvas.height, 0.01, 50);
+      camera.position.copy(defaultCam.pos);
+      camera.lookAt(defaultCam.look);
+
+      orbit = new THREE.OrbitControls(camera, glCanvas);
+      orbit.enableDamping = true;
+      orbit.dampingFactor = 0.08;
+
+      const grid = new THREE.GridHelper(6, 12, 0x2b6cff, 0x222222);
+      grid.material.opacity = 0.15;
+      grid.material.transparent = true;
+      grid.name = "grid";
+      scene.add(grid);
+
+      const key = new THREE.DirectionalLight(0xffffff, 1.05);
+      key.position.set(2,3,2);
+      scene.add(key);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+      transform = new THREE.TransformControls(camera, glCanvas);
+      transform.setSize(1.0);
+      transform.addEventListener("dragging-changed", (e)=>{
+        orbit.enabled = !e.value;
+      });
+      scene.add(transform);
+
+      setPrimitiveType("box"); // Init with box
+
+      animate3D();
+      onResize3D();
+      update3DVisibility();
+    }
+
+    // --- SPHERE PICKING (RAYCASTER) ---
+    // Raycasting against control balls
+    if(THREE_OK) {
+        glCanvas.addEventListener('pointerdown', (ev) => {
+            if (!poseMode || !rig || !product3DEnabled) return;
+            
+            // 1. Raycast
+            const rect = glCanvas.getBoundingClientRect();
+            const x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+            const y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            const mouse = new THREE.Vector2(x, y);
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Check intersection with our control balls
+            const intersects = raycaster.intersectObjects(rig.controlBalls);
+            
+            if (intersects.length > 0) {
+               const hit = intersects[0].object;
+               const boneIndex = hit.userData.boneIndex;
+               
+               // Select in UI
+               boneSelect.value = boneIndex;
+               boneSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+
+    function makePrimitiveMesh(type){
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x2b6cff,
+        transparent: true,
+        opacity: Number(primOpacityEl.value || 0.25),
+        roughness: 0.65,
+        metalness: 0.0
+      });
+      let geo;
+      if (type === "cylinder") geo = new THREE.CylinderGeometry(0.22, 0.22, 0.62, 32, 1);
+      else if (type === "plane") geo = new THREE.BoxGeometry(0.72, 0.52, 0.02);
+      else geo = new THREE.BoxGeometry(0.52, 0.52, 0.52);
+      
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(0, 0.55, 0);
+
+      const wireGeo = new THREE.WireframeGeometry(geo);
+      const wireMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
+      const wireframe = new THREE.LineSegments(wireGeo, wireMat);
+      wireframe.name = "structural_wireframe";
+      mesh.add(wireframe);
+
+      return mesh;
+    }
+
+    // --- Detect Rig & Create Control Spheres ---
+    function findFirstSkinnedMeshAndSetupRig(root) {
+        let skinned = null;
+        root.traverse(o => {
+            if (o.isSkinnedMesh && o.skeleton && o.skeleton.bones && o.skeleton.bones.length > 0) {
+                if (!skinned) skinned = o;
+            }
+        });
+        
+        if (skinned) {
+             const allBones = skinned.skeleton.bones;
+             
+             // 1. Filter Bones
+             const filteredIndices = [];
+             allBones.forEach((b, i) => {
+                 if (ALLOWED_BONES.includes(b.name)) {
+                     filteredIndices.push(i);
+                 }
+             });
+
+             // 2. Bind Pose
+             const bindPose = allBones.map(b=>({
+                 uuid: b.uuid,
+                 pos: b.position.clone(),
+                 quat: b.quaternion.clone(),
+                 scl: b.scale.clone()
+             }));
+
+             // 3. Create Control Balls
+             const controlBalls = [];
+             const ballGeo = new THREE.SphereGeometry(0.04, 16, 16);
+             const ballMat = new THREE.MeshBasicMaterial({ color: 0xffff00, depthTest: false, transparent: true, opacity: 0.8 });
+             
+             filteredIndices.forEach(idx => {
+                 const bone = allBones[idx];
+                 const ball = new THREE.Mesh(ballGeo, ballMat);
+                 ball.userData = { boneIndex: idx }; // Link back to index
+                 bone.add(ball); // Attach to bone so it moves with it
+                 controlBalls.push(ball);
+             });
+
+             return { root, skinned, bones: allBones, bindPose, controlBalls, filteredIndices };
+        }
+        return null;
+    }
+
+    function fillBoneSelect() {
+        boneSelect.innerHTML = "";
+        if (!rig) return;
+        
+        rig.filteredIndices.forEach(idx => {
+            const bone = rig.bones[idx];
+            const rusName = BONE_MAPPING[bone.name] || bone.name;
+            const opt = document.createElement("option");
+            opt.value = idx;
+            opt.textContent = rusName;
+            boneSelect.appendChild(opt);
+        });
+    }
+
+    function attachSelectedBone() {
+        if (!rig || !poseMode) return;
+        const idx = parseInt(boneSelect.value);
+        const bone = rig.bones[idx];
+        if (bone) {
+            transform.detach();
+            transform.attach(bone);
+        }
+    }
+
+    function setPoseMode(on) {
+        if (on && !rig) { alert("No rig found!"); return; }
+        poseMode = on;
+        poseSwitch.classList.toggle("on", poseMode);
+
+        // Show/Hide Control Balls
+        if (rig && rig.controlBalls) {
+            rig.controlBalls.forEach(ball => ball.visible = poseMode);
+        }
+
+        if (poseMode) {
+            // POSE MODE
+            setTransformMode("rotate");
+            transform.setSpace("local");
+            attachSelectedBone();
+        } else {
+            // OBJECT MODE
+            transform.detach();
+            transform.setSpace("world");
+            if (productMesh) transform.attach(productMesh);
+        }
+        update3DVisibility();
+    }
+
+    function resetPose() {
+        if (!rig) return;
+        rig.bones.forEach((b, i) => {
+            const bp = rig.bindPose[i];
+            if (bp && bp.uuid === b.uuid) {
+                b.position.copy(bp.pos);
+                b.quaternion.copy(bp.quat);
+                b.scale.copy(bp.scl);
+            }
+        });
+        if (poseMode) attachSelectedBone();
+    }
+    
+    poseSwitch.addEventListener("click", () => setPoseMode(!poseMode));
+    boneSelect.addEventListener("change", () => attachSelectedBone());
+    btnResetPose.addEventListener("click", () => resetPose());
+
+    // --- Load Logic ---
+    function handleModelLoaded(gltf, label) {
+        const root = gltf.scene;
+       
+        // Clean old
+        if (productMesh) {
+           transform.detach();
+           scene.remove(productMesh);
+           productMesh = null;
+        }
+        // Clean rig
+        if (rig) {
+             rig = null;
+        }
+
+        // 1. HARD SCALE FIX
+        // Force model to be ~1.6m tall (standard human) inside the 1.0 unit world
+        const box = new THREE.Box3().setFromObject(root);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        
+        const maxDim = size.y; // Height is primary for human
+        const targetHeight = 1.6; 
+        let scaleFactor = targetHeight / (maxDim || 1);
+        
+        // If it's too huge or too small, normalize aggressively
+        root.scale.set(scaleFactor, scaleFactor, scaleFactor);
+       
+        // 2. Position on floor
+        box.setFromObject(root);
+        box.getCenter(size); 
+        const bottomY = box.min.y;
+        
+        root.position.x = -size.x;
+        root.position.z = -size.z;
+        root.position.y = -bottomY;
+       
+        const wrapper = new THREE.Group();
+        wrapper.add(root);
+        
+        // Scale wrapper down to fit Viewport (approx 1.0 unit box size)
+        // 1.6m -> 1.0 unit
+        const viewScale = 0.65; 
+        wrapper.scale.set(viewScale, viewScale, viewScale);
+        wrapper.position.set(0, 0.05, 0); // Floor
+
+        updateModelMaterial(wrapper);
+
+        productMesh = wrapper;
+        productMesh.visible = product3DEnabled;
+        scene.add(productMesh);
+       
+        // 3. Detect Rig & Setup Control Spheres
+        rig = findFirstSkinnedMeshAndSetupRig(root);
+        
+        if (rig) {
+            poseUI.style.display = "flex";
+            fillBoneSelect();
+            setPoseMode(false);
+        } else {
+            poseUI.style.display = "none";
+            poseMode = false;
+        }
+
+        // 4. Attach Controls
+        transform.attach(productMesh);
+        transform.enabled = product3DEnabled;
+        transform.setSpace("world");
+
+        // 5. Update UI
+        modelName.textContent = label;
+        primTypeEl.value = "custom"; 
+    }
+
+    function loadCustomModelFromFile(file){
+      if (!THREE.GLTFLoader) { alert("Loader not found"); return; }
+      const loader = new THREE.GLTFLoader();
+      const url = URL.createObjectURL(file);
+      
+      loader.load(url, (gltf) => {
+         handleModelLoaded(gltf, file.name);
+      }, undefined, (err)=>{
+        alert("Error loading GLB: " + err);
+      });
+    }
+
+    function loadCustomModelFromUrl(url, label) {
+       if (!THREE.GLTFLoader) { alert("Loader not found"); return; }
+       const loader = new THREE.GLTFLoader();
+       loader.setCrossOrigin('anonymous');
+
+       loader.load(url, (gltf) => {
+          handleModelLoaded(gltf, label);
+       }, undefined, (err) => {
+          alert("CORS error or invalid URL loading model.\nCheck console for details.");
+          console.error(err);
+       });
+    }
+
+    btnAddHuman.addEventListener("click", () => {
+        setProduct3DEnabled(true);
+        setMode("3d");
+        loadCustomModelFromUrl(HUMAN_URL, "Human (Rigged)");
+    });
+
+    // Auto-enable Pose Mode for Human
+    const originalHandleModelLoaded = handleModelLoaded;
+    handleModelLoaded = function(gltf, label) {
+         originalHandleModelLoaded(gltf, label);
+         if (label === "Human (Rigged)" && rig) {
+             setPoseMode(true);
+             if (boneSelect.options.length > 0) {
+                 boneSelect.selectedIndex = 0;
+                 attachSelectedBone();
+             }
+         }
+    }
+
+    function updateModelMaterial(obj){
+      const op = Number(primOpacityEl.value || 0.25);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x2b6cff,
+        transparent: true,
+        opacity: op,
+        roughness: 0.65,
+        metalness: 0.0
+      });
+
+      obj.traverse((child)=>{
+        if (child.isMesh && child.name.indexOf("Sphere") === -1){ // Don't color control balls
+           child.material = mat;
+           child.castShadow = true;
+           child.receiveShadow = true;
+        }
+      });
+    }
+
+    function setPrimitiveType(type){
+      if (!scene) return;
+      if (type === "custom") return;
+
+      if (productMesh){
+        transform.detach();
+        scene.remove(productMesh);
+        productMesh = null;
+      }
+      
+      rig = null;
+      poseMode = false;
+      poseUI.style.display = "none";
+      poseSwitch.classList.remove("on");
+
+      productMesh = makePrimitiveMesh(type);
+      productMesh.visible = product3DEnabled;
+      scene.add(productMesh);
+      transform.attach(productMesh);
+      transform.setSpace("world");
+      transform.enabled = product3DEnabled;
+      
+      modelName.textContent = "Upload .GLB";
+      customModelFile.value = ""; 
+    }
+
+    function setPrimitiveOpacity(v){
+      if (!productMesh) return;
+      const val = Number(v);
+      if (productMesh.isMesh && productMesh.material) {
+         productMesh.material.opacity = val;
+      } else {
+         productMesh.traverse((child)=>{
+            if (child.isMesh && child.material && child.name.indexOf("Sphere") === -1) {
+                child.material.opacity = val;
+            }
+         });
+      }
+    }
+
+    function setTransformMode(m){
+      if (!transform) return;
+      transform.setMode(m);
+      tMove.classList.toggle("active", m==="translate");
+      tRot.classList.toggle("active", m==="rotate");
+      tScale.classList.toggle("active", m==="scale");
+    }
+
+    function center3D(){
+      if (!productMesh) return;
+      if (poseMode) {
+          alert("Exit Pose Mode to move the whole object.");
+          return;
+      }
+      productMesh.position.set(0,0.55,0);
+      productMesh.rotation.set(0,0,0);
+      productMesh.scale.set(1,1,1);
+    }
+
+    function reset3D(){
+      if (poseMode) {
+         resetPose();
+      } else {
+         center3D();
+      }
+      camera.position.copy(defaultCam.pos);
+      camera.lookAt(defaultCam.look);
+      orbit.target.copy(defaultCam.look);
+      orbit.update();
+    }
+
+    function update3DVisibility(){
+      if (!scene) return;
+      const grid = scene.getObjectByName("grid");
+      if (grid) grid.visible = (mode === "3d"); 
+      
+      const showTransform = product3DEnabled && (mode !== "draw");
+      
+      if (transform) {
+          transform.visible = showTransform;
+          transform.enabled = showTransform;
+          
+          if (showTransform) {
+              if (poseMode && rig) {
+                  if (!transform.object) attachSelectedBone();
+              } else if (productMesh) {
+                   if (!transform.object || transform.object !== productMesh) {
+                       if (!poseMode) transform.attach(productMesh);
+                   }
+              }
+          }
+      }
+      
+      if (productMesh) productMesh.visible = product3DEnabled;
+      orbit.enabled = true; 
+    }
+
+    function onResize3D(){
+      if (!renderer || !camera) return;
+      const w = glCanvas.width, h = glCanvas.height;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+
+    function animate3D(){
+      requestAnimationFrame(animate3D);
+      if (orbit) orbit.update();
+      if (renderer && scene && camera) renderer.render(scene, camera);
+    }
+
+    function setProduct3DEnabled(on){
+      product3DEnabled = !!on;
+      prodSwitch.classList.toggle("on", product3DEnabled);
+      update3DVisibility();
+      setMode(mode); 
+    }
+
+    // ---------------- backend ----------------
+    async function getSessionOrRedirect(){
+      const sb = window.sb;
+      if (!sb) { location.href = BASE + "/login"; throw new Error("No supabase client"); }
+      const { data } = await sb.auth.getSession();
+      const s = data?.session;
+      if (!s) { location.href = BASE + "/login"; throw new Error("No session"); }
+      return s;
+    }
+    async function refreshSessionSafe(){
+      const sb = window.sb;
+      try { await sb.auth.refreshSession(); } catch(e){}
+      return getSessionOrRedirect();
+    }
+    async function fetchJsonWithAuth(url, options={}){
+      let s = await getSessionOrRedirect();
+      let r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+      if (r.status===401 || r.status===403){
+        s = await refreshSessionSafe();
+        r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+      }
+      const raw = await r.text();
+      let j={}; try{ j=raw?JSON.parse(raw):{} }catch(_){}
+      if (!r.ok || j?.ok===false){
+        const err = new Error(j.error || ("HTTP "+r.status));
+        err.status = r.status;
+        err.data = j;
+        err.raw = raw;
+        throw err;
+      }
+      return j;
+    }
+
+    async function uploadToInputs(fileOrBlob, filenameHint){
+      const sb = window.sb;
+      const session = await getSessionOrRedirect();
+      const isFile = (fileOrBlob instanceof File);
+      const mime = isFile ? (fileOrBlob.type || "application/octet-stream") : (fileOrBlob.type || "image/png");
+      let ext = "png";
+      if (isFile) {
+        ext = (fileOrBlob.name.split(".").pop() || "png").toLowerCase();
+      } else if (mime.includes("jpeg")) ext = "jpg";
+      else if (mime.includes("webp")) ext = "webp";
+      const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "png";
+      const path = `${session.user.id}/${uuid()}_${(filenameHint||"file")}.${safeExt}`;
+      let up = await sb.storage.from(INPUTS_BUCKET).upload(path, fileOrBlob, { upsert:false, contentType: mime });
+      if (up?.error && (up.error.statusCode === 401 || up.error.statusCode === 403)){
+        await refreshSessionSafe();
+        up = await sb.storage.from(INPUTS_BUCKET).upload(path, fileOrBlob, { upsert:false, contentType: mime });
+      }
+      if (up.error) throw up.error;
+      const pub = sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
+      return pub.data.publicUrl;
+    }
+
+    // --------- EXPORT COMPOSITE ---------
+    async function exportCompositeBlob(){
+      const w = bgCanvas.width, h = bgCanvas.height;
+
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      const ctx = c.getContext("2d");
+
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(bgCanvas, 0, 0, w, h);
+
+      if (product3DEnabled && THREE_OK && renderer && scene && camera && productMesh){
+        const grid = scene.getObjectByName("grid");
+
+        const gridVis = grid ? grid.visible : false;
+        const hadTransform = !!transform;
+        
+        // Hide Transform & Grid
+        const oldTarget = transform ? transform.object : null;
+        const oldSpace = transform ? transform.space : "world";
+
+        if (grid) grid.visible = false;
+        if (hadTransform) { 
+            transform.visible = false; 
+            transform.enabled = false; 
+            transform.detach(); 
+        }
+
+        // HIDE CONTROL BALLS
+        if (rig && rig.controlBalls) {
+            rig.controlBalls.forEach(b => b.visible = false);
+        }
+
+        const wf = productMesh.getObjectByName("structural_wireframe");
+        const wfVis = wf ? wf.visible : false;
+        if (wf) wf.visible = false;
+
+        // -- SAFE MATERIAL SWAP --
+        const materialsMap = new Map();
+        const exportMat = new THREE.MeshStandardMaterial({
+          color: 0x2b6cff,
+          transparent: true,
+          opacity: 0.85,
+          roughness: 0.3,
+          metalness: 0.1
+        });
+
+        productMesh.traverse((child)=>{
+            if (child.isMesh && child.name.indexOf("Sphere") === -1) {
+               materialsMap.set(child, child.material);
+               child.material = exportMat;
+            }
+         });
+
+        const exportLight = new THREE.DirectionalLight(0xffffff, 2.0);
+        exportLight.position.set(-2, 3, 2);
+        const rimLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        rimLight.position.set(2, 0.5, -2);
+
+        scene.add(exportLight);
+        scene.add(rimLight);
+
+        renderer.render(scene, camera);
+
+        scene.remove(exportLight);
+        scene.remove(rimLight);
+
+        ctx.drawImage(glCanvas, 0, 0, w, h);
+
+        ctx.save();
+        ctx.globalCompositeOperation = "source-over";
+        ctx.shadowColor = "rgba(0,0,0,0.85)";
+        ctx.shadowBlur = 8;
+        ctx.drawImage(glCanvas, 0, 0, w, h);
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalCompositeOperation = "source-over";
+        ctx.shadowColor = "rgba(255,255,255,0.12)";
+        ctx.shadowBlur = 4;
+        ctx.drawImage(glCanvas, 0, 0, w, h);
+        ctx.restore();
+
+        // -- RESTORE --
+        productMesh.traverse((child)=>{
+            if (child.isMesh && materialsMap.has(child)) {
+              child.material = materialsMap.get(child);
+            }
+         });
+        exportMat.dispose();
+
+        if (wf) wf.visible = wfVis;
+        
+        if (hadTransform && oldTarget) {
+            transform.attach(oldTarget);
+            transform.setSpace(oldSpace);
+        }
+        if (grid) grid.visible = gridVis;
+        
+        // RESTORE BALLS
+        if (rig && rig.controlBalls && poseMode) {
+             rig.controlBalls.forEach(b => b.visible = true);
+        }
+
+        update3DVisibility();
+        renderer.render(scene, camera);
+      }
+
+      ctx.drawImage(drawCanvas, 0, 0, w, h);
+
+      return await new Promise((resolve)=>c.toBlob(resolve, "image/png", 0.92));
+    }
+
+    // --------- LOCK PROMPT & TRIGGERS ---------
+
+    function hasUserDrawing(){
+      const w = drawCanvas.width, h = drawCanvas.height;
+      if (!w || !h) return false;
+      const data = dCtx.getImageData(0,0,w,h).data;
+      for (let i = 3; i < data.length; i += 4*96){
+        if (data[i] > 10) return true;
+      }
+      return false;
+    }
+    
+    function userWantsScene(text){
+      const t = (text||"").toLowerCase();
+      return /(table|desk|kitchen|room|interior|studio|street|forest|grass|sand|snow|wall|floor|background|scene|cafe|restaurant|on the table|lying on)/.test(t);
+    }
+    
+    function hasGreenStrokes(){
+      const w = drawCanvas.width, h = drawCanvas.height;
+      if (!w || !h) return false;
+      const data = dCtx.getImageData(0,0,w,h).data;
+      for (let i = 0; i < data.length; i += 4*96){
+        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+        if (a < 10) continue;
+        if (g > 120 && g > r + 40 && g > b + 40) return true;
+      }
+      return false;
+    }
+
+    function buildLockPrompt(){
+      const prim = (primTypeEl.value || "box").toLowerCase();
+      const shape = prim === "cylinder" ? "cylinder" : (prim === "plane" ? "flat plane" : "box");
+
+      const userText = (sceneEl.value||"").trim();
+      const hasProd = !!productFileObj;
+
+      const hasBg = !!bgImage;
+      const hasDraw = hasUserDrawing();
+      const wantsScene = userWantsScene(userText);
+
+      const geoBlock = [
+        "Use the input image as a locked base image.",
+        `TASK: Replace ONLY the blue 3D placeholder (${shape}) with the product.`,
+        "The product MUST match the placeholder's exact position, size, rotation, and perspective.",
+        "Do NOT re-pose, do NOT straighten, do NOT change camera or framing."
+      ].join(" ");
+
+      const prodBlock = hasProd
+        ? "Use the product reference image to match the exact product identity, branding, and label."
+        : "Create a realistic product object that fits the placeholder exactly.";
+
+      const drawBlock = hasDraw ? [
+        "IMPORTANT: The drawn strokes are strict instructions. Follow them literally.",
+        "Do NOT ignore the strokes.",
+        "Treat strokes as guides for placement, added details, and composition.",
+        "green strokes indicate leaves/foliage or organic decoration placement guidance."
+      ].filter(Boolean).join(" ") : "";
+
+      let bgBlock = "";
+      if (hasBg){
+        bgBlock = [
+          "BACKGROUND PHOTO IS LOCKED. Do not change the background pixels or composition.",
+          "Composite the product into the scene photorealistically:",
+          "match lighting direction, intensity, and color temperature;",
+          "add accurate contact shadow and ambient occlusion at contact edges;",
+          "match reflections/bounce light from the environment;",
+          "match lens softness/grain so the product blends naturally."
+        ].join(" ");
+      } else {
+        if (wantsScene){
+          bgBlock = [
+            "NO background image is provided.",
+            "Generate the scene described by the user.",
+            "Keep the product pose locked to the placeholder and keep camera framing stable.",
+            "Make the scene physically plausible (if user says 'on the table', there must be a table)."
+          ].join(" ");
+        } else {
+          bgBlock = [
+            "NO background image is provided.",
+            "Keep the background pure black.",
+            "Do NOT create a studio beauty-shot pose; keep exact placeholder pose even if unusual."
+          ].join(" ");
+        }
+      }
+
+      const avoid = "AVOID: beauty-shot re-pose, front-view correction, upright correction, centering, changing camera, adding extra products.";
+
+      return [geoBlock, prodBlock, drawBlock, bgBlock, avoid].filter(Boolean).join(" ");
+    }
+
+    async function startJob(){
+      runBtn.disabled = true;
+      stopBtn.style.display = "block";
+      abortPoll = false;
+      currentJobId = null;
+      if (pollTimer) clearTimeout(pollTimer);
+      setStatus("");
+      showLoader(true);
+      loaderSub.textContent = "Preparing…";
+      resultOverlay.style.display = "none";
+      loaderSub.textContent = "Exporting composite…";
+      const compositeBlob = await exportCompositeBlob();
+      loaderSub.textContent = "Uploading composite…";
+      const baseUrl = await uploadToInputs(compositeBlob, "ad_base");
+      let extraUrls = [];
+      if (productFileObj){
+        loaderSub.textContent = "Uploading product reference…";
+        const prodUrl = await uploadToInputs(productFileObj, "product_ref");
+        extraUrls.push(prodUrl);
+      }
+      
+      const userText = (sceneEl.value||"").trim();
+      const lock = buildLockPrompt();
+      const finalPrompt = userText ? (userText + "\n\n" + lock) : lock;
+
+      loaderSub.textContent = "Sending task…";
+      const fd = new FormData();
+      fd.append("presetId", PRESET_ID);
+      fd.append("scene", finalPrompt);
+      fd.append("aspect_ratio", "match_input_image");
+      fd.append("resolution", String(resEl.value || "2K"));
+      fd.append("output_format", "png");
+      fd.append("safety_filter_level", "block_only_high");
+      fd.append("image_input_url", baseUrl);
+      extraUrls.forEach(u => fd.append("image_input_urls", u));
+      let data;
+      try{
+        data = await fetchJsonWithAuth(BACKEND_BASE + "/api/start", { method: "POST", body: fd });
+      } catch(e){
+        showLoader(false);
+        runBtn.disabled = false;
+        stopBtn.style.display = "none";
+        if (e.status === 402 && e.data) {
+          const need = e.data.required ?? "?";
+          const have = e.data.credits ?? 0;
+          setStatus(`Not enough credits • need ${need} Cr • you have ${have} Cr`, "err");
+          return;
+        }
+        setStatus("Error", "err");
+        alert("Start error:\n\n" + (e?.message||e));
+        return;
+      }
+      currentJobId = data.jobId;
+      if (typeof data.cost !== "undefined" && typeof data.credits_left !== "undefined") {
+        setStatus(`Started • cost ${data.cost} Cr • left ${data.credits_left} Cr`, "ok");
+      } else {
+        setStatus("jobId: " + currentJobId, "");
+      }
+      pollStatus();
+    }
+
+    async function pollStatus(){
+      abortPoll = false;
+      const tick = async ()=>{
+        if (abortPoll) return;
+        try{
+          const data = await fetchJsonWithAuth(BACKEND_BASE + `/api/status?jobId=${encodeURIComponent(currentJobId)}`, { method:"GET" });
+          loaderSub.textContent = "status: " + data.status;
+          if (data.status === "succeeded"){
+            showLoader(false);
+            runBtn.disabled = false;
+            stopBtn.style.display = "none";
+            setStatus("Done", "ok");
+            if (data.output_url) showResult(data.output_url, data.status);
+            return;
+          }
+          if (data.status === "failed" || data.status === "canceled"){
+            showLoader(false);
+            runBtn.disabled = false;
+            stopBtn.style.display = "none";
+            setStatus("Failed", "err");
+            return;
+          }
+          pollTimer = setTimeout(tick, 1200);
+        } catch(e){
+          showLoader(false);
+          runBtn.disabled = false;
+          stopBtn.style.display = "none";
+          setStatus("Status error", "err");
+          alert("Status error:\n\n" + (e?.message || e));
+        }
+      };
+      tick();
+    }
+
+    function attachDrop(dropEl, inputEl, onFiles, ignoreIds){
+      dropEl.addEventListener("click", (e)=>{
+        const t = e.target;
+        if (t && t.id && ignoreIds && ignoreIds.includes(t.id)) return;
+        inputEl.click();
+      });
+      inputEl.addEventListener("change", (e)=>{
+        const files = Array.from(e.target.files || []);
+        inputEl.value = "";
+        if (files.length) onFiles(files);
+      });
+      ["dragenter","dragover"].forEach(evt=>{
+        dropEl.addEventListener(evt,(ev)=>{ ev.preventDefault(); dropEl.style.borderColor="rgba(43,108,255,.55)"; });
+      });
+      ["dragleave","drop"].forEach(evt=>{
+        dropEl.addEventListener(evt,(ev)=>{ ev.preventDefault(); dropEl.style.borderColor="rgba(255,255,255,.18)"; });
+      });
+      dropEl.addEventListener("drop",(ev)=>{
+        const files = Array.from(ev.dataTransfer?.files || []);
+        if (files.length) onFiles(files);
+      });
+    }
+
+    attachDrop(bgDrop, bgFile, async (files)=>{
+      const f = files.find(x=>x && x.type && x.type.startsWith("image/"));
+      if (!f) return;
+      try { await setBackground(f); }
+      catch(e){ alert("Background load error:\n\n" + (e?.message || e)); }
+    }, ["bgClear"]);
+
+    attachDrop(prodDrop, prodFile, async (files)=>{
+      const f = files.find(x=>x && x.type && x.type.startsWith("image/"));
+      if (!f) return;
+      try {
+        productFileObj = f;
+        productImg = await loadImageFromFile(f);
+        prodTitle.textContent = "Product loaded";
+        prodSub.textContent = (f?.name ? f.name : "—") + " • " + formatSize(f.size||0);
+        if(prodPreview) {
+          prodPreview.src = productImg.src;
+          prodPreview.classList.add("visible");
+        }
+      } catch(e){
+        alert("Product load error:\n\n" + (e?.message || e));
+      }
+    }, ["prodClear"]);
+
+    bgClear.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); clearBackground(); });
+    prodClear.addEventListener("click", (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      if (productImg && productImg.src && productImg.src.startsWith("blob:")){
+        try{ URL.revokeObjectURL(productImg.src); }catch(_){}
+      }
+      productFileObj = null;
+      productImg = null;
+      prodTitle.textContent = "Upload product";
+      prodSub.textContent = "This image will be used to replace the 3D primitive";
+      if(prodPreview){
+        prodPreview.classList.remove("visible");
+        prodPreview.src = "";
+      }
+    });
+
+    attachDrop(modelDrop, customModelFile, (files)=>{
+       const f = files[0];
+       if (!f) return;
+       const ext = f.name.split('.').pop().toLowerCase();
+       if (ext !== 'glb' && ext !== 'gltf') { alert("Only .glb or .gltf allowed"); return; }
+       
+       modelName.textContent = f.name;
+       loadCustomModelFromFile(f);
+    }, ["modelClear"]);
+
+    modelClear.addEventListener("click", (e)=>{
+       e.preventDefault(); e.stopPropagation();
+       primTypeEl.value = "box";
+       setPrimitiveType("box");
+       modelName.textContent = "Upload .GLB";
+       customModelFile.value = "";
+    });
+
+    btnDraw.addEventListener("click", ()=> setMode("draw"));
+    btn3D.addEventListener("click", ()=> setMode("3d"));
+
+    btnHelp.addEventListener("click", ()=>{
+       helpOverlay.style.display = "flex";
+    });
+    
+    closeHelp.addEventListener("click", ()=>{
+       helpOverlay.style.display = "none";
+    });
+    
+    helpOverlay.addEventListener("click", (e)=>{
+       if (e.target === helpOverlay) helpOverlay.style.display = "none";
+    });
+
+    prodSwitch.addEventListener("click", ()=> setProduct3DEnabled(!product3DEnabled) );
+
+    tMove.addEventListener("click", ()=>setTransformMode("translate"));
+    tRot.addEventListener("click", ()=>setTransformMode("rotate"));
+    tScale.addEventListener("click", ()=>setTransformMode("scale"));
+
+    primTypeEl.addEventListener("change", ()=>setPrimitiveType(primTypeEl.value));
+    primOpacityEl.addEventListener("input", ()=>setPrimitiveOpacity(primOpacityEl.value));
+    btnCenter3D.addEventListener("click", center3D);
+    btnReset3D.addEventListener("click", reset3D);
+
+    btnPreviewAI.addEventListener("click", async () => {
+      const blob = await exportCompositeBlob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    });
+
+    runBtn.addEventListener("click", async ()=>{
+      try{ await startJob(); }
+      catch(e){
+        showLoader(false);
+        runBtn.disabled=false;
+        stopBtn.style.display="none";
+        setStatus("Error", "err");
+        alert("Start error:\n\n" + (e?.message||e));
+      }
+    });
+
+    stopBtn.addEventListener("click", ()=>{
+      abortPoll = true;
+      if (pollTimer) clearTimeout(pollTimer);
+      showLoader(false);
+      runBtn.disabled = false;
+      stopBtn.style.display = "none";
+      setStatus("Stopped");
+    });
+
+    aspectEl.addEventListener("change", applyAspect);
+    resEl.addEventListener("change", calcCost);
+
+    // boot
+    buildPalette();
+    calcCost();
+    applyAspect();
+    resizeAll();
+    
+    if(THREE_OK) init3D();
+    
+    setMode("view");
+    setProduct3DEnabled(false);
+    
+    if(THREE_OK) {
+        setPrimitiveType("box");
+        setPrimitiveOpacity(primOpacityEl.value);
+        setTransformMode("translate");
+    }
+
+    setStatus("Ready ✓", "ok");
+    setTimeout(()=>setStatus(""), 1200);
+  });
+})();
+</script>
+</body>
+</html>
