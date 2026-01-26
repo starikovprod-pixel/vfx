@@ -653,6 +653,10 @@
     font-weight:900;
     font-size:13px;
     cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
   }
   .lf-dropdown-item:hover{
     background:rgba(43,108,255,.12);
@@ -691,6 +695,50 @@
   }
 
   .hidden{ display:none !important; }
+
+  .lf-previewOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:9999;
+  }
+  .lf-previewCard{
+    width:min(920px, 96vw);
+    max-height:90vh;
+    overflow:auto;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    box-shadow:0 24px 50px rgba(0,0,0,.45);
+  }
+  .lf-previewCard img{
+    width:100%;
+    max-height:440px;
+    object-fit:contain;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:#070707;
+  }
+  .lf-previewList{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    font-size:12px;
+  }
+  .lf-previewList a{
+    color:#9ab6ff;
+    word-break:break-all;
+    text-decoration:none;
+  }
+  .lf-previewList a:hover{ text-decoration:underline; }
 </style>
 
 <div id="lf-nano">
@@ -740,77 +788,34 @@
 
         <div class="lf-field">
           <label>Aspect ratio</label>
-
-          <div class="lf-aspectlist" id="aspectList">
-            <div class="lf-aspectitem active" data-aspect="16:9">
-              <div class="lf-aspectleft">
-                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
-                <div class="lf-aspectlabel">16:9</div>
-              </div>
-              <div class="lf-aspectright">
+          <div class="lf-dropdown" id="aspectDropdown">
+            <button class="lf-dropdown-btn" id="aspectBtn" type="button">
+              <span id="aspectBtnLabel">16:9</span>
+              <span class="lf-badge" id="aspectBtnBadge">Cinematic</span>
+            </button>
+            <div class="lf-dropdown-menu" id="aspectMenu">
+              <div class="lf-dropdown-item active" data-aspect="16:9">
+                <span>16:9</span>
                 <span class="lf-badge">Cinematic</span>
-                <span class="lf-check">✓</span>
               </div>
-            </div>
-
-            <div class="lf-aspectitem" data-aspect="21:9">
-              <div class="lf-aspectleft">
-                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
-                <div class="lf-aspectlabel">21:9</div>
-              </div>
-              <div class="lf-aspectright">
+              <div class="lf-dropdown-item" data-aspect="21:9">
+                <span>21:9</span>
                 <span class="lf-badge">Cinematic</span>
-                <span class="lf-check">✓</span>
               </div>
-            </div>
-
-            <div class="lf-aspectitem" data-aspect="9:16">
-              <div class="lf-aspectleft">
-                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
-                <div class="lf-aspectlabel">9:16</div>
+              <div class="lf-dropdown-item" data-aspect="9:16">
+                <span>9:16</span>
               </div>
-              <div class="lf-aspectright">
-                <span class="lf-check">✓</span>
+              <div class="lf-dropdown-item" data-aspect="1:1">
+                <span>1:1</span>
               </div>
-            </div>
-
-            <div class="lf-aspectitem" data-aspect="1:1">
-              <div class="lf-aspectleft">
-                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
-                <div class="lf-aspectlabel">1:1</div>
+              <div class="lf-dropdown-item" data-aspect="4:3">
+                <span>4:3</span>
               </div>
-              <div class="lf-aspectright">
-                <span class="lf-check">✓</span>
+              <div class="lf-dropdown-item" data-aspect="3:2">
+                <span>3:2</span>
               </div>
-            </div>
-
-            <div class="lf-aspectitem" data-aspect="4:3">
-              <div class="lf-aspectleft">
-                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
-                <div class="lf-aspectlabel">4:3</div>
-              </div>
-              <div class="lf-aspectright">
-                <span class="lf-check">✓</span>
-              </div>
-            </div>
-
-            <div class="lf-aspectitem" data-aspect="3:2">
-              <div class="lf-aspectleft">
-                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
-                <div class="lf-aspectlabel">3:2</div>
-              </div>
-              <div class="lf-aspectright">
-                <span class="lf-check">✓</span>
-              </div>
-            </div>
-
-            <div class="lf-aspectitem" data-aspect="2:3">
-              <div class="lf-aspectleft">
-                <div class="lf-aspectbox"><div class="lf-aspectdot"></div></div>
-                <div class="lf-aspectlabel">2:3</div>
-              </div>
-              <div class="lf-aspectright">
-                <span class="lf-check">✓</span>
+              <div class="lf-dropdown-item" data-aspect="2:3">
+                <span>2:3</span>
               </div>
             </div>
           </div>
@@ -891,6 +896,8 @@
         <div class="lf-actions">
           <button class="lf-btn secondary" id="gptPrompt" type="button">GPT → Build Prompt</button>
 
+          <button class="lf-btn secondary" id="previewInput" type="button">Preview Input Plate</button>
+
           <button class="lf-btn" id="run" type="button">
             Generate <span class="lf-cost" id="cost">—</span>
           </button>
@@ -927,11 +934,11 @@
               <canvas id="drawCanvas"></canvas>
               <canvas id="glCanvas"></canvas>
             </div>
-            <div class="lf-resultOverlay" id="resultOverlay">
-              <button class="lf-close" id="closeResult" type="button">Close</button>
-              <div class="lf-resultCard">
-                <video id="outVideo" controls playsinline class="hidden"></video>
-                <img id="outImg" class="hidden" alt="result" />
+          <div class="lf-resultOverlay" id="resultOverlay">
+            <button class="lf-close" id="closeResult" type="button">Close</button>
+            <div class="lf-resultCard">
+              <video id="outVideo" controls playsinline class="hidden"></video>
+              <img id="outImg" class="hidden" alt="result" />
                 <div class="lf-resbar">
                   <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
                   <a id="download" href="#" target="_blank" download>Download</a>
@@ -1065,9 +1072,21 @@
             <select id="boneSelect" class="lf-select"></select>
           </div>
           <button class="lf-btnSmall" id="resetPose" type="button">Reset pose</button>
-        </div>
-      </div>
     </div>
+  </div>
+</div>
+
+<div class="lf-previewOverlay" id="inputPreviewOverlay">
+  <div class="lf-previewCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <div class="lf-h2">Preview Input Plate</div>
+      <button class="lf-btnSmall" id="previewClose" type="button">Close</button>
+    </div>
+    <img id="previewImg" alt="Input preview" />
+    <div style="font-size:12px;color:var(--text-sec);" id="previewPrimary"></div>
+    <div class="lf-previewList" id="previewList"></div>
+  </div>
+</div>
   </div>
 
   <div class="lf-loader" id="loader">
@@ -1214,18 +1233,24 @@ ANTI-AI LOOK:
     return s.trim();
   }
 
-  function buildFinalPrompt({ userPrompt, hasImage, presetKey, focalMm, aperture, grain, exposure, aspect, res, styleOnly, flare, bloom, cinemaLock }) {
+  function buildFinalPrompt({ userPrompt, hasImage, presetKey, focalMm, aperture, grain, exposure, aspect, res, styleOnly, flare, bloom, cinemaLock, identityMode }) {
     const P = LF_CAMERA_PRESETS[presetKey] || LF_CAMERA_PRESETS.IMAX_PANAVISION_ANAMORPHIC;
     const up = normalizeUserPrompt(userPrompt);
 
-    const identityWardrobeLock = hasImage ? `
+    const identityWardrobeLock = hasImage ? (identityMode === "proxy_layout_plate" ? `
+IDENTITY + WARDROBE LOCK (ABSOLUTE):
+- Composite plate is a layout/pose/camera reference only. Character identity MUST come from Character photos.
+- Do NOT derive identity from the proxy color silhouette.
+- Preserve clothing/outfit type, layers, materials, and overall look based on the identity photos.
+- Preserve body proportions and silhouette.
+` : `
 IDENTITY + WARDROBE LOCK (ABSOLUTE):
 - Preserve the exact same person identity from the input image.
 - Keep face structure, facial features, eye shape, nose, mouth, beard, hairstyle consistent.
 - Preserve clothing/outfit type, layers, materials, and overall look.
 - Do NOT replace wardrobe with a different coat/jacket/armor unless explicitly requested by the user.
 - Preserve body proportions and silhouette.
-` : `
+`) : `
 NO INPUT IMAGE:
 - Create a new scene from scratch according to USER_TEXT.
 `;
@@ -1310,7 +1335,11 @@ ${camBlock}
   const sceneEl = $("scene");
   const promptLoader = $("promptLoader");
 
-  const aspectListEl = $("aspectList");
+  const aspectDropdown = $("aspectDropdown");
+  const aspectBtn = $("aspectBtn");
+  const aspectMenu = $("aspectMenu");
+  const aspectBtnLabel = $("aspectBtnLabel");
+  const aspectBtnBadge = $("aspectBtnBadge");
   let selectedAspect = "16:9";
 
   const resDropdown = $("resDropdown");
@@ -1331,6 +1360,7 @@ ${camBlock}
 
   const runBtn = $("run");
   const gptBtn = $("gptPrompt");
+  const previewBtn = $("previewInput");
   const stopBtn = $("stop");
   const statusText = $("statusText");
 
@@ -1355,6 +1385,11 @@ ${camBlock}
   const download = $("download");
   const meta = $("meta");
   const closeResult = $("closeResult");
+  const inputPreviewOverlay = $("inputPreviewOverlay");
+  const previewClose = $("previewClose");
+  const previewImg = $("previewImg");
+  const previewPrimary = $("previewPrimary");
+  const previewList = $("previewList");
 
   const bgFile = $("bgFile");
   const bgDrop = $("bgDrop");
@@ -1488,10 +1523,21 @@ ${camBlock}
     camPresetEl.value = "IMAX_PANAVISION_ANAMORPHIC";
   })();
 
+  function isCinematicAspect(aspect){
+    return aspect === "16:9" || aspect === "21:9";
+  }
+
   function setAspect(val){
     selectedAspect = String(val || "16:9");
-    const items = aspectListEl ? Array.from(aspectListEl.querySelectorAll(".lf-aspectitem")) : [];
-    items.forEach(it => it.classList.toggle("active", it.dataset.aspect === selectedAspect));
+    if (aspectBtnLabel) aspectBtnLabel.textContent = selectedAspect;
+    if (aspectBtnBadge) {
+      aspectBtnBadge.style.display = isCinematicAspect(selectedAspect) ? "inline-flex" : "none";
+    }
+    if (aspectMenu) {
+      aspectMenu.querySelectorAll(".lf-dropdown-item").forEach(item=>{
+        item.classList.toggle("active", item.dataset.aspect === selectedAspect);
+      });
+    }
     updateFrameAspect();
   }
 
@@ -1510,11 +1556,16 @@ ${camBlock}
     if (THREE_OK) onResize3D();
   }
 
-  if (aspectListEl){
-    aspectListEl.addEventListener("click", (e)=>{
-      const item = e.target.closest(".lf-aspectitem");
+  if (aspectDropdown && aspectBtn && aspectMenu){
+    aspectBtn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      aspectDropdown.classList.toggle("open");
+    });
+    aspectMenu.addEventListener("click", (e)=>{
+      const item = e.target.closest(".lf-dropdown-item");
       if (!item) return;
       setAspect(item.dataset.aspect);
+      aspectDropdown.classList.remove("open");
     });
   }
   setAspect("16:9");
@@ -1592,10 +1643,16 @@ ${camBlock}
     return (kb/1024).toFixed(1) + " MB";
   }
 
+  function isCharPhotoActive(index){
+    const actor = index === 1 ? actorState.char1 : actorState.char2;
+    const file = index === 1 ? char1PhotoFileObj : char2PhotoFileObj;
+    return !!(actor && actor.visible && file);
+  }
+
   function getMaxLeftImages(){
     const compositeSlot = shouldUseComposite() ? 1 : 0;
-    const char1Slot = char1PhotoFileObj ? 1 : 0;
-    const char2Slot = char2PhotoFileObj ? 1 : 0;
+    const char1Slot = isCharPhotoActive(1) ? 1 : 0;
+    const char2Slot = isCharPhotoActive(2) ? 1 : 0;
     return Math.max(0, MAX_IMAGES - compositeSlot - char1Slot - char2Slot);
   }
 
@@ -2812,6 +2869,11 @@ Keep it compact but unambiguous.
     });
   }
 
+  async function buildCompositeBlob(){
+    if (!shouldUseComposite()) return null;
+    return exportCompositeBlob();
+  }
+
   function shouldUseComposite(){
     const hasActors = actors.some(a => a.visible);
     return !!bgImage || drawDirty || hasActors;
@@ -2853,6 +2915,7 @@ Keep it compact but unambiguous.
       lines.push(`Image #${indexMap.composite} is the composite viewport plate (locked). Preserve camera, perspective, placements.`);
       lines.push("HARD LOCK: The composite proxy pose and camera are absolute. Do NOT interpret or stylize the pose.");
       lines.push("Do NOT change camera angle, camera height, lens perspective, or subject distance relative to background.");
+      lines.push("No reframing, no camera move, no lens change, keep horizon line identical.");
     }
 
     if (hasComposite && hasBackground){
@@ -2875,17 +2938,19 @@ Keep it compact but unambiguous.
 
     if (hasComposite && actorState.char1 && actorState.char1.visible && indexMap.char1){
       lines.push(`Character 1 identity MUST match Character 1 photo (image #${indexMap.char1}). Exact face structure (eyes/nose/mouth/jawline), beard/hairline.`);
-      lines.push(`Character 1 pose MUST match proxy in composite EXACTLY (image #${indexMap.composite}). Same joint angles, hand positions, weight shift, body lean.`);
+      lines.push(`Character 1 pose MUST match proxy silhouette in composite EXACTLY (image #${indexMap.composite}). Same joint angles, hand positions, weight shift, body lean.`);
       lines.push("Camera MUST match composite EXACTLY: framing, perspective, subject scale, FOV.");
       lines.push("Forbidden: re-posing, straightening posture, “improving” pose, changing arm angles.");
+      lines.push("If there is any mismatch between identity photo and proxy pose, keep proxy pose exactly, and match identity within that pose.");
       lines.push("If any conflict: preserve proxy pose over everything.");
     }
 
     if (hasComposite && actorState.char2 && actorState.char2.visible && indexMap.char2){
       lines.push(`Character 2 identity MUST match Character 2 photo (image #${indexMap.char2}). Exact face structure (eyes/nose/mouth/jawline), beard/hairline.`);
-      lines.push(`Character 2 pose MUST match proxy in composite EXACTLY (image #${indexMap.composite}). Same joint angles, hand positions, weight shift, body lean.`);
+      lines.push(`Character 2 pose MUST match proxy silhouette in composite EXACTLY (image #${indexMap.composite}). Same joint angles, hand positions, weight shift, body lean.`);
       lines.push("Camera MUST match composite EXACTLY: framing, perspective, subject scale, FOV.");
       lines.push("Forbidden: re-posing, straightening posture, “improving” pose, changing arm angles.");
+      lines.push("If there is any mismatch between identity photo and proxy pose, keep proxy pose exactly, and match identity within that pose.");
       lines.push("If any conflict: preserve proxy pose over everything.");
     }
 
@@ -2894,6 +2959,77 @@ Keep it compact but unambiguous.
     }
 
     return lines.join("\n");
+  }
+
+  let previewObjectUrl = "";
+
+  function closeInputPreview(){
+    if (previewObjectUrl){
+      try { URL.revokeObjectURL(previewObjectUrl); } catch(e){}
+      previewObjectUrl = "";
+    }
+    if (inputPreviewOverlay) inputPreviewOverlay.style.display = "none";
+  }
+
+  async function openInputPreview(){
+    if (!previewBtn) return;
+    previewBtn.disabled = true;
+    setStatus("");
+    try{
+      if (previewObjectUrl){
+        try { URL.revokeObjectURL(previewObjectUrl); } catch(e){}
+        previewObjectUrl = "";
+      }
+      const compositeBlob = await buildCompositeBlob();
+      if (compositeBlob){
+        previewObjectUrl = URL.createObjectURL(compositeBlob);
+      }
+
+      const leftUrls = await getOrUploadImageUrls();
+      const useChar1 = isCharPhotoActive(1);
+      const useChar2 = isCharPhotoActive(2);
+      const char1Url = useChar1 ? await getCharPhotoUrl(1) : "";
+      const char2Url = useChar2 ? await getCharPhotoUrl(2) : "";
+      const compositeUrl = compositeBlob
+        ? await uploadReferenceToInputs(new File([compositeBlob], `composite-${uuid()}.png`, { type: "image/png" }))
+        : null;
+
+      const imagePlan = buildImageInputPlan({
+        compositeUrl,
+        char1Url,
+        char2Url,
+        leftUrls
+      });
+
+      if (!imagePlan.urls.length){
+        closeInputPreview();
+        setStatus("No input images to preview.", "err");
+        return;
+      }
+
+      const primaryUrl = compositeUrl || char1Url || char2Url || leftUrls[0] || "";
+
+      if (previewImg){
+        previewImg.src = previewObjectUrl || primaryUrl || "";
+      }
+      if (previewPrimary){
+        previewPrimary.innerHTML = primaryUrl
+          ? `Primary image_input_url: <a href="${primaryUrl}" target="_blank" rel="noopener noreferrer">${primaryUrl}</a>`
+          : "Primary image_input_url: —";
+      }
+      if (previewList){
+        previewList.innerHTML = "";
+        imagePlan.urls.forEach((url, idx)=>{
+          const row = document.createElement("div");
+          row.innerHTML = `image_input_urls[${idx + 1}]: <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+          previewList.appendChild(row);
+        });
+      }
+
+      if (inputPreviewOverlay) inputPreviewOverlay.style.display = "flex";
+    } finally {
+      previewBtn.disabled = false;
+    }
   }
 
   async function startJob(){
@@ -2911,7 +3047,7 @@ Keep it compact but unambiguous.
     const fd = new FormData();
     fd.append("presetId", PRESET_ID);
 
-    const userPromptRaw = (sceneEl.value||"").trim() || "high quality, detailed";
+    const userPromptRaw = (sceneEl.value||"").trim();
 
     const presetKey = String(camPresetEl?.value || "IMAX_PANAVISION_ANAMORPHIC");
     const focalMm = Number(focalEl?.value || 35);
@@ -2925,8 +3061,10 @@ Keep it compact but unambiguous.
 
     const leftUrls = await getOrUploadImageUrls();
     const compositeUrl = await buildCompositeUrl();
-    const char1Url = await getCharPhotoUrl(1);
-    const char2Url = await getCharPhotoUrl(2);
+    const useChar1 = isCharPhotoActive(1);
+    const useChar2 = isCharPhotoActive(2);
+    const char1Url = useChar1 ? await getCharPhotoUrl(1) : "";
+    const char2Url = useChar2 ? await getCharPhotoUrl(2) : "";
     const imagePlan = buildImageInputPlan({
       compositeUrl,
       char1Url,
@@ -2934,13 +3072,24 @@ Keep it compact but unambiguous.
       leftUrls
     });
     const hasImage = imagePlan.urls.length > 0;
+    if (!userPromptRaw && !hasImage){
+      showLoader(false);
+      runBtn.disabled = false;
+      gptBtn.disabled = false;
+      stopBtn.style.display = "none";
+      setStatus("Add a prompt or at least one image input.", "err");
+      return;
+    }
+    const identityMode = compositeUrl && (useChar1 || useChar2) ? "proxy_layout_plate" : "generic_locked_image";
+    const effectiveStyleOnly = userPromptRaw ? !!styleChk.checked : true;
+    const safeUserText = "No additional instructions. Preserve the input images exactly. Do NOT add new objects/props/light sources. Only apply optics/grade/grain if enabled.";
     const cinemaLock = buildCinemaLockPrompt({
       indexMap: imagePlan.indexMap,
       hasComposite: !!compositeUrl
     });
 
     const finalPrompt = buildFinalPrompt({
-      userPrompt: userPromptRaw,
+      userPrompt: userPromptRaw || safeUserText,
       hasImage,
       presetKey,
       focalMm,
@@ -2949,10 +3098,11 @@ Keep it compact but unambiguous.
       exposure,
       aspect: selectedAspect,
       res: resVal,
-      styleOnly: !!styleChk.checked,
+      styleOnly: effectiveStyleOnly,
       flare,
       bloom,
-      cinemaLock
+      cinemaLock,
+      identityMode
     });
 
     fd.append("scene", finalPrompt);
@@ -2961,7 +3111,7 @@ Keep it compact but unambiguous.
     fd.append("output_format", "png");
     fd.append("safety_filter_level", "block_only_high");
 
-    const primaryUrl = compositeUrl || leftUrls[0];
+    const primaryUrl = compositeUrl || char1Url || char2Url || leftUrls[0];
     if (primaryUrl){
       fd.append("image_input_url", primaryUrl);
     }
@@ -3098,6 +3248,17 @@ Keep it compact but unambiguous.
     }
   });
 
+  if (previewBtn){
+    previewBtn.addEventListener("click", async ()=>{
+      try { await openInputPreview(); }
+      catch(e){
+        closeInputPreview();
+        setStatus("Preview error", "err");
+        alert("Preview error:\n\n" + (e?.message || e));
+      }
+    });
+  }
+
   stopBtn.addEventListener("click", ()=>{
     abortPoll = true;
     if (pollTimer) clearTimeout(pollTimer);
@@ -3107,6 +3268,15 @@ Keep it compact but unambiguous.
     stopBtn.style.display = "none";
     setStatus("Stopped");
   });
+
+  if (previewClose){
+    previewClose.addEventListener("click", closeInputPreview);
+  }
+  if (inputPreviewOverlay){
+    inputPreviewOverlay.addEventListener("click", (e)=>{
+      if (e.target === inputPreviewOverlay) closeInputPreview();
+    });
+  }
 
   drop.addEventListener("contextmenu", (e)=>{
     e.preventDefault();
@@ -3127,6 +3297,7 @@ Keep it compact but unambiguous.
     });
     window.addEventListener("click", ()=>{
       resDropdown.classList.remove("open");
+      if (aspectDropdown) aspectDropdown.classList.remove("open");
     });
   }
   setResolution(selectedRes);
