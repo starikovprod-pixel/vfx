@@ -419,16 +419,16 @@
   }
 
   .lf-topbar{
-  height:56px;
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  align-items:center;
-  gap:12px;
-  padding:10px 14px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  background:rgba(0,0,0,.35);
-  backdrop-filter: blur(4px);
-}
+    height:56px;
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+    backdrop-filter: blur(4px);
+  }
 
   .lf-topbar .left{
     display:flex;
@@ -456,30 +456,29 @@
   .lf-topbar .center{
     display:flex;
     align-items:center;
-    justify-content:center;
+    justify-content:flex-start;
     gap:12px;
     min-width:0;
   }
   .lf-topbar .right{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:10px;
-  flex-wrap:nowrap;
-  white-space:nowrap;
-
-  min-width:0;
-  max-width:560px;     /* ВОТ ЭТО держит всю правую группу */
-  overflow:hidden;     /* чтобы текст не толкал кнопки */
-}
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    flex-wrap:wrap;
+    min-width:0;
+    max-width:100%;
+    overflow:visible;
+    white-space:normal;
+  }
   .lf-projectStatus{
-  min-width:0;
-  max-width:170px;     /* только статус ограничиваем */
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  display:block;
-}
+    min-width:0;
+    max-width:170px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    display:block;
+  }
   .lf-topgroup{ display:flex; gap:8px; align-items:center; }
   .lf-vdiv{
     width:1px;
@@ -607,6 +606,14 @@
     display:flex;
     gap:10px;
     align-items:center;
+  }
+
+  .lf-transformRow{
+    flex-wrap:wrap;
+  }
+  .lf-transformRow .lf-btnSmall{
+    flex:1 1 96px;
+    text-align:center;
   }
 
   .lf-btnSmall{
@@ -1191,12 +1198,6 @@
                 <button class="lf-btnIcon" id="btnDraw" type="button">Draw</button>
                 <button class="lf-btnIcon" id="btn3D" type="button">3D</button>
               </div>
-              <div class="lf-vdiv"></div>
-              <div class="lf-topgroup">
-                <button class="lf-btnIcon active" id="tMove" type="button">Move</button>
-                <button class="lf-btnIcon" id="tRot" type="button">Rotate</button>
-                <button class="lf-btnIcon" id="tScale" type="button">Scale</button>
-              </div>
             </div>
             <div class="right">
               <button class="lf-btnSmall" id="projectSave" type="button">Save Project</button>
@@ -1345,6 +1346,14 @@
           <div class="lf-row" style="margin-bottom:10px;">
             <div class="lf-switch" id="poseToggle"></div>
             <span style="font-size:12px;color:var(--text-sec);">Rotate bones</span>
+          </div>
+          <div class="lf-field">
+            <label>Transform</label>
+            <div class="lf-row lf-transformRow">
+              <button class="lf-btnSmall active" id="tMove" type="button">Move</button>
+              <button class="lf-btnSmall" id="tRot" type="button">Rotate</button>
+              <button class="lf-btnSmall" id="tScale" type="button">Scale</button>
+            </div>
           </div>
           <div class="lf-field">
             <label>Bone</label>
