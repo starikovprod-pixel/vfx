@@ -81,6 +81,23 @@
     padding:0;
     font-size:13px;
   }
+  .lf-navStack{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .lf-navPills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .lf-btnSmall.lf-link{
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
 
   .lf-h2{ font-size:16px; font-weight:1000; margin:0; }
 
@@ -405,6 +422,11 @@
   }
   .lf-topbar .center{ display:flex; gap:14px; align-items:center; justify-self:center; }
   .lf-topbar .right{ display:flex; gap:10px; align-items:center; justify-self:end; }
+  .lf-projectStatus{
+    font-size:12px;
+    color:var(--text-sec);
+    font-weight:800;
+  }
   .lf-topgroup{ display:flex; gap:8px; align-items:center; }
   .lf-divider{
     width:1px;
@@ -543,6 +565,109 @@
   }
   .lf-btnSmall:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.12); }
   .lf-btnSmall.active{ border-color:rgba(43,108,255,.85); background:rgba(43,108,255,.22); }
+
+  .lf-libraryList{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    max-height:360px;
+    overflow:auto;
+    padding-right:4px;
+  }
+  .lf-libraryCard{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:14px;
+    padding:10px;
+    background:rgba(0,0,0,.25);
+    cursor:pointer;
+  }
+  .lf-libraryCard img{
+    width:64px;
+    height:64px;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.12);
+  }
+  .lf-libraryMeta{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:0;
+  }
+  .lf-libraryTitle{
+    font-weight:900;
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .lf-muted{
+    color:var(--text-sec);
+    font-size:11px;
+  }
+
+  .lf-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:9999;
+  }
+  .lf-modalCard{
+    width:min(900px, 96vw);
+    max-height:90vh;
+    overflow:auto;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    box-shadow:0 24px 50px rgba(0,0,0,.45);
+  }
+  .lf-modalHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .lf-modal input[type="text"]{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
+    padding:10px 12px;
+    border-radius:12px;
+    font-size:14px;
+  }
+  .lf-modalCard img{
+    width:100%;
+    max-height:420px;
+    object-fit:contain;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:#070707;
+  }
+  .lf-libraryGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+    gap:12px;
+  }
+  .lf-libraryGrid .lf-libraryCard{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .lf-libraryGrid .lf-libraryCard img{
+    width:100%;
+    height:140px;
+  }
 
   .lf-palette{ display:flex; gap:8px; flex-wrap:wrap; }
   .lf-swatch{
@@ -745,7 +870,13 @@
   <div id="lf-main">
     <div id="lf-workspace">
       <div class="lf-side">
-        <button class="lf-back" id="btn-back" type="button">← Back to Flow</button>
+        <div class="lf-navStack">
+          <div class="lf-navPills">
+            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_character" rel="noopener" target="_blank">CINEMA CHARACTER</a>
+            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_animation" rel="noopener" target="_blank">CINEMA ANIMATION</a>
+          </div>
+          <button class="lf-back" id="btn-back" type="button">← Back to CINEMA LAB</button>
+        </div>
         <div class="lf-h2">Nano Banana Pro (Image) + Cinema Viewport</div>
 
         <div class="lf-field">
@@ -926,7 +1057,12 @@
                 <button class="lf-btnIcon" id="tScale" type="button">Scale</button>
               </div>
             </div>
-            <div class="right"></div>
+            <div class="right">
+              <button class="lf-btnSmall" id="projectSave" type="button">Save Project</button>
+              <button class="lf-btnSmall" id="projectOpen" type="button">Open Project</button>
+              <button class="lf-btnSmall" id="projectRename" type="button" title="Rename project">✎</button>
+              <div class="lf-projectStatus" id="projectStatus">Project: —</div>
+            </div>
           </div>
           <div class="lf-stageWrap">
             <div class="lf-frame" id="frame">
@@ -941,7 +1077,7 @@
               <img id="outImg" class="hidden" alt="result" />
                 <div class="lf-resbar">
                   <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
-                  <a id="download" href="#" target="_blank" download>Download</a>
+                  <a id="download" href="#" download>Download</a>
                 </div>
               </div>
             </div>
@@ -1072,9 +1208,18 @@
             <select id="boneSelect" class="lf-select"></select>
           </div>
           <button class="lf-btnSmall" id="resetPose" type="button">Reset pose</button>
+        </div>
+
+        <div class="lf-section" id="shotLibrarySection">
+          <div class="lf-row" style="justify-content:space-between;">
+            <div class="lf-h2">Cinema Shot Library</div>
+            <button class="lf-btnSmall" id="shotLibraryRefresh" type="button">Refresh</button>
+          </div>
+          <div class="lf-libraryList" id="shotLibraryList"></div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
 <div class="lf-previewOverlay" id="inputPreviewOverlay">
   <div class="lf-previewCard">
@@ -1085,6 +1230,64 @@
     <img id="previewImg" alt="Input preview" />
     <div style="font-size:12px;color:var(--text-sec);" id="previewPrimary"></div>
     <div class="lf-previewList" id="previewList"></div>
+  </div>
+</div>
+
+<div class="lf-modal" id="shotModal">
+  <div class="lf-modalCard">
+    <div class="lf-modalHeader">
+      <div>
+        <div class="lf-h2" id="shotModalTitle">Cinema Shot</div>
+        <div class="lf-muted" id="shotModalMeta"></div>
+      </div>
+      <button class="lf-btnSmall" id="shotModalClose" type="button">Close</button>
+    </div>
+    <img id="shotModalImg" alt="Cinema shot preview" />
+    <div class="lf-row" style="justify-content:flex-end;flex-wrap:wrap;">
+      <button class="lf-btnSmall" id="shotModalDownload" type="button">Download</button>
+      <button class="lf-btnSmall" id="shotModalCopy" type="button">Copy URL</button>
+      <button class="lf-btnSmall" id="shotModalRename" type="button">Rename</button>
+    </div>
+  </div>
+</div>
+
+<div class="lf-modal" id="charLibraryModal">
+  <div class="lf-modalCard">
+    <div class="lf-modalHeader">
+      <div class="lf-h2">Character Library</div>
+      <button class="lf-btnSmall" id="charLibraryClose" type="button">Close</button>
+    </div>
+    <div class="lf-row" style="flex-wrap:wrap;">
+      <input id="charLibrarySearch" type="text" placeholder="Search characters..." />
+      <button class="lf-btnSmall" id="charLibraryRefresh" type="button">Refresh</button>
+    </div>
+    <div class="lf-libraryGrid" id="charLibraryList"></div>
+  </div>
+</div>
+
+<div class="lf-modal" id="projectListModal">
+  <div class="lf-modalCard">
+    <div class="lf-modalHeader">
+      <div class="lf-h2">Open Project</div>
+      <button class="lf-btnSmall" id="projectListClose" type="button">Close</button>
+    </div>
+    <div class="lf-libraryList" id="projectList"></div>
+  </div>
+</div>
+
+<div class="lf-modal" id="projectSaveModal">
+  <div class="lf-modalCard">
+    <div class="lf-modalHeader">
+      <div class="lf-h2" id="projectSaveTitle">Save Project</div>
+      <button class="lf-btnSmall" id="projectSaveClose" type="button">Close</button>
+    </div>
+    <div class="lf-field">
+      <label>Project name</label>
+      <input type="text" id="projectNameInput" placeholder="Project name" />
+    </div>
+    <div class="lf-row" style="justify-content:flex-end;">
+      <button class="lf-btnSmall" id="projectSaveConfirm" type="button">Save</button>
+    </div>
   </div>
 </div>
   </div>
@@ -1380,6 +1583,10 @@ ${camBlock}
   const uploadImagesBtn = $("uploadImagesBtn");
   const myCharsGlobal = $("myCharsGlobal");
   const styleChk = $("styleOnly");
+  const projectSave = $("projectSave");
+  const projectOpen = $("projectOpen");
+  const projectRename = $("projectRename");
+  const projectStatus = $("projectStatus");
 
   const camPresetEl = $("camPreset");
   const focalEl = $("focal");
@@ -1402,6 +1609,32 @@ ${camBlock}
   const stateText = $("stateText");
   const btnDraw = $("btnDraw");
   const btn3D = $("btn3D");
+
+  const shotLibraryList = $("shotLibraryList");
+  const shotLibraryRefresh = $("shotLibraryRefresh");
+  const shotModal = $("shotModal");
+  const shotModalTitle = $("shotModalTitle");
+  const shotModalMeta = $("shotModalMeta");
+  const shotModalImg = $("shotModalImg");
+  const shotModalClose = $("shotModalClose");
+  const shotModalDownload = $("shotModalDownload");
+  const shotModalCopy = $("shotModalCopy");
+  const shotModalRename = $("shotModalRename");
+
+  const charLibraryModal = $("charLibraryModal");
+  const charLibraryClose = $("charLibraryClose");
+  const charLibrarySearch = $("charLibrarySearch");
+  const charLibraryList = $("charLibraryList");
+  const charLibraryRefresh = $("charLibraryRefresh");
+
+  const projectListModal = $("projectListModal");
+  const projectListClose = $("projectListClose");
+  const projectList = $("projectList");
+  const projectSaveModal = $("projectSaveModal");
+  const projectSaveClose = $("projectSaveClose");
+  const projectSaveConfirm = $("projectSaveConfirm");
+  const projectSaveTitle = $("projectSaveTitle");
+  const projectNameInput = $("projectNameInput");
 
   const frame = $("frame");
   const bgCanvas = $("bgCanvas");
@@ -1470,12 +1703,15 @@ ${camBlock}
   const resetPoseBtn = $("resetPose");
 
   let selectedFiles = [];
+  let selectedUrls = [];
   let char1PhotoFileObj = null;
   let char2PhotoFileObj = null;
   let char1PhotoUrl = "";
   let char2PhotoUrl = "";
   let char1PhotoSignature = "";
   let char2PhotoSignature = "";
+  let char1LibraryUrl = "";
+  let char2LibraryUrl = "";
   let currentJobId = null;
   let abortPoll = false;
   let pollTimer = null;
@@ -1484,6 +1720,13 @@ ${camBlock}
 
   let cachedImageUrls = [];
   let cachedSignature = "";
+  let currentOutputUrl = "";
+  let charLibraryContext = "global";
+  let charLibraryItems = [];
+  let shotLibraryItems = [];
+  let shotModalItem = null;
+  let currentProjectId = null;
+  let currentProjectTitle = "";
 
   const palette = ["#ffffff", "#ff3b30", "#ff9500", "#ffd60a", "#34c759", "#2b6cff", "#af52de", "#00c7be", "#a0a0a0", "#000000"];
 
@@ -1497,6 +1740,9 @@ ${camBlock}
 
   let bgImage = null;
   let bgFileObj = null;
+  let bgPublicUrl = "";
+  let bgUploadSignature = "";
+  let drawPublicUrl = "";
 
   const actors = [];
   const actorState = {
@@ -1536,10 +1782,54 @@ ${camBlock}
     btn3D.disabled = true;
   }
 
-  $("btn-back").addEventListener("click", ()=>location.href = BASE + "/flow#image");
+  $("btn-back").addEventListener("click", ()=>location.href = "https://lightfull.ai/cinema_lab");
 
-  function openCharacterLibrary(){
-    alert("Coming soon: character library");
+  function openModal(el){
+    if (el) el.style.display = "flex";
+  }
+
+  function closeModal(el){
+    if (el) el.style.display = "none";
+  }
+
+  async function forceDownload(url, filename){
+    if (!url) return;
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename || "cinema-shot.png";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(blobUrl);
+  }
+
+  async function copyToClipboard(text){
+    if (!text) return;
+    if (navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const input = document.createElement("textarea");
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy");
+    input.remove();
+  }
+
+  function setProjectStatus(title){
+    const label = title ? `Project: ${title}` : "Project: —";
+    if (projectStatus) projectStatus.textContent = label;
+  }
+
+  function openCharacterLibrary(context){
+    charLibraryContext = context || "global";
+    if (charLibrarySearch) charLibrarySearch.value = "";
+    openModal(charLibraryModal);
+    loadCharacterLibrary();
   }
 
   (function initCinematicPresets(){
@@ -1614,7 +1904,8 @@ ${camBlock}
 
   function showResult(url, status){
     resultOverlay.style.display = "flex";
-    download.href = url;
+    currentOutputUrl = url;
+    download.href = url || "#";
     meta.textContent = `status: ${status} • jobId: ${currentJobId}`;
     outVideo.classList.add("hidden");
     outImg.classList.add("hidden");
@@ -1634,6 +1925,10 @@ ${camBlock}
   }
 
   closeResult.addEventListener("click", ()=>{ resultOverlay.style.display = "none"; });
+  download.addEventListener("click", (e)=>{
+    e.preventDefault();
+    forceDownload(currentOutputUrl || download.href, "cinema-shot.png");
+  });
 
   function showLoader(on){
     loader.style.display = on ? "flex" : "none";
@@ -1677,7 +1972,8 @@ ${camBlock}
   function isCharPhotoActive(index){
     const actor = index === 1 ? actorState.char1 : actorState.char2;
     const file = index === 1 ? char1PhotoFileObj : char2PhotoFileObj;
-    return !!(actor && actor.visible && file);
+    const libUrl = index === 1 ? char1LibraryUrl : char2LibraryUrl;
+    return !!(actor && actor.visible && (file || libUrl));
   }
 
   function getMaxLeftImages(){
@@ -1685,6 +1981,10 @@ ${camBlock}
     const char1Slot = isCharPhotoActive(1) ? 1 : 0;
     const char2Slot = isCharPhotoActive(2) ? 1 : 0;
     return Math.max(0, MAX_IMAGES - compositeSlot - char1Slot - char2Slot);
+  }
+
+  function getLeftImageCount(){
+    return selectedFiles.length + selectedUrls.length;
   }
 
   function ensureLimit(files, limit){
@@ -1710,7 +2010,13 @@ ${camBlock}
 
     const merged = selectedFiles.concat(imgs);
     const maxLeft = getMaxLeftImages();
-    const limited = ensureLimit(dedupeBySignature(merged), maxLeft);
+    const available = Math.max(0, maxLeft - selectedUrls.length);
+    if (available === 0){
+      setStatus(`Max ${maxLeft} images for this setup. Remove images to add more.`, "err");
+      setTimeout(()=>setStatus(""), 1600);
+      return;
+    }
+    const limited = ensureLimit(dedupeBySignature(merged), available);
     if (limited.length < merged.length){
       setStatus(`Max ${maxLeft} images for this setup. Extra files ignored.`, "err");
       setTimeout(()=>setStatus(""), 1600);
@@ -1720,6 +2026,20 @@ ${camBlock}
     updateDropText();
     cachedImageUrls = [];
     cachedSignature = "";
+  }
+
+  function addReferenceUrl(url){
+    if (!url) return;
+    if (selectedUrls.includes(url)) return;
+    const maxLeft = getMaxLeftImages();
+    if (getLeftImageCount() >= maxLeft){
+      setStatus(`Max ${maxLeft} images for this setup. Remove images to add more.`, "err");
+      setTimeout(()=>setStatus(""), 1600);
+      return;
+    }
+    selectedUrls.push(url);
+    renderThumbs();
+    updateDropText();
   }
 
   function removeFileAt(idx){
@@ -1734,6 +2054,12 @@ ${camBlock}
     cachedSignature = "";
   }
 
+  function removeUrlAt(idx){
+    selectedUrls.splice(idx, 1);
+    renderThumbs();
+    updateDropText();
+  }
+
   function clearFiles(){
     for (const f of selectedFiles){
       if (f && f.__previewUrl){
@@ -1741,6 +2067,7 @@ ${camBlock}
       }
     }
     selectedFiles = [];
+    selectedUrls = [];
     renderThumbs();
     updateDropText();
     cachedImageUrls = [];
@@ -1749,12 +2076,35 @@ ${camBlock}
 
   function renderThumbs(){
     thumbsEl.innerHTML = "";
-    if (!selectedFiles.length){
+    if (!selectedFiles.length && !selectedUrls.length){
       thumbsEl.style.display = "none";
       return;
     }
 
     thumbsEl.style.display = "flex";
+
+    selectedUrls.forEach((url, idx) => {
+      const box = document.createElement("div");
+      box.className = "lf-thumbbox";
+
+      const img = document.createElement("img");
+      img.alt = "Reference image";
+      img.src = url;
+
+      const x = document.createElement("div");
+      x.className = "x";
+      x.textContent = "×";
+      x.title = "Remove";
+      x.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        removeUrlAt(idx);
+      });
+
+      box.appendChild(img);
+      box.appendChild(x);
+      thumbsEl.appendChild(box);
+    });
 
     selectedFiles.forEach((file, idx) => {
       const box = document.createElement("div");
@@ -1786,31 +2136,35 @@ ${camBlock}
 
   function updateDropText(){
     const maxLeft = getMaxLeftImages();
-    if (!selectedFiles.length){
+    const totalCount = getLeftImageCount();
+    if (!totalCount){
       dropTitle.textContent = "Upload images";
       dropSub.textContent = `Click or drag&drop • up to ${maxLeft} images`;
       return;
     }
-    const count = selectedFiles.length;
     const totalBytes = selectedFiles.reduce((s,f)=>s+(f?.size||0), 0);
 
-    dropTitle.textContent = `${count} image${count>1?"s":""} selected`;
+    dropTitle.textContent = `${totalCount} image${totalCount>1?"s":""} selected`;
     dropSub.textContent = `Total: ${formatSize(totalBytes)} • Click to add more • Up to ${maxLeft} images`;
   }
 
   function enforceLeftLimit(reason){
     const maxLeft = getMaxLeftImages();
-    if (selectedFiles.length <= maxLeft) {
-      updateDropText();
-      return;
+    if (selectedUrls.length > maxLeft) {
+      selectedUrls = selectedUrls.slice(0, maxLeft);
     }
-    selectedFiles = selectedFiles.slice(0, maxLeft);
+    const available = Math.max(0, maxLeft - selectedUrls.length);
+    if (selectedFiles.length > available){
+      selectedFiles = selectedFiles.slice(0, available);
+      cachedImageUrls = [];
+      cachedSignature = "";
+      if (reason) {
+        setStatus(`Max ${maxLeft} images for this setup. Extra files ignored.`, "err");
+        setTimeout(()=>setStatus(""), 1600);
+      }
+    }
     renderThumbs();
     updateDropText();
-    if (reason) {
-      setStatus(`Max ${maxLeft} images for this setup. Extra files ignored.`, "err");
-      setTimeout(()=>setStatus(""), 1600);
-    }
   }
 
   async function getSessionOrRedirect(){
@@ -1850,12 +2204,59 @@ ${camBlock}
     return j;
   }
 
+  function extractGenerations(data){
+    if (Array.isArray(data?.generations)) return data.generations;
+    if (Array.isArray(data?.data?.generations)) return data.data.generations;
+    if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data)) return data;
+    return [];
+  }
+
+  function extractProjects(data){
+    if (Array.isArray(data?.projects)) return data.projects;
+    if (Array.isArray(data?.data?.projects)) return data.data.projects;
+    if (Array.isArray(data)) return data;
+    return [];
+  }
+
+  function getGenerationLab(item){
+    return item?.lab || item?.meta?.lab || item?.data?.lab || "";
+  }
+
+  function getGenerationKind(item){
+    return item?.kind || item?.meta?.kind || item?.data?.kind || "";
+  }
+
+  function getGenerationId(item){
+    return item?.generation_id || item?.id || item?.gen_id || item?.generationId || "";
+  }
+
+  function getGenerationUrl(item){
+    const raw = item?.output_url || item?.outputUrl || item?.url || item?.image_url || item?.imageUrl || item?.preview_url || item?.previewUrl || "";
+    if (Array.isArray(raw)) return raw[0] || "";
+    return raw || "";
+  }
+
+  function getGenerationTitle(item, fallbackPrefix){
+    const title = String(item?.title || item?.name || "").trim();
+    if (title) return title;
+    const id = getGenerationId(item) || "—";
+    return `${fallbackPrefix} ${id}`;
+  }
+
+  function matchesGeneration(item, lab, kind){
+    const labVal = String(getGenerationLab(item)).toLowerCase();
+    const kindVal = String(getGenerationKind(item)).toLowerCase();
+    if (labVal && kindVal) return labVal === lab && kindVal === kind;
+    return true;
+  }
+
   async function uploadReferenceToInputs(file){
     const sb = window.sb;
     const session = await getSessionOrRedirect();
 
     const ext = (file.name.split(".").pop() || "png").toLowerCase();
-    const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "png";
+    const safeExt = ["png","jpg","jpeg","webp","glb"].includes(ext) ? ext : "png";
     const path = `${session.user.id}/${uuid()}.${safeExt}`;
 
     let up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, {
@@ -1877,6 +2278,230 @@ ${camBlock}
     return pub.data.publicUrl;
   }
 
+  async function renameGenerationTitle(genId, newTitle){
+    if (!genId || !newTitle) return;
+    await fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action: "set_generation_title",
+        generation_id: genId,
+        title: newTitle
+      })
+    });
+  }
+
+  function renderShotLibrary(){
+    if (!shotLibraryList) return;
+    shotLibraryList.innerHTML = "";
+    if (!shotLibraryItems.length){
+      shotLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">No shots yet.</div>";
+      return;
+    }
+    shotLibraryItems.forEach(item => {
+      const url = getGenerationUrl(item);
+      const title = getGenerationTitle(item, "Shot");
+      const card = document.createElement("div");
+      card.className = "lf-libraryCard";
+      card.addEventListener("click", ()=>openShotModal(item));
+
+      const img = document.createElement("img");
+      img.alt = title;
+      img.src = url || "";
+
+      const meta = document.createElement("div");
+      meta.className = "lf-libraryMeta";
+      const titleEl = document.createElement("div");
+      titleEl.className = "lf-libraryTitle";
+      titleEl.textContent = title;
+      const sub = document.createElement("div");
+      sub.className = "lf-muted";
+      sub.textContent = url ? "Click to preview" : "No preview URL";
+
+      meta.appendChild(titleEl);
+      meta.appendChild(sub);
+      card.appendChild(img);
+      card.appendChild(meta);
+      shotLibraryList.appendChild(card);
+    });
+  }
+
+  async function loadShotLibrary(){
+    if (!shotLibraryList) return;
+    shotLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Loading…</div>";
+    try{
+      const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?limit=50&offset=0", { method:"GET" });
+      const gens = extractGenerations(data);
+      shotLibraryItems = gens.filter(item => matchesGeneration(item, "cinema", "shot"));
+      renderShotLibrary();
+    } catch(e){
+      shotLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Failed to load library.</div>";
+    }
+  }
+
+  function openShotModal(item){
+    shotModalItem = item;
+    const url = getGenerationUrl(item);
+    const title = getGenerationTitle(item, "Shot");
+    if (shotModalTitle) shotModalTitle.textContent = title;
+    if (shotModalMeta) shotModalMeta.textContent = getGenerationId(item) ? `ID: ${getGenerationId(item)}` : "";
+    if (shotModalImg) shotModalImg.src = url || "";
+    openModal(shotModal);
+  }
+
+  function renderCharacterLibrary(){
+    if (!charLibraryList) return;
+    charLibraryList.innerHTML = "";
+    const query = String(charLibrarySearch?.value || "").trim().toLowerCase();
+    const filtered = charLibraryItems.filter(item => {
+      const title = getGenerationTitle(item, "Character").toLowerCase();
+      return !query || title.includes(query);
+    });
+
+    if (!filtered.length){
+      charLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">No characters found.</div>";
+      return;
+    }
+
+    filtered.forEach(item => {
+      const url = getGenerationUrl(item);
+      const title = getGenerationTitle(item, "Character");
+      const genId = getGenerationId(item);
+
+      const card = document.createElement("div");
+      card.className = "lf-libraryCard";
+      card.addEventListener("click", ()=>{
+        if (!url) return;
+        if (charLibraryContext === "global"){
+          addReferenceUrl(url);
+        } else if (charLibraryContext === "char1"){
+          setCharPhotoFromUrl(1, url);
+        } else if (charLibraryContext === "char2"){
+          setCharPhotoFromUrl(2, url);
+        }
+        closeModal(charLibraryModal);
+      });
+
+      const img = document.createElement("img");
+      img.alt = title;
+      img.src = url || "";
+
+      const meta = document.createElement("div");
+      meta.className = "lf-libraryMeta";
+      const titleEl = document.createElement("div");
+      titleEl.className = "lf-libraryTitle";
+      titleEl.textContent = title;
+      const sub = document.createElement("div");
+      sub.className = "lf-muted";
+      sub.textContent = url ? "Click to select" : "No preview URL";
+
+      const actions = document.createElement("div");
+      actions.className = "lf-row";
+      const renameBtn = document.createElement("button");
+      renameBtn.className = "lf-btnSmall";
+      renameBtn.textContent = "✎";
+      renameBtn.title = "Rename";
+      renameBtn.addEventListener("click", async (ev)=>{
+        ev.stopPropagation();
+        const next = prompt("New character name:", title);
+        if (!next) return;
+        try{
+          await renameGenerationTitle(genId, next);
+          item.title = next;
+          renderCharacterLibrary();
+        } catch(e){
+          setStatus("Rename failed", "err");
+        }
+      });
+
+      actions.appendChild(renameBtn);
+      meta.appendChild(titleEl);
+      meta.appendChild(sub);
+      meta.appendChild(actions);
+      card.appendChild(img);
+      card.appendChild(meta);
+      charLibraryList.appendChild(card);
+    });
+  }
+
+  async function loadCharacterLibrary(){
+    if (!charLibraryList) return;
+    charLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Loading…</div>";
+    try{
+      const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?limit=100&offset=0", { method:"GET" });
+      const gens = extractGenerations(data);
+      charLibraryItems = gens.filter(item => matchesGeneration(item, "cinema", "character"));
+      renderCharacterLibrary();
+    } catch(e){
+      charLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Failed to load library.</div>";
+    }
+  }
+
+  async function fetchProjectsList(){
+    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?projects=1", { method:"GET" });
+    return extractProjects(data);
+  }
+
+  async function fetchProjectById(id){
+    const data = await fetchJsonWithAuth(BACKEND_BASE + `/api/me?project_id=${encodeURIComponent(id)}`, { method:"GET" });
+    return data?.project || data?.data?.project || data?.project_data || data;
+  }
+
+  async function upsertProject({ projectId, title, data }){
+    return fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action: "upsert_project",
+        project_id: projectId || null,
+        title,
+        data
+      })
+    });
+  }
+
+  function renderProjectList(items){
+    if (!projectList) return;
+    projectList.innerHTML = "";
+    if (!items.length){
+      projectList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">No projects found.</div>";
+      return;
+    }
+    items.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "lf-libraryCard";
+      card.addEventListener("click", async ()=>{
+        closeModal(projectListModal);
+        await openProject(item.id || item.project_id);
+      });
+
+      const meta = document.createElement("div");
+      meta.className = "lf-libraryMeta";
+      const titleEl = document.createElement("div");
+      titleEl.className = "lf-libraryTitle";
+      titleEl.textContent = item.title || `Project ${item.id || item.project_id || "—"}`;
+      const sub = document.createElement("div");
+      sub.className = "lf-muted";
+      const updated = item.updated_at || item.updatedAt || item.created_at || "";
+      sub.textContent = updated ? `Updated: ${updated}` : "Click to open";
+      meta.appendChild(titleEl);
+      meta.appendChild(sub);
+      card.appendChild(meta);
+      projectList.appendChild(card);
+    });
+  }
+
+  async function openProjectList(){
+    openModal(projectListModal);
+    projectList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Loading…</div>";
+    try{
+      const items = await fetchProjectsList();
+      renderProjectList(items);
+    } catch(e){
+      projectList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Failed to load projects.</div>";
+    }
+  }
+
   async function uploadAllSelectedOrThrow(){
     if (!selectedFiles.length) return [];
     loaderSub.textContent = `Uploading ${selectedFiles.length} image(s)…`;
@@ -1894,18 +2519,30 @@ ${camBlock}
     return (files||[]).map(f => `${f.name}|${f.size}|${f.lastModified}`).join("||");
   }
 
+  function dedupeUrls(urls){
+    const seen = new Set();
+    const out = [];
+    (urls || []).forEach(url => {
+      const key = String(url || "").trim();
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      out.push(key);
+    });
+    return out;
+  }
+
   async function getOrUploadImageUrls(){
-    if (!selectedFiles.length) return [];
+    if (!selectedFiles.length && !selectedUrls.length) return [];
 
     const sig = filesSignature(selectedFiles);
     if (cachedSignature === sig && cachedImageUrls.length === selectedFiles.length){
-      return cachedImageUrls;
+      return dedupeUrls([...selectedUrls, ...cachedImageUrls]);
     }
 
     const urls = await uploadAllSelectedOrThrow();
     cachedSignature = sig;
     cachedImageUrls = urls;
-    return urls;
+    return dedupeUrls([...selectedUrls, ...urls]);
   }
 
   function setResolution(val){
@@ -2120,8 +2757,48 @@ Keep it compact but unambiguous.
     });
   }
 
+  async function loadImageFromUrl(url){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.onload = ()=>resolve(img);
+      img.onerror = reject;
+      img.crossOrigin = "anonymous";
+      img.src = url;
+    });
+  }
+
+  function clearDrawCanvas(){
+    dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
+    drawDirty = false;
+    drawPublicUrl = "";
+  }
+
+  async function setBackgroundFromUrl(url){
+    if (!url) return;
+    bgImage = await loadImageFromUrl(url);
+    bgFileObj = null;
+    bgPublicUrl = url;
+    bgUploadSignature = "";
+    redrawBackground();
+    bgTitle.textContent = "Background loaded";
+    bgSub.textContent = url;
+    enforceLeftLimit(true);
+  }
+
+  async function setDrawFromUrl(url){
+    if (!url) return;
+    const img = await loadImageFromUrl(url);
+    dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
+    dCtx.drawImage(img, 0, 0, drawCanvas.width, drawCanvas.height);
+    drawDirty = true;
+    drawPublicUrl = url;
+    enforceLeftLimit(true);
+  }
+
   async function setBackground(file){
     bgFileObj = file;
+    bgPublicUrl = "";
+    bgUploadSignature = "";
     bgImage = await loadImageFromFile(file);
     redrawBackground();
     bgTitle.textContent = "Background loaded";
@@ -2135,6 +2812,8 @@ Keep it compact but unambiguous.
     }
     bgImage = null;
     bgFileObj = null;
+    bgPublicUrl = "";
+    bgUploadSignature = "";
     redrawBackground();
     bgTitle.textContent = "Upload background";
     bgSub.textContent = "Click or drag&drop";
@@ -2149,6 +2828,7 @@ Keep it compact but unambiguous.
       char1PhotoFileObj = null;
       char1PhotoUrl = "";
       char1PhotoSignature = "";
+      char1LibraryUrl = "";
       char1PhotoPreview?.classList.add("hidden");
       if (char1PhotoPreview) char1PhotoPreview.src = "";
       if (char1PhotoDrop) {
@@ -2162,6 +2842,7 @@ Keep it compact but unambiguous.
       char2PhotoFileObj = null;
       char2PhotoUrl = "";
       char2PhotoSignature = "";
+      char2LibraryUrl = "";
       char2PhotoPreview?.classList.add("hidden");
       if (char2PhotoPreview) char2PhotoPreview.src = "";
       if (char2PhotoDrop) {
@@ -2181,6 +2862,7 @@ Keep it compact but unambiguous.
       char1PhotoFileObj = file;
       char1PhotoSignature = "";
       char1PhotoUrl = "";
+      char1LibraryUrl = "";
       if (!file.__previewUrl){
         try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
       }
@@ -2199,11 +2881,50 @@ Keep it compact but unambiguous.
       char2PhotoFileObj = file;
       char2PhotoSignature = "";
       char2PhotoUrl = "";
+      char2LibraryUrl = "";
       if (!file.__previewUrl){
         try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
       }
       if (char2PhotoPreview) {
         char2PhotoPreview.src = file.__previewUrl || "";
+        char2PhotoPreview.classList.remove("hidden");
+      }
+      if (char2PhotoDrop) {
+        const placeholder = char2PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "none";
+      }
+    }
+    enforceLeftLimit(true);
+  }
+
+  function setCharPhotoFromUrl(index, url){
+    if (!url) return;
+    if (index === 1){
+      if (char1PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char1PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char1PhotoFileObj = null;
+      char1PhotoSignature = "";
+      char1PhotoUrl = "";
+      char1LibraryUrl = url;
+      if (char1PhotoPreview) {
+        char1PhotoPreview.src = url;
+        char1PhotoPreview.classList.remove("hidden");
+      }
+      if (char1PhotoDrop) {
+        const placeholder = char1PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "none";
+      }
+    } else {
+      if (char2PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char2PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char2PhotoFileObj = null;
+      char2PhotoSignature = "";
+      char2PhotoUrl = "";
+      char2LibraryUrl = url;
+      if (char2PhotoPreview) {
+        char2PhotoPreview.src = url;
         char2PhotoPreview.classList.remove("hidden");
       }
       if (char2PhotoDrop) {
@@ -2221,6 +2942,8 @@ Keep it compact but unambiguous.
 
   async function getCharPhotoUrl(index){
     const file = index === 1 ? char1PhotoFileObj : char2PhotoFileObj;
+    const libUrl = index === 1 ? char1LibraryUrl : char2LibraryUrl;
+    if (libUrl) return libUrl;
     if (!file) return "";
     const sig = fileSignature(file);
     if (index === 1 && sig && char1PhotoSignature === sig && char1PhotoUrl) return char1PhotoUrl;
@@ -2324,8 +3047,7 @@ Keep it compact but unambiguous.
   });
   btnClearDraw.addEventListener("click", ()=>{
     if (!confirm("Clear drawings?")) return;
-    dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
-    drawDirty = false;
+    clearDrawCanvas();
     enforceLeftLimit(false);
   });
 
@@ -2510,7 +3232,7 @@ Keep it compact but unambiguous.
     root.position.y -= box2.min.y;
   }
 
-  function createActor({ name, color, type, group, isCharacter=false, characterIndex=null, shortLabel="L" }){
+  function createActor({ name, color, type, group, isCharacter=false, characterIndex=null, shortLabel="L", sourceUrl="", sourceFile=null, primitiveType="" }){
     return {
       id: `actor-${actorCounter++}`,
       name,
@@ -2523,7 +3245,10 @@ Keep it compact but unambiguous.
       selectedBoneIndex: null,
       isCharacter,
       characterIndex,
-      shortLabel
+      shortLabel,
+      sourceUrl,
+      sourceFile,
+      primitiveType
     };
   }
 
@@ -2713,7 +3438,7 @@ Keep it compact but unambiguous.
     tScale.classList.toggle("active", modeName === "scale");
   }
 
-  function addCharacter(index, gltf, label){
+  function addCharacter(index, gltf, label, sourceUrl=""){
     const root = gltf.scene;
     normalizeModel(root);
     const wrapper = new THREE.Group();
@@ -2731,7 +3456,8 @@ Keep it compact but unambiguous.
       group: wrapper,
       isCharacter: true,
       characterIndex: index,
-      shortLabel: `C${index}`
+      shortLabel: `C${index}`,
+      sourceUrl: sourceUrl || HUMAN_URL
     });
 
     actor.rig = findFirstSkinnedMeshAndSetupRig(root);
@@ -2749,6 +3475,7 @@ Keep it compact but unambiguous.
 
     addActor(actor);
     setMode("3d");
+    return actor;
   }
 
   function addPrimitiveActor(){
@@ -2765,13 +3492,15 @@ Keep it compact but unambiguous.
       color: "#bbbbbb",
       type: "primitive",
       group: wrapper,
-      shortLabel: label
+      shortLabel: label,
+      primitiveType: type
     });
     addActor(actor);
     setMode("3d");
+    return actor;
   }
 
-  function addModelActor(gltf, label){
+  function addModelActor(gltf, label, sourceFile=null, sourceUrl=""){
     const root = gltf.scene;
     normalizeModel(root);
     const wrapper = new THREE.Group();
@@ -2785,7 +3514,9 @@ Keep it compact but unambiguous.
       color: "#ffffff",
       type: "model",
       group: wrapper,
-      shortLabel: modelLabel
+      shortLabel: modelLabel,
+      sourceUrl,
+      sourceFile
     });
     actor.rig = findFirstSkinnedMeshAndSetupRig(root);
     if (actor.rig){
@@ -2794,6 +3525,7 @@ Keep it compact but unambiguous.
     }
     addActor(actor);
     setMode("3d");
+    return actor;
   }
 
   function loadGltfFromFile(file){
@@ -2916,6 +3648,228 @@ Keep it compact but unambiguous.
     if (!blob) return null;
     const file = new File([blob], `composite-${uuid()}.png`, { type: "image/png" });
     return uploadReferenceToInputs(file);
+  }
+
+  async function canvasToBlob(canvas){
+    return new Promise(resolve => {
+      canvas.toBlob((blob)=>resolve(blob), "image/png", 0.95);
+    });
+  }
+
+  function serializeVector(vec){
+    return [vec.x, vec.y, vec.z];
+  }
+
+  function serializeQuaternion(q){
+    return [q.x, q.y, q.z, q.w];
+  }
+
+  async function serializeActors(){
+    const serialized = [];
+    for (const actor of actors){
+      const transforms = {
+        position: serializeVector(actor.group.position),
+        rotation: serializeVector(actor.group.rotation),
+        scale: serializeVector(actor.group.scale)
+      };
+      const data = {
+        type: actor.type,
+        name: actor.name,
+        visible: actor.visible,
+        shortLabel: actor.shortLabel,
+        characterIndex: actor.characterIndex,
+        primitiveType: actor.primitiveType || "",
+        modelUrl: actor.sourceUrl || "",
+        transforms,
+        poseMode: actor.poseMode
+      };
+
+      if (actor.type === "model" && actor.sourceFile && !data.modelUrl){
+        data.modelUrl = await uploadReferenceToInputs(actor.sourceFile);
+        actor.sourceUrl = data.modelUrl;
+      }
+      if (actor.type === "character" && !data.modelUrl){
+        data.modelUrl = HUMAN_URL;
+      }
+
+      if (actor.poseMode && actor.rig?.bones){
+        const rotations = {};
+        actor.rig.bones.forEach(bone => {
+          rotations[bone.name] = serializeQuaternion(bone.quaternion);
+        });
+        data.boneRotations = rotations;
+      }
+
+      serialized.push(data);
+    }
+    return serialized;
+  }
+
+  async function buildProjectData(){
+    let bgUrl = bgPublicUrl;
+    if (bgFileObj){
+      const sig = fileSignature(bgFileObj);
+      if (!bgPublicUrl || bgUploadSignature !== sig){
+        bgPublicUrl = await uploadReferenceToInputs(bgFileObj);
+        bgUploadSignature = sig;
+      }
+      bgUrl = bgPublicUrl;
+    }
+
+    let drawUrl = drawPublicUrl;
+    if (drawDirty){
+      const blob = await canvasToBlob(drawCanvas);
+      if (blob){
+        drawUrl = await uploadReferenceToInputs(new File([blob], `draw-${uuid()}.png`, { type: "image/png" }));
+        drawPublicUrl = drawUrl;
+      }
+    }
+
+    const actorsData = await serializeActors();
+
+    const leftUrls = await getOrUploadImageUrls();
+    const char1Url = isCharPhotoActive(1) ? await getCharPhotoUrl(1) : "";
+    const char2Url = isCharPhotoActive(2) ? await getCharPhotoUrl(2) : "";
+
+    return {
+      version: 1,
+      ui: { selectedAspect, selectedRes, styleOnly: !!styleChk.checked },
+      prompt: sceneEl.value,
+      camera: {
+        presetKey: camPresetEl?.value,
+        focalMm: Number(focalEl?.value || 35),
+        aperture: String(apertureEl?.value || "f/2.0"),
+        grain: String(grainEl?.value || "subtle"),
+        exposure: String(exposureEl?.value || "natural"),
+        flare: String(flareEl?.value || "subtle"),
+        bloom: String(bloomEl?.value || "subtle")
+      },
+      refs: {
+        leftUrls: dedupeUrls(leftUrls),
+        char1Url: char1Url || "",
+        char2Url: char2Url || "",
+        compositeUsed: shouldUseComposite()
+      },
+      background: { bgUrl: bgUrl || "" },
+      draw: { drawUrl: drawUrl || "" },
+      actors: actorsData,
+      projectTitle: currentProjectTitle || "",
+      savedAt: Date.now()
+    };
+  }
+
+  async function restoreActors(actorData){
+    while (actors.length){
+      removeActor(actors[0]);
+    }
+    actorState.char1 = null;
+    actorState.char2 = null;
+
+    for (const data of actorData || []){
+      let actor = null;
+      if (data.type === "character"){
+        if (!data.modelUrl) data.modelUrl = HUMAN_URL;
+        const gltf = await loadGltfFromUrl(data.modelUrl);
+        actor = addCharacter(data.characterIndex || 1, gltf, data.name || "Character", data.modelUrl);
+      } else if (data.type === "model"){
+        if (!data.modelUrl) continue;
+        const gltf = await loadGltfFromUrl(data.modelUrl);
+        actor = addModelActor(gltf, data.name || "Model", null, data.modelUrl);
+      } else if (data.type === "primitive"){
+        const prev = primTypeEl.value;
+        primTypeEl.value = data.primitiveType || "box";
+        actor = addPrimitiveActor();
+        primTypeEl.value = prev;
+      }
+
+      if (!actor) continue;
+      if (data.name) actor.name = data.name;
+      if (data.shortLabel) actor.shortLabel = data.shortLabel;
+      if (data.transforms?.position) actor.group.position.set(...data.transforms.position);
+      if (data.transforms?.rotation) actor.group.rotation.set(...data.transforms.rotation);
+      if (data.transforms?.scale) actor.group.scale.set(...data.transforms.scale);
+      if (typeof data.visible === "boolean") setActorVisible(actor, data.visible);
+
+      if (data.poseMode && actor.rig?.bones){
+        actor.poseMode = true;
+        Object.entries(data.boneRotations || {}).forEach(([name, quat])=>{
+          const bone = actor.rig.bones.find(b => b.name === name);
+          if (bone && Array.isArray(quat) && quat.length === 4){
+            bone.quaternion.set(quat[0], quat[1], quat[2], quat[3]);
+          }
+        });
+        actor.rig.controlBalls?.forEach(ball => ball.visible = actor.visible && actor.poseMode);
+      } else if (actor.rig){
+        actor.poseMode = false;
+        actor.rig.controlBalls?.forEach(ball => ball.visible = false);
+      }
+    }
+    renderLayers();
+  }
+
+  async function applyProjectData(data){
+    if (!data) return;
+    selectedUrls = [];
+    clearFiles();
+
+    if (data.ui?.selectedAspect) setAspect(data.ui.selectedAspect);
+    if (data.ui?.selectedRes) setResolution(data.ui.selectedRes);
+    styleChk.checked = !!data.ui?.styleOnly;
+
+    sceneEl.value = data.prompt || "";
+
+    if (data.camera?.presetKey) camPresetEl.value = data.camera.presetKey;
+    if (focalEl && data.camera?.focalMm) focalEl.value = data.camera.focalMm;
+    if (apertureEl && data.camera?.aperture) apertureEl.value = data.camera.aperture;
+    if (grainEl && data.camera?.grain) grainEl.value = data.camera.grain;
+    if (exposureEl && data.camera?.exposure) exposureEl.value = data.camera.exposure;
+    if (flareEl && data.camera?.flare) flareEl.value = data.camera.flare;
+    if (bloomEl && data.camera?.bloom) bloomEl.value = data.camera.bloom;
+    applyFocalToCamera();
+
+    clearBackground();
+    clearDrawCanvas();
+    clearCharPhoto(1);
+    clearCharPhoto(2);
+
+    if (data.background?.bgUrl) await setBackgroundFromUrl(data.background.bgUrl);
+    if (data.draw?.drawUrl) await setDrawFromUrl(data.draw.drawUrl);
+
+    const refs = data.refs || {};
+    selectedUrls = dedupeUrls(refs.leftUrls || []);
+    renderThumbs();
+    updateDropText();
+
+    if (refs.char1Url) setCharPhotoFromUrl(1, refs.char1Url);
+    if (refs.char2Url) setCharPhotoFromUrl(2, refs.char2Url);
+
+    await restoreActors(data.actors || []);
+  }
+
+  async function openProject(projectId){
+    if (!projectId) return;
+    setStatus("Loading project…");
+    try{
+      const project = await fetchProjectById(projectId);
+      const payload = project?.data || project?.project?.data || project?.project_data || project;
+      await applyProjectData(payload);
+      currentProjectId = project?.id || project?.project_id || projectId;
+      currentProjectTitle = project?.title || payload?.projectTitle || "";
+      setProjectStatus(currentProjectTitle);
+      setStatus("Project loaded", "ok");
+    } catch(e){
+      setStatus("Project load failed", "err");
+    }
+  }
+
+  async function saveProjectFlow({ promptTitle = "" } = {}){
+    const data = await buildProjectData();
+    const title = promptTitle || currentProjectTitle || "Untitled project";
+    const res = await upsertProject({ projectId: currentProjectId, title, data });
+    currentProjectId = res?.project?.id || res?.id || currentProjectId;
+    currentProjectTitle = title;
+    setProjectStatus(currentProjectTitle);
+    setStatus("Project saved", "ok");
   }
 
   function buildImageInputPlan({ compositeUrl, char1Url, char2Url, leftUrls }){
@@ -3065,6 +4019,7 @@ Keep it compact but unambiguous.
 
     const fd = new FormData();
     fd.append("presetId", PRESET_ID);
+    fd.append("origin_path", "/cinema_shot");
 
     const userPromptRaw = (sceneEl.value||"").trim();
 
@@ -3232,7 +4187,7 @@ Keep it compact but unambiguous.
     uploadImagesBtn.addEventListener("click", ()=>fileEl.click());
   }
   if (myCharsGlobal){
-    myCharsGlobal.addEventListener("click", openCharacterLibrary);
+    myCharsGlobal.addEventListener("click", ()=>openCharacterLibrary("global"));
   }
 
   ["dragenter","dragover"].forEach(evt=>{
@@ -3299,6 +4254,121 @@ Keep it compact but unambiguous.
     });
   }
 
+  if (shotLibraryRefresh){
+    shotLibraryRefresh.addEventListener("click", ()=>loadShotLibrary());
+  }
+  if (shotModalClose){
+    shotModalClose.addEventListener("click", ()=>closeModal(shotModal));
+  }
+  if (shotModal){
+    shotModal.addEventListener("click", (e)=>{
+      if (e.target === shotModal) closeModal(shotModal);
+    });
+  }
+  if (shotModalDownload){
+    shotModalDownload.addEventListener("click", ()=>{
+      if (!shotModalItem) return;
+      forceDownload(getGenerationUrl(shotModalItem), "cinema-shot.png");
+    });
+  }
+  if (shotModalCopy){
+    shotModalCopy.addEventListener("click", async ()=>{
+      if (!shotModalItem) return;
+      await copyToClipboard(getGenerationUrl(shotModalItem));
+      setStatus("URL copied", "ok");
+      setTimeout(()=>setStatus(""), 1200);
+    });
+  }
+  if (shotModalRename){
+    shotModalRename.addEventListener("click", async ()=>{
+      if (!shotModalItem) return;
+      const title = getGenerationTitle(shotModalItem, "Shot");
+      const next = prompt("New shot name:", title);
+      if (!next) return;
+      try{
+        await renameGenerationTitle(getGenerationId(shotModalItem), next);
+        shotModalItem.title = next;
+        renderShotLibrary();
+        if (shotModalTitle) shotModalTitle.textContent = next;
+      } catch(e){
+        setStatus("Rename failed", "err");
+      }
+    });
+  }
+
+  if (charLibraryClose){
+    charLibraryClose.addEventListener("click", ()=>closeModal(charLibraryModal));
+  }
+  if (charLibraryModal){
+    charLibraryModal.addEventListener("click", (e)=>{
+      if (e.target === charLibraryModal) closeModal(charLibraryModal);
+    });
+  }
+  if (charLibrarySearch){
+    charLibrarySearch.addEventListener("input", ()=>renderCharacterLibrary());
+  }
+  if (charLibraryRefresh){
+    charLibraryRefresh.addEventListener("click", ()=>loadCharacterLibrary());
+  }
+
+  if (projectOpen){
+    projectOpen.addEventListener("click", ()=>openProjectList());
+  }
+  if (projectListClose){
+    projectListClose.addEventListener("click", ()=>closeModal(projectListModal));
+  }
+  if (projectListModal){
+    projectListModal.addEventListener("click", (e)=>{
+      if (e.target === projectListModal) closeModal(projectListModal);
+    });
+  }
+  if (projectSave){
+    projectSave.addEventListener("click", async ()=>{
+      if (currentProjectId){
+        try{
+          await saveProjectFlow();
+        } catch(e){
+          setStatus("Project save failed", "err");
+        }
+        return;
+      }
+      if (projectSaveTitle) projectSaveTitle.textContent = "Save Project";
+      if (projectNameInput) projectNameInput.value = currentProjectTitle || "";
+      openModal(projectSaveModal);
+    });
+  }
+  if (projectRename){
+    projectRename.addEventListener("click", ()=>{
+      if (projectSaveTitle) projectSaveTitle.textContent = "Rename Project";
+      if (projectNameInput) projectNameInput.value = currentProjectTitle || "";
+      openModal(projectSaveModal);
+    });
+  }
+  if (projectSaveClose){
+    projectSaveClose.addEventListener("click", ()=>closeModal(projectSaveModal));
+  }
+  if (projectSaveModal){
+    projectSaveModal.addEventListener("click", (e)=>{
+      if (e.target === projectSaveModal) closeModal(projectSaveModal);
+    });
+  }
+  if (projectSaveConfirm){
+    projectSaveConfirm.addEventListener("click", async ()=>{
+      const title = String(projectNameInput?.value || "").trim();
+      if (!title){
+        alert("Enter a project name.");
+        return;
+      }
+      currentProjectTitle = title;
+      try{
+        await saveProjectFlow({ promptTitle: title });
+        closeModal(projectSaveModal);
+      } catch(e){
+        setStatus("Project save failed", "err");
+      }
+    });
+  }
+
   drop.addEventListener("contextmenu", (e)=>{
     e.preventDefault();
     if (!selectedFiles.length) return;
@@ -3325,6 +4395,7 @@ Keep it compact but unambiguous.
   updateDropText();
   buildPalette();
   applyAspectRatio();
+  setProjectStatus(currentProjectTitle);
   if (focalEl){
     focalEl.addEventListener("change", ()=>{
       applyFocalToCamera();
@@ -3346,13 +4417,13 @@ Keep it compact but unambiguous.
   char1Default.addEventListener("click", async ()=>{
     try{
       const gltf = await loadGltfFromUrl(HUMAN_URL);
-      addCharacter(1, gltf, "Character 1");
+      addCharacter(1, gltf, "Character 1", HUMAN_URL);
     } catch(e){
       alert("Error loading default character");
     }
   });
   if (char1Library){
-    char1Library.addEventListener("click", openCharacterLibrary);
+    char1Library.addEventListener("click", ()=>openCharacterLibrary("char1"));
   }
   char1PhotoDrop.addEventListener("click", ()=>char1PhotoFile.click());
   char1PhotoFile.addEventListener("change", (e)=>{
@@ -3388,13 +4459,13 @@ Keep it compact but unambiguous.
   char2Default.addEventListener("click", async ()=>{
     try{
       const gltf = await loadGltfFromUrl(HUMAN_URL);
-      addCharacter(2, gltf, "Character 2");
+      addCharacter(2, gltf, "Character 2", HUMAN_URL);
     } catch(e){
       alert("Error loading default character");
     }
   });
   if (char2Library){
-    char2Library.addEventListener("click", openCharacterLibrary);
+    char2Library.addEventListener("click", ()=>openCharacterLibrary("char2"));
   }
   char2PhotoDrop.addEventListener("click", ()=>char2PhotoFile.click());
   char2PhotoFile.addEventListener("change", (e)=>{
@@ -3435,7 +4506,7 @@ Keep it compact but unambiguous.
     if (!file) return;
     try{
       const gltf = await loadGltfFromFile(file);
-      addModelActor(gltf, file.name);
+      addModelActor(gltf, file.name, file);
     } catch(e){
       alert("Error loading GLB");
     }
@@ -3466,6 +4537,8 @@ Keep it compact but unambiguous.
     init3D();
     updateRaycastSelection();
   }
+
+  loadShotLibrary();
 
   setMode("view");
   update3DState();
