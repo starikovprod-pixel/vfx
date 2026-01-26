@@ -579,7 +579,10 @@
     cursor:pointer;
   }
   .lf-btnSmall:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.12); }
-  .lf-btnSmall.active{ border-color:rgba(43,108,255,.85); background:rgba(43,108,255,.22); }
+  .lf-btnSmall.active{
+    border-color: rgba(43,108,255,.85) !important;
+    background: rgba(43,108,255,.18) !important;
+  }
 
   .lf-libraryList{
     display:flex;
@@ -588,17 +591,6 @@
     max-height:360px;
     overflow:auto;
     padding-right:4px;
-  }
-  #shotLibrarySection{
-    position: fixed !important;
-    right: calc(18px + 420px) !important;
-    top: calc(74px + 26px) !important;
-    width: 360px !important;
-    max-height: calc(100vh - 74px - 26px - 40px) !important;
-    z-index: 9998 !important;
-  }
-  #shotLibrarySection .lf-libraryList{
-    max-height:calc(100vh - 74px - 26px - 120px);
   }
   .lf-libraryCard{
     display:flex;
@@ -693,6 +685,39 @@
   .lf-libraryGrid .lf-libraryCard img{
     width:100%;
     height:140px;
+  }
+  .lf-assetCard{
+    position: relative;
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.25);
+    cursor: pointer;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .lf-assetCard img{
+    width:100%;
+    height:140px;
+    object-fit:cover;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.12);
+    background:#070707;
+  }
+  .lf-assetActions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .lf-chip{
+    font-size:11px;
+    font-weight:900;
+    padding:3px 8px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
   }
 
   .lf-palette{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -1086,6 +1111,7 @@
             <div class="right">
               <button class="lf-btnSmall" id="projectSave" type="button">Save Project</button>
               <button class="lf-btnSmall" id="projectOpen" type="button">Open Project</button>
+              <button class="lf-btnSmall" id="openCinemaLibrary" type="button">Cinema Library</button>
               <button class="lf-btnSmall" id="projectRename" type="button" title="Rename project">✎</button>
               <div class="lf-projectStatus" id="projectStatus">Project: —</div>
             </div>
@@ -1284,6 +1310,90 @@
     </div>
   </div>
 
+  <div class="lf-modal" id="cinemaLibraryModal">
+    <div class="lf-modalCard" style="width:min(1280px, 96vw);">
+      <div class="lf-modalHeader">
+        <div>
+          <div class="lf-h2">Cinema Library</div>
+          <div class="lf-muted" id="libBreadcrumb">—</div>
+        </div>
+        <button class="lf-btnSmall" id="cinemaLibraryClose" type="button">Close</button>
+      </div>
+
+      <div class="lf-row" style="justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="lf-row" style="gap:8px; flex-wrap:wrap;">
+          <button class="lf-btnSmall active" id="libTabManager" type="button">Library</button>
+          <button class="lf-btnSmall" id="libTabAdd" type="button">Add from Generations</button>
+        </div>
+
+        <div class="lf-row" style="gap:8px; flex-wrap:wrap;">
+          <button class="lf-btnSmall" id="libRefresh" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div id="libManagerView" style="display:grid; grid-template-columns: 320px 320px 1fr; gap:12px; min-height:520px;">
+        <div class="lf-section" style="height:100%; overflow:hidden;">
+          <div class="lf-row" style="justify-content:space-between;">
+            <div class="lf-h2">Projects</div>
+            <button class="lf-btnSmall" id="libNewProject" type="button">＋</button>
+          </div>
+          <input id="libProjectSearch" type="text" placeholder="Search projects..." style="margin-top:10px;" />
+          <div class="lf-libraryList" id="libProjectsList" style="margin-top:10px; max-height:420px;"></div>
+        </div>
+
+        <div class="lf-section" style="height:100%; overflow:hidden;">
+          <div class="lf-row" style="justify-content:space-between;">
+            <div class="lf-h2">Scenes</div>
+            <button class="lf-btnSmall" id="libNewScene" type="button">＋</button>
+          </div>
+          <input id="libSceneSearch" type="text" placeholder="Search scenes..." style="margin-top:10px;" />
+          <div class="lf-libraryList" id="libScenesList" style="margin-top:10px; max-height:420px;"></div>
+        </div>
+
+        <div class="lf-section" style="height:100%; overflow:hidden;">
+          <div class="lf-row" style="justify-content:space-between; align-items:flex-end;">
+            <div>
+              <div class="lf-h2">Assets</div>
+              <div class="lf-muted" id="libAssetsHint">Select a scene</div>
+            </div>
+            <div class="lf-row" style="gap:8px;">
+              <button class="lf-btnSmall" id="libAddSelectedGen" type="button" disabled>Add selected</button>
+            </div>
+          </div>
+
+          <div id="libAssetsGrid" class="lf-libraryGrid" style="margin-top:10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); max-height:460px; overflow:auto;"></div>
+        </div>
+      </div>
+
+      <div id="libAddView" style="display:none;">
+        <div class="lf-section">
+          <div class="lf-row" style="justify-content:space-between;">
+            <div>
+              <div class="lf-h2">Add from Generations</div>
+              <div class="lf-muted">Pick items and add to the selected Scene.</div>
+            </div>
+            <div class="lf-row" style="gap:8px;">
+              <button class="lf-btnSmall" id="libGenRefresh" type="button">Refresh</button>
+            </div>
+          </div>
+
+          <div class="lf-row" style="gap:10px; margin-top:10px; flex-wrap:wrap;">
+            <input id="libGenSearch" type="text" placeholder="Search by title..." style="flex:1; min-width:260px;" />
+            <select id="libGenKind" class="lf-select" style="width:200px;">
+              <option value="">All kinds</option>
+              <option value="shot">shot</option>
+              <option value="character">character</option>
+              <option value="animation">animation</option>
+            </select>
+          </div>
+
+          <div id="libGenGrid" class="lf-libraryGrid" style="margin-top:12px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-height:520px; overflow:auto;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <div class="lf-modal" id="projectListModal">
     <div class="lf-modalCard">
       <div class="lf-modalHeader">
@@ -1315,14 +1425,6 @@
     <div class="lf-wait">Waiting…</div>
     <div class="lf-time" id="loaderTime">01:00</div>
     <div class="lf-time" id="loaderSub">Sending task…</div>
-  </div>
-
-  <div class="lf-section" id="shotLibrarySection">
-    <div class="lf-row" style="justify-content:space-between;">
-      <div class="lf-h2">Cinema Shot Library</div>
-      <button class="lf-btnSmall" id="shotLibraryRefresh" type="button">Refresh</button>
-    </div>
-    <div class="lf-libraryList" id="shotLibraryList"></div>
   </div>
 </div>
 
@@ -1636,8 +1738,6 @@ ${camBlock}
   const btnDraw = $("btnDraw");
   const btn3D = $("btn3D");
 
-  const shotLibraryList = $("shotLibraryList");
-  const shotLibraryRefresh = $("shotLibraryRefresh");
   const shotModal = $("shotModal");
   const shotModalTitle = $("shotModalTitle");
   const shotModalMeta = $("shotModalMeta");
@@ -1661,6 +1761,31 @@ ${camBlock}
   const projectSaveConfirm = $("projectSaveConfirm");
   const projectSaveTitle = $("projectSaveTitle");
   const projectNameInput = $("projectNameInput");
+
+  const openCinemaLibrary = $("openCinemaLibrary");
+  const cinemaLibraryModal = $("cinemaLibraryModal");
+  const cinemaLibraryClose = $("cinemaLibraryClose");
+  const libTabManager = $("libTabManager");
+  const libTabAdd = $("libTabAdd");
+  const libManagerView = $("libManagerView");
+  const libAddView = $("libAddView");
+  const libRefresh = $("libRefresh");
+  const libBreadcrumb = $("libBreadcrumb");
+
+  const libProjectsList = $("libProjectsList");
+  const libScenesList = $("libScenesList");
+  const libAssetsGrid = $("libAssetsGrid");
+  const libAssetsHint = $("libAssetsHint");
+
+  const libNewProject = $("libNewProject");
+  const libNewScene = $("libNewScene");
+  const libProjectSearch = $("libProjectSearch");
+  const libSceneSearch = $("libSceneSearch");
+
+  const libGenGrid = $("libGenGrid");
+  const libGenRefresh = $("libGenRefresh");
+  const libGenSearch = $("libGenSearch");
+  const libGenKind = $("libGenKind");
 
   const frame = $("frame");
   const bgCanvas = $("bgCanvas");
@@ -1749,10 +1874,16 @@ ${camBlock}
   let currentOutputUrl = "";
   let charLibraryContext = "global";
   let charLibraryItems = [];
-  let shotLibraryItems = [];
   let shotModalItem = null;
   let currentProjectId = null;
   let currentProjectTitle = "";
+
+  let libProjects = [];
+  let libScenes = [];
+  let libAssets = [];
+  let libSelectedProject = null;
+  let libSelectedScene = null;
+  let libGenerations = [];
 
   const palette = ["#ffffff", "#ff3b30", "#ff9500", "#ffd60a", "#34c759", "#2b6cff", "#af52de", "#00c7be", "#a0a0a0", "#000000"];
 
@@ -1816,6 +1947,176 @@ ${camBlock}
 
   function closeModal(el){
     if (el) el.style.display = "none";
+  }
+
+  async function apiLibrary(action, payload){
+    return fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ action, ...payload })
+    });
+  }
+
+  async function loadLibraryProjects(){
+    const r = await apiLibrary("library_list_projects", {});
+    libProjects = r.projects || [];
+  }
+
+  async function loadLibraryScenes(projectId){
+    const r = await apiLibrary("library_list_scenes", { project_id: projectId });
+    libScenes = r.scenes || [];
+  }
+
+  async function loadLibraryAssets(sceneId){
+    const r = await apiLibrary("library_list_assets", { scene_id: sceneId });
+    libAssets = r.assets || [];
+  }
+
+  function renderProjects(){
+    const q = String(libProjectSearch?.value || "").trim().toLowerCase();
+    const items = libProjects.filter(p => !q || String(p.title||"").toLowerCase().includes(q));
+    libProjectsList.innerHTML = items.map(p => {
+      const active = libSelectedProject?.id === p.id;
+      return `
+        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${p.id}">
+          <div class="lf-libraryMeta">
+            <div class="lf-libraryTitle">${escapeHtml(p.title)}</div>
+            <div class="lf-muted">${(p.updated_at||p.created_at||"").toString().slice(0,19).replace("T"," ")}</div>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No projects</div>`;
+  }
+
+  function renderScenes(){
+    const q = String(libSceneSearch?.value || "").trim().toLowerCase();
+    const items = libScenes.filter(s => !q || String(s.title||"").toLowerCase().includes(q));
+    libScenesList.innerHTML = items.map(s => {
+      const active = libSelectedScene?.id === s.id;
+      return `
+        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${s.id}">
+          <div class="lf-libraryMeta">
+            <div class="lf-libraryTitle">${escapeHtml(s.title)}</div>
+            <div class="lf-muted">Scene</div>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No scenes</div>`;
+  }
+
+  function renderAssets(){
+    if (!libSelectedScene){
+      libAssetsHint.textContent = "Select a scene";
+      libAssetsGrid.innerHTML = "";
+      return;
+    }
+    libAssetsHint.textContent = `Scene: ${libSelectedScene.title || "—"}`;
+    libAssetsGrid.innerHTML = (libAssets || []).map(a => {
+      const title = a.title || `${a.kind || "asset"} ${String(a.generation_id||"")}`.trim();
+      const url = a.thumb_url || a.url || "";
+      const kind = a.kind || "";
+      return `
+        <div class="lf-assetCard" data-id="${a.id}">
+          <img src="${escapeAttr(url)}" alt="">
+          <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+            <div class="lf-libraryTitle" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+            ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
+          </div>
+          <div class="lf-assetActions">
+            <button class="lf-btnSmall" data-act="add">Add to Scene</button>
+            <button class="lf-btnSmall" data-act="rename">✎</button>
+            <button class="lf-btnSmall" data-act="delete">🗑</button>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No assets yet</div>`;
+  }
+
+  function updateBreadcrumb(){
+    const p = libSelectedProject?.title || "—";
+    const s = libSelectedScene?.title || "—";
+    libBreadcrumb.textContent = `Project: ${p} / Scene: ${s}`;
+  }
+
+  function escapeHtml(s){
+    return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  }
+
+  function escapeAttr(s){
+    return escapeHtml(s).replaceAll("'","&#39;");
+  }
+
+  function setLibTab(tab){
+    const isManager = tab === "manager";
+    libTabManager.classList.toggle("active", isManager);
+    libTabAdd.classList.toggle("active", !isManager);
+    libManagerView.style.display = isManager ? "grid" : "none";
+    libAddView.style.display = isManager ? "none" : "block";
+  }
+
+  async function refreshLibraryAll(){
+    await loadLibraryProjects();
+    if (!libSelectedProject && libProjects[0]) libSelectedProject = libProjects[0];
+    if (libSelectedProject){
+      await loadLibraryScenes(libSelectedProject.id);
+      if (!libSelectedScene && libScenes[0]) libSelectedScene = libScenes[0];
+    }
+    if (libSelectedScene){
+      await loadLibraryAssets(libSelectedScene.id);
+    }
+    updateBreadcrumb();
+    renderProjects();
+    renderScenes();
+    renderAssets();
+  }
+
+  async function refreshGenerationsForAdd(){
+    if (!libSelectedScene){
+      libGenGrid.innerHTML = `<div class="lf-muted">Select a scene first (Library tab).</div>`;
+      return;
+    }
+    libGenGrid.innerHTML = `<div class="lf-muted">Loading…</div>`;
+
+    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?limit=80&offset=0", { method:"GET" });
+    const gens = Array.isArray(data.generations) ? data.generations : [];
+    libGenerations = gens.filter(g => String(g.lab||"").toLowerCase() === "cinema");
+
+    renderGenerationsGrid();
+  }
+
+  function renderGenerationsGrid(){
+    if (!libSelectedScene){
+      libGenGrid.innerHTML = `<div class="lf-muted">Select a scene first.</div>`;
+      return;
+    }
+    const q = String(libGenSearch?.value || "").trim().toLowerCase();
+    const kindFilter = String(libGenKind?.value || "").trim().toLowerCase();
+
+    const items = libGenerations.filter(g=>{
+      const title = String(g.title||"").toLowerCase();
+      const kind = String(g.kind||"").toLowerCase();
+      if (kindFilter && kind !== kindFilter) return false;
+      if (q && !title.includes(q)) return false;
+      return true;
+    });
+
+    libGenGrid.innerHTML = items.map(g=>{
+      const url = g.output_url || "";
+      const title = g.title || `${g.kind || "item"} ${g.id}`;
+      const kind = g.kind || "";
+      return `
+        <div class="lf-assetCard" data-gen-id="${g.id}">
+          <img src="${escapeAttr(url)}" alt="">
+          <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+            <div class="lf-libraryTitle" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+            ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
+          </div>
+          <div class="lf-assetActions">
+            <button class="lf-btnSmall" data-act="add-gen">Add</button>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No generations</div>`;
   }
 
   async function forceDownload(url, filename){
@@ -2315,64 +2616,6 @@ ${camBlock}
         title: newTitle
       })
     });
-  }
-
-  function renderShotLibrary(){
-    if (!shotLibraryList) return;
-    shotLibraryList.innerHTML = "";
-    if (!shotLibraryItems.length){
-      shotLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">No shots yet.</div>";
-      return;
-    }
-    shotLibraryItems.forEach(item => {
-      const url = getGenerationUrl(item);
-      const title = getGenerationTitle(item, "Shot");
-      const card = document.createElement("div");
-      card.className = "lf-libraryCard";
-      card.addEventListener("click", ()=>openShotModal(item));
-
-      const img = document.createElement("img");
-      img.alt = title;
-      img.src = url || "";
-
-      const meta = document.createElement("div");
-      meta.className = "lf-libraryMeta";
-      const titleEl = document.createElement("div");
-      titleEl.className = "lf-libraryTitle";
-      titleEl.textContent = title;
-      const sub = document.createElement("div");
-      sub.className = "lf-muted";
-      sub.textContent = url ? "Click to preview" : "No preview URL";
-
-      meta.appendChild(titleEl);
-      meta.appendChild(sub);
-      card.appendChild(img);
-      card.appendChild(meta);
-      shotLibraryList.appendChild(card);
-    });
-  }
-
-  async function loadShotLibrary(){
-    if (!shotLibraryList) return;
-    shotLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Loading…</div>";
-    try{
-      const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?limit=50&offset=0", { method:"GET" });
-      const gens = extractGenerations(data);
-      shotLibraryItems = gens.filter(item => matchesGeneration(item, "cinema", "shot"));
-      renderShotLibrary();
-    } catch(e){
-      shotLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Failed to load library.</div>";
-    }
-  }
-
-  function openShotModal(item){
-    shotModalItem = item;
-    const url = getGenerationUrl(item);
-    const title = getGenerationTitle(item, "Shot");
-    if (shotModalTitle) shotModalTitle.textContent = title;
-    if (shotModalMeta) shotModalMeta.textContent = getGenerationId(item) ? `ID: ${getGenerationId(item)}` : "";
-    if (shotModalImg) shotModalImg.src = url || "";
-    openModal(shotModal);
   }
 
   function renderCharacterLibrary(){
@@ -4280,9 +4523,164 @@ Keep it compact but unambiguous.
     });
   }
 
-  if (shotLibraryRefresh){
-    shotLibraryRefresh.addEventListener("click", ()=>loadShotLibrary());
+  if (openCinemaLibrary){
+    openCinemaLibrary.addEventListener("click", async ()=>{
+      setLibTab("manager");
+      openModal(cinemaLibraryModal);
+      await refreshLibraryAll();
+    });
   }
+  if (cinemaLibraryClose){
+    cinemaLibraryClose.addEventListener("click", ()=>closeModal(cinemaLibraryModal));
+  }
+  if (cinemaLibraryModal){
+    cinemaLibraryModal.addEventListener("click", (e)=>{
+      if (e.target === cinemaLibraryModal) closeModal(cinemaLibraryModal);
+    });
+  }
+  if (libTabManager){
+    libTabManager.addEventListener("click", ()=>setLibTab("manager"));
+  }
+  if (libTabAdd){
+    libTabAdd.addEventListener("click", async ()=>{
+      setLibTab("add");
+      await refreshGenerationsForAdd();
+    });
+  }
+  if (libRefresh){
+    libRefresh.addEventListener("click", ()=>refreshLibraryAll());
+  }
+  if (libProjectSearch){
+    libProjectSearch.addEventListener("input", renderProjects);
+  }
+  if (libSceneSearch){
+    libSceneSearch.addEventListener("input", renderScenes);
+  }
+  if (libProjectsList){
+    libProjectsList.addEventListener("click", async (e)=>{
+      const card = e.target.closest(".lf-libraryCard");
+      if (!card) return;
+      const id = card.dataset.id;
+      libSelectedProject = libProjects.find(x=>String(x.id)===String(id)) || null;
+      libSelectedScene = null;
+      libScenes = [];
+      libAssets = [];
+      if (libSelectedProject){
+        await loadLibraryScenes(libSelectedProject.id);
+        if (libScenes[0]) libSelectedScene = libScenes[0];
+      }
+      if (libSelectedScene) await loadLibraryAssets(libSelectedScene.id);
+      updateBreadcrumb();
+      renderProjects();
+      renderScenes();
+      renderAssets();
+    });
+  }
+  if (libScenesList){
+    libScenesList.addEventListener("click", async (e)=>{
+      const card = e.target.closest(".lf-libraryCard");
+      if (!card) return;
+      const id = card.dataset.id;
+      libSelectedScene = libScenes.find(x=>String(x.id)===String(id)) || null;
+      libAssets = [];
+      if (libSelectedScene) await loadLibraryAssets(libSelectedScene.id);
+      updateBreadcrumb();
+      renderScenes();
+      renderAssets();
+    });
+  }
+  if (libAssetsGrid){
+    libAssetsGrid.addEventListener("click", async (e)=>{
+      const card = e.target.closest(".lf-assetCard");
+      if (!card) return;
+      const assetId = card.dataset.id;
+      const actBtn = e.target.closest("button");
+      if (!actBtn) return;
+
+      const act = actBtn.dataset.act;
+      const asset = libAssets.find(a=>String(a.id)===String(assetId));
+      if (!asset) return;
+
+      if (act === "add"){
+        addReferenceUrl(asset.url);
+        setStatus("Added to Reference Images", "ok");
+        setTimeout(()=>setStatus(""), 1200);
+      }
+
+      if (act === "rename"){
+        const next = prompt("New asset name:", asset.title || "");
+        if (!next) return;
+        await apiLibrary("library_rename_asset", { asset_id: asset.id, title: next });
+        asset.title = next;
+        renderAssets();
+      }
+
+      if (act === "delete"){
+        if (!confirm("Remove asset from this scene?")) return;
+        await apiLibrary("library_delete_asset", { asset_id: asset.id });
+        libAssets = libAssets.filter(a=>a.id!==asset.id);
+        renderAssets();
+      }
+    });
+  }
+  if (libNewProject){
+    libNewProject.addEventListener("click", async ()=>{
+      const title = prompt("Project name:");
+      if (!title) return;
+      const r = await apiLibrary("library_create_project", { title });
+      libSelectedProject = r.project;
+      libSelectedScene = null;
+      await refreshLibraryAll();
+    });
+  }
+  if (libNewScene){
+    libNewScene.addEventListener("click", async ()=>{
+      if (!libSelectedProject) return alert("Select a project first");
+      const title = prompt("Scene name:");
+      if (!title) return;
+      const r = await apiLibrary("library_create_scene", { project_id: libSelectedProject.id, title });
+      libSelectedScene = r.scene;
+      await refreshLibraryAll();
+    });
+  }
+  if (libGenRefresh){
+    libGenRefresh.addEventListener("click", refreshGenerationsForAdd);
+  }
+  if (libGenSearch){
+    libGenSearch.addEventListener("input", renderGenerationsGrid);
+  }
+  if (libGenKind){
+    libGenKind.addEventListener("change", renderGenerationsGrid);
+  }
+  if (libGenGrid){
+    libGenGrid.addEventListener("click", async (e)=>{
+      const card = e.target.closest(".lf-assetCard");
+      const btn = e.target.closest("button");
+      if (!card || !btn) return;
+      if (btn.dataset.act !== "add-gen") return;
+
+      if (!libSelectedScene) return alert("Select a scene first");
+      const genId = card.dataset.genId;
+      const g = libGenerations.find(x=>String(x.id)===String(genId));
+      if (!g) return;
+
+      await apiLibrary("library_add_asset", {
+        scene_id: libSelectedScene.id,
+        generation_id: g.id,
+        title: g.title || null,
+        kind: g.kind || null,
+        url: g.output_url,
+        thumb_url: g.output_url
+      });
+
+      setStatus("Added to Library", "ok");
+      setTimeout(()=>setStatus(""), 1200);
+
+      await loadLibraryAssets(libSelectedScene.id);
+      if (libTabManager.classList.contains("active")) renderAssets();
+    });
+  }
+
   if (shotModalClose){
     shotModalClose.addEventListener("click", ()=>closeModal(shotModal));
   }
@@ -4314,7 +4712,6 @@ Keep it compact but unambiguous.
       try{
         await renameGenerationTitle(getGenerationId(shotModalItem), next);
         shotModalItem.title = next;
-        renderShotLibrary();
         if (shotModalTitle) shotModalTitle.textContent = next;
       } catch(e){
         setStatus("Rename failed", "err");
@@ -4564,7 +4961,7 @@ Keep it compact but unambiguous.
     updateRaycastSelection();
   }
 
-  loadShotLibrary();
+  // cinema library manager is opened on demand
 
   setMode("view");
   update3DState();
