@@ -1,0 +1,1496 @@
+<style>
+  :root{
+    --bg-body:#050505;
+    --bg-panel:#0f0f10;
+    --bg-card:#151517;
+    --bg-input:#1f1f22;
+    --border:#2b2b2b;
+    --accent:#2b6cff;
+    --accent2:#af52de;
+    --accent-hover:#1a5cff;
+    --text-main:#ffffff;
+    --text-sec:#a0a0a0;
+    --radius:18px;
+  }
+
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+  #lf-char * { box-sizing:border-box; }
+
+  #lf-char{
+    background:var(--bg-body);
+    color:var(--text-main);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    min-height:calc(100vh - 74px);
+    position:relative;
+  }
+
+  #lf-char *{
+    scrollbar-width: thin;
+    scrollbar-color: #2a2a2a #0b0b0b;
+  }
+  #lf-char *::-webkit-scrollbar{ width:10px; height:10px; }
+  #lf-char *::-webkit-scrollbar-track{ background:#0b0b0b; }
+  #lf-char *::-webkit-scrollbar-thumb{
+    background:#2a2a2a; border-radius:10px; border:2px solid #0b0b0b;
+  }
+
+  #lf-main{ padding:26px 18px 40px; max-width:1860px; margin:0 auto; }
+
+  /* === WORKSPACE === */
+  #lf-workspace{
+    border:1px solid var(--border);
+    border-radius:24px;
+    overflow:hidden;
+    background:rgba(255,255,255,.02);
+    box-shadow:0 22px 60px rgba(0,0,0,.55);
+  }
+
+  .lf-topHeader{
+    padding:18px 18px 16px;
+    background:
+      radial-gradient(circle at 25% 20%, rgba(43,108,255,.22), transparent 50%),
+      radial-gradient(circle at 80% 35%, rgba(175,82,222,.18), transparent 55%),
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+    border-bottom:1px solid rgba(255,255,255,.08);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .lf-topHeader::before{
+    content:"";
+    position:absolute; inset:-2px;
+    background:
+      linear-gradient(90deg, transparent 0%, rgba(43,108,255,.14) 40%, rgba(175,82,222,.14) 60%, transparent 100%);
+    background-size:200% 100%;
+    animation: lfshine 6s linear infinite;
+    opacity:.55;
+    pointer-events:none;
+  }
+  @keyframes lfshine{
+    0%{ background-position:200% 0; }
+    100%{ background-position:-200% 0; }
+  }
+
+  .lf-topRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    position:relative;
+    z-index:2;
+    flex-wrap:wrap;
+  }
+
+  .lf-brand{
+    display:flex; align-items:center; gap:12px; min-width:0;
+  }
+  .lf-mark{
+    width:38px; height:38px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:
+      radial-gradient(circle at 30% 25%, rgba(43,108,255,.55), rgba(43,108,255,.05) 60%),
+      radial-gradient(circle at 70% 75%, rgba(175,82,222,.45), rgba(175,82,222,.04) 60%),
+      rgba(255,255,255,.05);
+    box-shadow:0 10px 24px rgba(43,108,255,.16);
+    position:relative;
+    overflow:hidden;
+  }
+  .lf-mark::after{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.12), transparent 55%);
+    opacity:.7;
+  }
+  .lf-titleBlock{ min-width:0; }
+  .lf-title{
+    font-size:16px;
+    font-weight:1000;
+    letter-spacing:.3px;
+    margin:0;
+    line-height:1.05;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .lf-sub{
+    margin-top:4px;
+    font-size:12px;
+    color:rgba(255,255,255,.72);
+    letter-spacing:.2px;
+    max-width:760px;
+  }
+
+  .lf-navPills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+  }
+
+  .lf-pillLink{
+    text-decoration:none !important;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    color:#fff !important;
+    font-weight:950;
+    font-size:12px;
+    padding:9px 12px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    white-space:nowrap;
+  }
+  .lf-pillLink:hover{
+    border-color:rgba(43,108,255,.55);
+    background:rgba(43,108,255,.12);
+  }
+  .lf-pillLink.grad{
+    border-color:rgba(255,255,255,.14);
+    background: linear-gradient(135deg, rgba(43,108,255,.95), rgba(175,82,222,.75));
+    box-shadow:0 12px 28px rgba(43,108,255,.18);
+  }
+  .lf-pillLink.grad:hover{ filter:brightness(1.05); }
+
+  /* === MAIN GRID: controls + preview === */
+  .lf-grid{
+    display:grid;
+    grid-template-columns: 520px minmax(560px, 1fr);
+    gap:0;
+    min-height:560px;
+    background:rgba(0,0,0,.18);
+  }
+
+  .lf-left{
+    padding:18px;
+    border-right:1px solid var(--border);
+    max-height:calc(100vh - 74px - 52px);
+    overflow:auto;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(43,108,255,.10), transparent 55%),
+      radial-gradient(circle at 90% 25%, rgba(175,82,222,.08), transparent 55%),
+      #0b0b0c;
+  }
+
+  .lf-right{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    background:#060606;
+  }
+
+  /* === Section cards === */
+  .lf-card{
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+    background:rgba(255,255,255,.03);
+    padding:14px;
+  }
+
+  .lf-h2{
+    margin:0 0 10px;
+    font-size:13px;
+    font-weight:1000;
+    letter-spacing:.2px;
+    color:rgba(255,255,255,.92);
+  }
+  .lf-muted{ color:var(--text-sec); font-size:12px; line-height:1.45; }
+
+  .lf-field label{
+    display:block;
+    font-size:12px;
+    font-weight:900;
+    color:var(--text-sec);
+    margin-bottom:8px;
+  }
+
+  .lf-field input[type="text"],
+  .lf-field textarea,
+  .lf-field select{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid rgba(255,255,255,.10);
+    color:var(--text-main);
+    padding:12px 12px;
+    border-radius:14px;
+    font-size:14px;
+    outline:none;
+  }
+  .lf-field textarea{ resize:vertical; min-height:110px; }
+
+  /* Mode Switch */
+  .lf-mode{
+    display:flex;
+    gap:8px;
+    padding:6px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(0,0,0,.35);
+  }
+  .lf-mode button{
+    flex:1;
+    border:0;
+    border-radius:12px;
+    padding:10px 10px;
+    font-weight:1000;
+    cursor:pointer;
+    background:transparent;
+    color:rgba(255,255,255,.55);
+    transition:.15s;
+    font-size:12px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .lf-mode button:hover{ color:#fff; }
+  .lf-mode button.active{
+    background:rgba(255,255,255,.08);
+    color:#fff;
+    box-shadow:0 10px 22px rgba(0,0,0,.28);
+    border:1px solid rgba(43,108,255,.35);
+  }
+  .lf-modeHint{
+    margin-top:8px;
+    font-size:12px;
+    color:rgba(255,255,255,.62);
+    line-height:1.4;
+  }
+
+  /* Dropzone */
+  .lf-drop{
+    border:2px dashed rgba(255,255,255,.16);
+    border-radius:16px;
+    padding:16px 14px;
+    cursor:pointer;
+    background:rgba(255,255,255,.02);
+    transition:.12s;
+    text-align:center;
+  }
+  .lf-drop:hover{
+    border-color:rgba(43,108,255,.6);
+    background:rgba(43,108,255,.06);
+  }
+  .lf-drop .big{ font-weight:1000; font-size:13px; }
+  .lf-drop .sub{ font-size:12px; color:var(--text-sec); margin-top:6px; }
+
+  .lf-thumbRow{
+    display:none;
+    margin-top:12px;
+    gap:10px;
+    align-items:center;
+  }
+  .lf-thumbBox{
+    width:86px; height:86px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.12);
+    background:#000;
+    overflow:hidden;
+    position:relative;
+    flex:0 0 auto;
+  }
+  .lf-thumbBox img{
+    width:100%; height:100%; object-fit:cover;
+    display:block;
+  }
+  .lf-thumbBox .x{
+    position:absolute;
+    top:8px; right:8px;
+    width:20px; height:20px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.55);
+    color:#fff;
+    font-weight:1000;
+    font-size:12px;
+    line-height:18px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    opacity:0;
+    transform:scale(.96);
+    transition:.12s;
+    user-select:none;
+  }
+  .lf-thumbBox:hover .x{ opacity:1; transform:scale(1); }
+
+  /* Actions */
+  .lf-actions{
+    margin-top:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding-top:10px;
+  }
+
+  .lf-btn{
+    width:100%;
+    padding:14px 14px;
+    border-radius:16px;
+    border:0;
+    background:var(--accent);
+    color:#fff;
+    font-weight:1000;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    transition:.15s;
+  }
+  .lf-btn:hover{ background:var(--accent-hover); transform:translateY(-1px); }
+  .lf-btn.secondary{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+  }
+  .lf-btn.secondary:hover{
+    border-color:rgba(43,108,255,.55);
+    background:rgba(43,108,255,.12);
+    transform:none;
+  }
+  .lf-cost{
+    font-size:12px;
+    padding:3px 10px;
+    border-radius:999px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.10);
+  }
+
+  .lf-status{
+    text-align:center;
+    font-size:12px;
+    color:var(--text-sec);
+    min-height:18px;
+  }
+  .lf-status.err{ color:#ff5a6b; font-weight:1000; }
+  .lf-status.ok{ color:#9be28a; font-weight:1000; }
+
+  /* Preview */
+  .lf-previewTopbar{
+    height:58px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+    backdrop-filter: blur(4px);
+  }
+  .lf-previewLeft{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .lf-chip{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:7px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    font-weight:900;
+    font-size:12px;
+    white-space:nowrap;
+  }
+  .lf-previewTitle{
+    font-weight:1000;
+    font-size:13px;
+    color:rgba(255,255,255,.88);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:560px;
+  }
+  .lf-previewRight{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .lf-btnSmall{
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    font-weight:900;
+    cursor:pointer;
+  }
+  .lf-btnSmall:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.12); }
+  .lf-btnSmall.grad{
+    border:1px solid rgba(255,255,255,.12);
+    background: linear-gradient(135deg, rgba(43,108,255,.95), rgba(175,82,222,.75));
+    box-shadow:0 10px 24px rgba(43,108,255,.16);
+  }
+  .lf-btnSmall.grad:hover{ filter:brightness(1.05); }
+
+  .lf-stage{
+    position:relative;
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(43,108,255,.10), transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(175,82,222,.08), transparent 42%),
+      #050505;
+  }
+
+  .lf-frame{
+    width:min(1200px, 100%);
+    border-radius:22px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.10);
+    background:#0b0b0b;
+    box-shadow:0 30px 80px rgba(0,0,0,.7);
+    position:relative;
+  }
+  .lf-frame img{
+    width:100%;
+    display:block;
+    max-height:70vh;
+    object-fit:contain;
+    background:#000;
+  }
+  .lf-empty{
+    padding:52px 18px;
+    text-align:center;
+    color:rgba(255,255,255,.18);
+    font-weight:1000;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+  }
+  .lf-empty .sig{
+    font-size:44px;
+    opacity:.12;
+    margin-bottom:10px;
+  }
+
+  .lf-resbar{
+    padding:14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border-top:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+  }
+  .lf-resbar .meta{
+    color:rgba(255,255,255,.62);
+    font-size:12px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  /* Loader (viewport only) */
+  .lf-loader{
+    position:absolute; inset:0;
+    background:rgba(0,0,0,.72);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    z-index:50;
+    backdrop-filter: blur(4px);
+  }
+  .lf-spin{
+    width:48px;height:48px;
+    border-radius:999px;
+    border:4px solid rgba(255,255,255,.12);
+    border-top-color:var(--accent);
+    animation:lfspin 1s linear infinite;
+  }
+  @keyframes lfspin{ to{ transform:rotate(360deg); } }
+  .lf-wait{ font-weight:1000; }
+  .lf-time{ color:var(--text-sec); font-size:12px; }
+
+  /* === BOTTOM LIBRARY (big) === */
+  .lf-bottom{
+    border-top:1px solid rgba(255,255,255,.08);
+    background:
+      radial-gradient(circle at 20% 0%, rgba(43,108,255,.10), transparent 52%),
+      radial-gradient(circle at 90% 40%, rgba(175,82,222,.08), transparent 55%),
+      rgba(0,0,0,.30);
+    padding:16px 18px 18px;
+  }
+  .lf-libHead{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+  .lf-libLeft{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .lf-libTitle{
+    font-size:14px;
+    font-weight:1000;
+    letter-spacing:.2px;
+    margin:0;
+  }
+  .lf-libSub{ color:rgba(255,255,255,.62); font-size:12px; }
+
+  .lf-libTools{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .lf-libTools input{
+    width:min(420px, 64vw);
+    background:var(--bg-input);
+    border:1px solid rgba(255,255,255,.10);
+    color:#fff;
+    padding:11px 12px;
+    border-radius:14px;
+    font-size:13px;
+    outline:none;
+  }
+
+  .lf-libGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:12px;
+    max-height:420px;
+    overflow:auto;
+    padding-right:4px;
+  }
+
+  .lf-assetCard{
+    position:relative;
+    padding:10px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(0,0,0,.25);
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    transition:.12s;
+  }
+  .lf-assetCard:hover{
+    border-color:rgba(43,108,255,.55);
+    background:rgba(43,108,255,.10);
+    transform: translateY(-1px);
+  }
+  .lf-assetCard img{
+    width:100%;
+    height:150px;
+    object-fit:cover;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:#070707;
+  }
+  .lf-assetMeta{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .lf-assetName{
+    font-weight:1000;
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:100%;
+  }
+  .lf-assetHint{
+    color:rgba(255,255,255,.62);
+    font-size:11px;
+    margin-top:6px;
+    line-height:1.35;
+  }
+  .lf-assetActions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:2px;
+  }
+  .lf-mini{
+    padding:9px 10px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    font-weight:900;
+    cursor:pointer;
+    font-size:12px;
+  }
+  .lf-mini:hover{
+    border-color:rgba(43,108,255,.55);
+    background:rgba(43,108,255,.12);
+  }
+
+  .hidden{ display:none !important; }
+
+  @media (max-width: 1200px){
+    .lf-grid{ grid-template-columns: 1fr; }
+    .lf-left{ border-right:0; border-bottom:1px solid var(--border); max-height:none; }
+    .lf-previewTitle{ max-width: 60vw; }
+  }
+</style>
+
+<div id="lf-char">
+  <div id="lf-main">
+    <div id="lf-workspace">
+
+      <!-- TOP HEADER / NAV -->
+      <div class="lf-topHeader">
+        <div class="lf-topRow">
+          <div class="lf-brand">
+            <div class="lf-mark"></div>
+            <div class="lf-titleBlock">
+              <h1 class="lf-title">CINEMA CHARACTER</h1>
+              <div class="lf-sub">Create a print-ready character reference sheet (turnaround + portraits) from a photo or from text. Everything you generate appears in <b>My Characters</b> below and is available in CINEMA SHOT.</div>
+            </div>
+          </div>
+
+          <div class="lf-navPills">
+            <a class="lf-pillLink" href="https://lightfull.ai/cinema_lab" rel="noopener">← CINEMA LAB</a>
+            <a class="lf-pillLink" href="https://lightfull.ai/cinema_shot" rel="noopener">CINEMA SHOT</a>
+            <a class="lf-pillLink" href="https://lightfull.ai/cinema_animation" rel="noopener">CINEMA ANIMATION</a>
+            <a class="lf-pillLink grad" href="https://lightfull.ai/flow" rel="noopener">Flow</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN GRID -->
+      <div class="lf-grid">
+
+        <!-- LEFT: CONTROLS -->
+        <div class="lf-left">
+
+          <div class="lf-card">
+            <div class="lf-h2">Mode</div>
+            <div class="lf-mode">
+              <button id="modePhoto" class="active" type="button">???? From Photo</button>
+              <button id="modeText" type="button">✍️ From Prompt</button>
+            </div>
+            <div class="lf-modeHint" id="modeHint">
+              Upload a reference photo — the sheet will match its realism level and visual style exactly.
+            </div>
+          </div>
+
+          <div class="lf-card">
+            <div class="lf-h2">Character name</div>
+            <div class="lf-field">
+              <label>Title (for your library)</label>
+              <input id="charName" type="text" placeholder="e.g. Detective K / Main Hero / Villain #2" />
+            </div>
+            <div class="lf-muted">Name is used for library cards and rename workflow.</div>
+          </div>
+
+          <div class="lf-card" id="photoBlock">
+            <div class="lf-h2">Reference image</div>
+            <div class="lf-field">
+              <label>Upload (single image)</label>
+              <input type="file" id="file" accept="image/png,image/jpeg,image/webp" hidden />
+              <div class="lf-drop" id="drop">
+                <div class="big" id="dropTitle">Upload photo</div>
+                <div class="sub" id="dropSub">Click or drag & drop</div>
+
+                <div class="lf-thumbRow" id="thumbRow">
+                  <div class="lf-thumbBox">
+                    <img id="thumbImg" alt="reference preview" />
+                    <div class="x" id="thumbRemove" title="Remove">×</div>
+                  </div>
+                  <div class="lf-muted" id="thumbMeta" style="font-size:12px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lf-card hidden" id="textBlock">
+            <div class="lf-h2">Character description</div>
+            <div class="lf-field">
+              <label>Prompt (English or Russian — we pass it as is)</label>
+              <textarea id="desc" placeholder="Describe appearance, age, style, clothing, vibe, etc..."></textarea>
+            </div>
+            <div class="lf-muted">
+              This mode generates a new character from scratch. Identity must be consistent across all panels.
+            </div>
+          </div>
+
+          <div class="lf-card">
+            <div class="lf-h2">Output</div>
+            <div class="lf-row2" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="lf-field">
+                <label>Resolution</label>
+                <select id="res">
+                  <option value="1K">1K</option>
+                  <option value="2K" selected>2K</option>
+                  <option value="4K">4K</option>
+                </select>
+              </div>
+              <div class="lf-field">
+                <label>Aspect ratio</label>
+                <select id="aspect">
+                  <option value="match_input_image">Match input</option>
+                  <option value="1:1">1:1</option>
+                  <option value="4:3">4:3</option>
+                  <option value="16:9" selected>16:9</option>
+                  <option value="21:9">21:9</option>
+                </select>
+              </div>
+            </div>
+            <div class="lf-muted" style="margin-top:8px;">
+              You usually want <b>16:9</b> or <b>21:9</b> for a clean sheet layout.
+            </div>
+          </div>
+
+          <div class="lf-actions">
+            <button class="lf-btn" id="run" type="button">
+              Generate <span class="lf-cost" id="cost">—</span>
+            </button>
+            <button class="lf-btn secondary" id="refreshLib" type="button">Refresh My Characters</button>
+            <div class="lf-status" id="statusText"></div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: PREVIEW -->
+        <div class="lf-right">
+          <div class="lf-previewTopbar">
+            <div class="lf-previewLeft">
+              <div class="lf-chip" id="chipMode">From Photo</div>
+              <div class="lf-previewTitle" id="previewTitle">Result preview</div>
+            </div>
+            <div class="lf-previewRight">
+              <button class="lf-btnSmall" id="btnOpenShot" type="button">Open CINEMA SHOT</button>
+              <button class="lf-btnSmall grad" id="btnUseInShot" type="button" disabled>Use in Shot (copy URL)</button>
+              <button class="lf-btnSmall" id="btnDownload" type="button" disabled>Download</button>
+            </div>
+          </div>
+
+          <div class="lf-stage">
+            <div class="lf-frame" id="frame">
+              <div class="lf-empty" id="empty">
+                <div class="sig">✦</div>
+                <div>CHARACTER SHEET PREVIEW</div>
+              </div>
+
+              <img id="outImg" class="hidden" alt="character sheet result" />
+
+              <div class="lf-resbar">
+                <div class="meta" id="meta">status: —</div>
+                <div class="meta" id="meta2" style="text-align:right;">jobId: —</div>
+              </div>
+
+              <div class="lf-loader" id="loader">
+                <div class="lf-spin"></div>
+                <div class="lf-wait">PROCESSING</div>
+                <div class="lf-time" id="loaderTime">01:00</div>
+                <div class="lf-time" id="loaderSub" style="opacity:.75;">Sending task…</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- BIG BOTTOM LIBRARY -->
+      <div class="lf-bottom">
+        <div class="lf-libHead">
+          <div class="lf-libLeft">
+            <h3 class="lf-libTitle">My Characters</h3>
+            <div class="lf-libSub">These are generations where <b>lab = cinema</b> and <b>kind = character</b>. Click a card to preview. Use ✎ to rename.</div>
+          </div>
+
+          <div class="lf-libTools">
+            <input id="libSearch" type="text" placeholder="Search characters..." />
+            <button class="lf-btnSmall" id="libRefresh" type="button">Refresh</button>
+          </div>
+        </div>
+
+        <div class="lf-libGrid" id="libGrid">
+          <div class="lf-muted">Loading…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const BASE = location.origin;
+  const BACKEND_BASE = "https://api.lightfull.ai";
+  const INPUTS_BUCKET = "inputs";
+  const PRESET_ID = "nano_banana_pro";
+  const ETA_SECONDS = 60;
+
+  // ===== FIXED PROMPTS (AS GIVEN) =====
+  const PROMPT_WITH_IMAGE = `Prompt to create a character reference sheet
+Create a professional character reference sheet based strictly on the uploaded reference image. Use a clean, neutral plain background and present the sheet as a technical model turnaround while matching the exact visual style of the reference (same realism level, rendering approach, texture, color treatment, and overall aesthetic). Arrange the composition into two horizontal rows. Top row: four full-body standing views placed side-by-side in this order: front view, left profile view (facing left), right profile view (facing right), back view. Bottom row: three highly detailed close-up portraits aligned beneath the full-body row in this order: front portrait, left profile portrait (facing left), right profile portrait (facing right). Maintain perfect identity consistency across every panel. Keep the subject in a relaxed A-pose and with consistent scale and alignment between views, accurate anatomy, and clear silhouette; ensure even spacing and clean panel separation, with uniform framing and consistent head height across the full-body lineup and consistent facial scale across the portraits. Lighting should be consistent across all panels (same direction, intensity, and softness), with natural, controlled shadows that preserve detail without dramatic mood shifts. Output a crisp, print-ready reference sheet look, sharp details.`;
+
+  const PROMPT_NO_IMAGE_TEMPLATE = `No reference image? No problem!
+Create a professional character reference sheet of [PUT YOUR CHARACTER DESCRIPTION HERE]. Use a clean, neutral plain background and present the sheet as a technical model turnaround in a photographic style. Arrange the composition into two horizontal rows. Top row: four full-body standing views placed side-by-side in this order: front view, left profile view (facing left), right profile view (facing right), back view. Bottom row: three highly detailed close-up portraits aligned beneath the full-body row in this order: front portrait, left profile portrait (facing left), right profile portrait (facing right). Maintain perfect identity consistency across every panel. Keep the subject in a relaxed A-pose and with consistent scale and alignment between views, accurate anatomy, and clear silhouette; ensure even spacing and clean panel separation, with uniform framing and consistent head height across the full-body lineup and consistent facial scale across the portraits. Lighting should be consistent across all panels (same direction, intensity, and softness), with natural, controlled shadows that preserve detail without dramatic mood shifts. Output a crisp, print-ready reference sheet look, sharp details.`;
+
+  const $ = (id)=>document.getElementById(id);
+
+  const modePhotoBtn = $("modePhoto");
+  const modeTextBtn = $("modeText");
+  const modeHint = $("modeHint");
+  const chipMode = $("chipMode");
+
+  const photoBlock = $("photoBlock");
+  const textBlock  = $("textBlock");
+
+  const fileEl = $("file");
+  const drop = $("drop");
+  const dropTitle = $("dropTitle");
+  const dropSub = $("dropSub");
+  const thumbRow = $("thumbRow");
+  const thumbImg = $("thumbImg");
+  const thumbRemove = $("thumbRemove");
+  const thumbMeta = $("thumbMeta");
+
+  const descEl = $("desc");
+  const nameEl = $("charName");
+
+  const resEl = $("res");
+  const aspectEl = $("aspect");
+
+  const runBtn = $("run");
+  const refreshLibBtn = $("refreshLib");
+  const statusText = $("statusText");
+
+  const empty = $("empty");
+  const outImg = $("outImg");
+  const meta = $("meta");
+  const meta2 = $("meta2");
+
+  const loader = $("loader");
+  const loaderTime = $("loaderTime");
+  const loaderSub = $("loaderSub");
+
+  const btnDownload = $("btnDownload");
+  const btnUseInShot = $("btnUseInShot");
+  const btnOpenShot = $("btnOpenShot");
+  const previewTitle = $("previewTitle");
+
+  // Bottom library
+  const libGrid = $("libGrid");
+  const libSearch = $("libSearch");
+  const libRefresh = $("libRefresh");
+
+  // State
+  let mode = "photo"; // "photo" | "text"
+  let selectedFile = null;
+  let selectedFilePreviewUrl = "";
+  let currentJobId = null;
+  let abortPoll = false;
+  let pollTimer = null;
+  let timer = null;
+  let timeLeft = ETA_SECONDS;
+  let currentOutputUrl = "";
+
+  // Library data
+  let charLibraryItems = [];
+
+  function setStatus(t, kind){
+    statusText.textContent = t || "";
+    statusText.classList.remove("err","ok");
+    if (kind) statusText.classList.add(kind);
+  }
+
+  function showLoader(on){
+    loader.style.display = on ? "flex" : "none";
+    if (on) startTimer(ETA_SECONDS);
+    if (!on) stopTimer();
+  }
+
+  function startTimer(sec){
+    stopTimer();
+    timeLeft = Math.max(0, Math.floor(sec));
+    const tick = ()=>{
+      const m = Math.floor(timeLeft/60);
+      const s = String(timeLeft%60).padStart(2,"0");
+      loaderTime.textContent = `${m}:${s}`;
+      timeLeft = Math.max(0, timeLeft-1);
+    };
+    tick();
+    timer = setInterval(tick, 1000);
+          tick();
+      timer = setInterval(tick, 1000);
+    }
+
+    function stopTimer(){
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    function uuid(){
+      if (crypto && crypto.randomUUID) return crypto.randomUUID();
+      return Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
+
+    function formatSize(bytes){
+      const kb = Math.round((bytes||0)/1024);
+      if (kb < 1024) return kb + " KB";
+      return (kb/1024).toFixed(1) + " MB";
+    }
+
+    function calcCost(){
+      const r = String(resEl.value || "2K");
+      const cost = (r === "4K") ? 2 : 1;
+      $("cost").textContent = cost + " Cr";
+    }
+
+    function resetOutput(){
+      currentOutputUrl = "";
+      currentJobId = null;
+      meta.textContent = "status: —";
+      meta2.textContent = "jobId: —";
+      previewTitle.textContent = "Result preview";
+      empty.classList.remove("hidden");
+      outImg.classList.add("hidden");
+      outImg.removeAttribute("src");
+      btnDownload.disabled = true;
+      btnUseInShot.disabled = true;
+    }
+
+    function setMode(next){
+      mode = next === "text" ? "text" : "photo";
+      modePhotoBtn.classList.toggle("active", mode === "photo");
+      modeTextBtn.classList.toggle("active", mode === "text");
+
+      photoBlock.classList.toggle("hidden", mode !== "photo");
+      textBlock.classList.toggle("hidden", mode !== "text");
+
+      chipMode.textContent = (mode === "photo") ? "From Photo" : "From Prompt";
+      modeHint.textContent = (mode === "photo")
+        ? "Upload a reference photo — the sheet will match its realism level and visual style exactly."
+        : "Write a description — a new character will be generated from scratch with consistent identity across every panel.";
+
+      resetOutput();
+    }
+
+    // ====== FILE HANDLING ======
+    function clearSelectedFile(){
+      selectedFile = null;
+      if (selectedFilePreviewUrl){
+        try { URL.revokeObjectURL(selectedFilePreviewUrl); } catch(e){}
+        selectedFilePreviewUrl = "";
+      }
+      thumbRow.style.display = "none";
+      thumbImg.removeAttribute("src");
+      thumbMeta.textContent = "";
+      dropTitle.textContent = "Upload photo";
+      dropSub.textContent = "Click or drag & drop";
+    }
+
+    function setSelectedFile(file){
+      if (!file || !file.type || !file.type.startsWith("image/")){
+        alert("Only image files (png/jpg/webp).");
+        return;
+      }
+      clearSelectedFile();
+      selectedFile = file;
+      try { selectedFilePreviewUrl = URL.createObjectURL(file); } catch(e){ selectedFilePreviewUrl = ""; }
+      thumbImg.src = selectedFilePreviewUrl || "";
+      thumbMeta.textContent = `${file.name || "image"} • ${formatSize(file.size||0)}`;
+      thumbRow.style.display = "flex";
+      dropTitle.textContent = "Photo selected";
+      dropSub.textContent = "Click to replace • Right-click to clear";
+    }
+
+    // ====== AUTH HELPERS (same style as CINEMA SHOT) ======
+    async function getSessionOrRedirect(){
+      const sb = window.sb;
+      if (!sb) { location.href = BASE + "/login"; throw new Error("No supabase client"); }
+      const { data } = await sb.auth.getSession();
+      const s = data?.session;
+      if (!s) { location.href = BASE + "/login"; throw new Error("No session"); }
+      return s;
+    }
+
+    async function refreshSessionSafe(){
+      const sb = window.sb;
+      try { await sb.auth.refreshSession(); } catch(e){}
+      return getSessionOrRedirect();
+    }
+
+    async function fetchJsonWithAuth(url, options={}){
+      let s = await getSessionOrRedirect();
+      let r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+
+      if (r.status===401 || r.status===403){
+        s = await refreshSessionSafe();
+        r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+      }
+
+      const raw = await r.text();
+      let j={}; try{ j=raw?JSON.parse(raw):{} }catch(_){}
+
+      if (!r.ok || j?.ok===false){
+        const err = new Error(j.error || ("HTTP "+r.status));
+        err.status = r.status;
+        err.data = j;
+        err.raw = raw;
+        throw err;
+      }
+      return j;
+    }
+
+    async function uploadReferenceToInputs(file){
+      const sb = window.sb;
+      const session = await getSessionOrRedirect();
+
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "png";
+      const path = `${session.user.id}/${uuid()}.${safeExt}`;
+
+      let up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, {
+        upsert:false,
+        contentType: file.type || "application/octet-stream"
+      });
+
+      if (up?.error && (up.error.statusCode === 401 || up.error.statusCode === 403)){
+        await refreshSessionSafe();
+        up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, {
+          upsert:false,
+          contentType: file.type || "application/octet-stream"
+        });
+      }
+
+      if (up.error) throw up.error;
+
+      const pub = sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
+      return pub.data.publicUrl;
+    }
+
+    // ====== OUTPUT ACTIONS ======
+    async function forceDownload(url, filename){
+      if (!url) return;
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename || "cinema-character.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    }
+
+    async function copyToClipboard(text){
+      if (!text) return;
+      if (navigator.clipboard?.writeText){
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const input = document.createElement("textarea");
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      input.remove();
+    }
+
+    // ====== GENERATION START / POLL ======
+    function buildPrompt(){
+      if (mode === "photo") return PROMPT_WITH_IMAGE;
+      const desc = String(descEl.value || "").trim();
+      return PROMPT_NO_IMAGE_TEMPLATE.replace("[PUT YOUR CHARACTER DESCRIPTION HERE]", desc || "A realistic character with clear defining features.");
+    }
+
+    async function startJob(){
+      runBtn.disabled = true;
+      abortPoll = false;
+      currentJobId = null;
+      if (pollTimer) clearTimeout(pollTimer);
+
+      setStatus("");
+      resetOutput();
+      showLoader(true);
+      loaderSub.textContent = "Preparing…";
+
+      const fd = new FormData();
+      fd.append("presetId", PRESET_ID);
+
+      // важно: это нужно, чтобы бэк классифицировал generation как cinema/character.
+      // Если у тебя уже есть маппинг по origin_path — этого достаточно.
+      fd.append("origin_path", "/cinema_character");
+
+      // Optional title hint for backend (safe if ignored)
+      const title = String(nameEl.value || "").trim();
+      if (title) fd.append("title", title);
+
+      fd.append("scene", buildPrompt());
+      fd.append("aspect_ratio", String(aspectEl.value || "16:9"));
+      fd.append("resolution", String(resEl.value || "2K"));
+      fd.append("output_format", "png");
+      fd.append("safety_filter_level", "block_only_high");
+
+      if (mode === "photo"){
+        if (!selectedFile){
+          showLoader(false);
+          runBtn.disabled = false;
+          setStatus("Upload a photo first.", "err");
+          return;
+        }
+        loaderSub.textContent = "Uploading reference…";
+        const url = await uploadReferenceToInputs(selectedFile);
+        fd.append("image_input_url", url);
+        loaderSub.textContent = "Sending task…";
+      } else {
+        const desc = String(descEl.value || "").trim();
+        if (!desc){
+          showLoader(false);
+          runBtn.disabled = false;
+          setStatus("Write a character description first.", "err");
+          return;
+        }
+        loaderSub.textContent = "Sending task…";
+      }
+
+      let data;
+      try{
+        data = await fetchJsonWithAuth(BACKEND_BASE + "/api/start", {
+          method:"POST",
+          body: fd
+        });
+      } catch(e){
+        showLoader(false);
+        runBtn.disabled = false;
+
+        if (e.status === 402 && e.data) {
+          const need = e.data.required ?? "?";
+          const have = e.data.credits ?? 0;
+          setStatus(`Not enough credits • need ${need} Cr • you have ${have} Cr`, "err");
+          return;
+        }
+
+        setStatus("Start error", "err");
+        alert("Start error:\n\n" + (e?.message||e));
+        return;
+      }
+
+      currentJobId = data.jobId;
+      meta2.textContent = "jobId: " + currentJobId;
+      meta.textContent = "status: processing";
+      setStatus("Started", "ok");
+
+      pollStatus();
+    }
+
+    async function pollStatus(){
+      abortPoll = false;
+
+      const tick = async ()=>{
+        if (abortPoll) return;
+
+        try{
+          const data = await fetchJsonWithAuth(BACKEND_BASE + `/api/status?jobId=${encodeURIComponent(currentJobId)}`, {
+            method:"GET"
+          });
+
+          loaderSub.textContent = "status: " + data.status;
+          meta.textContent = "status: " + data.status;
+
+          if (data.status === "succeeded"){
+            showLoader(false);
+            runBtn.disabled = false;
+            setStatus("Done", "ok");
+
+            const url = data.output_url || "";
+            currentOutputUrl = url;
+
+            if (url){
+              empty.classList.add("hidden");
+              outImg.classList.remove("hidden");
+              outImg.src = url;
+              previewTitle.textContent = (String(nameEl.value||"").trim()) || "Character sheet";
+              btnDownload.disabled = false;
+              btnUseInShot.disabled = false;
+            }
+
+            // обновим библиотеку, чтобы новый персонаж появился снизу
+            loadCharacterLibrary().catch(()=>{});
+            return;
+          }
+
+          if (data.status === "failed" || data.status === "canceled"){
+            showLoader(false);
+            runBtn.disabled = false;
+            setStatus("Failed", "err");
+            return;
+          }
+
+          pollTimer = setTimeout(tick, 1200);
+        } catch(e){
+          showLoader(false);
+          runBtn.disabled = false;
+          setStatus("Status error", "err");
+          alert("Status error:\n\n" + (e?.message || e));
+        }
+      };
+
+      tick();
+    }
+
+    // ====== LIBRARY (same filter as CINEMA SHOT) ======
+    function extractGenerations(data){
+      if (Array.isArray(data?.generations)) return data.generations;
+      if (Array.isArray(data?.data?.generations)) return data.data.generations;
+      if (Array.isArray(data?.items)) return data.items;
+      if (Array.isArray(data)) return data;
+      return [];
+    }
+
+    function getGenerationLab(item){
+      return item?.lab || item?.meta?.lab || item?.data?.lab || "";
+    }
+    function getGenerationKind(item){
+      return item?.kind || item?.meta?.kind || item?.data?.kind || "";
+    }
+    function getGenerationId(item){
+      return item?.generation_id || item?.id || item?.gen_id || item?.generationId || "";
+    }
+    function getGenerationUrl(item){
+      const raw = item?.output_url || item?.outputUrl || item?.url || item?.image_url || item?.imageUrl || item?.preview_url || item?.previewUrl || "";
+      if (Array.isArray(raw)) return raw[0] || "";
+      return raw || "";
+    }
+    function getGenerationTitle(item, fallbackPrefix){
+      const title = String(item?.title || item?.name || "").trim();
+      if (title) return title;
+      const id = getGenerationId(item) || "—";
+      return `${fallbackPrefix} ${id}`;
+    }
+    function matchesGeneration(item, lab, kind){
+      const labVal = String(getGenerationLab(item)).toLowerCase();
+      const kindVal = String(getGenerationKind(item)).toLowerCase();
+      if (!labVal || !kindVal) return false;
+      return labVal === lab && kindVal === kind;
+    }
+
+    function escapeHtml(s){
+      return String(s||"")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
+    }
+    function escapeAttr(s){
+      return escapeHtml(s).replaceAll("'","&#39;");
+    }
+
+    async function renameGenerationTitle(genId, newTitle){
+      if (!genId || !newTitle) return;
+      await fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          action: "set_generation_title",
+          generation_id: genId,
+          title: newTitle
+        })
+      });
+    }
+
+    function renderLibrary(){
+      const q = String(libSearch.value || "").trim().toLowerCase();
+      const items = (charLibraryItems || []).filter(item => {
+        const title = getGenerationTitle(item, "Character").toLowerCase();
+        return !q || title.includes(q);
+      });
+
+      if (!items.length){
+        libGrid.innerHTML = `<div class="lf-muted">No characters found.</div>`;
+        return;
+      }
+
+      libGrid.innerHTML = items.map(item=>{
+        const url = getGenerationUrl(item);
+        const title = getGenerationTitle(item, "Character");
+        const id = getGenerationId(item);
+        return `
+          <div class="lf-assetCard" data-id="${escapeAttr(id)}" data-url="${escapeAttr(url)}">
+            <img src="${escapeAttr(url)}" alt="">
+            <div class="lf-assetMeta">
+              <div style="min-width:0; flex:1;">
+                <div class="lf-assetName" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+                <div class="lf-assetHint">Click to preview • Use in Shot = copy URL</div>
+              </div>
+            </div>
+            <div class="lf-assetActions">
+              <button class="lf-mini" data-act="use">Use in Shot</button>
+              <button class="lf-mini" data-act="copy">Copy URL</button>
+              <button class="lf-mini" data-act="rename">✎</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadCharacterLibrary(){
+      libGrid.innerHTML = `<div class="lf-muted">Loading…</div>`;
+      try{
+        const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?limit=140&offset=0", { method:"GET" });
+        const gens = extractGenerations(data);
+        charLibraryItems = gens.filter(item => matchesGeneration(item, "cinema", "character"));
+        renderLibrary();
+      } catch(e){
+        libGrid.innerHTML = `<div class="lf-muted">Failed to load library.</div>`;
+      }
+    }
+
+    function previewFromLibraryItem(url, title, id){
+      if (!url) return;
+      currentOutputUrl = url;
+      empty.classList.add("hidden");
+      outImg.classList.remove("hidden");
+      outImg.src = url;
+      previewTitle.textContent = title || "Character sheet";
+      meta.textContent = "status: library";
+      meta2.textContent = "id: " + (id || "—");
+      btnDownload.disabled = false;
+      btnUseInShot.disabled = false;
+    }
+
+    // ====== EVENTS ======
+    modePhotoBtn.addEventListener("click", ()=>setMode("photo"));
+    modeTextBtn.addEventListener("click", ()=>setMode("text"));
+
+    resEl.addEventListener("change", calcCost);
+    calcCost();
+
+    btnOpenShot.addEventListener("click", ()=>location.href="https://lightfull.ai/cinema_shot");
+
+    btnDownload.addEventListener("click", async ()=>{
+      if (!currentOutputUrl) return;
+      try{
+        await forceDownload(currentOutputUrl, "cinema-character.png");
+      } catch(e){
+        alert("Download error");
+      }
+    });
+
+    btnUseInShot.addEventListener("click", async ()=>{
+      if (!currentOutputUrl) return;
+      try{
+        await copyToClipboard(currentOutputUrl);
+        setStatus("URL copied ✓", "ok");
+        setTimeout(()=>setStatus(""), 1200);
+      } catch(e){
+        setStatus("Copy failed", "err");
+      }
+    });
+
+    runBtn.addEventListener("click", async ()=>{
+      try{
+        await startJob();
+      } catch(e){
+        showLoader(false);
+        runBtn.disabled = false;
+        setStatus("Error", "err");
+        alert("Error:\n\n" + (e?.message||e));
+      }
+    });
+
+    refreshLibBtn.addEventListener("click", ()=>loadCharacterLibrary());
+    libRefresh.addEventListener("click", ()=>loadCharacterLibrary());
+    libSearch.addEventListener("input", renderLibrary);
+
+    // Dropzone interactions
+    drop.addEventListener("click", ()=>fileEl.click());
+    fileEl.addEventListener("change", (e)=>{
+      const f = e.target.files && e.target.files[0];
+      fileEl.value = "";
+      if (f) setSelectedFile(f);
+    });
+
+    ["dragenter","dragover"].forEach(evt=>{
+      drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="rgba(43,108,255,.6)"; });
+    });
+    ["dragleave","drop"].forEach(evt=>{
+      drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="rgba(255,255,255,.16)"; });
+    });
+    drop.addEventListener("drop",(ev)=>{
+      const f = ev.dataTransfer?.files?.[0];
+      if (f) setSelectedFile(f);
+    });
+
+    // right-click clear (nice)
+    drop.addEventListener("contextmenu",(e)=>{
+      e.preventDefault();
+      if (!selectedFile) return;
+      if (confirm("Remove selected photo?")) clearSelectedFile();
+    });
+
+    thumbRemove.addEventListener("click",(e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      clearSelectedFile();
+    });
+
+    // Library card events (delegate)
+    libGrid.addEventListener("click", async (e)=>{
+      const card = e.target.closest(".lf-assetCard");
+      if (!card) return;
+
+      const id = card.dataset.id || "";
+      const url = card.dataset.url || "";
+      const item = (charLibraryItems || []).find(x=>String(getGenerationId(x))===String(id)) || null;
+      const title = item ? getGenerationTitle(item, "Character") : "Character";
+
+      const btn = e.target.closest("button");
+      if (!btn){
+        previewFromLibraryItem(url, title, id);
+        return;
+      }
+
+      const act = btn.dataset.act;
+      if (act === "use" || act === "copy"){
+        try{
+          await copyToClipboard(url);
+          setStatus("URL copied ✓", "ok");
+          setTimeout(()=>setStatus(""), 1200);
+        } catch(_){
+          setStatus("Copy failed", "err");
+        }
+        return;
+      }
+
+      if (act === "rename"){
+        const next = prompt("New character name:", title);
+        if (!next) return;
+        try{
+          await renameGenerationTitle(id, next);
+          if (item) item.title = next;
+          renderLibrary();
+          setStatus("Renamed ✓", "ok");
+          setTimeout(()=>setStatus(""), 1200);
+        } catch(_){
+          setStatus("Rename failed", "err");
+        }
+        return;
+      }
+    });
+
+    // init
+    setMode("photo");
+    resetOutput();
+    loadCharacterLibrary();
+  })();
+</script>
+
