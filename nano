@@ -1223,7 +1223,6 @@ PHYSICAL CAMERA SIMULATION:
 - This is photographed live-action, not illustration.
 - Focal length affects perspective/compression realistically.
 - Aperture affects depth of field/bokeh realistically.
-- Torch/fire (if present) behaves as a real key light with warm falloff.
 `;
 
     const isAnamorphic = presetKey === "IMAX_PANAVISION_ANAMORPHIC";
