@@ -22,6 +22,23 @@
     min-height:calc(100vh - 74px);
   }
 
+  #lf-nano *{
+    scrollbar-width: thin;
+    scrollbar-color: #2a2a2a #0b0b0b;
+  }
+  #lf-nano *::-webkit-scrollbar{
+    width:10px;
+    height:10px;
+  }
+  #lf-nano *::-webkit-scrollbar-track{
+    background:#0b0b0b;
+  }
+  #lf-nano *::-webkit-scrollbar-thumb{
+    background:#2a2a2a;
+    border-radius:10px;
+    border:2px solid #0b0b0b;
+  }
+
   #lf-main{ padding:26px 18px 40px; max-width:1860px; margin:0 auto; }
 
   #lf-workspace{
@@ -360,9 +377,9 @@
 
   .lf-topbar{
     height:56px;
-    display:flex;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
     align-items:center;
-    justify-content:space-between;
     padding:10px 14px;
     border-bottom:1px solid rgba(255,255,255,.08);
     background:rgba(0,0,0,.35);
@@ -386,7 +403,14 @@
     overflow:hidden;
     text-overflow:ellipsis;
   }
-  .lf-topbar .right{ display:flex; gap:10px; align-items:center; }
+  .lf-topbar .center{ display:flex; gap:14px; align-items:center; justify-self:center; }
+  .lf-topbar .right{ display:flex; gap:10px; align-items:center; justify-self:end; }
+  .lf-topgroup{ display:flex; gap:8px; align-items:center; }
+  .lf-divider{
+    width:1px;
+    height:26px;
+    background:rgba(255,255,255,.12);
+  }
 
   .lf-btnIcon{
     border:1px solid rgba(255,255,255,.12);
@@ -557,17 +581,107 @@
   .lf-layerlist{ display:flex; flex-direction:column; gap:8px; }
   .lf-layeritem{
     display:grid;
-    grid-template-columns:auto auto 1fr auto;
+    grid-template-columns:auto auto auto 1fr;
     gap:10px;
     align-items:center;
     border:1px solid rgba(255,255,255,.12);
     border-radius:12px;
     padding:8px 10px;
     background:rgba(255,255,255,.04);
+    cursor:pointer;
   }
   .lf-layeritem.active{ border-color:rgba(43,108,255,.8); background:rgba(43,108,255,.12); }
   .lf-layer-badge{ width:10px; height:10px; border-radius:999px; }
   .lf-layer-name{ font-size:12px; font-weight:800; color:#fff; }
+
+  .lf-layer-label{
+    font-size:11px;
+    font-weight:1000;
+    padding:2px 6px;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+  }
+
+  .lf-dropdown{
+    position:relative;
+    width:100%;
+  }
+  .lf-dropdown-btn{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
+    padding:12px 12px;
+    border-radius:12px;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    font-weight:900;
+  }
+  .lf-dropdown-btn::after{
+    content:"▾";
+    color:var(--text-sec);
+    font-size:12px;
+  }
+  .lf-dropdown-menu{
+    position:absolute;
+    left:0;
+    right:0;
+    top:calc(100% + 6px);
+    background:#121212;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    padding:6px;
+    display:none;
+    z-index:20;
+    box-shadow:0 12px 28px rgba(0,0,0,.4);
+  }
+  .lf-dropdown.open .lf-dropdown-menu{ display:block; }
+  .lf-dropdown-item{
+    padding:10px 10px;
+    border-radius:10px;
+    font-weight:900;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .lf-dropdown-item:hover{
+    background:rgba(43,108,255,.12);
+  }
+  .lf-dropdown-item.active{
+    background:rgba(43,108,255,.2);
+    border:1px solid rgba(43,108,255,.4);
+  }
+
+  .lf-photoDrop{
+    width:108px;
+    height:108px;
+    border-radius:14px;
+    border:1px dashed rgba(255,255,255,.2);
+    background:rgba(255,255,255,.04);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    cursor:pointer;
+    overflow:hidden;
+    position:relative;
+  }
+  .lf-photoDrop:hover{ border-color:rgba(43,108,255,.6); background:rgba(43,108,255,.08); }
+  .lf-photoDrop img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .lf-photoPlaceholder{
+    font-size:11px;
+    font-weight:900;
+    color:var(--text-sec);
+    padding:8px;
+  }
 
   .hidden{ display:none !important; }
 </style>
@@ -592,7 +706,7 @@
         </div>
 
         <div class="lf-field">
-          <label>Reference Images (optional)</label>
+          <label>Reference Images</label>
           <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
           <div class="lf-drop" id="drop">
             <div class="big" id="dropTitle">Upload images</div>
@@ -603,11 +717,14 @@
 
         <div class="lf-field">
           <label>Resolution</label>
-          <select id="res" class="lf-select">
-            <option value="1K">1K</option>
-            <option value="2K" selected>2K</option>
-            <option value="4K">4K</option>
-          </select>
+          <div class="lf-dropdown" id="resDropdown">
+            <button class="lf-dropdown-btn" id="resBtn" type="button">2K</button>
+            <div class="lf-dropdown-menu" id="resMenu">
+              <div class="lf-dropdown-item" data-value="1K">1K</div>
+              <div class="lf-dropdown-item active" data-value="2K">2K</div>
+              <div class="lf-dropdown-item" data-value="4K">4K</div>
+            </div>
+          </div>
         </div>
 
         <div class="lf-field">
@@ -773,10 +890,19 @@
               <div class="lf-pill" id="stateText">View • 3D ON</div>
               <div class="lf-title">Cinema Viewport</div>
             </div>
-            <div class="right">
-              <button class="lf-btnIcon" id="btnDraw" type="button">Draw</button>
-              <button class="lf-btnIcon" id="btn3D" type="button">3D</button>
+            <div class="center">
+              <div class="lf-topgroup">
+                <button class="lf-btnIcon" id="btnDraw" type="button">Draw</button>
+                <button class="lf-btnIcon" id="btn3D" type="button">3D</button>
+              </div>
+              <div class="lf-divider"></div>
+              <div class="lf-topgroup">
+                <button class="lf-btnIcon active" id="tMove" type="button">Move</button>
+                <button class="lf-btnIcon" id="tRot" type="button">Rotate</button>
+                <button class="lf-btnIcon" id="tScale" type="button">Scale</button>
+              </div>
             </div>
+            <div class="right"></div>
           </div>
           <div class="lf-stageWrap">
             <div class="lf-frame" id="frame">
@@ -805,7 +931,7 @@
           <input type="file" id="bgFile" accept="image/png,image/jpeg,image/webp" hidden />
           <div class="lf-drop" id="bgDrop">
             <div class="big" id="bgTitle">Upload background</div>
-            <div class="sub" id="bgSub">Optional</div>
+            <div class="sub" id="bgSub">Click or drag&drop</div>
           </div>
           <button class="lf-btn secondary" id="bgClear" type="button" style="margin-top:8px;">Remove background</button>
         </div>
@@ -836,13 +962,22 @@
             <div class="lf-char-header">
               <div class="lf-row">
                 <span class="lf-char-badge" style="background:#ff3b30;"></span>
-                <div class="lf-char-title">Character 1 (Red)</div>
+                <div class="lf-char-title">Character 1</div>
               </div>
               <div class="lf-switch" id="char1Toggle"></div>
             </div>
+            <input type="file" id="char1PhotoFile" accept="image/png,image/jpeg,image/webp" hidden />
+            <div class="lf-row" style="gap:12px;align-items:center;">
+              <div class="lf-photoDrop" id="char1PhotoDrop">
+                <div class="lf-photoPlaceholder">Drag & drop<br/>or click</div>
+                <img id="char1PhotoPreview" class="hidden" alt="Character 1 photo preview" />
+              </div>
+              <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
+                Photo upload
+              </div>
+            </div>
             <button class="lf-btnSmall" id="char1Default" type="button">Add default rigged character</button>
-            <input type="file" id="char1File" accept=".glb" hidden />
-            <button class="lf-btnSmall" id="char1Upload" type="button">Upload custom .glb</button>
+            <button class="lf-btnSmall" id="char1PhotoClear" type="button">Remove photo</button>
             <button class="lf-btnSmall" id="char1Remove" type="button">Remove</button>
           </div>
 
@@ -850,13 +985,22 @@
             <div class="lf-char-header">
               <div class="lf-row">
                 <span class="lf-char-badge" style="background:#2b6cff;"></span>
-                <div class="lf-char-title">Character 2 (Blue)</div>
+                <div class="lf-char-title">Character 2</div>
               </div>
               <div class="lf-switch" id="char2Toggle"></div>
             </div>
+            <input type="file" id="char2PhotoFile" accept="image/png,image/jpeg,image/webp" hidden />
+            <div class="lf-row" style="gap:12px;align-items:center;">
+              <div class="lf-photoDrop" id="char2PhotoDrop">
+                <div class="lf-photoPlaceholder">Drag & drop<br/>or click</div>
+                <img id="char2PhotoPreview" class="hidden" alt="Character 2 photo preview" />
+              </div>
+              <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
+                Photo upload
+              </div>
+            </div>
             <button class="lf-btnSmall" id="char2Default" type="button">Add default rigged character</button>
-            <input type="file" id="char2File" accept=".glb" hidden />
-            <button class="lf-btnSmall" id="char2Upload" type="button">Upload custom .glb</button>
+            <button class="lf-btnSmall" id="char2PhotoClear" type="button">Remove photo</button>
             <button class="lf-btnSmall" id="char2Remove" type="button">Remove</button>
           </div>
         </div>
@@ -884,15 +1028,6 @@
             <button class="lf-btnSmall" id="btnAddPrimitive" type="button">Add primitive</button>
             <input type="file" id="modelFile" accept=".glb" hidden />
             <button class="lf-btnSmall" id="btnAddModel" type="button">Add model (.glb)</button>
-          </div>
-        </div>
-
-        <div class="lf-section">
-          <div class="lf-h2">Transform</div>
-          <div class="lf-row">
-            <button class="lf-btnSmall active" id="tMove" type="button">Move</button>
-            <button class="lf-btnSmall" id="tRot" type="button">Rotate</button>
-            <button class="lf-btnSmall" id="tScale" type="button">Scale</button>
           </div>
         </div>
 
@@ -1156,7 +1291,10 @@ ${camBlock}
   const aspectListEl = $("aspectList");
   let selectedAspect = "16:9";
 
-  const resEl = $("res");
+  const resDropdown = $("resDropdown");
+  const resBtn = $("resBtn");
+  const resMenu = $("resMenu");
+  let selectedRes = "2K";
   const styleChk = $("styleOnly");
 
   const camPresetEl = $("camPreset");
@@ -1208,14 +1346,18 @@ ${camBlock}
 
   const char1Toggle = $("char1Toggle");
   const char1Default = $("char1Default");
-  const char1File = $("char1File");
-  const char1Upload = $("char1Upload");
+  const char1PhotoFile = $("char1PhotoFile");
+  const char1PhotoDrop = $("char1PhotoDrop");
+  const char1PhotoPreview = $("char1PhotoPreview");
+  const char1PhotoClear = $("char1PhotoClear");
   const char1Remove = $("char1Remove");
 
   const char2Toggle = $("char2Toggle");
   const char2Default = $("char2Default");
-  const char2File = $("char2File");
-  const char2Upload = $("char2Upload");
+  const char2PhotoFile = $("char2PhotoFile");
+  const char2PhotoDrop = $("char2PhotoDrop");
+  const char2PhotoPreview = $("char2PhotoPreview");
+  const char2PhotoClear = $("char2PhotoClear");
   const char2Remove = $("char2Remove");
 
   const layersList = $("layersList");
@@ -1236,6 +1378,12 @@ ${camBlock}
   const resetPoseBtn = $("resetPose");
 
   let selectedFiles = [];
+  let char1PhotoFileObj = null;
+  let char2PhotoFileObj = null;
+  let char1PhotoUrl = "";
+  let char2PhotoUrl = "";
+  let char1PhotoSignature = "";
+  let char2PhotoSignature = "";
   let currentJobId = null;
   let abortPoll = false;
   let pollTimer = null;
@@ -1265,6 +1413,8 @@ ${camBlock}
     char2: null
   };
   let actorCounter = 1;
+  let primitiveCounter = 1;
+  let modelCounter = 1;
 
   let renderer;
   let scene;
@@ -1403,9 +1553,16 @@ ${camBlock}
     return (kb/1024).toFixed(1) + " MB";
   }
 
-  function ensureLimit(files){
-    if (files.length <= MAX_IMAGES) return files;
-    return files.slice(0, MAX_IMAGES);
+  function getMaxLeftImages(){
+    const compositeSlot = shouldUseComposite() ? 1 : 0;
+    const char1Slot = char1PhotoFileObj ? 1 : 0;
+    const char2Slot = char2PhotoFileObj ? 1 : 0;
+    return Math.max(0, MAX_IMAGES - compositeSlot - char1Slot - char2Slot);
+  }
+
+  function ensureLimit(files, limit){
+    if (files.length <= limit) return files;
+    return files.slice(0, limit);
   }
 
   function dedupeBySignature(files){
@@ -1425,9 +1582,10 @@ ${camBlock}
     if (!imgs.length) return;
 
     const merged = selectedFiles.concat(imgs);
-    const limited = ensureLimit(dedupeBySignature(merged));
+    const maxLeft = getMaxLeftImages();
+    const limited = ensureLimit(dedupeBySignature(merged), maxLeft);
     if (limited.length < merged.length){
-      setStatus(`Max ${MAX_IMAGES} images. Extra files ignored.`, "err");
+      setStatus(`Max ${maxLeft} images for this setup. Extra files ignored.`, "err");
       setTimeout(()=>setStatus(""), 1600);
     }
     selectedFiles = limited;
@@ -1500,16 +1658,32 @@ ${camBlock}
   }
 
   function updateDropText(){
+    const maxLeft = getMaxLeftImages();
     if (!selectedFiles.length){
       dropTitle.textContent = "Upload images";
-      dropSub.textContent = "Click or drag&drop • up to 14 images";
+      dropSub.textContent = `Click or drag&drop • up to ${maxLeft} images`;
       return;
     }
     const count = selectedFiles.length;
     const totalBytes = selectedFiles.reduce((s,f)=>s+(f?.size||0), 0);
 
     dropTitle.textContent = `${count} image${count>1?"s":""} selected`;
-    dropSub.textContent = `Total: ${formatSize(totalBytes)} • Click to add more • Drag&drop works`;
+    dropSub.textContent = `Total: ${formatSize(totalBytes)} • Click to add more • Up to ${maxLeft} images`;
+  }
+
+  function enforceLeftLimit(reason){
+    const maxLeft = getMaxLeftImages();
+    if (selectedFiles.length <= maxLeft) {
+      updateDropText();
+      return;
+    }
+    selectedFiles = selectedFiles.slice(0, maxLeft);
+    renderThumbs();
+    updateDropText();
+    if (reason) {
+      setStatus(`Max ${maxLeft} images for this setup. Extra files ignored.`, "err");
+      setTimeout(()=>setStatus(""), 1600);
+    }
   }
 
   async function getSessionOrRedirect(){
@@ -1607,8 +1781,19 @@ ${camBlock}
     return urls;
   }
 
+  function setResolution(val){
+    selectedRes = val;
+    if (resBtn) resBtn.textContent = val;
+    if (resMenu) {
+      resMenu.querySelectorAll(".lf-dropdown-item").forEach(item=>{
+        item.classList.toggle("active", item.dataset.value === val);
+      });
+    }
+    calcCost();
+  }
+
   function calcCost(){
-    const res = String(resEl.value || "2K");
+    const res = String(selectedRes || "2K");
     const cost = (res === "4K") ? 2 : 1;
     $("cost").textContent = cost + " Cr";
   }
@@ -1805,6 +1990,7 @@ Keep it compact but unambiguous.
     redrawBackground();
     bgTitle.textContent = "Background loaded";
     bgSub.textContent = (file?.name ? file.name : "—") + " • " + formatSize(file.size||0);
+    enforceLeftLimit(true);
   }
 
   function clearBackground(){
@@ -1815,7 +2001,103 @@ Keep it compact but unambiguous.
     bgFileObj = null;
     redrawBackground();
     bgTitle.textContent = "Upload background";
-    bgSub.textContent = "Optional";
+    bgSub.textContent = "Click or drag&drop";
+    enforceLeftLimit(false);
+  }
+
+  function clearCharPhoto(index){
+    if (index === 1){
+      if (char1PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char1PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char1PhotoFileObj = null;
+      char1PhotoUrl = "";
+      char1PhotoSignature = "";
+      char1PhotoPreview?.classList.add("hidden");
+      if (char1PhotoPreview) char1PhotoPreview.src = "";
+      if (char1PhotoDrop) {
+        const placeholder = char1PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "block";
+      }
+    } else {
+      if (char2PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char2PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char2PhotoFileObj = null;
+      char2PhotoUrl = "";
+      char2PhotoSignature = "";
+      char2PhotoPreview?.classList.add("hidden");
+      if (char2PhotoPreview) char2PhotoPreview.src = "";
+      if (char2PhotoDrop) {
+        const placeholder = char2PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "block";
+      }
+    }
+    enforceLeftLimit(true);
+  }
+
+  function setCharPhoto(index, file){
+    if (!file) return;
+    if (index === 1){
+      if (char1PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char1PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char1PhotoFileObj = file;
+      char1PhotoSignature = "";
+      char1PhotoUrl = "";
+      if (!file.__previewUrl){
+        try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
+      }
+      if (char1PhotoPreview) {
+        char1PhotoPreview.src = file.__previewUrl || "";
+        char1PhotoPreview.classList.remove("hidden");
+      }
+      if (char1PhotoDrop) {
+        const placeholder = char1PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "none";
+      }
+    } else {
+      if (char2PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char2PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char2PhotoFileObj = file;
+      char2PhotoSignature = "";
+      char2PhotoUrl = "";
+      if (!file.__previewUrl){
+        try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
+      }
+      if (char2PhotoPreview) {
+        char2PhotoPreview.src = file.__previewUrl || "";
+        char2PhotoPreview.classList.remove("hidden");
+      }
+      if (char2PhotoDrop) {
+        const placeholder = char2PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "none";
+      }
+    }
+    enforceLeftLimit(true);
+  }
+
+  function fileSignature(file){
+    if (!file) return "";
+    return `${file.name}|${file.size}|${file.lastModified}`;
+  }
+
+  async function getCharPhotoUrl(index){
+    const file = index === 1 ? char1PhotoFileObj : char2PhotoFileObj;
+    if (!file) return "";
+    const sig = fileSignature(file);
+    if (index === 1 && sig && char1PhotoSignature === sig && char1PhotoUrl) return char1PhotoUrl;
+    if (index === 2 && sig && char2PhotoSignature === sig && char2PhotoUrl) return char2PhotoUrl;
+    const url = await uploadReferenceToInputs(file);
+    if (index === 1){
+      char1PhotoSignature = sig;
+      char1PhotoUrl = url;
+    } else {
+      char2PhotoSignature = sig;
+      char2PhotoUrl = url;
+    }
+    return url;
   }
 
   function buildPalette(){
@@ -1863,7 +2145,10 @@ Keep it compact but unambiguous.
     dCtx.lineTo(x1,y1);
     dCtx.stroke();
     dCtx.restore();
-    drawDirty = true;
+    if (!drawDirty){
+      drawDirty = true;
+      enforceLeftLimit(true);
+    }
   }
 
   drawCanvas.addEventListener("mousedown", (ev)=>{
@@ -1905,6 +2190,7 @@ Keep it compact but unambiguous.
     if (!confirm("Clear drawings?")) return;
     dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
     drawDirty = false;
+    enforceLeftLimit(false);
   });
 
   function init3D(){
@@ -2088,7 +2374,7 @@ Keep it compact but unambiguous.
     root.position.y -= box2.min.y;
   }
 
-  function createActor({ name, color, type, group, isCharacter=false, characterIndex=null }){
+  function createActor({ name, color, type, group, isCharacter=false, characterIndex=null, shortLabel="L" }){
     return {
       id: `actor-${actorCounter++}`,
       name,
@@ -2100,7 +2386,8 @@ Keep it compact but unambiguous.
       poseMode: false,
       selectedBoneIndex: null,
       isCharacter,
-      characterIndex
+      characterIndex,
+      shortLabel
     };
   }
 
@@ -2111,6 +2398,7 @@ Keep it compact but unambiguous.
     renderLayers();
     setActiveActor(actor.id);
     updateCharactersUI();
+    enforceLeftLimit(true);
   }
 
   function removeActor(actor){
@@ -2125,6 +2413,7 @@ Keep it compact but unambiguous.
     renderLayers();
     updateActiveUI();
     updateCharactersUI();
+    enforceLeftLimit(true);
   }
 
   function setActorVisible(actor, visible){
@@ -2137,6 +2426,7 @@ Keep it compact but unambiguous.
     }
     renderLayers();
     updateActiveUI();
+    enforceLeftLimit(true);
   }
 
   function setActiveActor(id){
@@ -2158,11 +2448,13 @@ Keep it compact but unambiguous.
     actors.forEach(actor => {
       const item = document.createElement("div");
       item.className = "lf-layeritem" + (actor.id === actorState.activeId ? " active" : "");
+      item.addEventListener("click", ()=>setActiveActor(actor.id));
 
       const visBtn = document.createElement("button");
       visBtn.className = "lf-btnSmall";
       visBtn.textContent = actor.visible ? "👁" : "🚫";
-      visBtn.addEventListener("click", ()=>{
+      visBtn.addEventListener("click", (e)=>{
+        e.stopPropagation();
         setActorVisible(actor, !actor.visible);
       });
 
@@ -2170,19 +2462,18 @@ Keep it compact but unambiguous.
       badge.className = "lf-layer-badge";
       badge.style.background = actor.color;
 
+      const label = document.createElement("span");
+      label.className = "lf-layer-label";
+      label.textContent = actor.shortLabel || "L";
+
       const name = document.createElement("span");
       name.className = "lf-layer-name";
       name.textContent = actor.name;
 
-      const selectBtn = document.createElement("button");
-      selectBtn.className = "lf-btnSmall";
-      selectBtn.textContent = "Select";
-      selectBtn.addEventListener("click", ()=>setActiveActor(actor.id));
-
       item.appendChild(visBtn);
       item.appendChild(badge);
+      item.appendChild(label);
       item.appendChild(name);
-      item.appendChild(selectBtn);
       layersList.appendChild(item);
     });
   }
@@ -2303,7 +2594,8 @@ Keep it compact but unambiguous.
       type: "character",
       group: wrapper,
       isCharacter: true,
-      characterIndex: index
+      characterIndex: index,
+      shortLabel: `C${index}`
     });
 
     actor.rig = findFirstSkinnedMeshAndSetupRig(root);
@@ -2330,12 +2622,14 @@ Keep it compact but unambiguous.
     const wrapper = new THREE.Group();
     wrapper.add(mesh);
     wrapper.position.set(0, 0.05, 0);
+    const label = `P${primitiveCounter++}`;
 
     const actor = createActor({
-      name: `Primitive ${actors.length + 1}`,
+      name: `Primitive ${label}`,
       color: "#bbbbbb",
       type: "primitive",
-      group: wrapper
+      group: wrapper,
+      shortLabel: label
     });
     addActor(actor);
     setMode("3d");
@@ -2349,11 +2643,13 @@ Keep it compact but unambiguous.
     wrapper.position.set(0, 0.05, 0);
     updateModelMaterial(wrapper, 0xffffff, 0.75);
 
+    const modelLabel = `M${modelCounter++}`;
     const actor = createActor({
       name: label,
       color: "#ffffff",
       type: "model",
-      group: wrapper
+      group: wrapper,
+      shortLabel: modelLabel
     });
     actor.rig = findFirstSkinnedMeshAndSetupRig(root);
     if (actor.rig){
@@ -2481,25 +2777,62 @@ Keep it compact but unambiguous.
     return uploadReferenceToInputs(file);
   }
 
-  function buildCinemaLockPrompt(){
+  function buildImageInputPlan({ compositeUrl, char1Url, char2Url, leftUrls }){
+    const urls = [];
+    const indexMap = {};
+    if (compositeUrl){
+      indexMap.composite = urls.length + 1;
+      urls.push(compositeUrl);
+    }
+    if (char1Url){
+      indexMap.char1 = urls.length + 1;
+      urls.push(char1Url);
+    }
+    if (char2Url){
+      indexMap.char2 = urls.length + 1;
+      urls.push(char2Url);
+    }
+    (leftUrls || []).forEach(url => urls.push(url));
+    return { urls, indexMap };
+  }
+
+  function buildCinemaLockPrompt({ indexMap, hasComposite }){
     const lines = [];
     const hasBackground = !!bgImage;
     const visibleActors = actors.filter(a => a.visible);
 
-    if (hasBackground){
+    if (hasComposite && indexMap.composite){
+      lines.push(`Image #${indexMap.composite} is the composite viewport plate (locked). Preserve camera, perspective, placements.`);
+    }
+
+    if (hasComposite && hasBackground){
       lines.push("BACKGROUND LOCK: The composite contains a locked background plate. Preserve the exact background composition, perspective, and camera framing.");
     }
 
-    if (visibleActors.length){
+    if (hasComposite && visibleActors.length){
       lines.push("SCENE LOCK: Preserve all proxy placements, scales, and camera perspective from the composite input. Do NOT re-pose, re-center, or replace any proxy silhouettes.");
     }
 
-    if (actorState.char1 && actorState.char1.visible){
-      lines.push("CHARACTER 1 LOCK: The RED proxy represents Character 1. Keep the exact pose and silhouette from the red proxy. Do not adjust limb angles or stance.");
+    if (indexMap.char1){
+      lines.push(`Character 1 photo is image #${indexMap.char1} in the reference list.`);
+      lines.push(`Image #${indexMap.char1} is Character 1 identity photo. Use it as identity reference for Character 1.`);
     }
 
-    if (actorState.char2 && actorState.char2.visible){
-      lines.push("CHARACTER 2 LOCK: The BLUE proxy represents Character 2. Keep the exact pose and silhouette from the blue proxy. Do not adjust limb angles or stance.");
+    if (indexMap.char2){
+      lines.push(`Character 2 photo is image #${indexMap.char2} in the reference list.`);
+      lines.push(`Image #${indexMap.char2} is Character 2 identity photo. Use it as identity reference for Character 2.`);
+    }
+
+    if (hasComposite && actorState.char1 && actorState.char1.visible && indexMap.char1){
+      lines.push(`Character 1 identity must match Character 1 photo (image #${indexMap.char1}).`);
+      lines.push("Character 1 pose must match the proxy pose exactly as seen in the composite viewport image.");
+      lines.push("Do not change pose, silhouette, stance, camera angle.");
+    }
+
+    if (hasComposite && actorState.char2 && actorState.char2.visible && indexMap.char2){
+      lines.push(`Character 2 identity must match Character 2 photo (image #${indexMap.char2}).`);
+      lines.push("Character 2 pose must match the proxy pose exactly as seen in the composite viewport image.");
+      lines.push("Do not change pose, silhouette, stance, camera angle.");
     }
 
     if (visibleActors.length > 1){
@@ -2534,12 +2867,23 @@ Keep it compact but unambiguous.
     const flare = String(flareEl?.value || "subtle");
     const bloom = String(bloomEl?.value || "subtle");
 
-    const resVal = String(resEl.value || "2K");
+    const resVal = String(selectedRes || "2K");
 
-    const urls = await getOrUploadImageUrls();
+    const leftUrls = await getOrUploadImageUrls();
     const compositeUrl = await buildCompositeUrl();
-    const hasImage = urls.length > 0 || !!compositeUrl;
-    const cinemaLock = buildCinemaLockPrompt();
+    const char1Url = await getCharPhotoUrl(1);
+    const char2Url = await getCharPhotoUrl(2);
+    const imagePlan = buildImageInputPlan({
+      compositeUrl,
+      char1Url,
+      char2Url,
+      leftUrls
+    });
+    const hasImage = imagePlan.urls.length > 0;
+    const cinemaLock = buildCinemaLockPrompt({
+      indexMap: imagePlan.indexMap,
+      hasComposite: !!compositeUrl
+    });
 
     const finalPrompt = buildFinalPrompt({
       userPrompt: userPromptRaw,
@@ -2563,14 +2907,11 @@ Keep it compact but unambiguous.
     fd.append("output_format", "png");
     fd.append("safety_filter_level", "block_only_high");
 
-    if (compositeUrl){
-      fd.append("image_input_url", compositeUrl);
-      const allUrls = [compositeUrl, ...urls];
-      allUrls.forEach(u => fd.append("image_input_urls", u));
-    } else if (urls.length){
-      fd.append("image_input_url", urls[0]);
-      urls.forEach(u => fd.append("image_input_urls", u));
+    const primaryUrl = compositeUrl || leftUrls[0];
+    if (primaryUrl){
+      fd.append("image_input_url", primaryUrl);
     }
+    imagePlan.urls.forEach(u => fd.append("image_input_urls", u));
 
     loaderSub.textContent = "Sending task…";
 
@@ -2713,8 +3054,22 @@ Keep it compact but unambiguous.
     if (confirm("Clear selected images?")) clearFiles();
   });
 
-  resEl.addEventListener("change", calcCost);
-  calcCost();
+  if (resDropdown && resBtn && resMenu){
+    resBtn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      resDropdown.classList.toggle("open");
+    });
+    resMenu.addEventListener("click", (e)=>{
+      const item = e.target.closest(".lf-dropdown-item");
+      if (!item) return;
+      setResolution(item.dataset.value);
+      resDropdown.classList.remove("open");
+    });
+    window.addEventListener("click", ()=>{
+      resDropdown.classList.remove("open");
+    });
+  }
+  setResolution(selectedRes);
   updateDropText();
   buildPalette();
   applyAspectRatio();
@@ -2734,23 +3089,31 @@ Keep it compact but unambiguous.
   char1Default.addEventListener("click", async ()=>{
     try{
       const gltf = await loadGltfFromUrl(HUMAN_URL);
-      addCharacter(1, gltf, "Character 1 (Default)" );
+      addCharacter(1, gltf, "Character 1");
     } catch(e){
       alert("Error loading default character");
     }
   });
-  char1Upload.addEventListener("click", ()=>char1File.click());
-  char1File.addEventListener("change", async (e)=>{
+  char1PhotoDrop.addEventListener("click", ()=>char1PhotoFile.click());
+  char1PhotoFile.addEventListener("change", (e)=>{
     const file = e.target.files?.[0];
-    char1File.value = "";
+    char1PhotoFile.value = "";
     if (!file) return;
-    try{
-      const gltf = await loadGltfFromFile(file);
-      addCharacter(1, gltf, "Character 1" );
-    } catch(e){
-      alert("Error loading GLB");
-    }
+    if (!file.type.startsWith("image/")) return;
+    setCharPhoto(1, file);
   });
+  ["dragenter","dragover"].forEach(evt=>{
+    char1PhotoDrop.addEventListener(evt,(ev)=>{ ev.preventDefault(); char1PhotoDrop.style.borderColor="rgba(43,108,255,.55)"; });
+  });
+  ["dragleave","drop"].forEach(evt=>{
+    char1PhotoDrop.addEventListener(evt,(ev)=>{ ev.preventDefault(); char1PhotoDrop.style.borderColor="rgba(255,255,255,.2)"; });
+  });
+  char1PhotoDrop.addEventListener("drop",(ev)=>{
+    const file = ev.dataTransfer?.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    setCharPhoto(1, file);
+  });
+  char1PhotoClear.addEventListener("click", ()=>clearCharPhoto(1));
   char1Remove.addEventListener("click", ()=>{
     if (actorState.char1) {
       removeActor(actorState.char1);
@@ -2765,23 +3128,31 @@ Keep it compact but unambiguous.
   char2Default.addEventListener("click", async ()=>{
     try{
       const gltf = await loadGltfFromUrl(HUMAN_URL);
-      addCharacter(2, gltf, "Character 2 (Default)" );
+      addCharacter(2, gltf, "Character 2");
     } catch(e){
       alert("Error loading default character");
     }
   });
-  char2Upload.addEventListener("click", ()=>char2File.click());
-  char2File.addEventListener("change", async (e)=>{
+  char2PhotoDrop.addEventListener("click", ()=>char2PhotoFile.click());
+  char2PhotoFile.addEventListener("change", (e)=>{
     const file = e.target.files?.[0];
-    char2File.value = "";
+    char2PhotoFile.value = "";
     if (!file) return;
-    try{
-      const gltf = await loadGltfFromFile(file);
-      addCharacter(2, gltf, "Character 2" );
-    } catch(e){
-      alert("Error loading GLB");
-    }
+    if (!file.type.startsWith("image/")) return;
+    setCharPhoto(2, file);
   });
+  ["dragenter","dragover"].forEach(evt=>{
+    char2PhotoDrop.addEventListener(evt,(ev)=>{ ev.preventDefault(); char2PhotoDrop.style.borderColor="rgba(43,108,255,.55)"; });
+  });
+  ["dragleave","drop"].forEach(evt=>{
+    char2PhotoDrop.addEventListener(evt,(ev)=>{ ev.preventDefault(); char2PhotoDrop.style.borderColor="rgba(255,255,255,.2)"; });
+  });
+  char2PhotoDrop.addEventListener("drop",(ev)=>{
+    const file = ev.dataTransfer?.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    setCharPhoto(2, file);
+  });
+  char2PhotoClear.addEventListener("click", ()=>clearCharPhoto(2));
   char2Remove.addEventListener("click", ()=>{
     if (actorState.char2) {
       removeActor(actorState.char2);
