@@ -39,7 +39,7 @@
     border:2px solid #0b0b0b;
   }
 
-  #lf-main{ padding:26px 420px 40px 18px; max-width:1860px; margin:0 auto; }
+  #lf-main{ padding:26px 18px 40px; max-width:1860px; margin:0 auto; }
 
   #lf-workspace{
     display:grid;
@@ -590,12 +590,12 @@
     padding-right:4px;
   }
   #shotLibrarySection{
-    position:fixed;
-    right:18px;
-    top:calc(74px + 26px);
-    width:360px;
-    max-height:calc(100vh - 74px - 26px - 40px);
-    z-index:50;
+    position: fixed !important;
+    right: calc(18px + 420px) !important;
+    top: calc(74px + 26px) !important;
+    width: 360px !important;
+    max-height: calc(100vh - 74px - 26px - 40px) !important;
+    z-index: 9998 !important;
   }
   #shotLibrarySection .lf-libraryList{
     max-height:calc(100vh - 74px - 26px - 120px);
@@ -1096,11 +1096,11 @@
               <canvas id="drawCanvas"></canvas>
               <canvas id="glCanvas"></canvas>
             </div>
-          <div class="lf-resultOverlay" id="resultOverlay">
-            <button class="lf-close" id="closeResult" type="button">Close</button>
-            <div class="lf-resultCard">
-              <video id="outVideo" controls playsinline class="hidden"></video>
-              <img id="outImg" class="hidden" alt="result" />
+            <div class="lf-resultOverlay" id="resultOverlay">
+              <button class="lf-close" id="closeResult" type="button">Close</button>
+              <div class="lf-resultCard">
+                <video id="outVideo" controls playsinline class="hidden"></video>
+                <img id="outImg" class="hidden" alt="result" />
                 <div class="lf-resbar">
                   <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
                   <a id="download" href="#" download>Download</a>
@@ -1237,85 +1237,77 @@
         </div>
 
       </div>
-      <div class="lf-section" id="shotLibrarySection">
-        <div class="lf-row" style="justify-content:space-between;">
-          <div class="lf-h2">Cinema Shot Library</div>
-          <button class="lf-btnSmall" id="shotLibraryRefresh" type="button">Refresh</button>
+    </div>
+  </div>
+
+  <div class="lf-previewOverlay" id="inputPreviewOverlay">
+    <div class="lf-previewCard">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div class="lf-h2">Preview Input Plate</div>
+        <button class="lf-btnSmall" id="previewClose" type="button">Close</button>
+      </div>
+      <img id="previewImg" alt="Input preview" />
+      <div style="font-size:12px;color:var(--text-sec);" id="previewPrimary"></div>
+      <div class="lf-previewList" id="previewList"></div>
+    </div>
+  </div>
+
+  <div class="lf-modal" id="shotModal">
+    <div class="lf-modalCard">
+      <div class="lf-modalHeader">
+        <div>
+          <div class="lf-h2" id="shotModalTitle">Cinema Shot</div>
+          <div class="lf-muted" id="shotModalMeta"></div>
         </div>
-        <div class="lf-libraryList" id="shotLibraryList"></div>
+        <button class="lf-btnSmall" id="shotModalClose" type="button">Close</button>
+      </div>
+      <img id="shotModalImg" alt="Cinema shot preview" />
+      <div class="lf-row" style="justify-content:flex-end;flex-wrap:wrap;">
+        <button class="lf-btnSmall" id="shotModalDownload" type="button">Download</button>
+        <button class="lf-btnSmall" id="shotModalCopy" type="button">Copy URL</button>
+        <button class="lf-btnSmall" id="shotModalRename" type="button">Rename</button>
       </div>
     </div>
   </div>
 
-<div class="lf-previewOverlay" id="inputPreviewOverlay">
-  <div class="lf-previewCard">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-      <div class="lf-h2">Preview Input Plate</div>
-      <button class="lf-btnSmall" id="previewClose" type="button">Close</button>
-    </div>
-    <img id="previewImg" alt="Input preview" />
-    <div style="font-size:12px;color:var(--text-sec);" id="previewPrimary"></div>
-    <div class="lf-previewList" id="previewList"></div>
-  </div>
-</div>
-
-<div class="lf-modal" id="shotModal">
-  <div class="lf-modalCard">
-    <div class="lf-modalHeader">
-      <div>
-        <div class="lf-h2" id="shotModalTitle">Cinema Shot</div>
-        <div class="lf-muted" id="shotModalMeta"></div>
+  <div class="lf-modal" id="charLibraryModal">
+    <div class="lf-modalCard">
+      <div class="lf-modalHeader">
+        <div class="lf-h2">Character Library</div>
+        <button class="lf-btnSmall" id="charLibraryClose" type="button">Close</button>
       </div>
-      <button class="lf-btnSmall" id="shotModalClose" type="button">Close</button>
-    </div>
-    <img id="shotModalImg" alt="Cinema shot preview" />
-    <div class="lf-row" style="justify-content:flex-end;flex-wrap:wrap;">
-      <button class="lf-btnSmall" id="shotModalDownload" type="button">Download</button>
-      <button class="lf-btnSmall" id="shotModalCopy" type="button">Copy URL</button>
-      <button class="lf-btnSmall" id="shotModalRename" type="button">Rename</button>
+      <div class="lf-row" style="flex-wrap:wrap;">
+        <input id="charLibrarySearch" type="text" placeholder="Search characters..." />
+        <button class="lf-btnSmall" id="charLibraryRefresh" type="button">Refresh</button>
+      </div>
+      <div class="lf-libraryGrid" id="charLibraryList"></div>
     </div>
   </div>
-</div>
 
-<div class="lf-modal" id="charLibraryModal">
-  <div class="lf-modalCard">
-    <div class="lf-modalHeader">
-      <div class="lf-h2">Character Library</div>
-      <button class="lf-btnSmall" id="charLibraryClose" type="button">Close</button>
+  <div class="lf-modal" id="projectListModal">
+    <div class="lf-modalCard">
+      <div class="lf-modalHeader">
+        <div class="lf-h2">Open Project</div>
+        <button class="lf-btnSmall" id="projectListClose" type="button">Close</button>
+      </div>
+      <div class="lf-libraryList" id="projectList"></div>
     </div>
-    <div class="lf-row" style="flex-wrap:wrap;">
-      <input id="charLibrarySearch" type="text" placeholder="Search characters..." />
-      <button class="lf-btnSmall" id="charLibraryRefresh" type="button">Refresh</button>
-    </div>
-    <div class="lf-libraryGrid" id="charLibraryList"></div>
   </div>
-</div>
 
-<div class="lf-modal" id="projectListModal">
-  <div class="lf-modalCard">
-    <div class="lf-modalHeader">
-      <div class="lf-h2">Open Project</div>
-      <button class="lf-btnSmall" id="projectListClose" type="button">Close</button>
+  <div class="lf-modal" id="projectSaveModal">
+    <div class="lf-modalCard">
+      <div class="lf-modalHeader">
+        <div class="lf-h2" id="projectSaveTitle">Save Project</div>
+        <button class="lf-btnSmall" id="projectSaveClose" type="button">Close</button>
+      </div>
+      <div class="lf-field">
+        <label>Project name</label>
+        <input type="text" id="projectNameInput" placeholder="Project name" />
+      </div>
+      <div class="lf-row" style="justify-content:flex-end;">
+        <button class="lf-btnSmall" id="projectSaveConfirm" type="button">Save</button>
+      </div>
     </div>
-    <div class="lf-libraryList" id="projectList"></div>
-  </div>
-</div>
-
-<div class="lf-modal" id="projectSaveModal">
-  <div class="lf-modalCard">
-    <div class="lf-modalHeader">
-      <div class="lf-h2" id="projectSaveTitle">Save Project</div>
-      <button class="lf-btnSmall" id="projectSaveClose" type="button">Close</button>
-    </div>
-    <div class="lf-field">
-      <label>Project name</label>
-      <input type="text" id="projectNameInput" placeholder="Project name" />
-    </div>
-    <div class="lf-row" style="justify-content:flex-end;">
-      <button class="lf-btnSmall" id="projectSaveConfirm" type="button">Save</button>
-    </div>
-  </div>
-</div>
   </div>
 
   <div class="lf-loader" id="loader">
@@ -1323,6 +1315,14 @@
     <div class="lf-wait">Waiting…</div>
     <div class="lf-time" id="loaderTime">01:00</div>
     <div class="lf-time" id="loaderSub">Sending task…</div>
+  </div>
+
+  <div class="lf-section" id="shotLibrarySection">
+    <div class="lf-row" style="justify-content:space-between;">
+      <div class="lf-h2">Cinema Shot Library</div>
+      <button class="lf-btnSmall" id="shotLibraryRefresh" type="button">Refresh</button>
+    </div>
+    <div class="lf-libraryList" id="shotLibraryList"></div>
   </div>
 </div>
 
