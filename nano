@@ -578,7 +578,14 @@
   .lf-char-title{ font-weight:900; font-size:13px; }
   .lf-char-badge{ width:12px; height:12px; border-radius:999px; }
 
-  .lf-layerlist{ display:flex; flex-direction:column; gap:8px; }
+  .lf-layerlist{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    max-height:260px;
+    overflow:auto;
+    padding-right:4px;
+  }
   .lf-layeritem{
     display:grid;
     grid-template-columns:auto auto auto 1fr;
@@ -708,6 +715,10 @@
         <div class="lf-field">
           <label>Reference Images</label>
           <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+          <div class="lf-row" style="margin-bottom:10px;">
+            <button class="lf-btnSmall" id="uploadImagesBtn" type="button">Upload images</button>
+            <button class="lf-btnSmall" id="myCharsGlobal" type="button">Мои персонажи</button>
+          </div>
           <div class="lf-drop" id="drop">
             <div class="big" id="dropTitle">Upload images</div>
             <div class="sub" id="dropSub">Click or drag&drop • up to 14 images</div>
@@ -813,7 +824,14 @@
         <div class="lf-row2">
           <div class="lf-field">
             <label>Focal length (mm)</label>
-            <input type="text" id="focal" value="35" />
+            <select id="focal" class="lf-select">
+              <option value="18">18</option>
+              <option value="24">24</option>
+              <option value="35" selected>35</option>
+              <option value="50">50</option>
+              <option value="85">85</option>
+              <option value="135">135</option>
+            </select>
           </div>
           <div class="lf-field">
             <label>Aperture</label>
@@ -887,8 +905,7 @@
         <div class="lf-viewportCard">
           <div class="lf-topbar">
             <div class="left">
-              <div class="lf-pill" id="stateText">View • 3D ON</div>
-              <div class="lf-title">Cinema Viewport</div>
+              <div class="lf-pill" id="stateText">Cinema</div>
             </div>
             <div class="center">
               <div class="lf-topgroup">
@@ -972,8 +989,11 @@
                 <div class="lf-photoPlaceholder">Drag & drop<br/>or click</div>
                 <img id="char1PhotoPreview" class="hidden" alt="Character 1 photo preview" />
               </div>
-              <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
-                Photo upload
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
+                  Photo upload
+                </div>
+                <button class="lf-btnSmall" id="char1Library" type="button">Мои персонажи</button>
               </div>
             </div>
             <button class="lf-btnSmall" id="char1Default" type="button">Add default rigged character</button>
@@ -995,8 +1015,11 @@
                 <div class="lf-photoPlaceholder">Drag & drop<br/>or click</div>
                 <img id="char2PhotoPreview" class="hidden" alt="Character 2 photo preview" />
               </div>
-              <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
-                Photo upload
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
+                  Photo upload
+                </div>
+                <button class="lf-btnSmall" id="char2Library" type="button">Мои персонажи</button>
               </div>
             </div>
             <button class="lf-btnSmall" id="char2Default" type="button">Add default rigged character</button>
@@ -1167,9 +1190,9 @@ ANTI-AI LOOK:
       case "off":
         return "no anamorphic streak flare";
       case "strong":
-        return "strong but realistic anamorphic streak flare originating ONLY from bright highlights (torch flame), not a sci-fi laser line";
+        return "strong but realistic anamorphic streak flare originating ONLY from the brightest highlights / brightest light source (specular/emissive), not a sci-fi laser line";
       default:
-        return "subtle anamorphic streak flare originating ONLY from bright highlights (torch flame), not a sci-fi laser line";
+        return "subtle anamorphic streak flare originating ONLY from the brightest highlights / brightest light source (specular/emissive), not a sci-fi laser line";
     }
   }
 
@@ -1229,9 +1252,9 @@ PHYSICAL CAMERA SIMULATION:
     const useFlare = isAnamorphic && String(flare||"subtle") !== "off";
     const anamorphicOpticsPack = useFlare ? `
 ANAMORPHIC OPTICS (CONTROLLED):
-- Create the anamorphic streak flare ONLY from the torch flame highlight.
-- The flare must be realistic, not a neon sci-fi line. Do NOT add random blue lines.
-- If the flare becomes too strong, reduce intensity automatically.
+- Create an anamorphic horizontal streak flare ONLY from the brightest highlights / brightest light source in the scene.
+- The flare must originate from real specular/emissive highlights (street lamps, headlights, neon, sun glints, reflections) — not random blue lines.
+- Keep it film-realistic (no sci-fi laser beam). If too strong, automatically reduce intensity.
 ` : "";
 
     const camBlock = `
@@ -1294,6 +1317,8 @@ ${camBlock}
   const resBtn = $("resBtn");
   const resMenu = $("resMenu");
   let selectedRes = "2K";
+  const uploadImagesBtn = $("uploadImagesBtn");
+  const myCharsGlobal = $("myCharsGlobal");
   const styleChk = $("styleOnly");
 
   const camPresetEl = $("camPreset");
@@ -1348,6 +1373,7 @@ ${camBlock}
   const char1PhotoFile = $("char1PhotoFile");
   const char1PhotoDrop = $("char1PhotoDrop");
   const char1PhotoPreview = $("char1PhotoPreview");
+  const char1Library = $("char1Library");
   const char1PhotoClear = $("char1PhotoClear");
   const char1Remove = $("char1Remove");
 
@@ -1356,6 +1382,7 @@ ${camBlock}
   const char2PhotoFile = $("char2PhotoFile");
   const char2PhotoDrop = $("char2PhotoDrop");
   const char2PhotoPreview = $("char2PhotoPreview");
+  const char2Library = $("char2Library");
   const char2PhotoClear = $("char2PhotoClear");
   const char2Remove = $("char2Remove");
 
@@ -1427,6 +1454,15 @@ ${camBlock}
     look: new THREE.Vector3(0, 0.55, 0)
   };
 
+  const FOCAL_FOV = {
+    18: 80,
+    24: 65,
+    35: 45,
+    50: 32,
+    85: 20,
+    135: 12
+  };
+
   const THREE_OK = !!(window.THREE && THREE.OrbitControls && THREE.TransformControls && THREE.GLTFLoader);
 
   if (!THREE_OK){
@@ -1435,6 +1471,10 @@ ${camBlock}
   }
 
   $("btn-back").addEventListener("click", ()=>location.href = BASE + "/flow#image");
+
+  function openCharacterLibrary(){
+    alert("Coming soon: character library");
+  }
 
   (function initCinematicPresets(){
     if (!camPresetEl) return;
@@ -1797,6 +1837,18 @@ ${camBlock}
     $("cost").textContent = cost + " Cr";
   }
 
+  function resolveFovFromFocal(mm){
+    const val = Number(mm || 35);
+    if (FOCAL_FOV[val]) return FOCAL_FOV[val];
+    return FOCAL_FOV[35];
+  }
+
+  function applyFocalToCamera(){
+    if (!camera) return;
+    camera.fov = resolveFovFromFocal(focalEl?.value || 35);
+    camera.updateProjectionMatrix();
+  }
+
   function nanoPromptBuilderSystem(){
     return `
 You are a PROMPT BUILDER for "Nano Banana Pro (Image)".
@@ -1928,10 +1980,7 @@ Keep it compact but unambiguous.
       drawCanvas.style.pointerEvents = "none";
       glCanvas.style.pointerEvents = "auto";
     }
-    let label = "View";
-    if (next === "draw") label = "Draw";
-    if (next === "3d") label = "3D Edit";
-    stateText.textContent = `${label} • 3D ${actors.length ? "ON" : "OFF"}`;
+    stateText.textContent = "Cinema";
     update3DVisibility();
   }
 
@@ -2203,7 +2252,7 @@ Keep it compact but unambiguous.
     renderer.setSize(glCanvas.width, glCanvas.height, false);
 
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(42, glCanvas.width/glCanvas.height, 0.01, 50);
+    camera = new THREE.PerspectiveCamera(resolveFovFromFocal(focalEl?.value || 35), glCanvas.width/glCanvas.height, 0.01, 50);
     camera.position.copy(defaultCam.pos);
     camera.lookAt(defaultCam.look);
 
@@ -2271,9 +2320,9 @@ Keep it compact but unambiguous.
     if (type === "cylinder") geo = new THREE.CylinderGeometry(0.22, 0.22, 0.62, 32, 1);
     else if (type === "plane") geo = new THREE.BoxGeometry(0.72, 0.52, 0.02);
     else geo = new THREE.BoxGeometry(0.52, 0.52, 0.52);
+    geo.center();
 
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(0, 0.55, 0);
 
     const wireGeo = new THREE.WireframeGeometry(geo);
     const wireMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
@@ -2719,7 +2768,7 @@ Keep it compact but unambiguous.
   }
 
   function update3DState(){
-    stateText.textContent = `View • 3D ${actors.length ? "ON" : "OFF"}`;
+    stateText.textContent = "Cinema";
   }
 
   async function exportCompositeBlob(){
@@ -2802,6 +2851,8 @@ Keep it compact but unambiguous.
 
     if (hasComposite && indexMap.composite){
       lines.push(`Image #${indexMap.composite} is the composite viewport plate (locked). Preserve camera, perspective, placements.`);
+      lines.push("HARD LOCK: The composite proxy pose and camera are absolute. Do NOT interpret or stylize the pose.");
+      lines.push("Do NOT change camera angle, camera height, lens perspective, or subject distance relative to background.");
     }
 
     if (hasComposite && hasBackground){
@@ -2823,15 +2874,19 @@ Keep it compact but unambiguous.
     }
 
     if (hasComposite && actorState.char1 && actorState.char1.visible && indexMap.char1){
-      lines.push(`Character 1 identity must match Character 1 photo (image #${indexMap.char1}).`);
-      lines.push("Character 1 pose must match the proxy pose exactly as seen in the composite viewport image.");
-      lines.push("Do not change pose, silhouette, stance, camera angle.");
+      lines.push(`Character 1 identity MUST match Character 1 photo (image #${indexMap.char1}). Exact face structure (eyes/nose/mouth/jawline), beard/hairline.`);
+      lines.push(`Character 1 pose MUST match proxy in composite EXACTLY (image #${indexMap.composite}). Same joint angles, hand positions, weight shift, body lean.`);
+      lines.push("Camera MUST match composite EXACTLY: framing, perspective, subject scale, FOV.");
+      lines.push("Forbidden: re-posing, straightening posture, “improving” pose, changing arm angles.");
+      lines.push("If any conflict: preserve proxy pose over everything.");
     }
 
     if (hasComposite && actorState.char2 && actorState.char2.visible && indexMap.char2){
-      lines.push(`Character 2 identity must match Character 2 photo (image #${indexMap.char2}).`);
-      lines.push("Character 2 pose must match the proxy pose exactly as seen in the composite viewport image.");
-      lines.push("Do not change pose, silhouette, stance, camera angle.");
+      lines.push(`Character 2 identity MUST match Character 2 photo (image #${indexMap.char2}). Exact face structure (eyes/nose/mouth/jawline), beard/hairline.`);
+      lines.push(`Character 2 pose MUST match proxy in composite EXACTLY (image #${indexMap.composite}). Same joint angles, hand positions, weight shift, body lean.`);
+      lines.push("Camera MUST match composite EXACTLY: framing, perspective, subject scale, FOV.");
+      lines.push("Forbidden: re-posing, straightening posture, “improving” pose, changing arm angles.");
+      lines.push("If any conflict: preserve proxy pose over everything.");
     }
 
     if (visibleActors.length > 1){
@@ -3002,6 +3057,12 @@ Keep it compact but unambiguous.
     fileEl.value = "";
     addFiles(files);
   });
+  if (uploadImagesBtn){
+    uploadImagesBtn.addEventListener("click", ()=>fileEl.click());
+  }
+  if (myCharsGlobal){
+    myCharsGlobal.addEventListener("click", openCharacterLibrary);
+  }
 
   ["dragenter","dragover"].forEach(evt=>{
     drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="rgba(43,108,255,.55)"; });
@@ -3072,6 +3133,11 @@ Keep it compact but unambiguous.
   updateDropText();
   buildPalette();
   applyAspectRatio();
+  if (focalEl){
+    focalEl.addEventListener("change", ()=>{
+      applyFocalToCamera();
+    });
+  }
 
   btnDraw.addEventListener("click", ()=>setMode("draw"));
   btn3D.addEventListener("click", ()=>setMode("3d"));
@@ -3093,6 +3159,9 @@ Keep it compact but unambiguous.
       alert("Error loading default character");
     }
   });
+  if (char1Library){
+    char1Library.addEventListener("click", openCharacterLibrary);
+  }
   char1PhotoDrop.addEventListener("click", ()=>char1PhotoFile.click());
   char1PhotoFile.addEventListener("change", (e)=>{
     const file = e.target.files?.[0];
@@ -3132,6 +3201,9 @@ Keep it compact but unambiguous.
       alert("Error loading default character");
     }
   });
+  if (char2Library){
+    char2Library.addEventListener("click", openCharacterLibrary);
+  }
   char2PhotoDrop.addEventListener("click", ()=>char2PhotoFile.click());
   char2PhotoFile.addEventListener("change", (e)=>{
     const file = e.target.files?.[0];
