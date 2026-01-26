@@ -87,10 +87,17 @@
     gap:8px;
     margin-bottom:6px;
   }
+  .lf-labTitle{
+    font-size:14px;
+    font-weight:1000;
+    letter-spacing:.4px;
+    color:rgba(255,255,255,.92);
+    margin-bottom:2px;
+  }
   .lf-navPills{
     display:flex;
     flex-wrap:wrap;
-    gap:8px;
+    gap:10px;
   }
   .lf-btnSmall.lf-link{
     text-decoration:none;
@@ -98,12 +105,24 @@
     align-items:center;
     justify-content:center;
     color:#fff !important;
+    text-transform:none !important;
+    letter-spacing:.2px;
+    font-size:12px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+    color:rgba(255,255,255,.92) !important;
   }
   .lf-btnSmall.lf-link:visited{
     color:#fff !important;
   }
   .lf-btnSmall.lf-link span{
     color:#fff !important;
+  }
+  .lf-btnSmall.lf-link:hover{
+    background:rgba(255,255,255,.09);
+    border-color:rgba(43,108,255,.45);
   }
 
   .lf-h2{ font-size:16px; font-weight:1000; margin:0; }
@@ -401,16 +420,21 @@
 
   .lf-topbar{
     height:56px;
-    display:flex;
+    display:grid;
+    grid-template-columns:auto 1fr auto;
     align-items:center;
-    justify-content:space-between;
     gap:12px;
     padding:10px 14px;
     border-bottom:1px solid rgba(255,255,255,.08);
     background:rgba(0,0,0,.35);
     backdrop-filter: blur(4px);
   }
-  .lf-topbar .left{ display:flex; gap:10px; align-items:center; min-width:0; flex:0 0 auto; }
+  .lf-topbar .left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
   .lf-pill{
     border:1px solid rgba(255,255,255,.12);
     background:rgba(255,255,255,.06);
@@ -428,9 +452,19 @@
     overflow:hidden;
     text-overflow:ellipsis;
   }
-  .lf-topbar .center{ display:flex; gap:14px; align-items:center; justify-content:center; flex:1 1 auto; min-width:0; }
-  .lf-topbar .right{ display:flex; gap:10px; align-items:center; justify-content:flex-end; flex:0 0 auto; }
+  .lf-topbar .center{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    min-width:0;
+  }
   .lf-topbar .right{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    min-width:0;
     flex-wrap:nowrap;
     white-space:nowrap;
   }
@@ -438,15 +472,17 @@
     font-size:12px;
     color:var(--text-sec);
     font-weight:800;
-    max-width:180px;
+    max-width:160px;
     overflow:hidden;
     text-overflow:ellipsis;
   }
   .lf-topgroup{ display:flex; gap:8px; align-items:center; }
-  .lf-divider{
+  .lf-vdiv{
     width:1px;
     height:26px;
     background:rgba(255,255,255,.12);
+    margin:0 6px;
+    flex:0 0 auto;
   }
 
   .lf-btnIcon{
@@ -582,6 +618,16 @@
   .lf-btnSmall.active{
     border-color: rgba(43,108,255,.85) !important;
     background: rgba(43,108,255,.18) !important;
+  }
+  .lf-gradBtn{
+    border:1px solid rgba(255,255,255,.12) !important;
+    background: linear-gradient(135deg, rgba(43,108,255,.95), rgba(175,82,222,.75)) !important;
+    color:#fff !important;
+    box-shadow: 0 10px 24px rgba(43,108,255,.18);
+  }
+  .lf-gradBtn:hover{
+    filter: brightness(1.05);
+    box-shadow: 0 12px 28px rgba(43,108,255,.22);
   }
 
   .lf-libraryList{
@@ -776,6 +822,14 @@
   .lf-layeritem.active{ border-color:rgba(43,108,255,.8); background:rgba(43,108,255,.12); }
   .lf-layer-badge{ width:10px; height:10px; border-radius:999px; }
   .lf-layer-name{ font-size:12px; font-weight:800; color:#fff; }
+  .lf-layeritem .lf-btnSmall{
+    padding:8px 10px;
+    min-width:44px;
+    justify-content:center;
+    font-size:11px;
+    border-radius:10px;
+    opacity:.95;
+  }
 
   .lf-layer-label{
     font-size:11px;
@@ -809,6 +863,7 @@
     color:var(--text-sec);
     font-size:12px;
   }
+  #aspectBtnBadge{ display:none !important; }
   .lf-dropdown-menu{
     position:absolute;
     left:0;
@@ -915,6 +970,21 @@
     text-decoration:none;
   }
   .lf-previewList a:hover{ text-decoration:underline; }
+
+  @media (max-width: 1280px){
+    .lf-topbar .right #projectStatus{ display:none; }
+  }
+
+  @media (max-width: 1100px){
+    .lf-topbar{
+      grid-template-columns:1fr;
+      height:auto;
+      row-gap:10px;
+      padding:10px 12px;
+    }
+    .lf-topbar .center{ justify-content:flex-start; flex-wrap:wrap; }
+    .lf-topbar .right{ justify-content:flex-start; flex-wrap:wrap; white-space:normal; }
+  }
 </style>
 
 <div id="lf-nano">
@@ -922,9 +992,10 @@
     <div id="lf-workspace">
       <div class="lf-side">
         <div class="lf-navStack">
+          <div class="lf-labTitle">Cinema Shot</div>
           <div class="lf-navPills">
-            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_character" rel="noopener" target="_blank">CINEMA CHARACTER</a>
-            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_animation" rel="noopener" target="_blank">CINEMA ANIMATION</a>
+            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_character" rel="noopener" target="_blank">Cinema Character</a>
+            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_animation" rel="noopener" target="_blank">Cinema Animation</a>
           </div>
           <button class="lf-back" id="btn-back" type="button">← Back to CINEMA LAB</button>
         </div>
@@ -947,7 +1018,7 @@
           <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
           <div class="lf-row" style="margin-bottom:10px;">
             <button class="lf-btnSmall" id="uploadImagesBtn" type="button">Upload images</button>
-            <button class="lf-btnSmall" id="myCharsGlobal" type="button">Мои персонажи</button>
+            <button class="lf-btnSmall lf-gradBtn" id="myCharsGlobal" type="button">My Characters</button>
           </div>
           <div class="lf-drop" id="drop">
             <div class="big" id="dropTitle">Upload images</div>
@@ -1093,15 +1164,13 @@
       <div class="lf-center">
         <div class="lf-viewportCard">
           <div class="lf-topbar">
-            <div class="left">
-              <div class="lf-pill" id="stateText">Cinema</div>
-            </div>
+            <div class="left"></div>
             <div class="center">
               <div class="lf-topgroup">
                 <button class="lf-btnIcon" id="btnDraw" type="button">Draw</button>
                 <button class="lf-btnIcon" id="btn3D" type="button">3D</button>
               </div>
-              <div class="lf-divider"></div>
+              <div class="lf-vdiv"></div>
               <div class="lf-topgroup">
                 <button class="lf-btnIcon active" id="tMove" type="button">Move</button>
                 <button class="lf-btnIcon" id="tRot" type="button">Rotate</button>
@@ -1111,7 +1180,8 @@
             <div class="right">
               <button class="lf-btnSmall" id="projectSave" type="button">Save Project</button>
               <button class="lf-btnSmall" id="projectOpen" type="button">Open Project</button>
-              <button class="lf-btnSmall" id="openCinemaLibrary" type="button">Cinema Library</button>
+              <button class="lf-btnSmall lf-gradBtn" id="openCinemaLibrary" type="button">Cinema Library</button>
+              <div class="lf-vdiv"></div>
               <button class="lf-btnSmall" id="projectRename" type="button" title="Rename project">✎</button>
               <div class="lf-projectStatus" id="projectStatus">Project: —</div>
             </div>
@@ -1188,7 +1258,7 @@
                 <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
                   Photo upload
                 </div>
-                <button class="lf-btnSmall" id="char1Library" type="button">Мои персонажи</button>
+                <button class="lf-btnSmall lf-gradBtn" id="char1Library" type="button">My Characters</button>
               </div>
             </div>
             <button class="lf-btnSmall" id="char1Default" type="button">Add default rigged character</button>
@@ -1214,7 +1284,7 @@
                 <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
                   Photo upload
                 </div>
-                <button class="lf-btnSmall" id="char2Library" type="button">Мои персонажи</button>
+                <button class="lf-btnSmall lf-gradBtn" id="char2Library" type="button">My Characters</button>
               </div>
             </div>
             <button class="lf-btnSmall" id="char2Default" type="button">Add default rigged character</button>
@@ -3582,7 +3652,7 @@ Keep it compact but unambiguous.
 
       const visBtn = document.createElement("button");
       visBtn.className = "lf-btnSmall";
-      visBtn.textContent = actor.visible ? "👁" : "🚫";
+      visBtn.textContent = actor.visible ? "ON" : "OFF";
       visBtn.addEventListener("click", (e)=>{
         e.stopPropagation();
         setActorVisible(actor, !actor.visible);
