@@ -22,11 +22,11 @@
     min-height:calc(100vh - 74px);
   }
 
-  #lf-main{ padding:26px 18px 40px; max-width:1400px; margin:0 auto; }
+  #lf-main{ padding:26px 18px 40px; max-width:1860px; margin:0 auto; }
 
   #lf-workspace{
     display:grid;
-    grid-template-columns:420px 1fr;
+    grid-template-columns:440px minmax(520px, 1fr) 420px;
     gap:0;
     border:1px solid var(--border);
     border-radius:22px;
@@ -35,14 +35,24 @@
     min-height:calc(100vh - 74px - 52px);
   }
 
-  .lf-side{
+  .lf-side,
+  .lf-panel{
     padding:20px;
-    border-right:1px solid var(--border);
     display:flex;
     flex-direction:column;
     gap:16px;
     max-height:calc(100vh - 74px - 52px);
     overflow:auto;
+  }
+
+  .lf-side{ border-right:1px solid var(--border); }
+  .lf-panel{ border-left:1px solid var(--border); background:rgba(0,0,0,.2); }
+
+  .lf-center{
+    background:#0a0a0a;
+    display:flex;
+    flex-direction:column;
+    min-height:100%;
   }
 
   .lf-back{
@@ -73,7 +83,8 @@
   }
 
   .lf-field textarea,
-  .lf-field select{
+  .lf-field select,
+  .lf-field input[type="text"]{
     width:100%;
     background:var(--bg-input);
     border:1px solid var(--border);
@@ -83,7 +94,20 @@
     font-size:14px;
     display:block;
   }
-  
+
+  .lf-select{
+    appearance:none;
+    background-image:linear-gradient(45deg, transparent 50%, #a0a0a0 50%),
+      linear-gradient(135deg, #a0a0a0 50%, transparent 50%),
+      linear-gradient(to right, #00000000, #00000000);
+    background-position:calc(100% - 18px) calc(1em + 2px),
+      calc(100% - 12px) calc(1em + 2px),
+      100% 0;
+    background-size:6px 6px, 6px 6px, 2.5em 2.5em;
+    background-repeat:no-repeat;
+    padding-right:40px;
+  }
+
   .lf-input-wrap textarea {
     border: 1px solid var(--border);
     position: relative;
@@ -137,7 +161,7 @@
     align-items: center;
     gap: 8px;
   }
-  
+
   .lf-prompt-text span {
     animation: pulseOp 1.5s infinite ease-in-out;
   }
@@ -249,65 +273,15 @@
   .lf-status.err{ color:#ff5a6b; font-weight:1000; }
   .lf-status.ok{ color:#9be28a; font-weight:1000; }
 
-  .lf-main{
-    background:#000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:24px;
-    position:relative;
-  }
-
-  .lf-empty{
-    color:#3a3a3a;
-    text-align:center;
-    font-weight:900;
-  }
-
-  .lf-result{
-    display:none;
-    width:min(920px, 95%);
-    border-radius:18px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,.08);
-    box-shadow:0 0 50px rgba(0,0,0,.6);
-    background:#0b0b0b;
-  }
-  .lf-result img, .lf-result video{
-    width:100%;
-    display:block;
-    max-height:75vh;
-    object-fit:contain;
-    background:#000;
-  }
-
-  .lf-resbar{
-    padding:14px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-    border-top:1px solid rgba(255,255,255,.08);
-    background:rgba(0,0,0,.35);
-  }
-  .lf-resbar a{
-    text-decoration:none;
-    background:var(--accent);
-    color:#fff;
-    padding:10px 14px;
-    border-radius:12px;
-    font-weight:1000;
-  }
-
   .lf-loader{
-    position:absolute; inset:0;
+    position:fixed; inset:0;
     background:rgba(0,0,0,.78);
     display:none;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     gap:10px;
-    z-index:30;
+    z-index:60;
     backdrop-filter: blur(4px);
   }
   .lf-spin{
@@ -318,45 +292,25 @@
     animation:lfspin 1s linear infinite;
   }
   @keyframes lfspin{ to{ transform:rotate(360deg); } }
+
   .lf-wait{ font-weight:1000; }
-  .lf-time{ font-size:12px; color:var(--text-sec); }
+  .lf-time{ color:var(--text-sec); font-size:12px; }
 
-  .hidden{ display:none !important; }
-
-  @media(max-width:1000px){
-    #lf-workspace{ grid-template-columns:1fr; }
-    .lf-side{ border-right:0; border-bottom:1px solid var(--border); max-height:none; }
-    .lf-main{ min-height:420px; }
-  }
-
-  /* ✅ Aspect picker (Higgsfield-like) */
-  .lf-aspectlist{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
+  .lf-aspectlist{ display:flex; flex-direction:column; gap:8px; }
   .lf-aspectitem{
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:10px 12px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:10px;
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.10);
-    background:rgba(255,255,255,.02);
     cursor:pointer;
     transition:.12s;
-    user-select:none;
+    background:rgba(255,255,255,.02);
   }
-  .lf-aspectitem:hover{
-    border-color:rgba(43,108,255,.45);
-    background:rgba(43,108,255,.06);
-  }
-  .lf-aspectleft{
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
+  .lf-aspectitem:hover{ border-color:rgba(43,108,255,.5); background:rgba(43,108,255,.06); }
+  .lf-aspectitem.active{ border-color:rgba(43,108,255,.8); background:rgba(43,108,255,.12); }
+  .lf-aspectleft{ display:flex; align-items:center; gap:10px; }
   .lf-aspectbox{
     width:16px;height:16px;
     border-radius:5px;
@@ -379,16 +333,8 @@
   .lf-aspectitem.active .lf-aspectdot{
     background:var(--accent);
   }
-  .lf-aspectlabel{
-    font-weight:900;
-    font-size:13px;
-    color:#fff;
-  }
-  .lf-aspectright{
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
+  .lf-aspectlabel{ font-weight:900; font-size:13px; color:#fff; }
+  .lf-aspectright{ display:flex; align-items:center; gap:10px; }
   .lf-badge{
     font-size:12px;
     font-weight:1000;
@@ -398,14 +344,232 @@
     border:1px solid rgba(180,255,0,.25);
     color:#d7ff4a;
   }
-  .lf-check{
+  .lf-check{ font-weight:1000; color:#9be28a; opacity:0; }
+  .lf-aspectitem.active .lf-check{ opacity:1; }
+
+  /* Center viewport */
+  .lf-viewportCard{
+    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+    border-bottom:1px solid var(--border);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    flex:1;
+    min-height:520px;
+  }
+
+  .lf-topbar{
+    height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+    backdrop-filter: blur(4px);
+  }
+  .lf-topbar .left{ display:flex; gap:10px; align-items:center; min-width:0; }
+  .lf-pill{
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    padding:7px 10px;
+    border-radius:999px;
+    color:#fff;
+    font-weight:900;
+    font-size:12px;
+  }
+  .lf-title{
     font-weight:1000;
-    color:#9be28a;
-    opacity:0;
+    font-size:13px;
+    color:rgba(255,255,255,.88);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
-  .lf-aspectitem.active .lf-check{
-    opacity:1;
+  .lf-topbar .right{ display:flex; gap:10px; align-items:center; }
+
+  .lf-btnIcon{
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    border-radius:12px;
+    padding:10px 12px;
+    cursor:pointer;
+    font-weight:900;
+    font-size:13px;
+    user-select:none;
   }
+  .lf-btnIcon:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.12); }
+  .lf-btnIcon.active{ border-color:rgba(43,108,255,.85); background:rgba(43,108,255,.22); }
+
+  .lf-stageWrap{
+    flex:1;
+    position:relative;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px;
+  }
+
+  .lf-frame{
+    position:relative;
+    width:min(1400px, 100%);
+    aspect-ratio: var(--frame-aspect, 16 / 9);
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.10);
+    background:
+      radial-gradient(circle at 30% 20%, rgba(43,108,255,.10), transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(175,82,222,.08), transparent 42%),
+      #060606;
+  }
+
+  #lf-nano canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  #bgCanvas{ z-index:1; }
+  #drawCanvas{ z-index:2; }
+  #glCanvas{ z-index:3; }
+
+  .lf-resultOverlay{
+    position:absolute;
+    inset:14px;
+    background:rgba(0,0,0,.88);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:18px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:40;
+    padding:18px;
+  }
+
+  .lf-resultCard{
+    width:min(960px, 100%);
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 0 50px rgba(0,0,0,.6);
+    background:#0b0b0b;
+  }
+
+  .lf-resultCard img, .lf-resultCard video{
+    width:100%;
+    display:block;
+    max-height:65vh;
+    object-fit:contain;
+    background:#000;
+  }
+
+  .lf-resbar{
+    padding:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    border-top:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+  }
+
+  .lf-resbar a{
+    text-decoration:none;
+    background:var(--accent);
+    color:#fff;
+    padding:10px 14px;
+    border-radius:12px;
+    font-weight:1000;
+  }
+
+  .lf-close{
+    position:absolute;
+    top:14px; right:14px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    border-radius:10px;
+    padding:8px 10px;
+    cursor:pointer;
+    font-weight:900;
+  }
+
+  /* Right panel controls */
+  .lf-section{ padding:14px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,.02); }
+  .lf-section .lf-h2{ margin-bottom:10px; }
+  .lf-field .range{ width:100%; }
+
+  .lf-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+
+  .lf-btnSmall{
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    font-weight:900;
+    cursor:pointer;
+  }
+  .lf-btnSmall:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.12); }
+  .lf-btnSmall.active{ border-color:rgba(43,108,255,.85); background:rgba(43,108,255,.22); }
+
+  .lf-palette{ display:flex; gap:8px; flex-wrap:wrap; }
+  .lf-swatch{
+    width:24px;height:24px;border-radius:8px;
+    border:2px solid rgba(255,255,255,.15);
+    cursor:pointer;
+  }
+  .lf-swatch.active{ border-color:rgba(43,108,255,.9); box-shadow:0 0 0 2px rgba(43,108,255,.2); }
+
+  .lf-switch{
+    width:46px; height:26px; border-radius:999px;
+    background:#1c1c1c; border:1px solid var(--border);
+    position:relative; cursor:pointer; flex:0 0 auto;
+  }
+  .lf-switch::after{
+    content:"";
+    width:20px; height:20px; border-radius:50%;
+    background:#555; position:absolute; top:2px; left:3px; transition:.15s;
+  }
+  .lf-switch.on{ background:rgba(43,108,255,.3); border-color:rgba(43,108,255,.7); }
+  .lf-switch.on::after{ left:22px; background:#fff; }
+
+  .lf-character{
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:14px;
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    background:rgba(0,0,0,.2);
+  }
+  .lf-char-header{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .lf-char-title{ font-weight:900; font-size:13px; }
+  .lf-char-badge{ width:12px; height:12px; border-radius:999px; }
+
+  .lf-layerlist{ display:flex; flex-direction:column; gap:8px; }
+  .lf-layeritem{
+    display:grid;
+    grid-template-columns:auto auto 1fr auto;
+    gap:10px;
+    align-items:center;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    padding:8px 10px;
+    background:rgba(255,255,255,.04);
+  }
+  .lf-layeritem.active{ border-color:rgba(43,108,255,.8); background:rgba(43,108,255,.12); }
+  .lf-layer-badge{ width:10px; height:10px; border-radius:999px; }
+  .lf-layer-name{ font-size:12px; font-weight:800; color:#fff; }
+
+  .hidden{ display:none !important; }
 </style>
 
 <div id="lf-nano">
@@ -413,7 +577,7 @@
     <div id="lf-workspace">
       <div class="lf-side">
         <button class="lf-back" id="btn-back" type="button">← Back to Flow</button>
-        <div class="lf-h2">Nano Banana Pro (Image)</div>
+        <div class="lf-h2">Nano Banana Pro (Image) + Cinema Viewport</div>
 
         <div class="lf-field">
           <label>Prompt</label>
@@ -439,7 +603,7 @@
 
         <div class="lf-field">
           <label>Resolution</label>
-          <select id="res">
+          <select id="res" class="lf-select">
             <option value="1K">1K</option>
             <option value="2K" selected>2K</option>
             <option value="4K">4K</option>
@@ -522,127 +686,244 @@
               </div>
             </div>
           </div>
-
-          <div style="margin-top:8px;color:var(--text-sec);font-size:12px;">
-            Tip: choose <b>16:9</b> or <b>21:9</b> for a cinematic frame.
-          </div>
         </div>
-
-        <div class="lf-h2" style="margin-top:4px;">Cinematic Studio</div>
 
         <div class="lf-field">
-          <label>Camera preset</label>
-          <select id="camPreset"></select>
+          <label>Cinematic Studio</label>
+          <select id="camPreset" class="lf-select"></select>
         </div>
 
         <div class="lf-row2">
           <div class="lf-field">
-            <label>Focal length</label>
-            <select id="focal">
-              <option value="24">24mm (wide)</option>
-              <option value="35" selected>35mm (classic)</option>
-              <option value="50">50mm (natural)</option>
-              <option value="85">85mm (portrait)</option>
-              <option value="135">135mm (tele)</option>
-            </select>
+            <label>Focal length (mm)</label>
+            <input type="text" id="focal" value="35" />
           </div>
-
           <div class="lf-field">
             <label>Aperture</label>
-            <select id="aperture">
-              <option value="f/1.4">f/1.4 (very shallow DOF)</option>
-              <option value="f/2.0" selected>f/2.0 (shallow DOF)</option>
-              <option value="f/2.8">f/2.8 (balanced)</option>
-              <option value="f/4.0">f/4.0 (medium)</option>
-              <option value="f/5.6">f/5.6 (deeper)</option>
-              <option value="f/8">f/8 (deep)</option>
-              <option value="f/11">f/11 (very deep)</option>
+            <select id="aperture" class="lf-select">
+              <option>f/1.4</option>
+              <option>f/1.8</option>
+              <option selected>f/2.0</option>
+              <option>f/2.8</option>
+              <option>f/4.0</option>
+              <option>f/5.6</option>
+              <option>f/8</option>
+              <option>f/11</option>
             </select>
           </div>
         </div>
 
         <div class="lf-row2">
           <div class="lf-field">
-            <label>Film grain</label>
-            <select id="grain">
+            <label>Grain</label>
+            <select id="grain" class="lf-select">
               <option value="off">Off</option>
               <option value="subtle" selected>Subtle</option>
               <option value="medium">Medium</option>
             </select>
           </div>
-
           <div class="lf-field">
-            <label>Exposure style</label>
-            <select id="exposure">
+            <label>Exposure</label>
+            <select id="exposure" class="lf-select">
               <option value="natural" selected>Natural</option>
               <option value="lowkey">Low-key</option>
               <option value="highkey">High-key</option>
             </select>
           </div>
         </div>
-        
+
         <div class="lf-row2">
           <div class="lf-field">
-            <label>Anamorphic flare</label>
-            <select id="flare">
+            <label>Flare</label>
+            <select id="flare" class="lf-select">
               <option value="off">Off</option>
               <option value="subtle" selected>Subtle</option>
               <option value="strong">Strong</option>
             </select>
           </div>
           <div class="lf-field">
-            <label>Bloom / halation</label>
-            <select id="bloom">
+            <label>Bloom</label>
+            <select id="bloom" class="lf-select">
               <option value="off">Off</option>
               <option value="subtle" selected>Subtle</option>
               <option value="strong">Strong</option>
             </select>
           </div>
         </div>
+
+        <label class="lf-chk"><input id="styleOnly" type="checkbox" /> Style-only transform</label>
+
         <div class="lf-actions">
-          <label class="lf-chk">
-            <input type="checkbox" id="styleOnly" checked>
-            Style-only transform (keep scene)
-          </label>
+          <button class="lf-btn secondary" id="gptPrompt" type="button">GPT → Build Prompt</button>
 
           <button class="lf-btn" id="run" type="button">
             Generate <span class="lf-cost" id="cost">—</span>
           </button>
-          
-          <button class="lf-btn secondary" id="gptPrompt" type="button">
-              ✨ GPT → Build Prompt
-          </button>
 
-          <button class="lf-btn secondary" id="stop" type="button" style="display:none">Stop</button>
+          <button class="lf-btn secondary" id="stop" type="button" style="display:none;">Stop</button>
+
           <div class="lf-status" id="statusText"></div>
         </div>
       </div>
 
-      <div class="lf-main">
-        <div class="lf-empty" id="empty">
-          <div style="font-size:56px;opacity:.35;">✨</div>
-          <div style="margin-top:8px;">Result will appear here</div>
+      <div class="lf-center">
+        <div class="lf-viewportCard">
+          <div class="lf-topbar">
+            <div class="left">
+              <div class="lf-pill" id="stateText">View • 3D ON</div>
+              <div class="lf-title">Cinema Viewport</div>
+            </div>
+            <div class="right">
+              <button class="lf-btnIcon" id="btnDraw" type="button">Draw</button>
+              <button class="lf-btnIcon" id="btn3D" type="button">3D</button>
+            </div>
+          </div>
+          <div class="lf-stageWrap">
+            <div class="lf-frame" id="frame">
+              <canvas id="bgCanvas"></canvas>
+              <canvas id="drawCanvas"></canvas>
+              <canvas id="glCanvas"></canvas>
+            </div>
+            <div class="lf-resultOverlay" id="resultOverlay">
+              <button class="lf-close" id="closeResult" type="button">Close</button>
+              <div class="lf-resultCard">
+                <video id="outVideo" controls playsinline class="hidden"></video>
+                <img id="outImg" class="hidden" alt="result" />
+                <div class="lf-resbar">
+                  <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
+                  <a id="download" href="#" target="_blank" download>Download</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lf-panel">
+        <div class="lf-section">
+          <div class="lf-h2">Background</div>
+          <input type="file" id="bgFile" accept="image/png,image/jpeg,image/webp" hidden />
+          <div class="lf-drop" id="bgDrop">
+            <div class="big" id="bgTitle">Upload background</div>
+            <div class="sub" id="bgSub">Optional</div>
+          </div>
+          <button class="lf-btn secondary" id="bgClear" type="button" style="margin-top:8px;">Remove background</button>
         </div>
 
-        <div class="lf-result" id="result">
-          <video id="outVideo" controls playsinline class="hidden"></video>
-          <img id="outImg" class="hidden" alt="result" />
-          <div class="lf-resbar">
-            <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
-            <a id="download" href="#" target="_blank" download>Download</a>
+        <div class="lf-section">
+          <div class="lf-h2">Draw</div>
+          <div class="lf-field">
+            <label>Palette</label>
+            <div class="lf-palette" id="palette"></div>
+          </div>
+          <div class="lf-field">
+            <label>Brush size</label>
+            <input type="range" id="brushSize" class="range" min="4" max="60" value="18" />
+          </div>
+          <div class="lf-field">
+            <label>Opacity</label>
+            <input type="range" id="brushOpacity" class="range" min="0.1" max="1" step="0.05" value="0.9" />
+          </div>
+          <div class="lf-row">
+            <button class="lf-btnSmall" id="btnEraser" type="button">Eraser</button>
+            <button class="lf-btnSmall" id="btnClearDraw" type="button">Clear</button>
           </div>
         </div>
 
-        <div class="lf-loader" id="loader">
-          <div class="lf-spin"></div>
-          <div class="lf-wait">Waiting…</div>
-          <div class="lf-time" id="loaderTime">01:00</div>
-          <div class="lf-time" id="loaderSub">Sending task…</div>
+        <div class="lf-section">
+          <div class="lf-h2">Characters</div>
+          <div class="lf-character" id="char1Card">
+            <div class="lf-char-header">
+              <div class="lf-row">
+                <span class="lf-char-badge" style="background:#ff3b30;"></span>
+                <div class="lf-char-title">Character 1 (Red)</div>
+              </div>
+              <div class="lf-switch" id="char1Toggle"></div>
+            </div>
+            <button class="lf-btnSmall" id="char1Default" type="button">Add default rigged character</button>
+            <input type="file" id="char1File" accept=".glb" hidden />
+            <button class="lf-btnSmall" id="char1Upload" type="button">Upload custom .glb</button>
+            <button class="lf-btnSmall" id="char1Remove" type="button">Remove</button>
+          </div>
+
+          <div class="lf-character" id="char2Card">
+            <div class="lf-char-header">
+              <div class="lf-row">
+                <span class="lf-char-badge" style="background:#2b6cff;"></span>
+                <div class="lf-char-title">Character 2 (Blue)</div>
+              </div>
+              <div class="lf-switch" id="char2Toggle"></div>
+            </div>
+            <button class="lf-btnSmall" id="char2Default" type="button">Add default rigged character</button>
+            <input type="file" id="char2File" accept=".glb" hidden />
+            <button class="lf-btnSmall" id="char2Upload" type="button">Upload custom .glb</button>
+            <button class="lf-btnSmall" id="char2Remove" type="button">Remove</button>
+          </div>
+        </div>
+
+        <div class="lf-section">
+          <div class="lf-h2">Layers</div>
+          <div class="lf-layerlist" id="layersList"></div>
+        </div>
+
+        <div class="lf-section">
+          <div class="lf-h2">Add Objects</div>
+          <div class="lf-field">
+            <label>Primitive type</label>
+            <select id="primType" class="lf-select">
+              <option value="box">Box</option>
+              <option value="cylinder">Cylinder</option>
+              <option value="plane">Plane</option>
+            </select>
+          </div>
+          <div class="lf-field">
+            <label>Proxy opacity</label>
+            <input type="range" id="primOpacity" class="range" min="0.2" max="0.9" step="0.05" value="0.6" />
+          </div>
+          <div class="lf-row">
+            <button class="lf-btnSmall" id="btnAddPrimitive" type="button">Add primitive</button>
+            <input type="file" id="modelFile" accept=".glb" hidden />
+            <button class="lf-btnSmall" id="btnAddModel" type="button">Add model (.glb)</button>
+          </div>
+        </div>
+
+        <div class="lf-section">
+          <div class="lf-h2">Transform</div>
+          <div class="lf-row">
+            <button class="lf-btnSmall active" id="tMove" type="button">Move</button>
+            <button class="lf-btnSmall" id="tRot" type="button">Rotate</button>
+            <button class="lf-btnSmall" id="tScale" type="button">Scale</button>
+          </div>
+        </div>
+
+        <div class="lf-section" id="poseSection" style="display:none;">
+          <div class="lf-h2">Pose mode</div>
+          <div class="lf-row" style="margin-bottom:10px;">
+            <div class="lf-switch" id="poseToggle"></div>
+            <span style="font-size:12px;color:var(--text-sec);">Rotate bones</span>
+          </div>
+          <div class="lf-field">
+            <label>Bone</label>
+            <select id="boneSelect" class="lf-select"></select>
+          </div>
+          <button class="lf-btnSmall" id="resetPose" type="button">Reset pose</button>
         </div>
       </div>
     </div>
   </div>
+
+  <div class="lf-loader" id="loader">
+    <div class="lf-spin"></div>
+    <div class="lf-wait">Waiting…</div>
+    <div class="lf-time" id="loaderTime">01:00</div>
+    <div class="lf-time" id="loaderSub">Sending task…</div>
+  </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/TransformControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
 (() => {
@@ -652,8 +933,33 @@
   const ETA_SECONDS = 60;
   const PRESET_ID = "nano_banana_pro";
   const INPUTS_BUCKET = "inputs";
-
   const MAX_IMAGES = 14;
+
+  const HUMAN_URL = "https://vqnmzstiaosqeoltcwbq.supabase.co/storage/v1/object/public/assets_models/human%203.glb";
+
+  const BONE_MAPPING = {
+    "mixamorig_Head_06": "Голова",
+    "mixamorig_Neck_05": "Шея",
+    "mixamorig_Spine1_03": "Грудь",
+    "mixamorig_Spine_02": "Спина (Низ)",
+    "mixamorig_Hips_01": "Таз",
+    "mixamorig_LeftShoulder_010": "Плечо (Левое)",
+    "mixamorig_RightShoulder_034": "Плечо (Правое)",
+    "mixamorig_LeftArm_011": "Рука Верх (Левая)",
+    "mixamorig_RightArm_035": "Рука Верх (Правая)",
+    "mixamorig_LeftForeArm_012": "Предплечье (Левое)",
+    "mixamorig_RightForeArm_036": "Предплечье (Правое)",
+    "mixamorig_LeftHand_013": "Кисть (Левая)",
+    "mixamorig_RightHand_037": "Кисть (Правая)",
+    "mixamorig_LeftUpLeg_062": "Бедро (Левое)",
+    "mixamorig_RightUpLeg_058": "Бедро (Правое)",
+    "mixamorig_LeftLeg_063": "Голень (Левая)",
+    "mixamorig_RightLeg_00": "Голень (Правая)",
+    "mixamorig_LeftFoot_064": "Стопа (Левая)",
+    "mixamorig_RightFoot_059": "Стопа (Правая)"
+  };
+
+  const ALLOWED_BONES = Object.keys(BONE_MAPPING);
 
   const LF_ENGINE_PROMPT = `
 GLOBAL CONSTRAINT:
@@ -750,7 +1056,7 @@ ANTI-AI LOOK:
     return s.trim();
   }
 
-  function buildFinalPrompt({ userPrompt, hasImage, presetKey, focalMm, aperture, grain, exposure, aspect, res, styleOnly, flare, bloom }) {
+  function buildFinalPrompt({ userPrompt, hasImage, presetKey, focalMm, aperture, grain, exposure, aspect, res, styleOnly, flare, bloom, cinemaLock }) {
     const P = LF_CAMERA_PRESETS[presetKey] || LF_CAMERA_PRESETS.IMAX_PANAVISION_ANAMORPHIC;
     const up = normalizeUserPrompt(userPrompt);
 
@@ -819,6 +1125,8 @@ ${styleOnlyBlock.trim()}
 ${cameraPhysical.trim()}
 ${anamorphicOpticsPack.trim()}
 
+${cinemaLock ? `CINEMA_LOCKS:\n${cinemaLock}` : ""}
+
 USER_TEXT:
 ${up || "High-quality cinematic film still."}
 
@@ -834,8 +1142,6 @@ ${camBlock}
 `.trim();
   }
 
-  /* ----------------------------------------------------------- */
-
   const $ = (id)=>document.getElementById(id);
 
   const fileEl = $("file");
@@ -846,21 +1152,18 @@ ${camBlock}
 
   const sceneEl = $("scene");
   const promptLoader = $("promptLoader");
-  
-  // ✅ NEW: Aspect List Elements
+
   const aspectListEl = $("aspectList");
   let selectedAspect = "16:9";
 
   const resEl = $("res");
   const styleChk = $("styleOnly");
 
-  // Cinematic UI
   const camPresetEl = $("camPreset");
   const focalEl = $("focal");
   const apertureEl = $("aperture");
   const grainEl = $("grain");
   const exposureEl = $("exposure");
-
   const flareEl = $("flare");
   const bloomEl = $("bloom");
 
@@ -869,16 +1172,68 @@ ${camBlock}
   const stopBtn = $("stop");
   const statusText = $("statusText");
 
-  const empty = $("empty");
-  const result = $("result");
+  const loader = $("loader");
+  const loaderTime = $("loaderTime");
+  const loaderSub = $("loaderSub");
+
+  const stateText = $("stateText");
+  const btnDraw = $("btnDraw");
+  const btn3D = $("btn3D");
+
+  const frame = $("frame");
+  const bgCanvas = $("bgCanvas");
+  const drawCanvas = $("drawCanvas");
+  const glCanvas = $("glCanvas");
+  const bgCtx = bgCanvas.getContext("2d");
+  const dCtx = drawCanvas.getContext("2d");
+
+  const resultOverlay = $("resultOverlay");
   const outVideo = $("outVideo");
   const outImg = $("outImg");
   const download = $("download");
   const meta = $("meta");
+  const closeResult = $("closeResult");
 
-  const loader = $("loader");
-  const loaderTime = $("loaderTime");
-  const loaderSub = $("loaderSub");
+  const bgFile = $("bgFile");
+  const bgDrop = $("bgDrop");
+  const bgTitle = $("bgTitle");
+  const bgSub = $("bgSub");
+  const bgClear = $("bgClear");
+
+  const paletteEl = $("palette");
+  const brushSizeEl = $("brushSize");
+  const brushOpacityEl = $("brushOpacity");
+  const btnEraser = $("btnEraser");
+  const btnClearDraw = $("btnClearDraw");
+
+  const char1Toggle = $("char1Toggle");
+  const char1Default = $("char1Default");
+  const char1File = $("char1File");
+  const char1Upload = $("char1Upload");
+  const char1Remove = $("char1Remove");
+
+  const char2Toggle = $("char2Toggle");
+  const char2Default = $("char2Default");
+  const char2File = $("char2File");
+  const char2Upload = $("char2Upload");
+  const char2Remove = $("char2Remove");
+
+  const layersList = $("layersList");
+
+  const primTypeEl = $("primType");
+  const primOpacityEl = $("primOpacity");
+  const btnAddPrimitive = $("btnAddPrimitive");
+  const modelFile = $("modelFile");
+  const btnAddModel = $("btnAddModel");
+
+  const tMove = $("tMove");
+  const tRot = $("tRot");
+  const tScale = $("tScale");
+
+  const poseSection = $("poseSection");
+  const poseToggle = $("poseToggle");
+  const boneSelect = $("boneSelect");
+  const resetPoseBtn = $("resetPose");
 
   let selectedFiles = [];
   let currentJobId = null;
@@ -889,6 +1244,46 @@ ${camBlock}
 
   let cachedImageUrls = [];
   let cachedSignature = "";
+
+  const palette = ["#ffffff", "#ff3b30", "#ff9500", "#ffd60a", "#34c759", "#2b6cff", "#af52de", "#00c7be", "#a0a0a0", "#000000"];
+
+  let mode = "view";
+  let eraser = false;
+  let brushColor = palette[0];
+  let drawing = false;
+  let lastX = 0;
+  let lastY = 0;
+  let drawDirty = false;
+
+  let bgImage = null;
+  let bgFileObj = null;
+
+  const actors = [];
+  const actorState = {
+    activeId: null,
+    char1: null,
+    char2: null
+  };
+  let actorCounter = 1;
+
+  let renderer;
+  let scene;
+  let camera;
+  let orbit;
+  let transform;
+  let gridHelper;
+
+  const defaultCam = {
+    pos: new THREE.Vector3(0, 0.9, 2.6),
+    look: new THREE.Vector3(0, 0.55, 0)
+  };
+
+  const THREE_OK = !!(window.THREE && THREE.OrbitControls && THREE.TransformControls && THREE.GLTFLoader);
+
+  if (!THREE_OK){
+    setStatus("3D disabled (Three controls not loaded)", "err");
+    btn3D.disabled = true;
+  }
 
   $("btn-back").addEventListener("click", ()=>location.href = BASE + "/flow#image");
 
@@ -904,12 +1299,28 @@ ${camBlock}
     camPresetEl.value = "IMAX_PANAVISION_ANAMORPHIC";
   })();
 
-  // ✅ NEW: Aspect Ratio Logic
   function setAspect(val){
     selectedAspect = String(val || "16:9");
     const items = aspectListEl ? Array.from(aspectListEl.querySelectorAll(".lf-aspectitem")) : [];
     items.forEach(it => it.classList.toggle("active", it.dataset.aspect === selectedAspect));
+    updateFrameAspect();
   }
+
+  function updateFrameAspect(){
+    const map = {
+      "16:9": "16 / 9",
+      "21:9": "21 / 9",
+      "9:16": "9 / 16",
+      "1:1": "1 / 1",
+      "4:3": "4 / 3",
+      "3:2": "3 / 2",
+      "2:3": "2 / 3"
+    };
+    frame.style.setProperty("--frame-aspect", map[selectedAspect] || "16 / 9");
+    resizeAll();
+    if (THREE_OK) onResize3D();
+  }
+
   if (aspectListEl){
     aspectListEl.addEventListener("click", (e)=>{
       const item = e.target.closest(".lf-aspectitem");
@@ -925,29 +1336,15 @@ ${camBlock}
     if (kind) statusText.classList.add(kind);
   }
 
-  function resetResult(){
-    empty.style.display = "block";
-    result.style.display = "none";
-    outVideo.classList.add("hidden");
-    outImg.classList.add("hidden");
-    outVideo.pause();
-    outVideo.removeAttribute("src");
-    outImg.removeAttribute("src");
-    download.href="#";
-    meta.textContent="";
-  }
-
   function isVideoUrl(url){
     const u = String(url||"").toLowerCase();
     return u.includes(".mp4") || u.includes(".webm") || u.includes(".mov") || u.includes("fal.media");
   }
 
   function showResult(url, status){
-    empty.style.display = "none";
-    result.style.display = "block";
+    resultOverlay.style.display = "flex";
     download.href = url;
     meta.textContent = `status: ${status} • jobId: ${currentJobId}`;
-
     outVideo.classList.add("hidden");
     outImg.classList.add("hidden");
     outVideo.pause();
@@ -965,12 +1362,14 @@ ${camBlock}
     }
   }
 
+  closeResult.addEventListener("click", ()=>{ resultOverlay.style.display = "none"; });
+
   function showLoader(on){
     loader.style.display = on ? "flex" : "none";
     if (on) startTimer(ETA_SECONDS);
     if (!on) stopTimer();
   }
-  
+
   function showPromptLoader(on){
     promptLoader.style.display = on ? "flex" : "none";
   }
@@ -1138,7 +1537,7 @@ ${camBlock}
     }
 
     const raw = await r.text();
-    let j={}; try{ j=raw?JSON.parse(raw):{} }catch(_){}
+    let j={}; try{ j=raw?JSON.parse(raw):{} }catch(_){ }
 
     if (!r.ok || j?.ok===false){
       const err = new Error(j.error || ("HTTP "+r.status));
@@ -1213,10 +1612,6 @@ ${camBlock}
     const cost = (res === "4K") ? 2 : 1;
     $("cost").textContent = cost + " Cr";
   }
-
-  /* -----------------------------------------------------------
-      ✅ GPT PROMPT BUILDER
-      ----------------------------------------------------------- */
 
   function nanoPromptBuilderSystem(){
     return `
@@ -1337,9 +1732,782 @@ Keep it compact but unambiguous.
     }
   }
 
-  /* -----------------------------------------------------------
-      END GPT LOGIC
-      ----------------------------------------------------------- */
+  function setMode(next){
+    if (mode === next && next !== "view") next = "view";
+    mode = next;
+    btnDraw.classList.toggle("active", next==="draw");
+    btn3D.classList.toggle("active", next==="3d");
+    if (next === "draw") {
+      drawCanvas.style.pointerEvents = "auto";
+      glCanvas.style.pointerEvents = "none";
+    } else {
+      drawCanvas.style.pointerEvents = "none";
+      glCanvas.style.pointerEvents = "auto";
+    }
+    let label = "View";
+    if (next === "draw") label = "Draw";
+    if (next === "3d") label = "3D Edit";
+    stateText.textContent = `${label} • 3D ${actors.length ? "ON" : "OFF"}`;
+    update3DVisibility();
+  }
+
+  function applyAspectRatio(){
+    updateFrameAspect();
+  }
+
+  function resizeAll(){
+    const rect = frame.getBoundingClientRect();
+    const w = Math.max(2, Math.floor(rect.width));
+    const h = Math.max(2, Math.floor(rect.height));
+    const saved = drawCanvas.toDataURL("image/png");
+    for (const c of [bgCanvas, drawCanvas, glCanvas]){
+      c.width = w;
+      c.height = h;
+    }
+    redrawBackground();
+    const img = new Image();
+    img.onload = ()=>{
+      dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
+      dCtx.drawImage(img, 0,0, drawCanvas.width, drawCanvas.height);
+    };
+    img.src = saved;
+  }
+
+  const ro = new ResizeObserver(()=>{ resizeAll(); if(THREE_OK) onResize3D(); });
+  ro.observe(frame);
+
+  function redrawBackground(){
+    const w = bgCanvas.width, h = bgCanvas.height;
+    bgCtx.clearRect(0,0,w,h);
+    if (!bgImage) return;
+    const iw = bgImage.naturalWidth || bgImage.width;
+    const ih = bgImage.naturalHeight || bgImage.height;
+    const s = Math.max(w/iw, h/ih);
+    const dw = iw*s, dh = ih*s;
+    const dx = (w - dw)/2;
+    const dy = (h - dh)/2;
+    bgCtx.drawImage(bgImage, dx, dy, dw, dh);
+  }
+
+  async function loadImageFromFile(file){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.onload = ()=>resolve(img);
+      img.onerror = reject;
+      img.crossOrigin = "anonymous";
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function setBackground(file){
+    bgFileObj = file;
+    bgImage = await loadImageFromFile(file);
+    redrawBackground();
+    bgTitle.textContent = "Background loaded";
+    bgSub.textContent = (file?.name ? file.name : "—") + " • " + formatSize(file.size||0);
+  }
+
+  function clearBackground(){
+    if (bgImage && bgImage.src && bgImage.src.startsWith("blob:")){
+      try{ URL.revokeObjectURL(bgImage.src); }catch(e){}
+    }
+    bgImage = null;
+    bgFileObj = null;
+    redrawBackground();
+    bgTitle.textContent = "Upload background";
+    bgSub.textContent = "Optional";
+  }
+
+  function buildPalette(){
+    paletteEl.innerHTML = "";
+    palette.forEach((c, idx)=>{
+      const s = document.createElement("div");
+      s.className = "lf-swatch" + (idx===0 ? " active" : "");
+      s.style.background = c;
+      s.addEventListener("click", ()=>{
+        brushColor = c;
+        eraser = false;
+        btnEraser.classList.remove("active");
+        [...paletteEl.children].forEach(x=>x.classList.remove("active"));
+        s.classList.add("active");
+      });
+      paletteEl.appendChild(s);
+    });
+    brushColor = palette[0];
+  }
+
+  function pointerPos(ev, canvas){
+    const rect = canvas.getBoundingClientRect();
+    const x = (ev.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (ev.clientY - rect.top) * (canvas.height / rect.height);
+    return { x, y };
+  }
+
+  function drawLine(x0,y0,x1,y1){
+    const size = Number(brushSizeEl.value||14);
+    const op = Number(brushOpacityEl.value||0.9);
+    dCtx.save();
+    dCtx.lineCap = "round";
+    dCtx.lineJoin = "round";
+    dCtx.lineWidth = size;
+    dCtx.globalAlpha = op;
+    if (eraser){
+      dCtx.globalCompositeOperation = "destination-out";
+      dCtx.strokeStyle = "rgba(0,0,0,1)";
+    } else {
+      dCtx.globalCompositeOperation = "source-over";
+      dCtx.strokeStyle = brushColor;
+    }
+    dCtx.beginPath();
+    dCtx.moveTo(x0,y0);
+    dCtx.lineTo(x1,y1);
+    dCtx.stroke();
+    dCtx.restore();
+    drawDirty = true;
+  }
+
+  drawCanvas.addEventListener("mousedown", (ev)=>{
+    if (mode !== "draw") return;
+    drawing = true;
+    const p = pointerPos(ev, drawCanvas);
+    lastX = p.x; lastY = p.y;
+  });
+  window.addEventListener("mousemove", (ev)=>{
+    if (!drawing || mode !== "draw") return;
+    const p = pointerPos(ev, drawCanvas);
+    drawLine(lastX,lastY,p.x,p.y);
+    lastX = p.x; lastY = p.y;
+  });
+  window.addEventListener("mouseup", ()=>{ drawing = false; });
+  drawCanvas.addEventListener("touchstart", (ev)=>{
+    if (mode !== "draw") return;
+    ev.preventDefault();
+    drawing = true;
+    const t = ev.touches[0];
+    const p = pointerPos(t, drawCanvas);
+    lastX = p.x; lastY = p.y;
+  }, { passive:false });
+  drawCanvas.addEventListener("touchmove", (ev)=>{
+    if (!drawing || mode !== "draw") return;
+    ev.preventDefault();
+    const t = ev.touches[0];
+    const p = pointerPos(t, drawCanvas);
+    drawLine(lastX,lastY,p.x,p.y);
+    lastX = p.x; lastY = p.y;
+  }, { passive:false });
+  drawCanvas.addEventListener("touchend", ()=>{ drawing = false; });
+
+  btnEraser.addEventListener("click", ()=>{
+    eraser = !eraser;
+    btnEraser.classList.toggle("active", eraser);
+  });
+  btnClearDraw.addEventListener("click", ()=>{
+    if (!confirm("Clear drawings?")) return;
+    dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
+    drawDirty = false;
+  });
+
+  function init3D(){
+    renderer = new THREE.WebGLRenderer({
+      canvas: glCanvas,
+      alpha: true,
+      antialias: true,
+      preserveDrawingBuffer: true
+    });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setSize(glCanvas.width, glCanvas.height, false);
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(42, glCanvas.width/glCanvas.height, 0.01, 50);
+    camera.position.copy(defaultCam.pos);
+    camera.lookAt(defaultCam.look);
+
+    orbit = new THREE.OrbitControls(camera, glCanvas);
+    orbit.enableDamping = true;
+    orbit.dampingFactor = 0.08;
+
+    gridHelper = new THREE.GridHelper(6, 12, 0x2b6cff, 0x222222);
+    gridHelper.material.opacity = 0.15;
+    gridHelper.material.transparent = true;
+    gridHelper.name = "grid";
+    scene.add(gridHelper);
+
+    const key = new THREE.DirectionalLight(0xffffff, 1.05);
+    key.position.set(2,3,2);
+    scene.add(key);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+    transform = new THREE.TransformControls(camera, glCanvas);
+    transform.setSize(1.0);
+    transform.addEventListener("dragging-changed", (e)=>{
+      orbit.enabled = !e.value;
+    });
+    scene.add(transform);
+
+    animate3D();
+    onResize3D();
+    update3DVisibility();
+  }
+
+  function onResize3D(){
+    if (!renderer || !camera) return;
+    const w = glCanvas.width;
+    const h = glCanvas.height;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+
+  function animate3D(){
+    requestAnimationFrame(animate3D);
+    if (orbit) orbit.update();
+    if (transform) transform.updateMatrixWorld();
+    updateControlBallSizes();
+    if (renderer && scene && camera){
+      renderer.render(scene, camera);
+    }
+  }
+
+  function update3DVisibility(){
+    if (!scene) return;
+    const show3D = mode !== "draw";
+    glCanvas.style.visibility = show3D ? "visible" : "hidden";
+  }
+
+  function makePrimitiveMesh(type, color, opacity){
+    const mat = new THREE.MeshStandardMaterial({
+      color,
+      transparent: true,
+      opacity,
+      roughness: 0.65,
+      metalness: 0.0
+    });
+    let geo;
+    if (type === "cylinder") geo = new THREE.CylinderGeometry(0.22, 0.22, 0.62, 32, 1);
+    else if (type === "plane") geo = new THREE.BoxGeometry(0.72, 0.52, 0.02);
+    else geo = new THREE.BoxGeometry(0.52, 0.52, 0.52);
+
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(0, 0.55, 0);
+
+    const wireGeo = new THREE.WireframeGeometry(geo);
+    const wireMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
+    const wireframe = new THREE.LineSegments(wireGeo, wireMat);
+    wireframe.name = "structural_wireframe";
+    mesh.add(wireframe);
+
+    return mesh;
+  }
+
+  function findFirstSkinnedMeshAndSetupRig(root) {
+    let skinned = null;
+    root.traverse(o => {
+      if (o.isSkinnedMesh && o.skeleton && o.skeleton.bones && o.skeleton.bones.length > 0) {
+        if (!skinned) skinned = o;
+      }
+    });
+
+    if (skinned) {
+      const allBones = skinned.skeleton.bones;
+
+      const filteredIndices = [];
+      allBones.forEach((b, i) => {
+        if (ALLOWED_BONES.includes(b.name)) {
+          filteredIndices.push(i);
+        }
+      });
+
+      const bindPose = allBones.map(b=>({
+        uuid: b.uuid,
+        pos: b.position.clone(),
+        quat: b.quaternion.clone(),
+        scl: b.scale.clone()
+      }));
+
+      const controlBalls = [];
+      const ballGeo = new THREE.SphereGeometry(0.04, 16, 16);
+      const ballMat = new THREE.MeshBasicMaterial({ color: 0xffff00, depthTest: false, transparent: true, opacity: 0.85 });
+
+      filteredIndices.forEach(idx => {
+        const bone = allBones[idx];
+        const ball = new THREE.Mesh(ballGeo, ballMat);
+        ball.userData = { boneIndex: idx, isBoneBall: true };
+        bone.add(ball);
+        controlBalls.push(ball);
+      });
+
+      return { root, skinned, bones: allBones, bindPose, controlBalls, filteredIndices };
+    }
+    return null;
+  }
+
+  function updateControlBallSizes(){
+    const scaleVec = new THREE.Vector3();
+    actors.forEach(actor => {
+      if (!actor.rig || !actor.rig.controlBalls) return;
+      actor.rig.controlBalls.forEach(ball => {
+        if (!ball.parent) return;
+        ball.parent.getWorldScale(scaleVec);
+        const inv = 1 / Math.max(scaleVec.x, scaleVec.y, scaleVec.z, 0.0001);
+        ball.scale.setScalar(inv);
+      });
+    });
+  }
+
+  function updateModelMaterial(obj, color, opacity){
+    const mat = new THREE.MeshStandardMaterial({
+      color,
+      transparent: true,
+      opacity,
+      roughness: 0.65,
+      metalness: 0.0
+    });
+
+    obj.traverse((child)=>{
+      if (child.isMesh && !child.userData?.isBoneBall){
+        child.material = mat;
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }
+
+  function normalizeModel(root){
+    const box = new THREE.Box3().setFromObject(root);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    const scaleFactor = 1.2 / maxDim;
+    root.scale.setScalar(scaleFactor);
+
+    const box2 = new THREE.Box3().setFromObject(root);
+    const center = new THREE.Vector3();
+    box2.getCenter(center);
+    root.position.x -= center.x;
+    root.position.z -= center.z;
+    root.position.y -= box2.min.y;
+  }
+
+  function createActor({ name, color, type, group, isCharacter=false, characterIndex=null }){
+    return {
+      id: `actor-${actorCounter++}`,
+      name,
+      color,
+      type,
+      group,
+      visible: true,
+      rig: null,
+      poseMode: false,
+      selectedBoneIndex: null,
+      isCharacter,
+      characterIndex
+    };
+  }
+
+  function addActor(actor){
+    if (!scene) return;
+    actors.push(actor);
+    scene.add(actor.group);
+    renderLayers();
+    setActiveActor(actor.id);
+    updateCharactersUI();
+  }
+
+  function removeActor(actor){
+    if (!actor) return;
+    if (transform) transform.detach();
+    if (scene) scene.remove(actor.group);
+    const idx = actors.findIndex(a => a.id === actor.id);
+    if (idx !== -1) actors.splice(idx, 1);
+    if (actorState.activeId === actor.id){
+      actorState.activeId = actors[0]?.id || null;
+    }
+    renderLayers();
+    updateActiveUI();
+    updateCharactersUI();
+  }
+
+  function setActorVisible(actor, visible){
+    actor.visible = visible;
+    actor.group.visible = visible;
+    if (actor.rig && actor.rig.controlBalls){
+      actor.rig.controlBalls.forEach(ball => {
+        ball.visible = visible && actor.poseMode;
+      });
+    }
+    renderLayers();
+    updateActiveUI();
+  }
+
+  function setActiveActor(id){
+    actorState.activeId = id;
+    renderLayers();
+    updateActiveUI();
+  }
+
+  function getActiveActor(){
+    return actors.find(a => a.id === actorState.activeId) || null;
+  }
+
+  function renderLayers(){
+    layersList.innerHTML = "";
+    if (!actors.length){
+      layersList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">No layers yet.</div>";
+      return;
+    }
+    actors.forEach(actor => {
+      const item = document.createElement("div");
+      item.className = "lf-layeritem" + (actor.id === actorState.activeId ? " active" : "");
+
+      const visBtn = document.createElement("button");
+      visBtn.className = "lf-btnSmall";
+      visBtn.textContent = actor.visible ? "👁" : "🚫";
+      visBtn.addEventListener("click", ()=>{
+        setActorVisible(actor, !actor.visible);
+      });
+
+      const badge = document.createElement("span");
+      badge.className = "lf-layer-badge";
+      badge.style.background = actor.color;
+
+      const name = document.createElement("span");
+      name.className = "lf-layer-name";
+      name.textContent = actor.name;
+
+      const selectBtn = document.createElement("button");
+      selectBtn.className = "lf-btnSmall";
+      selectBtn.textContent = "Select";
+      selectBtn.addEventListener("click", ()=>setActiveActor(actor.id));
+
+      item.appendChild(visBtn);
+      item.appendChild(badge);
+      item.appendChild(name);
+      item.appendChild(selectBtn);
+      layersList.appendChild(item);
+    });
+  }
+
+  function updateActiveUI(){
+    const actor = getActiveActor();
+    if (!transform) return;
+    transform.detach();
+    if (!actor){
+      poseSection.style.display = "none";
+      return;
+    }
+    if (actor.poseMode && actor.rig){
+      poseSection.style.display = "block";
+      poseToggle.classList.toggle("on", true);
+      fillBoneSelect(actor);
+      attachSelectedBone(actor);
+      setTransformMode("rotate");
+      transform.setSpace("local");
+    } else {
+      poseSection.style.display = actor.rig ? "block" : "none";
+      poseToggle.classList.toggle("on", false);
+      if (actor.group) transform.attach(actor.group);
+      setTransformMode("translate");
+      transform.setSpace("world");
+    }
+    transform.enabled = actor.visible;
+  }
+
+  function fillBoneSelect(actor) {
+    boneSelect.innerHTML = "";
+    if (!actor?.rig) return;
+    actor.rig.filteredIndices.forEach(idx => {
+      const bone = actor.rig.bones[idx];
+      const rusName = BONE_MAPPING[bone.name] || bone.name;
+      const opt = document.createElement("option");
+      opt.value = idx;
+      opt.textContent = rusName;
+      boneSelect.appendChild(opt);
+    });
+    if (actor.selectedBoneIndex === null && actor.rig.filteredIndices.length){
+      actor.selectedBoneIndex = actor.rig.filteredIndices[0];
+    }
+    boneSelect.value = actor.selectedBoneIndex || actor.rig.filteredIndices[0] || "";
+  }
+
+  function attachSelectedBone(actor) {
+    if (!actor?.rig || !actor.poseMode) return;
+    const idx = parseInt(actor.selectedBoneIndex ?? boneSelect.value, 10);
+    const bone = actor.rig.bones[idx];
+    if (bone) {
+      transform.detach();
+      transform.attach(bone);
+      transform.setSpace("local");
+      setTransformMode("rotate");
+    }
+  }
+
+  function resetPose(actor) {
+    if (!actor?.rig) return;
+    actor.rig.bones.forEach((b, i) => {
+      const bp = actor.rig.bindPose[i];
+      if (bp && bp.uuid === b.uuid) {
+        b.position.copy(bp.pos);
+        b.quaternion.copy(bp.quat);
+        b.scale.copy(bp.scl);
+      }
+    });
+    if (actor.poseMode) attachSelectedBone(actor);
+  }
+
+  function setPoseModeForActor(actor, on){
+    if (on && !actor?.rig) { alert("No rig found!"); return; }
+    actor.poseMode = on;
+    poseToggle.classList.toggle("on", on);
+    if (actor.rig && actor.rig.controlBalls) {
+      actor.rig.controlBalls.forEach(ball => ball.visible = on && actor.visible);
+    }
+    if (!transform) return;
+    if (on) {
+      setTransformMode("rotate");
+      transform.setSpace("local");
+      attachSelectedBone(actor);
+    } else {
+      transform.detach();
+      transform.setSpace("world");
+      if (actor.group) transform.attach(actor.group);
+    }
+  }
+
+  function updateCharactersUI(){
+    char1Toggle.classList.toggle("on", !!(actorState.char1 && actorState.char1.visible));
+    char2Toggle.classList.toggle("on", !!(actorState.char2 && actorState.char2.visible));
+  }
+
+  function setTransformMode(modeName){
+    if (!transform) return;
+    transform.setMode(modeName);
+    tMove.classList.toggle("active", modeName === "translate");
+    tRot.classList.toggle("active", modeName === "rotate");
+    tScale.classList.toggle("active", modeName === "scale");
+  }
+
+  function addCharacter(index, gltf, label){
+    const root = gltf.scene;
+    normalizeModel(root);
+    const wrapper = new THREE.Group();
+    wrapper.add(root);
+    wrapper.position.set(0, 0.05, 0);
+
+    const color = index === 1 ? 0xff3b30 : 0x2b6cff;
+    const opacity = 0.85;
+    updateModelMaterial(wrapper, color, opacity);
+
+    const actor = createActor({
+      name: label,
+      color: index === 1 ? "#ff3b30" : "#2b6cff",
+      type: "character",
+      group: wrapper,
+      isCharacter: true,
+      characterIndex: index
+    });
+
+    actor.rig = findFirstSkinnedMeshAndSetupRig(root);
+    if (actor.rig) {
+      actor.poseMode = true;
+      actor.selectedBoneIndex = actor.rig.filteredIndices[0] || null;
+      actor.rig.controlBalls.forEach(ball => ball.visible = true);
+    }
+
+    if (index === 1 && actorState.char1) removeActor(actorState.char1);
+    if (index === 2 && actorState.char2) removeActor(actorState.char2);
+
+    if (index === 1) actorState.char1 = actor;
+    if (index === 2) actorState.char2 = actor;
+
+    addActor(actor);
+    setMode("3d");
+  }
+
+  function addPrimitiveActor(){
+    const type = primTypeEl.value || "box";
+    const opacity = Number(primOpacityEl.value || 0.6);
+    const mesh = makePrimitiveMesh(type, 0xffffff, opacity);
+    const wrapper = new THREE.Group();
+    wrapper.add(mesh);
+    wrapper.position.set(0, 0.05, 0);
+
+    const actor = createActor({
+      name: `Primitive ${actors.length + 1}`,
+      color: "#bbbbbb",
+      type: "primitive",
+      group: wrapper
+    });
+    addActor(actor);
+    setMode("3d");
+  }
+
+  function addModelActor(gltf, label){
+    const root = gltf.scene;
+    normalizeModel(root);
+    const wrapper = new THREE.Group();
+    wrapper.add(root);
+    wrapper.position.set(0, 0.05, 0);
+    updateModelMaterial(wrapper, 0xffffff, 0.75);
+
+    const actor = createActor({
+      name: label,
+      color: "#ffffff",
+      type: "model",
+      group: wrapper
+    });
+    actor.rig = findFirstSkinnedMeshAndSetupRig(root);
+    if (actor.rig){
+      actor.poseMode = false;
+      actor.rig.controlBalls.forEach(ball => ball.visible = false);
+    }
+    addActor(actor);
+    setMode("3d");
+  }
+
+  function loadGltfFromFile(file){
+    return new Promise((resolve, reject)=>{
+      if (!THREE.GLTFLoader) return reject(new Error("Loader not found"));
+      const loader = new THREE.GLTFLoader();
+      const url = URL.createObjectURL(file);
+      loader.load(url, (gltf) => {
+        resolve(gltf);
+      }, undefined, (err)=>{
+        reject(err);
+      });
+    });
+  }
+
+  function loadGltfFromUrl(url){
+    return new Promise((resolve, reject)=>{
+      if (!THREE.GLTFLoader) return reject(new Error("Loader not found"));
+      const loader = new THREE.GLTFLoader();
+      loader.setCrossOrigin("anonymous");
+      loader.load(url, (gltf)=>resolve(gltf), undefined, (err)=>reject(err));
+    });
+  }
+
+  function updateRaycastSelection(){
+    if (!THREE_OK) return;
+    glCanvas.addEventListener("pointerdown", (ev)=>{
+      const actor = getActiveActor();
+      if (!actor || !actor.poseMode || !actor.rig) return;
+      const rect = glCanvas.getBoundingClientRect();
+      const x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+
+      const mouse = new THREE.Vector2(x, y);
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, camera);
+
+      const intersects = raycaster.intersectObjects(actor.rig.controlBalls || []);
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        const boneIndex = hit.userData.boneIndex;
+        actor.selectedBoneIndex = boneIndex;
+        boneSelect.value = boneIndex;
+        attachSelectedBone(actor);
+      }
+    });
+  }
+
+  function updatePoseUiFromSelection(){
+    const actor = getActiveActor();
+    if (!actor || !actor.rig) return;
+    fillBoneSelect(actor);
+  }
+
+  function updateTransformForMode(modeName){
+    const actor = getActiveActor();
+    if (actor?.poseMode) return;
+    if (!transform) return;
+    setTransformMode(modeName);
+  }
+
+  function update3DState(){
+    stateText.textContent = `View • 3D ${actors.length ? "ON" : "OFF"}`;
+  }
+
+  async function exportCompositeBlob(){
+    const w = glCanvas.width;
+    const h = glCanvas.height;
+    if (!w || !h) return null;
+
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = w;
+    tempCanvas.height = h;
+    const ctx = tempCanvas.getContext("2d");
+
+    const prevTransformVisible = transform ? transform.visible : false;
+    const prevGridVisible = gridHelper?.visible;
+    if (transform) transform.visible = false;
+    if (gridHelper) gridHelper.visible = false;
+    actors.forEach(actor => {
+      if (actor.rig?.controlBalls) {
+        actor.rig.controlBalls.forEach(ball => ball.visible = false);
+      }
+    });
+
+    if (renderer && scene && camera) {
+      renderer.render(scene, camera);
+    }
+
+    ctx.drawImage(bgCanvas, 0, 0, w, h);
+    ctx.drawImage(glCanvas, 0, 0, w, h);
+    ctx.drawImage(drawCanvas, 0, 0, w, h);
+
+    if (transform) transform.visible = prevTransformVisible;
+    if (gridHelper) gridHelper.visible = prevGridVisible;
+    actors.forEach(actor => {
+      if (actor.rig?.controlBalls) {
+        actor.rig.controlBalls.forEach(ball => ball.visible = actor.poseMode && actor.visible);
+      }
+    });
+
+    return new Promise(resolve => {
+      tempCanvas.toBlob((blob)=>resolve(blob), "image/png", 0.95);
+    });
+  }
+
+  function shouldUseComposite(){
+    const hasActors = actors.some(a => a.visible);
+    return !!bgImage || drawDirty || hasActors;
+  }
+
+  async function buildCompositeUrl(){
+    if (!shouldUseComposite()) return null;
+    const blob = await exportCompositeBlob();
+    if (!blob) return null;
+    const file = new File([blob], `composite-${uuid()}.png`, { type: "image/png" });
+    return uploadReferenceToInputs(file);
+  }
+
+  function buildCinemaLockPrompt(){
+    const lines = [];
+    const hasBackground = !!bgImage;
+    const visibleActors = actors.filter(a => a.visible);
+
+    if (hasBackground){
+      lines.push("BACKGROUND LOCK: The composite contains a locked background plate. Preserve the exact background composition, perspective, and camera framing.");
+    }
+
+    if (visibleActors.length){
+      lines.push("SCENE LOCK: Preserve all proxy placements, scales, and camera perspective from the composite input. Do NOT re-pose, re-center, or replace any proxy silhouettes.");
+    }
+
+    if (actorState.char1 && actorState.char1.visible){
+      lines.push("CHARACTER 1 LOCK: The RED proxy represents Character 1. Keep the exact pose and silhouette from the red proxy. Do not adjust limb angles or stance.");
+    }
+
+    if (actorState.char2 && actorState.char2.visible){
+      lines.push("CHARACTER 2 LOCK: The BLUE proxy represents Character 2. Keep the exact pose and silhouette from the blue proxy. Do not adjust limb angles or stance.");
+    }
+
+    if (visibleActors.length > 1){
+      lines.push("MULTI-LAYER LOCK: Multiple objects/layers are present. Preserve every layer placement and relationship; do not delete or merge layers.");
+    }
+
+    return lines.join("\n");
+  }
 
   async function startJob(){
     runBtn.disabled = true;
@@ -1349,7 +2517,6 @@ Keep it compact but unambiguous.
     currentJobId = null;
     if (pollTimer) clearTimeout(pollTimer);
 
-    resetResult();
     setStatus("");
     showLoader(true);
     loaderSub.textContent = "Preparing…";
@@ -1358,19 +2525,21 @@ Keep it compact but unambiguous.
     fd.append("presetId", PRESET_ID);
 
     const userPromptRaw = (sceneEl.value||"").trim() || "high quality, detailed";
-    const hasImage = !!selectedFiles.length;
 
     const presetKey = String(camPresetEl?.value || "IMAX_PANAVISION_ANAMORPHIC");
     const focalMm = Number(focalEl?.value || 35);
     const aperture = String(apertureEl?.value || "f/2.0");
     const grain = String(grainEl?.value || "subtle");
     const exposure = String(exposureEl?.value || "natural");
-    
     const flare = String(flareEl?.value || "subtle");
     const bloom = String(bloomEl?.value || "subtle");
 
-    // ✅ Aspect is now from selectedAspect
     const resVal = String(resEl.value || "2K");
+
+    const urls = await getOrUploadImageUrls();
+    const compositeUrl = await buildCompositeUrl();
+    const hasImage = urls.length > 0 || !!compositeUrl;
+    const cinemaLock = buildCinemaLockPrompt();
 
     const finalPrompt = buildFinalPrompt({
       userPrompt: userPromptRaw,
@@ -1380,30 +2549,27 @@ Keep it compact but unambiguous.
       aperture,
       grain,
       exposure,
-      aspect: selectedAspect, // ✅ Passed selectedAspect
+      aspect: selectedAspect,
       res: resVal,
       styleOnly: !!styleChk.checked,
       flare,
-      bloom
+      bloom,
+      cinemaLock
     });
 
     fd.append("scene", finalPrompt);
-
-    // ✅ Passed selectedAspect to backend
     fd.append("aspect_ratio", selectedAspect);
     fd.append("resolution", resVal);
     fd.append("output_format", "png");
     fd.append("safety_filter_level", "block_only_high");
 
-    let urls = [];
-    if (selectedFiles.length){
-      urls = await getOrUploadImageUrls();
-      if (urls.length === 1){
-        fd.append("image_input_url", urls[0]);
-      } else {
-        urls.forEach(u => fd.append("image_input_urls", u));
-        fd.append("image_input_url", urls[0]);
-      }
+    if (compositeUrl){
+      fd.append("image_input_url", compositeUrl);
+      const allUrls = [compositeUrl, ...urls];
+      allUrls.forEach(u => fd.append("image_input_urls", u));
+    } else if (urls.length){
+      fd.append("image_input_url", urls[0]);
+      urls.forEach(u => fd.append("image_input_urls", u));
     }
 
     loaderSub.textContent = "Sending task…";
@@ -1550,5 +2716,124 @@ Keep it compact but unambiguous.
   resEl.addEventListener("change", calcCost);
   calcCost();
   updateDropText();
+  buildPalette();
+  applyAspectRatio();
+
+  btnDraw.addEventListener("click", ()=>setMode("draw"));
+  btn3D.addEventListener("click", ()=>setMode("3d"));
+
+  bgDrop.addEventListener("click", ()=>bgFile.click());
+  bgFile.addEventListener("change", async (e)=>{
+    const file = e.target.files?.[0];
+    bgFile.value = "";
+    if (!file) return;
+    await setBackground(file);
+  });
+  bgClear.addEventListener("click", ()=>clearBackground());
+
+  char1Default.addEventListener("click", async ()=>{
+    try{
+      const gltf = await loadGltfFromUrl(HUMAN_URL);
+      addCharacter(1, gltf, "Character 1 (Default)" );
+    } catch(e){
+      alert("Error loading default character");
+    }
+  });
+  char1Upload.addEventListener("click", ()=>char1File.click());
+  char1File.addEventListener("change", async (e)=>{
+    const file = e.target.files?.[0];
+    char1File.value = "";
+    if (!file) return;
+    try{
+      const gltf = await loadGltfFromFile(file);
+      addCharacter(1, gltf, "Character 1" );
+    } catch(e){
+      alert("Error loading GLB");
+    }
+  });
+  char1Remove.addEventListener("click", ()=>{
+    if (actorState.char1) {
+      removeActor(actorState.char1);
+      actorState.char1 = null;
+      updateCharactersUI();
+    }
+  });
+  char1Toggle.addEventListener("click", ()=>{
+    if (actorState.char1) setActorVisible(actorState.char1, !actorState.char1.visible);
+  });
+
+  char2Default.addEventListener("click", async ()=>{
+    try{
+      const gltf = await loadGltfFromUrl(HUMAN_URL);
+      addCharacter(2, gltf, "Character 2 (Default)" );
+    } catch(e){
+      alert("Error loading default character");
+    }
+  });
+  char2Upload.addEventListener("click", ()=>char2File.click());
+  char2File.addEventListener("change", async (e)=>{
+    const file = e.target.files?.[0];
+    char2File.value = "";
+    if (!file) return;
+    try{
+      const gltf = await loadGltfFromFile(file);
+      addCharacter(2, gltf, "Character 2" );
+    } catch(e){
+      alert("Error loading GLB");
+    }
+  });
+  char2Remove.addEventListener("click", ()=>{
+    if (actorState.char2) {
+      removeActor(actorState.char2);
+      actorState.char2 = null;
+      updateCharactersUI();
+    }
+  });
+  char2Toggle.addEventListener("click", ()=>{
+    if (actorState.char2) setActorVisible(actorState.char2, !actorState.char2.visible);
+  });
+
+  btnAddPrimitive.addEventListener("click", ()=>addPrimitiveActor());
+  btnAddModel.addEventListener("click", ()=>modelFile.click());
+  modelFile.addEventListener("change", async (e)=>{
+    const file = e.target.files?.[0];
+    modelFile.value = "";
+    if (!file) return;
+    try{
+      const gltf = await loadGltfFromFile(file);
+      addModelActor(gltf, file.name);
+    } catch(e){
+      alert("Error loading GLB");
+    }
+  });
+
+  tMove.addEventListener("click", ()=>updateTransformForMode("translate"));
+  tRot.addEventListener("click", ()=>updateTransformForMode("rotate"));
+  tScale.addEventListener("click", ()=>updateTransformForMode("scale"));
+
+  poseToggle.addEventListener("click", ()=>{
+    const actor = getActiveActor();
+    if (!actor) return;
+    setPoseModeForActor(actor, !actor.poseMode);
+    updateActiveUI();
+  });
+  boneSelect.addEventListener("change", ()=>{
+    const actor = getActiveActor();
+    if (!actor) return;
+    actor.selectedBoneIndex = parseInt(boneSelect.value, 10);
+    attachSelectedBone(actor);
+  });
+  resetPoseBtn.addEventListener("click", ()=>{
+    const actor = getActiveActor();
+    if (actor) resetPose(actor);
+  });
+
+  if (THREE_OK) {
+    init3D();
+    updateRaycastSelection();
+  }
+
+  setMode("view");
+  update3DState();
 })();
 </script>
