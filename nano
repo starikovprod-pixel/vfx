@@ -1233,7 +1233,7 @@ ANTI-AI LOOK:
     return s.trim();
   }
 
-  function buildFinalPrompt({ userPrompt, hasImage, presetKey, focalMm, aperture, grain, exposure, aspect, res, styleOnly, flare, bloom, cinemaLock, identityMode }) {
+  function buildFinalPrompt({ userPrompt, hasImage, presetKey, focalMm, aperture, grain, exposure, aspect, res, styleOnly, flare, bloom, cinemaLock, identityMode, locksFirst = false }) {
     const P = LF_CAMERA_PRESETS[presetKey] || LF_CAMERA_PRESETS.IMAX_PANAVISION_ANAMORPHIC;
     const up = normalizeUserPrompt(userPrompt);
 
@@ -1296,6 +1296,37 @@ CINEMATIC CAMERA SETUP:
 - Halation/Bloom: ${bloomBlock(bloom)}
 - Notes: ${P.notes}
 `.trim();
+
+    const hardLocksBlock = cinemaLock ? `
+HARD LOCKS — MUST EXECUTE FIRST:
+${cinemaLock}
+` : "";
+
+    const styleBlock = `
+CINEMATIC STYLE / CAMERA (SECOND PRIORITY):
+${LF_ENGINE_PROMPT}
+${cameraPhysical.trim()}
+${anamorphicOpticsPack.trim()}
+
+CINEMATIC CAMERA SETUP:
+${camBlock}
+`.trim();
+
+    if (locksFirst && cinemaLock) {
+      return `
+${hardLocksBlock.trim()}
+
+IDENTITY RULES (SECOND PRIORITY):
+${identityWardrobeLock.trim()}
+
+${styleOnlyBlock.trim()}
+
+${styleBlock}
+
+USER_TEXT:
+${up || "No extra instructions."}
+`.trim();
+    }
 
     return `
 ${LF_ENGINE_PROMPT}
@@ -2907,55 +2938,43 @@ Keep it compact but unambiguous.
   }
 
   function buildCinemaLockPrompt({ indexMap, hasComposite }){
-    const lines = [];
-    const hasBackground = !!bgImage;
-    const visibleActors = actors.filter(a => a.visible);
+    if (!hasComposite || !indexMap.composite) return "";
 
-    if (hasComposite && indexMap.composite){
-      lines.push(`Image #${indexMap.composite} is the composite viewport plate (locked). Preserve camera, perspective, placements.`);
-      lines.push("HARD LOCK: The composite proxy pose and camera are absolute. Do NOT interpret or stylize the pose.");
-      lines.push("Do NOT change camera angle, camera height, lens perspective, or subject distance relative to background.");
-      lines.push("No reframing, no camera move, no lens change, keep horizon line identical.");
-    }
+    const identitySources = [];
+    if (indexMap.char1) identitySources.push(`#${indexMap.char1}`);
+    if (indexMap.char2) identitySources.push(`#${indexMap.char2}`);
+    const identityLine = identitySources.length
+      ? `2) Identity from Image ${identitySources.join("/")} (ABSOLUTE).`
+      : "2) Identity from Image #CHAR1/#CHAR2 (ABSOLUTE).";
 
-    if (hasComposite && hasBackground){
-      lines.push("BACKGROUND LOCK: The composite contains a locked background plate. Preserve the exact background composition, perspective, and camera framing.");
-    }
-
-    if (hasComposite && visibleActors.length){
-      lines.push("SCENE LOCK: Preserve all proxy placements, scales, and camera perspective from the composite input. Do NOT re-pose, re-center, or replace any proxy silhouettes.");
-    }
+    const lines = [
+      "PRIORITY ORDER:",
+      `1) Pose + camera from Image #${indexMap.composite} (ABSOLUTE).`,
+      identityLine,
+      "3) Style/cinematic settings are THIRD priority. They must NOT change pose/camera.",
+      "",
+      "POSE/CAMERA LOCK:",
+      `- Use Image #${indexMap.composite} as the ONLY source of pose, camera angle, framing, distance, perspective, and scale.`,
+      "- Match the pose 1:1. Same joint angles. No “improving” the pose.",
+      "- Match camera 1:1. No reframing, no moving subject, no changing lens perspective."
+    ];
 
     if (indexMap.char1){
-      lines.push(`Character 1 photo is image #${indexMap.char1} in the reference list.`);
-      lines.push(`Image #${indexMap.char1} is Character 1 identity photo. Use it as identity reference for Character 1.`);
+      lines.push(
+        "",
+        "CHARACTER 1:",
+        `- Replace the RED proxy with the real person from Image #${indexMap.char1}.`,
+        `- Use Image #${indexMap.char1} ONLY for identity (face/body/clothes), NOT for pose/camera.`
+      );
     }
 
     if (indexMap.char2){
-      lines.push(`Character 2 photo is image #${indexMap.char2} in the reference list.`);
-      lines.push(`Image #${indexMap.char2} is Character 2 identity photo. Use it as identity reference for Character 2.`);
-    }
-
-    if (hasComposite && actorState.char1 && actorState.char1.visible && indexMap.char1){
-      lines.push(`Character 1 identity MUST match Character 1 photo (image #${indexMap.char1}). Exact face structure (eyes/nose/mouth/jawline), beard/hairline.`);
-      lines.push(`Character 1 pose MUST match proxy silhouette in composite EXACTLY (image #${indexMap.composite}). Same joint angles, hand positions, weight shift, body lean.`);
-      lines.push("Camera MUST match composite EXACTLY: framing, perspective, subject scale, FOV.");
-      lines.push("Forbidden: re-posing, straightening posture, “improving” pose, changing arm angles.");
-      lines.push("If there is any mismatch between identity photo and proxy pose, keep proxy pose exactly, and match identity within that pose.");
-      lines.push("If any conflict: preserve proxy pose over everything.");
-    }
-
-    if (hasComposite && actorState.char2 && actorState.char2.visible && indexMap.char2){
-      lines.push(`Character 2 identity MUST match Character 2 photo (image #${indexMap.char2}). Exact face structure (eyes/nose/mouth/jawline), beard/hairline.`);
-      lines.push(`Character 2 pose MUST match proxy silhouette in composite EXACTLY (image #${indexMap.composite}). Same joint angles, hand positions, weight shift, body lean.`);
-      lines.push("Camera MUST match composite EXACTLY: framing, perspective, subject scale, FOV.");
-      lines.push("Forbidden: re-posing, straightening posture, “improving” pose, changing arm angles.");
-      lines.push("If there is any mismatch between identity photo and proxy pose, keep proxy pose exactly, and match identity within that pose.");
-      lines.push("If any conflict: preserve proxy pose over everything.");
-    }
-
-    if (visibleActors.length > 1){
-      lines.push("MULTI-LAYER LOCK: Multiple objects/layers are present. Preserve every layer placement and relationship; do not delete or merge layers.");
+      lines.push(
+        "",
+        "CHARACTER 2:",
+        `- Replace the BLUE proxy with the real person from Image #${indexMap.char2}.`,
+        `- Use Image #${indexMap.char2} ONLY for identity, NOT for pose/camera.`
+      );
     }
 
     return lines.join("\n");
@@ -3082,7 +3101,8 @@ Keep it compact but unambiguous.
     }
     const identityMode = compositeUrl && (useChar1 || useChar2) ? "proxy_layout_plate" : "generic_locked_image";
     const effectiveStyleOnly = userPromptRaw ? !!styleChk.checked : true;
-    const safeUserText = "No additional instructions. Preserve the input images exactly. Do NOT add new objects/props/light sources. Only apply optics/grade/grain if enabled.";
+    const safeUserText = "No extra instructions. Do not add props. Do not change pose/camera. Only apply cinematic optics/grade subtly.";
+    const locksFirst = !!compositeUrl && (useChar1 || useChar2);
     const cinemaLock = buildCinemaLockPrompt({
       indexMap: imagePlan.indexMap,
       hasComposite: !!compositeUrl
@@ -3102,7 +3122,8 @@ Keep it compact but unambiguous.
       flare,
       bloom,
       cinemaLock,
-      identityMode
+      identityMode,
+      locksFirst
     });
 
     fd.append("scene", finalPrompt);
