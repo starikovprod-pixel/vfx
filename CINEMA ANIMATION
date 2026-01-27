@@ -666,9 +666,14 @@
 </div>
 
 <script>
-  const BACKEND_BASE = "";
+  const BACKEND_BASE = "https://ai-vfx-backend.vercel.app";
   const LIB_KEY = "LF_CINEMA_ANIMATION_LIBRARY";
   const $ = (id) => document.getElementById(id);
+  const { createClient } = supabase;
+  const SUPABASE_URL = "https://vqnmzstiaosqeoltcwbq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbm16c3RpYW9zcWVvbHRjd2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwMDA1MzcsImV4cCI6MjA4MzU3NjUzN30.12MycLBd_SpBwFz52alQFtIuWiguAunqh4AX7TbIkkk";
+
+
 
   const state = {
     mode: "cinema",
@@ -699,18 +704,61 @@
     return data?.session;
   }
 
+ 
+async function uploadToBucket(file, bucket) {
+  const session = await getSession();
+  if (!session) throw new Error("No session");
+
+  const userId = session.user.id;
+  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+  const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+
+  // ✅ upload через Supabase SDK (сам правильно формирует запрос)
+  const { error } = await window.sb.storage.from(bucket).upload(path, file, {
+    upsert: true,
+    contentType: file.type || "application/octet-stream",
+  });
+
+  if (error) throw new Error(`Upload failed: ${error.message}`);
+
+  // ✅ bucket у тебя public — берём public URL
+  const { data } = window.sb.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+
+
   async function fetchJsonWithAuth(url, opts={}) {
     let s = await getSession();
     if (!s) { location.href = "/login"; return; }
-    let r = await fetch(url, { ...opts, headers: { ...opts.headers, Authorization: "Bearer " + s.access_token }});
+    
+    let headers = { ...opts.headers, Authorization: "Bearer " + s.access_token };
+    
+    let r = await fetch(url, { ...opts, headers });
+    
     if (r.status === 401) {
       await window.sb.auth.refreshSession();
       s = await getSession();
-      r = await fetch(url, { ...opts, headers: { ...opts.headers, Authorization: "Bearer " + s.access_token }});
+      headers.Authorization = "Bearer " + s.access_token;
+      r = await fetch(url, { ...opts, headers });
     }
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.error || "Error");
-    return j;
+    
+    const ct = r.headers.get("content-type") || "";
+    const raw = await r.text();
+    let j = null;
+    
+    if (ct.includes("application/json")) {
+      try { j = JSON.parse(raw); } catch(e) {}
+    }
+
+    if (!r.ok) {
+      const errorText = (j && (j.error || j.details || j.message)) 
+        ? (j.error || j.details || j.message) 
+        : `Error ${r.status}: ${raw.slice(0, 300)}`;
+      throw new Error(errorText);
+    }
+
+    return j || { ok: true, raw };
   }
 
   function loadLibrary() {
@@ -1299,9 +1347,9 @@
               trimStartSec: 0,
               trimEndSec: Math.round(data.duration || data.durationSec || 0)
             };
+            
             state.latestClip = clip;
-            saveClipBtn.disabled = false;
-            addClipToScene({ ...clip, id: uuid() });
+            saveClipBtn.disabled = false; 
             renderViewport();
           }
         } else {
@@ -1315,53 +1363,64 @@
   async function handleGenerate() {
     statusText.textContent = "";
     saveClipBtn.disabled = true;
+    
     const session = await getSession();
     if (!session) return;
+
+    $("generateBtn").disabled = true;
 
     const fd = new FormData();
     fd.append("origin_path", "/cinema_animation");
     fd.append("enhance", "true");
-    fd.append("access_token", session.access_token);
-
-    if (state.mode === "cinema") {
-      const image = $("cinemaImage").files[0];
-      if (!image) return alert("Upload a start image.");
-      fd.append("presetId", "kling_v26");
-      fd.append("scene", $("cinemaPrompt").value || "cinematic scene");
-      fd.append("image", image);
-      fd.append("duration", $("cinemaDuration").value);
-      fd.append("aspect_ratio", $("cinemaAspect").value);
-      fd.append("generate_audio", $("cinemaAudio").checked);
-    } else {
-      const image = $("motionImage").files[0];
-      const video = $("motionVideo").files[0];
-      if (!image || !video) return alert("Upload reference image and video.");
-      const mode = $("motionMode").value;
-      fd.append("presetId", mode === "pro" ? "kling_v26_motion_pro" : "kling_v26_motion_std");
-      fd.append("scene", $("motionPrompt").value || "cinematic motion");
-      fd.append("image", image);
-      fd.append("video", video);
-      fd.append("mode", mode);
-      fd.append("keep_original_sound", $("motionKeepSound").checked);
-
-      const meta = await getVideoMeta(video);
-      if (meta?.duration) {
-        fd.append("video_duration_sec", Math.round(meta.duration));
-      }
-    }
-
-    $("generateBtn").disabled = true;
-    statusText.textContent = "Generating...";
-
+    
     try {
-      const r = await fetch(`${BACKEND_BASE}/api/start`, { method: "POST", body: fd });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || "Failed to start");
+      if (state.mode === "cinema") {
+        const image = $("cinemaImage").files[0];
+        if (!image) throw new Error("Please upload a start image.");
+
+        statusText.textContent = "Uploading start image...";
+        const imageUrl = await uploadToBucket(image, "inputs");
+
+        fd.append("presetId", "kling_v26");
+        fd.append("scene", $("cinemaPrompt").value || "cinematic scene");
+        fd.append("image_url", imageUrl);
+        fd.append("duration", $("cinemaDuration").value);
+        fd.append("aspect_ratio", $("cinemaAspect").value);
+        fd.append("generate_audio", $("cinemaAudio").checked);
+
+      } else {
+        const image = $("motionImage").files[0];
+        const video = $("motionVideo").files[0];
+        if (!image || !video) throw new Error("Upload reference image and video.");
+        
+        statusText.textContent = "Uploading assets...";
+        
+        const imageUrl = await uploadToBucket(image, "inputs");
+        const videoUrl = await uploadToBucket(video, "inputs_video");
+
+        const mode = $("motionMode").value;
+        fd.append("presetId", mode === "pro" ? "kling_v26_motion_pro" : "kling_v26_motion_std");
+        fd.append("scene", $("motionPrompt").value || "cinematic motion");
+        fd.append("image_url", imageUrl);
+        fd.append("video_url", videoUrl);
+        fd.append("mode", mode);
+        fd.append("keep_original_sound", $("motionKeepSound").checked);
+
+        const meta = await getVideoMeta(video);
+        if (meta?.duration) {
+          fd.append("video_duration_sec", Math.round(meta.duration));
+        }
+      }
+
+      statusText.textContent = "Starting generation...";
+      const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/start`, { method: "POST", body: fd });
+      
       statusText.textContent = "Job Started";
-      $("generateBtn").disabled = false;
       await pollJob(data.jobId);
+      
     } catch (e) {
       statusText.textContent = e.message;
+    } finally {
       $("generateBtn").disabled = false;
     }
   }
