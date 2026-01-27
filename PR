@@ -1,0 +1,2189 @@
+<style>
+  :root{
+    --bg-body:#050505;
+    --bg-panel:#111111;
+    --bg-card:#181818;
+    --bg-input:#222222;
+    --border:#2b2b2b;
+    --accent:#2b6cff;
+    --accent-hover:#1a5cff;
+    --text-main:#ffffff;
+    --text-sec:#a0a0a0;
+    --radius:16px;
+    --danger:#ff465a;
+    --ok:#39ff14;
+    /* Editor vars */
+    --timeline-bg: #111;
+    --track-bg: #1a1a1a;
+    --clip-bg: #2b4c85;
+    --clip-border: #4d7cba;
+    --playhead: #ff465a;
+  }
+
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+  #lf-nano * { box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:var(--bg-body);
+    color:var(--text-main);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  }
+
+  #lf-nano{
+    min-height:calc(100vh - 74px);
+    background:var(--bg-body);
+  }
+
+  #lf-nano *{
+    scrollbar-width: thin;
+    scrollbar-color: #2a2a2a #0b0b0b;
+  }
+  #lf-nano *::-webkit-scrollbar{ width:10px; height:10px; }
+  #lf-nano *::-webkit-scrollbar-track{ background:#0b0b0b; }
+  #lf-nano *::-webkit-scrollbar-thumb{ background:#2a2a2a; border-radius:10px; border:2px solid #0b0b0b; }
+
+  #lf-main{ padding:26px 18px 40px; max-width:1860px; margin:0 auto; }
+
+  #lf-workspace{
+    display:grid;
+    grid-template-columns:440px minmax(520px, 1fr);
+    gap:0;
+    border:1px solid var(--border);
+    border-radius:22px;
+    overflow:hidden;
+    background:var(--bg-panel);
+    min-height:calc(100vh - 74px - 52px);
+  }
+
+  .lf-side,
+  .lf-panel{
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    max-height:calc(100vh - 74px - 52px);
+    overflow:auto;
+  }
+
+  .lf-side{ border-right:1px solid var(--border); }
+  .lf-panel{ border-left:1px solid var(--border); background:rgba(0,0,0,.2); }
+
+  .lf-center{
+    background:#0a0a0a;
+    display:flex;
+    flex-direction:column;
+    min-height:100%;
+  }
+
+  .lf-navStack{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .lf-labTitle{
+    font-size:14px;
+    font-weight:1000;
+    letter-spacing:.4px;
+    color:rgba(255,255,255,.92);
+    margin-bottom:2px;
+  }
+  .lf-navPills{ display:flex; flex-wrap:wrap; gap:10px; }
+  .lf-btnSmall.lf-link{
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff !important;
+    text-transform:none !important;
+    letter-spacing:.2px;
+    font-size:12px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+    color:rgba(255,255,255,.92) !important;
+  }
+  .lf-btnSmall.lf-link:visited{ color:#fff !important; }
+  .lf-btnSmall.lf-link:hover{
+    background:rgba(255,255,255,.09);
+    border-color:rgba(43,108,255,.45);
+  }
+  .lf-back{
+    background:transparent;
+    border:0;
+    color:var(--text-sec);
+    font-weight:900;
+    cursor:pointer;
+    padding:0;
+    font-size:13px;
+    text-align:left;
+  }
+
+  .lf-h2{ font-size:16px; font-weight:1000; margin:0; }
+  .lf-muted{ color:var(--text-sec); font-size:12px; }
+
+  .lf-section{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .lf-field label{
+    display:block;
+    font-size:12px;
+    font-weight:900;
+    color:var(--text-sec);
+    margin-bottom:8px;
+  }
+
+  .lf-field textarea,
+  .lf-field select,
+  .lf-field input[type="text"],
+  .lf-field input[type="number"]{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
+    padding:12px 12px;
+    border-radius:12px;
+    font-size:14px;
+    display:block;
+  }
+
+  .lf-select{
+    appearance:none;
+    background-image:linear-gradient(45deg, transparent 50%, #a0a0a0 50%),
+      linear-gradient(135deg, #a0a0a0 50%, transparent 50%),
+      linear-gradient(to right, #00000000, #00000000);
+    background-position:calc(100% - 18px) calc(1em + 2px),
+      calc(100% - 12px) calc(1em + 2px),
+      100% 0;
+    background-size:6px 6px, 6px 6px, 2.5em 2.5em;
+    background-repeat:no-repeat;
+    padding-right:40px;
+  }
+
+  .lf-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .lf-row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .lf-btnSmall{
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    border-radius:12px;
+    padding:8px 12px;
+    cursor:pointer;
+    font-weight:900;
+    font-size:12px;
+    user-select:none;
+  }
+  .lf-btnSmall:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.12); }
+  .lf-btnSmall.active{ border-color:rgba(43,108,255,.85); background:rgba(43,108,255,.22); }
+  .lf-gradBtn{
+    background:linear-gradient(135deg, rgba(43,108,255,.9), rgba(100,140,255,.7));
+    border:1px solid rgba(43,108,255,.8);
+  }
+  .lf-btnSmall.danger { color:var(--danger); border-color:rgba(255, 70, 90, 0.3); }
+  .lf-btnSmall.danger:hover { background:rgba(255, 70, 90, 0.1); }
+
+  .lf-btn{
+    width:100%;
+    height:52px;
+    border-radius:14px;
+    border:0;
+    background:var(--accent);
+    color:#fff;
+    font-weight:900;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    font-size:15px;
+    transition:0.2s;
+  }
+  .lf-btn:hover{ background:var(--accent-hover); transform:translateY(-1px); }
+  .lf-btn:disabled{ opacity:0.6; cursor:not-allowed; transform:none; background:#333; color:#aaa; }
+  .lf-btn.secondary{ background:#2a2a2a; color:#ddd; }
+
+  .lf-cost{
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.15);
+  }
+  .lf-status{ text-align:center; font-size:13px; color:var(--text-sec); min-height:20px; font-weight:600; }
+
+  .lf-drop{
+    border:2px dashed var(--border);
+    border-radius:14px;
+    padding:24px 20px;
+    min-height:120px;
+    cursor:pointer;
+    background:rgba(255,255,255,.02);
+    transition:.15s;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .lf-drop:hover, .lf-drop.drag-over{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.06); }
+  .lf-drop .big{ font-weight:900; font-size:15px; color:#fff; }
+  .lf-drop .sub{ font-size:13px; color:var(--text-sec); }
+
+  .lf-thumb-preview{
+    display:none;
+    width:100%;
+    height:200px;
+    object-fit:contain;
+    border-radius:10px;
+    background:#000;
+    border:1px solid var(--border);
+  }
+
+  .lf-libraryList{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    overflow:auto;
+    padding-right:4px;
+    max-height:280px;
+  }
+
+  .lf-libraryCard{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.02);
+    cursor:pointer;
+  }
+  .lf-libraryCard.active{
+    border-color:rgba(43,108,255,.7);
+    background:rgba(43,108,255,.12);
+  }
+  .lf-libraryMeta{ display:flex; flex-direction:column; gap:2px; }
+  .lf-libraryTitle{ font-weight:900; font-size:13px; }
+  .lf-cardActions{ display:flex; gap:6px; }
+  .lf-chip{
+    font-size:11px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.18);
+    color:var(--text-sec);
+  }
+  .lf-divider{
+    height:1px;
+    width:100%;
+    background:rgba(255,255,255,.08);
+    margin:6px 0 10px;
+  }
+
+  .lf-viewportCard{
+    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+    border-bottom:1px solid var(--border);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    flex:1;
+    min-height:520px;
+  }
+
+  .lf-topbar{
+    height:56px;
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+    backdrop-filter: blur(4px);
+  }
+  .lf-topbar .left,
+  .lf-topbar .center,
+  .lf-topbar .right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .lf-topbar .center{ justify-content:flex-start; }
+  .lf-topbar .right{ justify-content:flex-end; flex-wrap:wrap; }
+  .lf-vdiv{ width:1px; height:26px; background:rgba(255,255,255,.12); margin:0 6px; }
+
+  .lf-stageWrap{
+    flex:1;
+    position:relative;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+  }
+
+  .lf-resultCard{
+    width:min(1200px, 100%);
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 0 60px rgba(0,0,0,.7);
+    background:#0b0b0b;
+  }
+  .lf-resultCard video{
+    width:100%;
+    display:block;
+    max-height:70vh;
+    object-fit:contain;
+    background:#000;
+  }
+
+  .lf-resbar{
+    padding:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    border-top:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.35);
+  }
+
+  .lf-pillGroup{ display:flex; gap:8px; }
+
+  .lf-editor{
+    display:none;
+    flex:1;
+    flex-direction: column;
+    padding:0;
+    background: #0a0a0a;
+  }
+  .lf-editor.active{ display:flex; }
+
+  /* TIMELINE STYLES */
+  .lf-player-wrap {
+    flex: 1; min-height: 240px; background: #000; display: flex; flex-direction:column; position:relative;
+    border-bottom:1px solid var(--border);
+  }
+  .lf-player-view { 
+      flex:1; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      position: relative; 
+      background: #000;
+      overflow: hidden;
+  }
+  .lf-player-view video { 
+      max-width: 100%; 
+      max-height: 100%; 
+      object-fit: contain; 
+      display: block;
+  }
+  /* Fix: Hide video visually but keep in DOM for logic */
+  .lf-player-view video.hidden {
+      visibility: hidden;
+  }
+
+  .lf-player-controls { height:40px; border-top:1px solid #222; background:#111; display:flex; align-items:center; justify-content:center; gap:16px; }
+  .lf-icon-btn { background:none; border:none; color:#fff; font-size:14px; cursor:pointer; padding:6px; opacity:0.8; }
+  .lf-icon-btn:hover { opacity:1; }
+
+  .lf-timeline-area {
+    height: 320px;
+    background: var(--timeline-bg);
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+  }
+  .lf-timeline-toolbar {
+    height: 36px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 10px;
+    background: #181818;
+  }
+  .lf-timeline-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    overflow: hidden;
+    position: relative;
+  }
+  .lf-track-headers {
+    background: #141414;
+    border-right: 1px solid var(--border);
+    overflow:hidden;
+  }
+  .lf-track-header {
+    height: 60px;
+    border-bottom: 1px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #777;
+  }
+  .lf-timeline-scroll {
+    overflow-x: scroll;
+    overflow-y: auto;
+    background: var(--timeline-bg);
+    position: relative;
+  }
+  .lf-ruler-wrap {
+    height: 24px;
+    border-bottom: 1px solid #333;
+    background: #181818;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-image: linear-gradient(90deg, #444 1px, transparent 1px);
+    background-size: 100px 100%;
+    width: 20000px;
+    cursor: pointer;
+  }
+  .lf-ruler-wrap:hover { background-color: #1f1f1f; }
+  
+  .lf-tracks-container {
+    position: relative;
+    width: 20000px;
+  }
+  .lf-track-lane {
+    height: 60px;
+    border-bottom: 1px solid #2a2a2a;
+    background: var(--track-bg);
+    position: relative;
+  }
+  .lf-clip-block {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    background: var(--clip-bg);
+    border: 1px solid var(--clip-border);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: grab;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .lf-clip-block:hover { background: #3d5e95; }
+  .lf-clip-block.selected { border: 2px solid #fff; z-index: 5; }
+  /* Cursor styles based on tool */
+  .cursor-razor .lf-clip-block { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" opacity="0"></rect><line x1="12" y1="2" x2="12" y2="22" stroke="red"></line><path d="M12 12 L18 18" stroke="red" stroke-width="1"></path></svg>') 12 12, crosshair; }
+  
+  .lf-clip-name {
+    font-size: 10px;
+    font-weight: 700;
+    color:#fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+  }
+  .lf-clip-handle {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 10px;
+    background: rgba(0,0,0,0.1);
+    cursor: col-resize;
+    z-index: 2;
+  }
+  .lf-clip-handle:hover { background: var(--accent); }
+  .lf-handle-l { left: 0; }
+  .lf-handle-r { right: 0; }
+
+  #lf-playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--playhead);
+    z-index: 100;
+    pointer-events: none;
+  }
+  #lf-playhead-cap {
+    width: 11px;
+    height: 12px;
+    background: var(--playhead);
+    position: absolute;
+    top: -12px;
+    left: -5px;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  .lf-modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.8);
+    backdrop-filter: blur(4px);
+    z-index:9999;
+  }
+  .lf-modal.open{ display:flex; }
+  .lf-modalCard{
+    width:min(1200px, 94vw);
+    max-height:88vh;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:20px;
+    overflow:auto;
+  }
+  .lf-modalHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+  }
+
+  .lf-libraryGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:12px;
+  }
+  .lf-genCard{
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    background:rgba(255,255,255,.02);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:10px;
+  }
+  .lf-genThumb{
+    width:100%;
+    aspect-ratio:16/9;
+    background:#000;
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .lf-genThumb video{ width:100%; height:100%; object-fit:cover; }
+  .lf-genMeta{ display:flex; flex-direction:column; gap:4px; }
+  .lf-assetCard{
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    background:rgba(255,255,255,.02);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:10px;
+  }
+  .lf-assetCard video{
+    width:100%;
+    height:120px;
+    object-fit:cover;
+    border-radius:10px;
+    background:#000;
+  }
+  .lf-assetActions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  #clipModal{ z-index:10050; }
+  .lf-status.err{ color:var(--danger); }
+
+  .lf-empty{
+    color:#3a3a3a;
+    text-align:center;
+    font-weight:900;
+  }
+
+  /* Export Render Overlay */
+  #renderOverlay {
+    position: absolute; inset:0; background:rgba(0,0,0,0.85); z-index: 200;
+    display:none; align-items:center; justify-content:center; flex-direction:column;
+  }
+  
+  .lf-project-info {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 700;
+      margin-left: 10px;
+      border: 1px solid var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      display:none;
+  }
+  .lf-project-info.visible { display:inline-block; }
+
+  @media (max-width: 1200px){
+    #lf-workspace{ grid-template-columns:1fr; }
+    .lf-side, .lf-panel{ border:0; border-bottom:1px solid var(--border); max-height:none; }
+  }
+</style>
+
+<div id="lf-nano">
+  <div id="lf-main">
+    <div id="lf-workspace">
+      <div class="lf-side">
+        <div class="lf-navStack">
+          <div class="lf-labTitle">Cinema Animation</div>
+          <div class="lf-navPills">
+            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_character" rel="noopener" target="_blank">Cinema Character</a>
+            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_shot" rel="noopener" target="_blank">Cinema Shot</a>
+          </div>
+          <button class="lf-back" id="btn-back" type="button">← Back to CINEMA LAB</button>
+        </div>
+
+        <div class="lf-divider"></div>
+
+        <div class="lf-section">
+          <div>
+            <div class="lf-h2">Generation</div>
+            <div class="lf-muted" id="modeHint">CINEMA (img2vid)</div>
+          </div>
+          <div class="lf-pillGroup" id="modeTabs">
+            <button class="lf-btnSmall active" data-mode="cinema" type="button">CINEMA</button>
+            <button class="lf-btnSmall" data-mode="motion" type="button">MOTION CONTROL</button>
+          </div>
+        </div>
+
+        <div id="cinemaForm">
+          <div class="lf-section">
+            <div class="lf-field">
+              <label>Upload Start Image (required)</label>
+              <input type="file" id="cinemaImage" accept="image/*" hidden />
+              <div class="lf-drop" id="cinemaImageDrop">
+                <div class="big" id="cinemaImageTitle">Upload image</div>
+                <div class="sub">Click or drag&drop • PNG/JPG/WebP</div>
+              </div>
+              <img id="cinemaImagePreview" class="lf-thumb-preview" alt="start image" />
+            </div>
+
+            <div class="lf-field">
+              <label>End Image (optional)</label>
+              <input type="file" id="cinemaEndImage" accept="image/*" hidden />
+              <div class="lf-drop" id="cinemaEndDrop">
+                <div class="big" id="cinemaEndTitle">Upload end image</div>
+                <div class="sub">Optional second frame</div>
+              </div>
+              <img id="cinemaEndPreview" class="lf-thumb-preview" alt="end image" />
+            </div>
+
+            <div class="lf-field">
+              <label>Prompt / Scene text</label>
+              <textarea id="cinemaPrompt" rows="4" placeholder="Describe the cinematic action..."></textarea>
+            </div>
+
+            <div class="lf-row2">
+              <div class="lf-field">
+                <label>Duration (sec)</label>
+                <select id="cinemaDuration" class="lf-select">
+                  <option value="5">5s</option>
+                  <option value="6">6s</option>
+                  <option value="8">8s</option>
+                </select>
+              </div>
+              <div class="lf-field">
+                <label>Aspect Ratio</label>
+                <select id="cinemaAspect" class="lf-select">
+                  <option value="16:9">16:9</option>
+                  <option value="21:9">21:9</option>
+                  <option value="9:16">9:16</option>
+                  <option value="1:1">1:1</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="lf-field" id="cinemaAudioRow">
+              <label class="lf-row" style="gap:8px;">
+                <input type="checkbox" id="cinemaAudio" />
+                Generate Audio
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="motionForm" style="display:none;">
+          <div class="lf-section">
+            <div class="lf-field">
+              <label>Reference Image (required)</label>
+              <input type="file" id="motionImage" accept="image/*" hidden />
+              <div class="lf-drop" id="motionImageDrop">
+                <div class="big" id="motionImageTitle">Upload image</div>
+                <div class="sub">Click or drag&drop • Required</div>
+              </div>
+              <img id="motionImagePreview" class="lf-thumb-preview" alt="reference image" />
+            </div>
+
+            <div class="lf-field">
+              <label>Reference Video (required)</label>
+              <input type="file" id="motionVideo" accept="video/mp4,video/quicktime,video/webm" hidden />
+              <div class="lf-drop" id="motionVideoDrop">
+                <div class="big" id="motionVideoTitle">Upload video</div>
+                <div class="sub">MP4/MOV/WebM • Required</div>
+              </div>
+            </div>
+
+            <div class="lf-field">
+              <label>Prompt / Scene text</label>
+              <textarea id="motionPrompt" rows="4" placeholder="Describe the motion-controlled scene..."></textarea>
+            </div>
+
+            <div class="lf-row2">
+              <div class="lf-field">
+                <label>Mode</label>
+                <select id="motionMode" class="lf-select">
+                  <option value="std">Standard</option>
+                  <option value="pro">Pro</option>
+                </select>
+              </div>
+              <div class="lf-field">
+                <label class="lf-row" style="gap:8px;">
+                  <input type="checkbox" id="motionKeepSound" checked />
+                  Keep Original Sound
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lf-section">
+          <button class="lf-btn" id="generateBtn" type="button">
+            Generate <span class="lf-cost" id="creditBadge">—</span>
+          </button>
+          <div class="lf-status" id="statusText"></div>
+          <button class="lf-btn secondary" id="saveClip" type="button" disabled>Save to Library</button>
+        </div>
+      </div>
+
+      <div class="lf-center">
+        <div class="lf-viewportCard">
+          <div class="lf-topbar">
+            <div class="left"></div>
+            <div class="center">
+              <div class="lf-pillGroup" id="viewTabs">
+                <button class="lf-btnSmall active" data-view="viewport" type="button">Preview</button>
+                <button class="lf-btnSmall" data-view="editor" type="button">Editor</button>
+              </div>
+            </div>
+            <div class="right">
+              <button class="lf-btnSmall lf-gradBtn" id="openCinemaLibrary" type="button">Library</button>
+            </div>
+          </div>
+
+          <div class="lf-stageWrap" id="viewportWrap">
+            <div class="lf-resultCard" id="viewportCard">
+              <video id="viewportVideo" playsinline></video>
+              <div class="lf-resbar" id="viewportResbar">
+                <div class="lf-muted" id="viewportMeta">No clip selected</div>
+                <a id="viewportDownloadLink" href="#" download>Download</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="lf-editor" id="editorView">
+              <div class="lf-player-wrap">
+                 <div class="lf-player-view">
+                    <video id="editorVideo" playsinline></video>
+                    <div id="renderOverlay">
+                       <div class="lf-h2" style="margin-bottom:10px;">Rendering...</div>
+                       <div class="lf-muted" id="renderStatus">Frame 0</div>
+                    </div>
+                 </div>
+                 <div class="lf-player-controls">
+                    <button class="lf-icon-btn" id="edPrevFrame">I&lt;</button>
+                    <button class="lf-icon-btn" id="edPlayPause">▶</button>
+                    <button class="lf-icon-btn" id="edNextFrame">&gt;I</button>
+                    <div style="font-family:monospace; font-size:12px; color:#aaa;">
+                       <span id="edTime">00:00.0</span>
+                    </div>
+                 </div>
+              </div>
+              
+              <div class="lf-timeline-area">
+                 <div class="lf-timeline-toolbar">
+                    <button class="lf-btnSmall active" id="toolSelect">Cursor (V)</button>
+                    <button class="lf-btnSmall" id="toolRazor">Split (C)</button>
+                    <div class="lf-vdiv"></div>
+                    <div class="lf-muted" style="font-size:11px;">Project:</div>
+                    <div id="projectResInfo" class="lf-project-info">Unknown</div>
+                    <div class="lf-vdiv"></div>
+                    <button class="lf-btnSmall" id="edAddTrack">+ Track</button>
+                    <button class="lf-btnSmall danger" id="edClear">Clear</button>
+                    <div style="flex:1"></div>
+                    <select id="exportResolution" class="lf-select" style="width:140px; padding:4px;">
+                       <option value="match">Match Source</option>
+                       <option value="1920x1080">FHD (1920x1080)</option>
+                       <option value="3840x2160">4K (3840x2160)</option>
+                       <option value="1280x720">HD (1280x720)</option>
+                       <option value="1080x1920">TikTok (9:16)</option>
+                       <option value="1080x1080">Square (1:1)</option>
+                    </select>
+                    <button class="lf-btnSmall lf-gradBtn" id="exportVideoBtn">Export Video</button>
+                 </div>
+                 <div class="lf-timeline-body" id="timelineBody">
+                    <div class="lf-track-headers" id="edHeaders"></div>
+                    <div class="lf-timeline-scroll" id="edScroll">
+                       <div class="lf-ruler-wrap" id="edRuler"></div>
+                       <div id="edTracksContainer" class="lf-tracks-container">
+                          <div id="lf-playhead">
+                             <div id="lf-playhead-cap"></div>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<canvas id="exportCanvas" style="display:none;"></canvas>
+
+<div class="lf-modal" id="cinemaLibraryModal">
+  <div class="lf-modalCard">
+    <div class="lf-modalHeader">
+      <div>
+        <div class="lf-h2">Cinema Library</div>
+        <div class="lf-muted" id="libBreadcrumb">Project: — / Scene: —</div>
+      </div>
+      <button class="lf-btnSmall" id="cinemaLibraryClose" type="button">Close</button>
+    </div>
+
+    <div class="lf-row" style="gap:10px; flex-wrap:wrap;">
+      <button class="lf-btnSmall active" id="libTabManager" type="button">Library</button>
+      <button class="lf-btnSmall" id="libTabAdd" type="button">Add from Generations</button>
+    </div>
+
+    <div id="libManagerView" style="margin-top:16px; display:grid; grid-template-columns:220px 220px 1fr; gap:16px;">
+      <div>
+        <div class="lf-row" style="justify-content:space-between;">
+          <div class="lf-h2">Projects</div>
+          <button class="lf-btnSmall" id="libNewProject" type="button">＋</button>
+        </div>
+        <input id="libProjectSearch" type="text" placeholder="Search projects..." />
+        <div class="lf-libraryList" id="libProjectsList" style="margin-top:10px; max-height:420px;"></div>
+      </div>
+      <div>
+        <div class="lf-row" style="justify-content:space-between;">
+          <div class="lf-h2">Scenes</div>
+          <button class="lf-btnSmall" id="libNewScene" type="button">＋</button>
+        </div>
+        <input id="libSceneSearch" type="text" placeholder="Search scenes..." />
+        <div class="lf-libraryList" id="libScenesList" style="margin-top:10px; max-height:420px;"></div>
+      </div>
+      <div>
+        <div class="lf-row" style="justify-content:space-between;">
+          <div>
+            <div class="lf-h2">Assets</div>
+            <div class="lf-muted" id="libAssetsHint">Select a scene</div>
+          </div>
+          <button class="lf-btnSmall" id="libRefresh" type="button">Refresh</button>
+        </div>
+        <div id="libAssetsGrid" class="lf-libraryGrid" style="margin-top:10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); max-height:460px; overflow:auto;"></div>
+      </div>
+    </div>
+
+    <div id="libAddView" style="margin-top:16px; display:none;">
+      <div class="lf-row" style="justify-content:space-between; align-items:center;">
+        <div class="lf-h2">Add from Generations</div>
+        <button class="lf-btnSmall" id="libGenRefresh" type="button">Refresh</button>
+      </div>
+      <div class="lf-row" style="margin-top:10px; gap:10px; flex-wrap:wrap;">
+        <input id="libGenSearch" type="text" placeholder="Search generations..." style="flex:1; min-width:240px;" />
+        <select id="libGenKind" class="lf-select" style="min-width:180px;">
+          <option value="">All kinds</option>
+          <option value="animation">Animation</option>
+        </select>
+      </div>
+      <div id="libGenGrid" class="lf-libraryGrid" style="margin-top:12px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-height:520px; overflow:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="lf-modal" id="clipModal">
+  <div class="lf-modalCard">
+    <div class="lf-modalHeader">
+      <div>
+        <div class="lf-h2" id="clipModalTitle">Clip preview</div>
+        <div class="lf-muted" id="clipModalMeta"></div>
+      </div>
+      <button class="lf-btnSmall" id="clipModalClose" type="button">Close</button>
+    </div>
+    <video id="clipModalVideo" controls playsinline style="width:100%; max-height:70vh; background:#000; border-radius:14px;"></video>
+    <div class="lf-row" style="justify-content:flex-end; margin-top:12px;">
+      <button class="lf-btnSmall" id="clipModalDownload" type="button">Download</button>
+      <button class="lf-btnSmall" id="clipModalCopy" type="button">Copy URL</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BACKEND_BASE = "https://ai-vfx-backend.vercel.app";
+  const $ = (id) => document.getElementById(id);
+  const { createClient } = supabase;
+  function uuid(){ return crypto.randomUUID(); }
+   
+  // --- STATE ---
+  const state = {
+    mode: "cinema",
+    view: "viewport",
+    latestClip: null,
+    // EDITOR STATE
+    editor: {
+        tracks: [{ id: 't1', name: 'Video 1', clips: [] }],
+        currentTime: 0,
+        isPlaying: false,
+        isExporting: false,
+        tool: 'select', // select, razor
+        pxPerSec: 100, // Zoom level
+        selectedClip: null,
+        // Параметры проекта
+        projectWidth: 1920,
+        projectHeight: 1080,
+        hasMedia: false // Флаг, был ли добавлен хоть один файл
+    }
+  };
+
+  // Элементы UI (ссылки на DOM)
+  const modeHint = $("modeHint");
+  const statusText = $("statusText");
+  const viewportVideo = $("viewportVideo");
+  const viewportMeta = $("viewportMeta");
+  const viewportDownloadLink = $("viewportDownloadLink");
+  const viewportResbar = $("viewportResbar");
+  const saveClipBtn = $("saveClip");
+  const cinemaAudioRow = $("cinemaAudioRow");
+
+  const cinemaLibraryModal = $("cinemaLibraryModal");
+  const libTabManager = $("libTabManager");
+  const libTabAdd = $("libTabAdd");
+  const libManagerView = $("libManagerView");
+  const libAddView = $("libAddView");
+  const libProjectsList = $("libProjectsList");
+  const libScenesList = $("libScenesList");
+  const libAssetsGrid = $("libAssetsGrid");
+  const libAssetsHint = $("libAssetsHint");
+  const libProjectSearch = $("libProjectSearch");
+  const libSceneSearch = $("libSceneSearch");
+  const libNewProject = $("libNewProject");
+  const libNewScene = $("libNewScene");
+  const libRefresh = $("libRefresh");
+  const libBreadcrumb = $("libBreadcrumb");
+  const libGenGrid = $("libGenGrid");
+  const libGenSearch = $("libGenSearch");
+  const libGenKind = $("libGenKind");
+  const libGenRefresh = $("libGenRefresh");
+
+  const clipModal = $("clipModal");
+  const clipModalTitle = $("clipModalTitle");
+  const clipModalMeta = $("clipModalMeta");
+  const clipModalVideo = $("clipModalVideo");
+  const clipModalClose = $("clipModalClose");
+  const clipModalDownload = $("clipModalDownload");
+  const clipModalCopy = $("clipModalCopy");
+
+  // Editor DOM
+  const edVideo = $("editorVideo");
+  const edScroll = $("edScroll");
+  const edContainer = $("edTracksContainer");
+  const edHeaders = $("edHeaders");
+  const edPlayhead = $("lf-playhead");
+  const edTimeDisplay = $("edTime");
+  const edRuler = $("edRuler");
+  const timelineBody = $("timelineBody");
+  const projectResInfo = $("projectResInfo");
+  
+  let libProjects = [];
+  let libScenes = [];
+  let libAssets = [];
+  let libGenerations = [];
+  let libSelectedProject = null;
+  let libSelectedScene = null;
+  let clipModalItem = null;
+
+  $("btn-back").addEventListener("click", () => {
+    location.href = "https://lightfull.ai/cinema_lab";
+  });
+
+  async function getSession() {
+    const { data } = await window.sb.auth.getSession();
+    return data?.session;
+  }
+
+  async function uploadToBucket(file, bucket) {
+    const session = await getSession();
+    if (!session) throw new Error("No session");
+
+    const userId = session.user.id;
+    const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+    const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+
+    const { error } = await window.sb.storage.from(bucket).upload(path, file, {
+      upsert: false,
+      contentType: file.type || "application/octet-stream",
+    });
+
+    if (error) throw new Error(`Upload failed: ${error.message}`);
+
+    const { data } = window.sb.storage.from(bucket).getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  async function fetchJsonWithAuth(url, opts={}) {
+    let s = await getSession();
+    if (!s) { location.href = "/login"; return; }
+    
+    let headers = { ...opts.headers, Authorization: "Bearer " + s.access_token };
+    let r = await fetch(url, { ...opts, headers });
+    
+    if (r.status === 401) {
+      await window.sb.auth.refreshSession();
+      s = await getSession();
+      headers.Authorization = "Bearer " + s.access_token;
+      r = await fetch(url, { ...opts, headers });
+    }
+    
+    const ct = r.headers.get("content-type") || "";
+    const raw = await r.text();
+    let j = null;
+    
+    if (ct.includes("application/json")) {
+      try { j = JSON.parse(raw); } catch(e) {}
+    }
+
+    if (!r.ok) {
+      const errorText = (j && (j.error || j.details || j.message)) 
+        ? (j.error || j.details || j.message) 
+        : `Error ${r.status}: ${raw.slice(0, 300)}`;
+      throw new Error(errorText);
+    }
+
+    return j || { ok: true, raw };
+  }
+
+  function setStatus(text, tone) {
+    statusText.textContent = text || "";
+    statusText.classList.toggle("err", tone === "err");
+  }
+
+  function getGenerationUrl(gen) {
+    return gen.output_url || gen.outputUrl || gen.result_url || gen.url || "";
+  }
+
+  function isVideoUrl(url) {
+    return /\.(mp4|webm|mov)(\?|$)/i.test(url || "");
+  }
+
+  function openModal(modal) {
+    if (modal) modal.style.display = "flex";
+  }
+
+  function closeModal(modal) {
+    if (modal) modal.style.display = "none";
+  }
+
+  function escapeHtml(s){
+    return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  }
+
+  function escapeAttr(s){
+    return escapeHtml(s).replaceAll("'","&#39;");
+  }
+
+  function updateCinemaAudioVisibility() {
+    const endImage = $("cinemaEndImage").files[0];
+    const showAudio = !endImage;
+    cinemaAudioRow.style.display = showAudio ? "block" : "none";
+    if (!showAudio) $("cinemaAudio").checked = false;
+  }
+
+  function renderViewport() {
+    const clip = state.latestClip;
+    if (!clip) {
+      viewportVideo.style.display = "none";
+      viewportVideo.removeAttribute("src");
+      viewportVideo.removeAttribute("controls");
+      viewportMeta.textContent = "No clip selected";
+      viewportResbar.style.display = "none";
+      viewportDownloadLink.href = "#";
+      viewportDownloadLink.removeAttribute("download");
+      return;
+    }
+    viewportVideo.style.display = "block";
+    viewportVideo.src = clip.output_url;
+    viewportVideo.setAttribute("controls", "");
+    viewportMeta.textContent = `${clip.title} • ${clip.durationSec || "—"}s • ${clip.aspectRatio || "—"}`;
+    viewportDownloadLink.href = clip.output_url;
+    viewportDownloadLink.download = `${clip.title || "clip"}.mp4`;
+    viewportResbar.style.display = "flex";
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    modeHint.textContent = mode === "cinema" ? "CINEMA (img2vid)" : "MOTION CONTROL";
+    $("cinemaForm").style.display = mode === "cinema" ? "block" : "none";
+    $("motionForm").style.display = mode === "motion" ? "block" : "none";
+  }
+
+  function setView(view) {
+    state.view = view;
+    if (view === "viewport") {
+      $("viewportWrap").style.display = "flex";
+      $("editorView").classList.remove("active");
+    } else {
+      $("viewportWrap").style.display = "none";
+      $("editorView").classList.add("active");
+      renderEditorTimeline();
+    }
+  }
+
+  function setupDropzone(drop, input, preview, title, onChange) {
+    drop.addEventListener("click", () => input.click());
+    drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("drag-over"); });
+    drop.addEventListener("dragleave", () => drop.classList.remove("drag-over"));
+    drop.addEventListener("drop", (e) => {
+      e.preventDefault();
+      drop.classList.remove("drag-over");
+      const file = e.dataTransfer.files[0];
+      if (file) input.files = e.dataTransfer.files;
+      input.dispatchEvent(new Event("change"));
+    });
+    input.addEventListener("change", () => {
+      const file = input.files[0];
+      if (!file) return;
+      title.textContent = file.name;
+      if (preview) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+      }
+      if (onChange) onChange();
+    });
+  }
+
+  setupDropzone($("cinemaImageDrop"), $("cinemaImage"), $("cinemaImagePreview"), $("cinemaImageTitle"));
+  setupDropzone($("cinemaEndDrop"), $("cinemaEndImage"), $("cinemaEndPreview"), $("cinemaEndTitle"), updateCinemaAudioVisibility);
+  setupDropzone($("motionImageDrop"), $("motionImage"), $("motionImagePreview"), $("motionImageTitle"));
+  setupDropzone($("motionVideoDrop"), $("motionVideo"), null, $("motionVideoTitle"));
+
+  // ==========================================
+  // 1. RENDER TIMELINE (Отрисовка)
+  // ==========================================
+  function renderEditorTimeline() {
+    // 1. Заголовки дорожек
+    edHeaders.innerHTML = state.editor.tracks.map(t => 
+        `<div class="lf-track-header">${t.name}</div>`
+    ).join("");
+
+    // 2. Очистка и отрисовка клипов
+    const existingLanes = edContainer.querySelectorAll(".lf-track-lane");
+    existingLanes.forEach(e => e.remove());
+
+    // Отрисовываем каждую дорожку
+    state.editor.tracks.forEach((track, i) => {
+        const lane = document.createElement("div");
+        lane.className = "lf-track-lane";
+        lane.style.top = (i * 61) + "px"; // Высота дорожки 60px + 1px border
+
+        track.clips.forEach(clip => {
+            const width = clip.dur * state.editor.pxPerSec;
+            const left = clip.start * state.editor.pxPerSec;
+            
+            const el = document.createElement("div");
+            el.className = `lf-clip-block ${state.editor.selectedClip === clip ? 'selected' : ''}`;
+            el.style.left = left + "px";
+            el.style.width = width + "px";
+            el.innerHTML = `
+                <div class="lf-clip-handle lf-handle-l" data-act="trim-l"></div>
+                <div class="lf-clip-name">${escapeHtml(clip.name)}</div>
+                <div class="lf-clip-handle lf-handle-r" data-act="trim-r"></div>
+            `;
+            // Важно: передаем индекс дорожки (i) в обработчик
+            el.onmousedown = (e) => handleClipMouse(e, clip, i);
+            lane.appendChild(el);
+        });
+        edContainer.appendChild(lane);
+    });
+    
+    // Курсор инструмента
+    if (state.editor.tool === 'razor') {
+        timelineBody.classList.add('cursor-razor');
+    } else {
+        timelineBody.classList.remove('cursor-razor');
+    }
+
+    updatePlayheadPos();
+  }
+
+  // ==========================================
+  // 2. PLAYHEAD & SYNC (Синхронизация видео)
+  // ==========================================
+  function updatePlayheadPos() {
+    const left = state.editor.currentTime * state.editor.pxPerSec;
+    edPlayhead.style.left = left + "px";
+    
+    // Time format
+    const m = Math.floor(state.editor.currentTime / 60);
+    const s = Math.floor(state.editor.currentTime % 60);
+    const ms = Math.floor((state.editor.currentTime % 1) * 10);
+    edTimeDisplay.textContent = `${m}:${String(s).padStart(2,'0')}.${ms}`;
+
+    if (!state.editor.isExporting) syncVideoFrame();
+  }
+
+  function syncVideoFrame() {
+    // Ищем клип на текущем времени. Приоритет: нижние дорожки перекрывают верхние.
+    let activeClip = null;
+    let offset = 0;
+    
+    // Идем с конца (последняя дорожка = верхний слой Z-index)
+    for (let i = state.editor.tracks.length - 1; i >= 0; i--) {
+        const track = state.editor.tracks[i];
+        const c = track.clips.find(clip => 
+            state.editor.currentTime >= clip.start && 
+            state.editor.currentTime < (clip.start + clip.dur)
+        );
+        if (c) { 
+            activeClip = c; 
+            offset = state.editor.currentTime - c.start; 
+            break; 
+        }
+    }
+
+    if (activeClip) {
+        // ПОКАЗЫВАЕМ ВИДЕО
+        edVideo.classList.remove('hidden'); 
+        
+        if (edVideo.src !== activeClip.url) edVideo.src = activeClip.url;
+        
+        const targetTime = activeClip.offset + offset;
+        
+        // Синхронизация: если рассинхрон больше 0.25с, делаем seek
+        if (Math.abs(edVideo.currentTime - targetTime) > 0.25) {
+            edVideo.currentTime = targetTime;
+        }
+        
+        if (state.editor.isPlaying) {
+             edVideo.play().catch(()=>{});
+        } else {
+             edVideo.pause();
+        }
+    } else {
+        // ПУСТОТА -> СКРЫВАЕМ ВИДЕО (ЧЕРНЫЙ ЭКРАН)
+        // Останавливаем, чтобы не грузить ресурсы
+        if (!edVideo.paused) edVideo.pause();
+        edVideo.classList.add('hidden');
+    }
+  }
+
+  // ==========================================
+  // 3. MOUSE HANDLER (DRAG & DROP & SPLIT)
+  // ==========================================
+  function handleClipMouse(e, clip, trackIndex) {
+    e.stopPropagation();
+    
+    // --- ИНСТРУМЕНТ: НОЖНИЦЫ (SPLIT) ---
+    if (state.editor.tool === 'razor') {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const clickX = e.clientX - edScroll.getBoundingClientRect().left + edScroll.scrollLeft;
+        const splitTime = clickX / state.editor.pxPerSec;
+
+        if (splitTime > clip.start && splitTime < (clip.start + clip.dur)) {
+            const splitPoint = splitTime - clip.start;
+            const remaining = clip.dur - splitPoint;
+            
+            // Правая часть
+            const newClip = {
+                ...clip,
+                id: uuid(),
+                start: splitTime,
+                dur: remaining,
+                offset: clip.offset + splitPoint
+            };
+            
+            // Левая часть (обновляем текущий клип)
+            clip.dur = splitPoint;
+            
+            state.editor.tracks[trackIndex].clips.push(newClip);
+            renderEditorTimeline();
+        }
+        return;
+    }
+
+    // --- ИНСТРУМЕНТ: CURSOR (MOVE / TRIM) ---
+    state.editor.selectedClip = clip;
+    renderEditorTimeline();
+
+    const startX = e.clientX;
+    const startY = e.clientY; // Для вертикального драга
+    const startLeft = clip.start;
+    const startDur = clip.dur;
+    const startOffset = clip.offset;
+    const sourceDur = clip.sourceDur || 9999;
+    const action = e.target.dataset.act || 'move';
+    
+    // Высота одной дорожки (из CSS: 60px height + 1px border)
+    const TRACK_HEIGHT = 61;
+
+    const onMove = (ev) => {
+        const dx = (ev.clientX - startX) / state.editor.pxPerSec;
+        const dy = ev.clientY - startY;
+        
+        if (action === 'move') {
+            // 1. Горизонтальное перемещение
+            clip.start = Math.max(0, startLeft + dx);
+
+            // 2. Вертикальное перемещение (Смена дорожки)
+            // Вычисляем, на какой дорожке мы сейчас визуально находимся
+            // Текущий индекс + смещение мыши / высота дорожки
+            const trackDiff = Math.round(dy / TRACK_HEIGHT);
+            let targetTrackIndex = trackIndex + trackDiff;
+
+            // Если тянем ниже последней дорожки -> Создаем новую
+            if (targetTrackIndex >= state.editor.tracks.length) {
+                // Добавляем новую дорожку (ограничим создание одной за раз для UX)
+                 state.editor.tracks.push({ id: uuid(), name: `Video ${state.editor.tracks.length+1}`, clips: [] });
+            }
+            
+            // Ограничиваем индекс
+            targetTrackIndex = Math.max(0, Math.min(targetTrackIndex, state.editor.tracks.length - 1));
+
+            // Если индекс изменился, перемещаем клип в массивах данных
+            if (targetTrackIndex !== trackIndex) {
+                // Удаляем из старой
+                const oldTrack = state.editor.tracks[trackIndex];
+                oldTrack.clips = oldTrack.clips.filter(c => c.id !== clip.id);
+                
+                // Добавляем в новую
+                const newTrack = state.editor.tracks[targetTrackIndex];
+                newTrack.clips.push(clip);
+                
+                // Обновляем текущий индекс для следующего тика onMove
+                trackIndex = targetTrackIndex;
+                
+                // Корректируем startY, чтобы предотвратить "мерцание" (сброс дельты)
+                // Но проще просто перерендерить, визуальный скачок минимален
+            }
+
+        } else if (action === 'trim-r') {
+            // Растягивание вправо
+            const maxDur = sourceDur - startOffset;
+            let newDur = Math.max(0.1, startDur + dx);
+            if (newDur > maxDur) newDur = maxDur; // Ограничение по длине исходника
+            clip.dur = newDur;
+
+        } else if (action === 'trim-l') {
+            // Растягивание влево
+            let newStart = Math.min(startLeft + startDur - 0.1, startLeft + dx);
+            let delta = newStart - startLeft;
+            
+            if (startOffset + delta < 0) {
+                 delta = -startOffset;
+                 newStart = startLeft + delta;
+            }
+            
+            clip.start = newStart;
+            clip.dur = startDur - delta;
+            clip.offset = startOffset + delta;
+        }
+        renderEditorTimeline();
+    };
+
+    const onUp = () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+        // Сортировка клипов после перетаскивания (опционально, для порядка)
+        state.editor.tracks.forEach(t => t.clips.sort((a,b) => a.start - b.start));
+        renderEditorTimeline();
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }
+
+  // ==========================================
+  // 4. ДОБАВЛЕНИЕ МЕДИА И АВТО-РАЗРЕШЕНИЕ
+  // ==========================================
+  async function getVideoMeta(url) {
+      return new Promise((resolve) => {
+          const v = document.createElement("video");
+          v.preload = "metadata";
+          v.src = url;
+          v.onloadedmetadata = () => resolve({ duration: v.duration, w: v.videoWidth, h: v.videoHeight });
+          v.onerror = () => resolve({ duration: 5, w: 1920, h: 1080 });
+      });
+  }
+
+  window.addAssetToEditor = async function(asset) {
+      setStatus("Loading media info...");
+      const url = asset.url || asset.thumb_url;
+      const meta = await getVideoMeta(url);
+      const sourceDur = meta.duration || 10;
+
+      // Логика установки разрешения проекта по первому файлу
+      if (!state.editor.hasMedia) {
+          state.editor.projectWidth = meta.w;
+          state.editor.projectHeight = meta.h;
+          state.editor.hasMedia = true;
+          
+          // Обновляем UI
+          projectResInfo.textContent = `${meta.w}x${meta.h}`;
+          projectResInfo.classList.add("visible");
+      }
+
+      const track = state.editor.tracks[0];
+      let endTime = 0;
+      track.clips.forEach(c => { if((c.start + c.dur) > endTime) endTime = c.start + c.dur; });
+      
+      track.clips.push({
+          id: uuid(),
+          name: asset.title || "Clip",
+          url: url,
+          start: endTime,
+          dur: sourceDur,
+          sourceDur: sourceDur,
+          offset: 0,
+          origW: meta.w, // Сохраняем оригинальные размеры
+          origH: meta.h
+      });
+      renderEditorTimeline();
+      setStatus("Added clip to Editor", "ok");
+  };
+
+  // ==========================================
+  // 5. ИСПРАВЛЕННЫЙ ЭКСПОРТ (RENDER LOOP)
+  // ==========================================
+  $("exportVideoBtn").onclick = async () => {
+      if (state.editor.isExporting) return;
+      
+      // Определяем длительность проекта
+      let maxTime = 0;
+      state.editor.tracks.forEach(t => {
+          t.clips.forEach(c => {
+             if (c.start + c.dur > maxTime) maxTime = c.start + c.dur;
+          });
+      });
+      if (maxTime === 0) { setStatus("Timeline is empty", "err"); return; }
+
+      // Определяем разрешение экспорта
+      const resVal = $("exportResolution").value;
+      let width = state.editor.projectWidth;
+      let height = state.editor.projectHeight;
+
+      if (resVal !== "match") {
+          const parts = resVal.split("x");
+          width = parseInt(parts[0]);
+          height = parseInt(parts[1]);
+      }
+
+      state.editor.isExporting = true;
+      state.editor.isPlaying = false;
+      $("renderOverlay").style.display = "flex";
+      
+      const canvas = $("exportCanvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d", { alpha: false }); // Alpha false может улучшить производительность
+      
+      // Инициализация MediaRecorder
+      const stream = canvas.captureStream(30); // Запрашиваем 30 FPS у канваса
+      let mimeType = "video/webm;codecs=vp9";
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = "video/webm";
+      if (MediaRecorder.isTypeSupported("video/mp4")) mimeType = "video/mp4"; // Chrome/Edge support
+
+      const recorder = new MediaRecorder(stream, { 
+          mimeType, 
+          videoBitsPerSecond: 12000000 // Высокий битрейт
+      });
+      
+      const chunks = [];
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+      
+      recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `exported_video_${width}x${height}_${Date.now()}.${mimeType === "video/mp4" ? "mp4" : "webm"}`;
+          a.click();
+          URL.revokeObjectURL(url);
+          
+          // Reset UI
+          state.editor.isExporting = false;
+          $("renderOverlay").style.display = "none";
+          $("renderStatus").textContent = "";
+          setStatus("Export complete", "ok");
+          edVideo.muted = false; // Unmute
+      };
+
+      recorder.start();
+      edVideo.muted = true; // Глушим звук при рендере, чтобы не шумело
+
+      // --- RENDER LOOP ---
+      const fps = 30;
+      const step = 1 / fps;
+      let currentTime = 0;
+
+      async function processFrame() {
+          if (!state.editor.isExporting) return;
+          if (currentTime > maxTime) {
+              recorder.stop();
+              return;
+          }
+
+          state.editor.currentTime = currentTime;
+          
+          // 1. Очистка канваса (Черный фон)
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(0, 0, width, height);
+
+          // 2. Поиск клипа
+          let activeClip = null;
+          let offset = 0;
+          for (let i = state.editor.tracks.length - 1; i >= 0; i--) {
+            const track = state.editor.tracks[i];
+            const c = track.clips.find(clip => currentTime >= clip.start && currentTime < (clip.start + clip.dur));
+            if (c) { activeClip = c; offset = currentTime - c.start; break; }
+          }
+
+          // 3. Отрисовка
+          if (activeClip) {
+             if (edVideo.src !== activeClip.url) {
+                 edVideo.src = activeClip.url;
+             }
+             
+             const targetVidTime = activeClip.offset + offset;
+
+             // Жесткое ожидание кадра
+             edVideo.currentTime = targetVidTime;
+             
+             await new Promise(resolve => {
+                 // Если кадр уже готов (разница времени мала и состояние ready), не ждем
+                 if (edVideo.readyState >= 3 && Math.abs(edVideo.currentTime - targetVidTime) < 0.1) {
+                     resolve();
+                 } else {
+                     // Иначе ждем события seeked
+                     const onSeek = () => { 
+                         edVideo.removeEventListener('seeked', onSeek); 
+                         resolve(); 
+                     };
+                     // Тайм-аут на случай зависания декодера (1000мс)
+                     setTimeout(() => { 
+                         edVideo.removeEventListener('seeked', onSeek); 
+                         resolve(); 
+                     }, 1000);
+                     
+                     edVideo.addEventListener('seeked', onSeek);
+                 }
+             });
+
+             // Рисуем с сохранением пропорций (Contain)
+             const vRatio = edVideo.videoWidth / edVideo.videoHeight;
+             const cRatio = width / height;
+             let drawW, drawH, drawX, drawY;
+
+             if (vRatio > cRatio) {
+                 // Видео шире канваса (по соотношению)
+                 drawW = width;
+                 drawH = width / vRatio;
+                 drawX = 0;
+                 drawY = (height - drawH) / 2;
+             } else {
+                 // Видео уже канваса
+                 drawH = height;
+                 drawW = height * vRatio;
+                 drawY = 0;
+                 drawX = (width - drawW) / 2;
+             }
+
+             ctx.drawImage(edVideo, 0, 0, edVideo.videoWidth, edVideo.videoHeight, drawX, drawY, drawW, drawH);
+          }
+
+          $("renderStatus").textContent = `Rendering: ${Math.round((currentTime / maxTime) * 100)}% (${currentTime.toFixed(1)}s)`;
+          
+          currentTime += step;
+          // requestAnimationFrame не используем, так как делаем через рекурсию с await
+          setTimeout(processFrame, 0); 
+      }
+
+      processFrame();
+  };
+
+
+  // --- REST OF LIBRARY & API LOGIC ---
+
+  async function apiLibrary(action, payload){
+    return fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ action, ...payload })
+    });
+  }
+
+  async function loadLibraryProjects(){
+    const r = await apiLibrary("library_list_projects", {});
+    libProjects = r.projects || [];
+  }
+
+  async function loadLibraryScenes(projectId){
+    const r = await apiLibrary("library_list_scenes", { project_id: projectId });
+    libScenes = r.scenes || [];
+  }
+
+  async function loadLibraryAssets(sceneId){
+    const r = await apiLibrary("library_list_assets", { scene_id: sceneId });
+    libAssets = r.assets || [];
+  }
+
+  function renderProjects(){
+    const q = String(libProjectSearch?.value || "").trim().toLowerCase();
+    const items = libProjects.filter(p => !q || String(p.title||"").toLowerCase().includes(q));
+    libProjectsList.innerHTML = items.map(p => {
+      const active = libSelectedProject?.id === p.id;
+      return `
+        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${p.id}">
+          <div class="lf-libraryMeta">
+            <div class="lf-libraryTitle">${escapeHtml(p.title)}</div>
+            <div class="lf-muted">${(p.updated_at||p.created_at||"").toString().slice(0,19).replace("T"," ")}</div>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No projects</div>`;
+  }
+
+  function renderScenes(){
+    const q = String(libSceneSearch?.value || "").trim().toLowerCase();
+    const items = libScenes.filter(s => !q || String(s.title||"").toLowerCase().includes(q));
+    libScenesList.innerHTML = items.map(s => {
+      const active = libSelectedScene?.id === s.id;
+      return `
+        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${s.id}">
+          <div class="lf-libraryMeta">
+            <div class="lf-libraryTitle">${escapeHtml(s.title)}</div>
+            <div class="lf-muted">Scene</div>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No scenes</div>`;
+  }
+
+  function renderAssets(){
+    if (!libSelectedScene){
+      libAssetsHint.textContent = "Select a scene";
+      libAssetsGrid.innerHTML = "";
+      return;
+    }
+    libAssetsHint.textContent = `Scene: ${libSelectedScene.title || "—"}`;
+    libAssetsGrid.innerHTML = (libAssets || []).map(a => {
+      const title = a.title || `${a.kind || "asset"} ${String(a.generation_id||"")}`.trim();
+      const url = a.url || a.thumb_url || "";
+      const kind = a.kind || "";
+      return `
+        <div class="lf-assetCard" data-id="${a.id}">
+          <video src="${escapeAttr(url)}" muted playsinline></video>
+          <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+            <div class="lf-libraryTitle" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+            ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
+          </div>
+          <div class="lf-assetActions">
+            <button class="lf-btnSmall" data-act="add">Add to Timeline</button>
+            <button class="lf-btnSmall" data-act="rename">✎</button>
+            <button class="lf-btnSmall" data-act="delete">X</button>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No assets yet</div>`;
+  }
+
+  function updateBreadcrumb(){
+    const p = libSelectedProject?.title || "—";
+    const s = libSelectedScene?.title || "—";
+    libBreadcrumb.textContent = `Project: ${p} / Scene: ${s}`;
+  }
+
+  function setLibTab(tab){
+    const isManager = tab === "manager";
+    libTabManager.classList.toggle("active", isManager);
+    libTabAdd.classList.toggle("active", !isManager);
+    libManagerView.style.display = isManager ? "grid" : "none";
+    libAddView.style.display = isManager ? "none" : "block";
+  }
+
+  async function refreshLibraryAll(){
+    await loadLibraryProjects();
+    if (!libSelectedProject && libProjects[0]) libSelectedProject = libProjects[0];
+    if (libSelectedProject){
+      await loadLibraryScenes(libSelectedProject.id);
+      if (!libSelectedScene && libScenes[0]) libSelectedScene = libScenes[0];
+    }
+    if (libSelectedScene){
+      await loadLibraryAssets(libSelectedScene.id);
+    }
+    updateBreadcrumb();
+    renderProjects();
+    renderScenes();
+    renderAssets();
+  }
+
+  async function refreshGenerationsForAdd(){
+    if (!libSelectedScene){
+      libGenGrid.innerHTML = `<div class="lf-muted">Select a scene first (Library tab).</div>`;
+      return;
+    }
+    libGenGrid.innerHTML = `<div class="lf-muted">Loading…</div>`;
+
+    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?limit=80&offset=0", { method:"GET" });
+    const gens = Array.isArray(data.generations) ? data.generations : [];
+    libGenerations = gens.filter(g => {
+      const lab = String(g.lab||"").toLowerCase();
+      const kind = String(g.kind||"").toLowerCase();
+      const status = String(g.status||"").toLowerCase();
+      const url = getGenerationUrl(g);
+      return lab === "cinema" && kind === "animation" && status === "succeeded" && url && isVideoUrl(url);
+    });
+
+    renderGenerationsGrid();
+  }
+
+  function renderGenerationsGrid(){
+    if (!libSelectedScene){
+      libGenGrid.innerHTML = `<div class="lf-muted">Select a scene first.</div>`;
+      return;
+    }
+    const q = String(libGenSearch?.value || "").trim().toLowerCase();
+    const kindFilter = String(libGenKind?.value || "").trim().toLowerCase();
+
+    const items = libGenerations.filter(g=>{
+      const title = String(g.title||"").toLowerCase();
+      const kind = String(g.kind||"").toLowerCase();
+      if (kindFilter && kind !== kindFilter) return false;
+      if (q && !title.includes(q)) return false;
+      return true;
+    });
+
+    libGenGrid.innerHTML = items.map(g=>{
+      const url = getGenerationUrl(g);
+      const title = g.title || `${g.kind || "item"} ${g.id}`;
+      const kind = g.kind || "";
+      return `
+        <div class="lf-assetCard" data-gen-id="${g.id}">
+          <video src="${escapeAttr(url)}" muted playsinline></video>
+          <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+            <div class="lf-libraryTitle" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+            ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
+          </div>
+          <div class="lf-assetActions">
+            <button class="lf-btnSmall" data-act="add-gen">Add</button>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No generations</div>`;
+  }
+
+  async function forceDownload(url, filename){
+    if (!url) return;
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename || "cinema-animation.mp4";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(blobUrl);
+  }
+
+  async function copyToClipboard(text){
+    if (!text) return;
+    if (navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const input = document.createElement("textarea");
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy");
+    input.remove();
+  }
+
+  $("modeTabs").addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-mode]");
+    if (!btn) return;
+    $("modeTabs").querySelectorAll("button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    setMode(btn.dataset.mode);
+  });
+
+  $("viewTabs").addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-view]");
+    if (!btn) return;
+    $("viewTabs").querySelectorAll("button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    setView(btn.dataset.view);
+  });
+
+  $("openCinemaLibrary").addEventListener("click", async () => {
+    setLibTab("manager");
+    openModal(cinemaLibraryModal);
+    await refreshLibraryAll();
+  });
+  $("cinemaLibraryClose").addEventListener("click", () => closeModal(cinemaLibraryModal));
+  cinemaLibraryModal.addEventListener("click", (e) => {
+    if (e.target === cinemaLibraryModal) closeModal(cinemaLibraryModal);
+  });
+  libTabManager.addEventListener("click", () => setLibTab("manager"));
+  libTabAdd.addEventListener("click", async () => {
+    setLibTab("add");
+    await refreshGenerationsForAdd();
+  });
+  libRefresh.addEventListener("click", () => refreshLibraryAll());
+  libProjectSearch.addEventListener("input", renderProjects);
+  libSceneSearch.addEventListener("input", renderScenes);
+
+  libProjectsList.addEventListener("click", async (e) => {
+    const card = e.target.closest(".lf-libraryCard");
+    if (!card) return;
+    const id = card.dataset.id;
+    libSelectedProject = libProjects.find(p => String(p.id) === String(id)) || null;
+    libSelectedScene = null;
+    libScenes = [];
+    libAssets = [];
+    if (libSelectedProject){
+      await loadLibraryScenes(libSelectedProject.id);
+      if (libScenes[0]) libSelectedScene = libScenes[0];
+    }
+    if (libSelectedScene) await loadLibraryAssets(libSelectedScene.id);
+    updateBreadcrumb();
+    renderProjects();
+    renderScenes();
+    renderAssets();
+  });
+
+  libScenesList.addEventListener("click", async (e) => {
+    const card = e.target.closest(".lf-libraryCard");
+    if (!card) return;
+    const id = card.dataset.id;
+    libSelectedScene = libScenes.find(s => String(s.id) === String(id)) || null;
+    libAssets = [];
+    if (libSelectedScene) await loadLibraryAssets(libSelectedScene.id);
+    updateBreadcrumb();
+    renderScenes();
+    renderAssets();
+  });
+
+  libAssetsGrid.addEventListener("click", async (e) => {
+    const card = e.target.closest(".lf-assetCard");
+    if (!card) return;
+    const assetId = card.dataset.id;
+    const actBtn = e.target.closest("button");
+    const asset = libAssets.find(a => String(a.id) === String(assetId));
+    if (!asset) return;
+
+    if (!actBtn) {
+      openClipModal(asset);
+      return;
+    }
+
+    const act = actBtn.dataset.act;
+    if (act === "add"){
+      if (state.view === 'editor') {
+          addAssetToEditor(asset);
+      } else {
+          setStatus("Switch to Editor tab to add", "err");
+          setTimeout(() => setStatus(""), 1200);
+      }
+    }
+
+    if (act === "rename"){
+      const next = prompt("New asset name:", asset.title || "");
+      if (!next) return;
+      await apiLibrary("library_rename_asset", { asset_id: asset.id, title: next });
+      asset.title = next;
+      renderAssets();
+    }
+
+    if (act === "delete"){
+      if (!confirm("Remove asset from this scene?")) return;
+      await apiLibrary("library_delete_asset", { asset_id: asset.id });
+      libAssets = libAssets.filter(a => a.id !== asset.id);
+      renderAssets();
+    }
+  });
+
+  libNewProject.addEventListener("click", async () => {
+    const title = prompt("Project name:");
+    if (!title) return;
+    const r = await apiLibrary("library_create_project", { title });
+    libSelectedProject = r.project;
+    libSelectedScene = null;
+    await refreshLibraryAll();
+  });
+  libNewScene.addEventListener("click", async () => {
+    if (!libSelectedProject) {
+      setStatus("Select a project first", "err");
+      return;
+    }
+    const title = prompt("Scene name:");
+    if (!title) return;
+    const r = await apiLibrary("library_create_scene", { project_id: libSelectedProject.id, title });
+    libSelectedScene = r.scene;
+    await refreshLibraryAll();
+  });
+
+  libGenRefresh.addEventListener("click", refreshGenerationsForAdd);
+  libGenSearch.addEventListener("input", renderGenerationsGrid);
+  libGenKind.addEventListener("change", renderGenerationsGrid);
+  libGenGrid.addEventListener("click", async (e) => {
+    const card = e.target.closest(".lf-assetCard");
+    if (!card) return;
+    const btn = e.target.closest("button");
+    if (!btn) {
+      const genId = card.dataset.genId;
+      const item = libGenerations.find(g => String(g.id) === String(genId));
+      if (item) openClipModal(item);
+      return;
+    }
+    if (btn.dataset.act !== "add-gen") return;
+    if (!libSelectedScene) {
+      setStatus("Select a scene first", "err");
+      return;
+    }
+    const genId = card.dataset.genId;
+    const g = libGenerations.find(x => String(x.id) === String(genId));
+    if (!g) return;
+
+    await apiLibrary("library_add_asset", {
+      scene_id: libSelectedScene.id,
+      generation_id: g.id,
+      title: g.title || null,
+      kind: g.kind || null,
+      url: getGenerationUrl(g),
+      thumb_url: getGenerationUrl(g)
+    });
+
+    setStatus("Added to Library", "ok");
+    setTimeout(() => setStatus(""), 1200);
+
+    await loadLibraryAssets(libSelectedScene.id);
+    if (libTabManager.classList.contains("active")) renderAssets();
+  });
+
+  clipModalClose.addEventListener("click", () => closeModal(clipModal));
+  clipModal.addEventListener("click", (e) => {
+    if (e.target === clipModal) closeModal(clipModal);
+  });
+  clipModalDownload.addEventListener("click", () => {
+    if (!clipModalItem?.url) return;
+    forceDownload(clipModalItem.url, `${(clipModalItem.title || "clip").replace(/\s+/g, "_")}.mp4`);
+  });
+  clipModalCopy.addEventListener("click", async () => {
+    if (!clipModalItem?.url) return;
+    await copyToClipboard(clipModalItem.url);
+    setStatus("Copied URL", "ok");
+    setTimeout(() => setStatus(""), 1200);
+  });
+
+  async function pollJob(jobId) {
+    let done = false;
+    while (!done) {
+      const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/status?jobId=${encodeURIComponent(jobId)}`, { method: "GET" });
+      if (data.status === "processing") {
+        if (data.stage === "upscaling") {
+          setStatus("Upgrading quality (Cinematic Upscale)...");
+        } else {
+          setStatus("Generating...");
+        }
+      }
+      if (["succeeded", "failed", "canceled"].includes(data.status)) {
+        done = true;
+        if (data.status === "succeeded") {
+          setStatus("Done");
+          const outputUrl = data.output_url || data.result_url || data.url;
+          if (outputUrl && isVideoUrl(outputUrl)) {
+            const clip = {
+              id: uuid(),
+              generationId: data.id || jobId,
+              title: "Cinema Clip",
+              output_url: outputUrl,
+              durationSec: Math.round(data.duration || data.durationSec || 0),
+              aspectRatio: data.aspect_ratio || "",
+              createdAt: new Date().toISOString(),
+              trimStartSec: 0,
+              trimEndSec: Math.round(data.duration || data.durationSec || 0)
+            };
+            
+            state.latestClip = clip;
+            saveClipBtn.disabled = false; 
+            renderViewport();
+          }
+        } else {
+          setStatus(data.status === "canceled" ? "Canceled" : "Failed", "err");
+        }
+      }
+      await new Promise(r => setTimeout(r, 1800));
+    }
+  }
+
+  async function handleGenerate() {
+    setStatus("");
+    saveClipBtn.disabled = true;
+    
+    const session = await getSession();
+    if (!session) return;
+
+    $("generateBtn").disabled = true;
+
+    const fd = new FormData();
+    fd.append("origin_path", "/cinema_animation");
+    fd.append("enhance", "true");
+    
+    try {
+      if (state.mode === "cinema") {
+        const image = $("cinemaImage").files[0];
+        const endImage = $("cinemaEndImage").files[0];
+        if (!image) throw new Error("Please upload a start image.");
+
+        setStatus("Uploading start image...");
+        const imageUrl = await uploadToBucket(image, "inputs");
+
+        const uiAR = $("cinemaAspect").value;
+        const apiAR = uiAR === "21:9" ? "16:9" : uiAR;
+
+        if (endImage) {
+          setStatus("Uploading end image...");
+          const endImageUrl = await uploadToBucket(endImage, "inputs");
+          fd.append("presetId", "kling_v25_turbo_pro");
+          fd.append("end_image_url", endImageUrl);
+        } else {
+          fd.append("presetId", "kling_v26");
+          fd.append("generate_audio", $("cinemaAudio").checked);
+        }
+
+        fd.append("scene", $("cinemaPrompt").value || "cinematic scene");
+        fd.append("image_url", imageUrl);
+        fd.append("duration", $("cinemaDuration").value);
+        fd.append("aspect_ratio", apiAR);
+
+      } else {
+        const image = $("motionImage").files[0];
+        const video = $("motionVideo").files[0];
+        if (!image || !video) throw new Error("Upload reference image and video.");
+        
+        setStatus("Uploading assets...");
+        
+        const imageUrl = await uploadToBucket(image, "inputs");
+        const videoUrl = await uploadToBucket(video, "inputs_video");
+
+        const mode = $("motionMode").value;
+        fd.append("presetId", mode === "pro" ? "kling_v26_motion_pro" : "kling_v26_motion_std");
+        fd.append("scene", $("motionPrompt").value || "cinematic motion");
+        fd.append("image_url", imageUrl);
+        fd.append("video_url", videoUrl);
+        fd.append("mode", mode);
+        fd.append("keep_original_sound", $("motionKeepSound").checked);
+      }
+
+      setStatus("Starting generation...");
+      const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/start`, { method: "POST", body: fd });
+      
+      setStatus("Job Started");
+      await pollJob(data.jobId);
+      
+    } catch (e) {
+      setStatus(e.message, "err");
+    } finally {
+      $("generateBtn").disabled = false;
+    }
+  }
+
+  $("generateBtn").addEventListener("click", handleGenerate);
+
+  saveClipBtn.addEventListener("click", async () => {
+    if (!state.latestClip) return;
+    if (!libSelectedScene) {
+      setStatus("Select a scene in Library first", "err");
+      return;
+    }
+    await apiLibrary("library_add_asset", {
+      scene_id: libSelectedScene.id,
+      generation_id: state.latestClip.generationId || null,
+      title: state.latestClip.title || null,
+      kind: "animation",
+      url: state.latestClip.output_url,
+      thumb_url: state.latestClip.output_url
+    });
+    setStatus("Saved to Library", "ok");
+    saveClipBtn.disabled = true;
+    await loadLibraryAssets(libSelectedScene.id);
+    renderAssets();
+  });
+
+  // Timeline interaction
+  edRuler.addEventListener("mousedown", (e) => {
+      const updateTime = (ev) => {
+          const rect = edScroll.getBoundingClientRect();
+          const x = ev.clientX - rect.left + edScroll.scrollLeft;
+          state.editor.currentTime = Math.max(0, x / state.editor.pxPerSec);
+          updatePlayheadPos();
+      };
+      updateTime(e);
+      const onMove = (ev) => updateTime(ev);
+      const onUp = () => {
+          window.removeEventListener("mousemove", onMove);
+          window.removeEventListener("mouseup", onUp);
+      };
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+  });
+
+  // Init loop
+  let lastTime = 0;
+  function editorLoop(t) {
+    requestAnimationFrame(editorLoop);
+    if (state.view !== 'editor' || state.editor.isExporting) return;
+    
+    if (state.editor.isPlaying) {
+        const dt = (t - lastTime) / 1000;
+        const cleanDt = dt > 0.1 ? 0.016 : dt;
+        state.editor.currentTime += cleanDt;
+        updatePlayheadPos();
+        
+        const viewW = edScroll.clientWidth;
+        const x = state.editor.currentTime * state.editor.pxPerSec;
+        if (x > edScroll.scrollLeft + viewW) edScroll.scrollLeft = x - 50;
+    }
+    lastTime = t;
+  }
+  requestAnimationFrame(editorLoop);
+  
+  // Timeline buttons
+  $("edPlayPause").onclick = () => { state.editor.isPlaying = !state.editor.isPlaying; $("edPlayPause").textContent = state.editor.isPlaying ? "||" : "▶"; };
+  $("edPrevFrame").onclick = () => { state.editor.currentTime = Math.max(0, state.editor.currentTime - 0.1); updatePlayheadPos(); };
+  $("edNextFrame").onclick = () => { state.editor.currentTime += 0.1; updatePlayheadPos(); };
+  $("toolSelect").onclick = () => { state.editor.tool = 'select'; $("toolSelect").classList.add("active"); $("toolRazor").classList.remove("active"); timelineBody.classList.remove('cursor-razor'); };
+  $("toolRazor").onclick = () => { state.editor.tool = 'razor'; $("toolRazor").classList.add("active"); $("toolSelect").classList.remove("active"); timelineBody.classList.add('cursor-razor'); };
+  $("edAddTrack").onclick = () => { state.editor.tracks.push({ id: uuid(), name: `Video ${state.editor.tracks.length+1}`, clips: [] }); renderEditorTimeline(); };
+  $("edClear").onclick = () => { if(confirm("Clear timeline?")) { state.editor.tracks.forEach(t => t.clips = []); state.editor.currentTime = 0; state.editor.hasMedia = false; projectResInfo.classList.remove("visible"); renderEditorTimeline(); }};
+
+  setMode("cinema");
+  setView("viewport");
+  updateCinemaAudioVisibility();
+  renderViewport();
+</script>
