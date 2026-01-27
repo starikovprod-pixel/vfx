@@ -41,7 +41,7 @@
 
   #lf-workspace{
     display:grid;
-    grid-template-columns:440px minmax(520px, 1fr) 420px;
+    grid-template-columns:440px minmax(520px, 1fr);
     gap:0;
     border:1px solid var(--border);
     border-radius:22px;
@@ -269,6 +269,19 @@
   .lf-libraryMeta{ display:flex; flex-direction:column; gap:2px; }
   .lf-libraryTitle{ font-weight:900; font-size:13px; }
   .lf-cardActions{ display:flex; gap:6px; }
+  .lf-chip{
+    font-size:11px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.18);
+    color:var(--text-sec);
+  }
+  .lf-divider{
+    height:1px;
+    width:100%;
+    background:rgba(255,255,255,.08);
+    margin:6px 0 10px;
+  }
 
   .lf-viewportCard{
     background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
@@ -348,7 +361,7 @@
   }
   .lf-editor.active{ display:flex; flex-direction:column; }
 
-  .lf-timeline{
+  .lf-trackList{
     flex:1;
     border:1px solid var(--border);
     border-radius:16px;
@@ -356,25 +369,73 @@
     padding:14px;
     display:flex;
     flex-direction:column;
-    gap:10px;
+    gap:14px;
   }
-  .lf-timelineItem{
+  .lf-track{
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    background:rgba(255,255,255,.02);
+    padding:12px;
     display:grid;
     grid-template-columns:120px 1fr;
-    gap:12px;
+    gap:14px;
+  }
+  .lf-trackHeader{
+    font-weight:900;
+    font-size:13px;
+    color:var(--text-sec);
+  }
+  .lf-trackLane{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    min-height:70px;
+    align-items:flex-start;
+  }
+  .lf-clipItem{
+    min-width:160px;
+    max-width:240px;
     padding:10px;
     border-radius:12px;
-    border:1px solid rgba(255,255,255,.08);
-    background:rgba(255,255,255,.02);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.04);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    cursor:grab;
   }
-  .lf-timelineItem video{
-    width:100%;
-    height:68px;
+  .lf-clipItem.dragging{ opacity:0.5; }
+  .lf-clipTitle{ font-weight:900; font-size:13px; }
+  .lf-clipMeta{ color:var(--text-sec); font-size:12px; }
+  .lf-clipTrim{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .lf-clipTrim label{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    font-size:11px;
+    color:var(--text-sec);
+  }
+  .lf-clipTrim input{
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
     border-radius:8px;
-    object-fit:cover;
-    background:#000;
+    padding:6px 8px;
+    font-size:12px;
   }
-  .lf-timelineItem.dragging{ opacity:0.5; }
+  .lf-exportSettings{
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:14px;
+    background:var(--bg-card);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
 
   .lf-modal{
     position:fixed;
@@ -428,6 +489,30 @@
   }
   .lf-genThumb video{ width:100%; height:100%; object-fit:cover; }
   .lf-genMeta{ display:flex; flex-direction:column; gap:4px; }
+  .lf-assetCard{
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    background:rgba(255,255,255,.02);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:10px;
+  }
+  .lf-assetCard video{
+    width:100%;
+    height:120px;
+    object-fit:cover;
+    border-radius:10px;
+    background:#000;
+  }
+  .lf-assetActions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  #clipModal{ z-index:10050; }
+  .lf-status.err{ color:var(--danger); }
 
   .lf-empty{
     color:#3a3a3a;
@@ -450,98 +535,21 @@
           <div class="lf-navPills">
             <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_character" rel="noopener" target="_blank">Cinema Character</a>
             <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_shot" rel="noopener" target="_blank">Cinema Shot</a>
-            <span class="lf-btnSmall lf-link" aria-current="page">Cinema Animation</span>
           </div>
           <button class="lf-back" id="btn-back" type="button">← Back to CINEMA LAB</button>
         </div>
 
-        <div class="lf-section">
-          <div class="lf-row" style="justify-content:space-between;">
-            <div>
-              <div class="lf-h2">Projects</div>
-              <div class="lf-muted">Organize animation projects</div>
-            </div>
-            <button class="lf-btnSmall" id="newProject" type="button">＋</button>
-          </div>
-          <input id="projectSearch" type="text" placeholder="Search projects..." />
-          <div class="lf-libraryList" id="projectsList"></div>
-        </div>
+        <div class="lf-divider"></div>
 
         <div class="lf-section">
-          <div class="lf-row" style="justify-content:space-between;">
-            <div>
-              <div class="lf-h2">Scenes</div>
-              <div class="lf-muted" id="sceneHint">Select a project</div>
-            </div>
-            <button class="lf-btnSmall" id="newScene" type="button">＋</button>
+          <div>
+            <div class="lf-h2">Generation</div>
+            <div class="lf-muted" id="modeHint">CINEMA (img2vid)</div>
           </div>
-          <input id="sceneSearch" type="text" placeholder="Search scenes..." />
-          <div class="lf-libraryList" id="scenesList"></div>
-        </div>
-
-        <div class="lf-section">
-          <div class="lf-row" style="justify-content:space-between;">
-            <div>
-              <div class="lf-h2">Clips</div>
-              <div class="lf-muted" id="clipHint">Select a scene</div>
-            </div>
-            <button class="lf-btnSmall lf-gradBtn" id="openGenModal" type="button">Add from Generations</button>
+          <div class="lf-pillGroup" id="modeTabs">
+            <button class="lf-btnSmall active" data-mode="cinema" type="button">CINEMA</button>
+            <button class="lf-btnSmall" data-mode="motion" type="button">MOTION CONTROL</button>
           </div>
-          <div class="lf-libraryList" id="clipsList"></div>
-        </div>
-      </div>
-
-      <div class="lf-center">
-        <div class="lf-viewportCard">
-          <div class="lf-topbar">
-            <div class="left"></div>
-            <div class="center">
-              <div class="lf-pillGroup" id="viewTabs">
-                <button class="lf-btnSmall active" data-view="viewport" type="button">Viewport</button>
-                <button class="lf-btnSmall" data-view="editor" type="button">Editor (beta)</button>
-              </div>
-              <div class="lf-vdiv"></div>
-              <div class="lf-pillGroup" id="modeTabs">
-                <button class="lf-btnSmall active" data-mode="cinema" type="button">CINEMA</button>
-                <button class="lf-btnSmall" data-mode="motion" type="button">MOTION CONTROL</button>
-              </div>
-            </div>
-            <div class="right">
-              <button class="lf-btnSmall" id="viewportDownload" type="button">Download</button>
-              <button class="lf-btnSmall" id="viewportAdd" type="button">Add to Scene</button>
-              <button class="lf-btnSmall" id="viewportEditor" type="button">Open in Editor</button>
-            </div>
-          </div>
-
-          <div class="lf-stageWrap" id="viewportWrap">
-            <div class="lf-resultCard" id="viewportCard">
-              <video id="viewportVideo" controls playsinline></video>
-              <div class="lf-resbar">
-                <div class="lf-muted" id="viewportMeta">No clip selected</div>
-                <a id="viewportDownloadLink" href="#" download>Download</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="lf-editor" id="editorView">
-            <div class="lf-row" style="justify-content:space-between;">
-              <div>
-                <div class="lf-h2">Editor Timeline</div>
-                <div class="lf-muted">Arrange clips, set trims, export playlist</div>
-              </div>
-              <button class="lf-btnSmall" id="exportProject" type="button">Export Project</button>
-            </div>
-            <div class="lf-timeline" id="timelineList">
-              <div class="lf-empty" id="timelineEmpty">No clips in this scene</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="lf-panel">
-        <div class="lf-section">
-          <div class="lf-h2">Generation</div>
-          <div class="lf-muted" id="modeHint">CINEMA (img2vid)</div>
         </div>
 
         <div id="cinemaForm">
@@ -554,6 +562,16 @@
                 <div class="sub">Click or drag&drop • PNG/JPG/WebP</div>
               </div>
               <img id="cinemaImagePreview" class="lf-thumb-preview" alt="start image" />
+            </div>
+
+            <div class="lf-field">
+              <label>End Image (optional)</label>
+              <input type="file" id="cinemaEndImage" accept="image/*" hidden />
+              <div class="lf-drop" id="cinemaEndDrop">
+                <div class="big" id="cinemaEndTitle">Upload end image</div>
+                <div class="sub">Optional second frame</div>
+              </div>
+              <img id="cinemaEndPreview" class="lf-thumb-preview" alt="end image" />
             </div>
 
             <div class="lf-field">
@@ -581,7 +599,7 @@
               </div>
             </div>
 
-            <div class="lf-field">
+            <div class="lf-field" id="cinemaAudioRow">
               <label class="lf-row" style="gap:8px;">
                 <input type="checkbox" id="cinemaAudio" />
                 Generate Audio
@@ -642,26 +660,161 @@
           <button class="lf-btn secondary" id="saveClip" type="button" disabled>Save to Library</button>
         </div>
       </div>
+
+      <div class="lf-center">
+        <div class="lf-viewportCard">
+          <div class="lf-topbar">
+            <div class="left"></div>
+            <div class="center">
+              <div class="lf-pillGroup" id="viewTabs">
+                <button class="lf-btnSmall active" data-view="viewport" type="button">Preview</button>
+                <button class="lf-btnSmall" data-view="editor" type="button">Editor</button>
+              </div>
+            </div>
+            <div class="right">
+              <button class="lf-btnSmall lf-gradBtn" id="openCinemaLibrary" type="button">Library</button>
+            </div>
+          </div>
+
+          <div class="lf-stageWrap" id="viewportWrap">
+            <div class="lf-resultCard" id="viewportCard">
+              <video id="viewportVideo" playsinline></video>
+              <div class="lf-resbar" id="viewportResbar">
+                <div class="lf-muted" id="viewportMeta">No clip selected</div>
+                <a id="viewportDownloadLink" href="#" download>Download</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="lf-editor" id="editorView">
+            <div class="lf-row" style="justify-content:space-between;">
+              <div>
+                <div class="lf-h2">Editor Timeline</div>
+                <div class="lf-muted">Arrange clips, trim in/out, export sequence</div>
+              </div>
+              <button class="lf-btnSmall" id="exportProject" type="button">Export Project</button>
+            </div>
+
+            <div class="lf-exportSettings">
+              <div class="lf-row2">
+                <div class="lf-field">
+                  <label>Format</label>
+                  <select id="exportFormat" class="lf-select">
+                    <option value="mp4">mp4</option>
+                    <option value="mov">mov</option>
+                    <option value="webm">webm</option>
+                  </select>
+                </div>
+                <div class="lf-field">
+                  <label>Resolution</label>
+                  <select id="exportResolution" class="lf-select">
+                    <option value="1920x1080">1920x1080</option>
+                    <option value="3840x2160">3840x2160</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+              </div>
+              <div class="lf-row2">
+                <div class="lf-field">
+                  <label>FPS</label>
+                  <select id="exportFps" class="lf-select">
+                    <option value="24">24</option>
+                    <option value="30">30</option>
+                    <option value="60">60</option>
+                  </select>
+                </div>
+                <div class="lf-field" id="customResolutionWrap" style="display:none;">
+                  <label>Custom Resolution</label>
+                  <input type="text" id="customResolution" placeholder="e.g. 2560x1440" />
+                </div>
+              </div>
+            </div>
+
+            <div class="lf-trackList" id="timelineTracks">
+              <div class="lf-empty" id="timelineEmpty">No clips in timeline</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="lf-modal" id="genModal">
+<div class="lf-modal" id="cinemaLibraryModal">
   <div class="lf-modalCard">
     <div class="lf-modalHeader">
       <div>
-        <div class="lf-h2">Add from Generations</div>
-        <div class="lf-muted">Pick a succeeded cinema animation generation.</div>
+        <div class="lf-h2">Cinema Library</div>
+        <div class="lf-muted" id="libBreadcrumb">Project: — / Scene: —</div>
       </div>
-      <button class="lf-btnSmall" id="genModalClose" type="button">Close</button>
+      <button class="lf-btnSmall" id="cinemaLibraryClose" type="button">Close</button>
     </div>
 
-    <div class="lf-row" style="justify-content:space-between;">
-      <input id="genSearch" type="text" placeholder="Search by title..." style="flex:1; min-width:260px;" />
-      <button class="lf-btnSmall" id="genRefresh" type="button">Refresh</button>
+    <div class="lf-row" style="gap:10px; flex-wrap:wrap;">
+      <button class="lf-btnSmall active" id="libTabManager" type="button">Library</button>
+      <button class="lf-btnSmall" id="libTabAdd" type="button">Add from Generations</button>
     </div>
 
-    <div class="lf-libraryGrid" id="genGrid" style="margin-top:12px;"></div>
+    <div id="libManagerView" style="margin-top:16px; display:grid; grid-template-columns:220px 220px 1fr; gap:16px;">
+      <div>
+        <div class="lf-row" style="justify-content:space-between;">
+          <div class="lf-h2">Projects</div>
+          <button class="lf-btnSmall" id="libNewProject" type="button">＋</button>
+        </div>
+        <input id="libProjectSearch" type="text" placeholder="Search projects..." />
+        <div class="lf-libraryList" id="libProjectsList" style="margin-top:10px; max-height:420px;"></div>
+      </div>
+      <div>
+        <div class="lf-row" style="justify-content:space-between;">
+          <div class="lf-h2">Scenes</div>
+          <button class="lf-btnSmall" id="libNewScene" type="button">＋</button>
+        </div>
+        <input id="libSceneSearch" type="text" placeholder="Search scenes..." />
+        <div class="lf-libraryList" id="libScenesList" style="margin-top:10px; max-height:420px;"></div>
+      </div>
+      <div>
+        <div class="lf-row" style="justify-content:space-between;">
+          <div>
+            <div class="lf-h2">Assets</div>
+            <div class="lf-muted" id="libAssetsHint">Select a scene</div>
+          </div>
+          <button class="lf-btnSmall" id="libRefresh" type="button">Refresh</button>
+        </div>
+        <div id="libAssetsGrid" class="lf-libraryGrid" style="margin-top:10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); max-height:460px; overflow:auto;"></div>
+      </div>
+    </div>
+
+    <div id="libAddView" style="margin-top:16px; display:none;">
+      <div class="lf-row" style="justify-content:space-between; align-items:center;">
+        <div class="lf-h2">Add from Generations</div>
+        <button class="lf-btnSmall" id="libGenRefresh" type="button">Refresh</button>
+      </div>
+      <div class="lf-row" style="margin-top:10px; gap:10px; flex-wrap:wrap;">
+        <input id="libGenSearch" type="text" placeholder="Search generations..." style="flex:1; min-width:240px;" />
+        <select id="libGenKind" class="lf-select" style="min-width:180px;">
+          <option value="">All kinds</option>
+          <option value="animation">Animation</option>
+        </select>
+      </div>
+      <div id="libGenGrid" class="lf-libraryGrid" style="margin-top:12px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-height:520px; overflow:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="lf-modal" id="clipModal">
+  <div class="lf-modalCard">
+    <div class="lf-modalHeader">
+      <div>
+        <div class="lf-h2" id="clipModalTitle">Clip preview</div>
+        <div class="lf-muted" id="clipModalMeta"></div>
+      </div>
+      <button class="lf-btnSmall" id="clipModalClose" type="button">Close</button>
+    </div>
+    <video id="clipModalVideo" controls playsinline style="width:100%; max-height:70vh; background:#000; border-radius:14px;"></video>
+    <div class="lf-row" style="justify-content:flex-end; margin-top:12px;">
+      <button class="lf-btnSmall" id="clipModalDownload" type="button">Download</button>
+      <button class="lf-btnSmall" id="clipModalCopy" type="button">Copy URL</button>
+    </div>
   </div>
 </div>
 
@@ -678,12 +831,11 @@
   const state = {
     mode: "cinema",
     view: "viewport",
-    library: { projects: [] },
-    selectedProjectId: null,
-    selectedSceneId: null,
-    selectedClipId: null,
     latestClip: null,
-    generations: []
+    timeline: {
+      tracks: [{ id: "v1", type: "video", items: [] }],
+      export: { format: "mp4", resolution: "1920x1080", fps: 24 }
+    }
   };
 
   const modeHint = $("modeHint");
@@ -691,7 +843,51 @@
   const viewportVideo = $("viewportVideo");
   const viewportMeta = $("viewportMeta");
   const viewportDownloadLink = $("viewportDownloadLink");
+  const viewportResbar = $("viewportResbar");
   const saveClipBtn = $("saveClip");
+  const cinemaAudioRow = $("cinemaAudioRow");
+
+  const exportFormat = $("exportFormat");
+  const exportResolution = $("exportResolution");
+  const exportFps = $("exportFps");
+  const customResolutionWrap = $("customResolutionWrap");
+  const customResolution = $("customResolution");
+
+  const cinemaLibraryModal = $("cinemaLibraryModal");
+  const libTabManager = $("libTabManager");
+  const libTabAdd = $("libTabAdd");
+  const libManagerView = $("libManagerView");
+  const libAddView = $("libAddView");
+  const libProjectsList = $("libProjectsList");
+  const libScenesList = $("libScenesList");
+  const libAssetsGrid = $("libAssetsGrid");
+  const libAssetsHint = $("libAssetsHint");
+  const libProjectSearch = $("libProjectSearch");
+  const libSceneSearch = $("libSceneSearch");
+  const libNewProject = $("libNewProject");
+  const libNewScene = $("libNewScene");
+  const libRefresh = $("libRefresh");
+  const libBreadcrumb = $("libBreadcrumb");
+  const libGenGrid = $("libGenGrid");
+  const libGenSearch = $("libGenSearch");
+  const libGenKind = $("libGenKind");
+  const libGenRefresh = $("libGenRefresh");
+
+  const clipModal = $("clipModal");
+  const clipModalTitle = $("clipModalTitle");
+  const clipModalMeta = $("clipModalMeta");
+  const clipModalVideo = $("clipModalVideo");
+  const clipModalClose = $("clipModalClose");
+  const clipModalDownload = $("clipModalDownload");
+  const clipModalCopy = $("clipModalCopy");
+
+  let libProjects = [];
+  let libScenes = [];
+  let libAssets = [];
+  let libGenerations = [];
+  let libSelectedProject = null;
+  let libSelectedScene = null;
+  let clipModalItem = null;
 
   $("btn-back").addEventListener("click", () => {
     location.href = "https://lightfull.ai/cinema_lab";
@@ -704,29 +900,24 @@
     return data?.session;
   }
 
- 
-async function uploadToBucket(file, bucket) {
-  const session = await getSession();
-  if (!session) throw new Error("No session");
+  async function uploadToBucket(file, bucket) {
+    const session = await getSession();
+    if (!session) throw new Error("No session");
 
-  const userId = session.user.id;
-  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
-  const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+    const userId = session.user.id;
+    const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+    const path = `${userId}/${crypto.randomUUID()}.${ext}`;
 
-  // ✅ upload через Supabase SDK (сам правильно формирует запрос)
-  const { error } = await window.sb.storage.from(bucket).upload(path, file, {
-    upsert: true,
-    contentType: file.type || "application/octet-stream",
-  });
+    const { error } = await window.sb.storage.from(bucket).upload(path, file, {
+      upsert: false,
+      contentType: file.type || "application/octet-stream",
+    });
 
-  if (error) throw new Error(`Upload failed: ${error.message}`);
+    if (error) throw new Error(`Upload failed: ${error.message}`);
 
-  // ✅ bucket у тебя public — берём public URL
-  const { data } = window.sb.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
-}
-
-
+    const { data } = window.sb.storage.from(bucket).getPublicUrl(path);
+    return data.publicUrl;
+  }
 
   async function fetchJsonWithAuth(url, opts={}) {
     let s = await getSession();
@@ -761,170 +952,61 @@ async function uploadToBucket(file, bucket) {
     return j || { ok: true, raw };
   }
 
-  function loadLibrary() {
-    try {
-      const raw = localStorage.getItem(LIB_KEY);
-      if (raw) state.library = JSON.parse(raw);
-    } catch (e) {
-      state.library = { projects: [] };
-    }
-    if (!state.library.projects?.length) {
-      const projectId = uuid();
-      const sceneId = uuid();
-      state.library.projects = [{
-        id: projectId,
-        name: "Project 1",
-        scenes: [{
-          id: sceneId,
-          name: "Scene 1",
-          clips: []
-        }]
-      }];
-      state.selectedProjectId = projectId;
-      state.selectedSceneId = sceneId;
-      persistLibrary();
-    }
+  function setStatus(text, tone) {
+    statusText.textContent = text || "";
+    statusText.classList.toggle("err", tone === "err");
   }
 
-  function persistLibrary() {
-    localStorage.setItem(LIB_KEY, JSON.stringify(state.library));
+  function getGenerationUrl(gen) {
+    return gen.output_url || gen.outputUrl || gen.result_url || gen.url || "";
   }
 
-  function getSelectedProject() {
-    return state.library.projects.find(p => p.id === state.selectedProjectId);
+  function isVideoUrl(url) {
+    return /\.(mp4|webm|mov)(\?|$)/i.test(url || "");
   }
 
-  function getSelectedScene() {
-    const project = getSelectedProject();
-    return project?.scenes.find(s => s.id === state.selectedSceneId);
+  function openModal(modal) {
+    if (modal) modal.style.display = "flex";
   }
 
-  function getSelectedClip() {
-    const scene = getSelectedScene();
-    return scene?.clips.find(c => c.id === state.selectedClipId);
+  function closeModal(modal) {
+    if (modal) modal.style.display = "none";
   }
 
-  function renderProjects() {
-    const q = $("projectSearch").value.trim().toLowerCase();
-    const list = state.library.projects.filter(p => !q || p.name.toLowerCase().includes(q));
-    $("projectsList").innerHTML = list.map(p => {
-      const active = p.id === state.selectedProjectId;
-      return `
-        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${p.id}">
-          <div class="lf-libraryMeta">
-            <div class="lf-libraryTitle">${escapeHtml(p.name)}</div>
-            <div class="lf-muted">${p.scenes.length} scenes</div>
-          </div>
-          <div class="lf-cardActions">
-            <button class="lf-btnSmall" data-action="rename">✎</button>
-            <button class="lf-btnSmall" data-action="delete">✕</button>
-          </div>
-        </div>
-      `;
-    }).join("") || `<div class="lf-muted">No projects yet</div>`;
+  function escapeHtml(s){
+    return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
   }
 
-  function renderScenes() {
-    const project = getSelectedProject();
-    const hint = $("sceneHint");
-    if (!project) {
-      hint.textContent = "Select a project";
-      $("scenesList").innerHTML = "";
-      return;
-    }
-    hint.textContent = project.name;
-    const q = $("sceneSearch").value.trim().toLowerCase();
-    const list = project.scenes.filter(s => !q || s.name.toLowerCase().includes(q));
-    $("scenesList").innerHTML = list.map(s => {
-      const active = s.id === state.selectedSceneId;
-      return `
-        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${s.id}">
-          <div class="lf-libraryMeta">
-            <div class="lf-libraryTitle">${escapeHtml(s.name)}</div>
-            <div class="lf-muted">${s.clips.length} clips</div>
-          </div>
-          <div class="lf-cardActions">
-            <button class="lf-btnSmall" data-action="rename">✎</button>
-            <button class="lf-btnSmall" data-action="delete">✕</button>
-          </div>
-        </div>
-      `;
-    }).join("") || `<div class="lf-muted">No scenes yet</div>`;
+  function escapeAttr(s){
+    return escapeHtml(s).replaceAll("'","&#39;");
   }
 
-  function renderClips() {
-    const scene = getSelectedScene();
-    const hint = $("clipHint");
-    if (!scene) {
-      hint.textContent = "Select a scene";
-      $("clipsList").innerHTML = "";
-      return;
-    }
-    hint.textContent = scene.name;
-    $("clipsList").innerHTML = scene.clips.map(c => {
-      const active = c.id === state.selectedClipId;
-      return `
-        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${c.id}" draggable="true">
-          <div class="lf-libraryMeta">
-            <div class="lf-libraryTitle">${escapeHtml(c.title)}</div>
-            <div class="lf-muted">${c.durationSec || "—"}s • ${c.aspectRatio || "—"}</div>
-          </div>
-          <div class="lf-cardActions">
-            <button class="lf-btnSmall" data-action="open">Open</button>
-            <button class="lf-btnSmall" data-action="rename">✎</button>
-            <button class="lf-btnSmall" data-action="delete">✕</button>
-          </div>
-        </div>
-      `;
-    }).join("") || `<div class="lf-muted">No clips yet</div>`;
-    renderTimeline();
-  }
-
-  function renderTimeline() {
-    const scene = getSelectedScene();
-    const timeline = $("timelineList");
-    const empty = $("timelineEmpty");
-    if (!scene || !scene.clips.length) {
-      empty.style.display = "block";
-      timeline.innerHTML = '<div class="lf-empty" id="timelineEmpty">No clips in this scene</div>';
-      return;
-    }
-    empty?.remove();
-    timeline.innerHTML = scene.clips.map(c => `
-      <div class="lf-timelineItem" draggable="true" data-id="${c.id}">
-        <div>
-          <video src="${c.output_url}" muted playsinline></video>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <div class="lf-libraryTitle">${escapeHtml(c.title)}</div>
-          <div class="lf-row2">
-            <div class="lf-field">
-              <label>Trim start (sec)</label>
-              <input type="number" min="0" step="0.1" value="${c.trimStartSec || 0}" data-field="trimStartSec" />
-            </div>
-            <div class="lf-field">
-              <label>Trim end (sec)</label>
-              <input type="number" min="0" step="0.1" value="${c.trimEndSec || c.durationSec || 0}" data-field="trimEndSec" />
-            </div>
-          </div>
-        </div>
-      </div>
-    `).join("");
+  function updateCinemaAudioVisibility() {
+    const endImage = $("cinemaEndImage").files[0];
+    const showAudio = !endImage;
+    cinemaAudioRow.style.display = showAudio ? "block" : "none";
+    if (!showAudio) $("cinemaAudio").checked = false;
   }
 
   function renderViewport() {
-    const clip = getSelectedClip() || state.latestClip;
+    const clip = state.latestClip;
     if (!clip) {
+      viewportVideo.style.display = "none";
       viewportVideo.removeAttribute("src");
+      viewportVideo.removeAttribute("controls");
       viewportMeta.textContent = "No clip selected";
+      viewportResbar.style.display = "none";
       viewportDownloadLink.href = "#";
       viewportDownloadLink.removeAttribute("download");
       return;
     }
+    viewportVideo.style.display = "block";
     viewportVideo.src = clip.output_url;
+    viewportVideo.setAttribute("controls", "");
     viewportMeta.textContent = `${clip.title} • ${clip.durationSec || "—"}s • ${clip.aspectRatio || "—"}`;
     viewportDownloadLink.href = clip.output_url;
     viewportDownloadLink.download = `${clip.title || "clip"}.mp4`;
+    viewportResbar.style.display = "flex";
   }
 
   function setMode(mode) {
@@ -945,114 +1027,7 @@ async function uploadToBucket(file, bucket) {
     }
   }
 
-  function escapeHtml(str) {
-    return String(str || "").replace(/[&<>"']/g, (m) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    }[m]));
-  }
-
-  function updateSelections() {
-    const project = getSelectedProject();
-    if (!project) {
-      state.selectedProjectId = state.library.projects[0]?.id || null;
-    }
-    const scene = getSelectedScene();
-    if (!scene && project?.scenes?.length) {
-      state.selectedSceneId = project.scenes[0].id;
-    }
-    const clip = getSelectedClip();
-    if (!clip && scene?.clips?.length) {
-      state.selectedClipId = scene.clips[0].id;
-    }
-  }
-
-  function refreshLibrary() {
-    updateSelections();
-    renderProjects();
-    renderScenes();
-    renderClips();
-    renderViewport();
-  }
-
-  function addClipToScene(clip) {
-    const scene = getSelectedScene();
-    if (!scene) return;
-    scene.clips.push(clip);
-    state.selectedClipId = clip.id;
-    persistLibrary();
-    refreshLibrary();
-  }
-
-  function createClipFromGeneration(gen) {
-    const outputUrl = getGenerationUrl(gen);
-    return {
-      id: uuid(),
-      generationId: gen.id || null,
-      title: gen.title || gen.prompt || "Cinema Clip",
-      output_url: outputUrl,
-      backup_url: gen.backup_url || "",
-      durationSec: Math.round(gen.durationSec || gen.duration || gen.video_duration || 0),
-      aspectRatio: gen.aspect_ratio || gen.aspectRatio || "",
-      createdAt: new Date().toISOString(),
-      trimStartSec: 0,
-      trimEndSec: Math.round(gen.durationSec || gen.duration || gen.video_duration || 0)
-    };
-  }
-
-  function getGenerationUrl(gen) {
-    return gen.output_url || gen.outputUrl || gen.result_url || gen.url || "";
-  }
-
-  function isVideoUrl(url) {
-    return /\.(mp4|webm|mov)(\?|$)/i.test(url || "");
-  }
-
-  async function fetchGenerationsForAnimation() {
-    const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/me?limit=80&offset=0`, { method: "GET" });
-    const gens = Array.isArray(data.generations) ? data.generations : (Array.isArray(data?.data?.generations) ? data.data.generations : []);
-    state.generations = gens.filter(g => {
-      const lab = String(g.lab || "").toLowerCase();
-      const kind = String(g.kind || "").toLowerCase();
-      const status = String(g.status || "").toLowerCase();
-      const url = getGenerationUrl(g);
-      return lab === "cinema" && kind === "animation" && status === "succeeded" && url && !String(url).startsWith("upscale:") && isVideoUrl(url);
-    });
-    renderGenerations();
-  }
-
-  function renderGenerations() {
-    const q = $("genSearch").value.trim().toLowerCase();
-    const items = state.generations.filter(g => {
-      const title = String(g.title || g.prompt || "").toLowerCase();
-      return !q || title.includes(q);
-    });
-    $("genGrid").innerHTML = items.map(g => `
-      <div class="lf-genCard" data-id="${g.id}">
-        <div class="lf-genThumb">
-          <video src="${getGenerationUrl(g)}" muted playsinline></video>
-        </div>
-        <div class="lf-genMeta">
-          <div class="lf-libraryTitle">${escapeHtml(g.title || "Cinema Clip")}</div>
-          <div class="lf-muted">${g.durationSec || g.duration || "—"}s • ${g.aspect_ratio || g.aspectRatio || ""}</div>
-          <button class="lf-btnSmall lf-gradBtn" data-action="add">Add to current scene</button>
-        </div>
-      </div>
-    `).join("") || `<div class="lf-muted">No generations found</div>`;
-  }
-
-  function openModal(modal) {
-    modal.classList.add("open");
-  }
-
-  function closeModal(modal) {
-    modal.classList.remove("open");
-  }
-
-  function setupDropzone(drop, input, preview, title) {
+  function setupDropzone(drop, input, preview, title, onChange) {
     drop.addEventListener("click", () => input.click());
     drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("drag-over"); });
     drop.addEventListener("dragleave", () => drop.classList.remove("drag-over"));
@@ -1071,12 +1046,265 @@ async function uploadToBucket(file, bucket) {
         preview.src = URL.createObjectURL(file);
         preview.style.display = "block";
       }
+      if (onChange) onChange();
     });
   }
 
   setupDropzone($("cinemaImageDrop"), $("cinemaImage"), $("cinemaImagePreview"), $("cinemaImageTitle"));
+  setupDropzone($("cinemaEndDrop"), $("cinemaEndImage"), $("cinemaEndPreview"), $("cinemaEndTitle"), updateCinemaAudioVisibility);
   setupDropzone($("motionImageDrop"), $("motionImage"), $("motionImagePreview"), $("motionImageTitle"));
   setupDropzone($("motionVideoDrop"), $("motionVideo"), null, $("motionVideoTitle"));
+
+  function renderTimeline() {
+    const track = state.timeline.tracks[0];
+    const timeline = $("timelineTracks");
+    if (!track.items.length) {
+      timeline.innerHTML = '<div class="lf-empty" id="timelineEmpty">No clips in timeline</div>';
+      return;
+    }
+    timeline.innerHTML = `
+      <div class="lf-track" data-track="${track.id}">
+        <div class="lf-trackHeader">Track 1</div>
+        <div class="lf-trackLane">
+          ${track.items.map(item => `
+            <div class="lf-clipItem" draggable="true" data-id="${item.id}">
+              <div class="lf-clipTitle">${escapeHtml(item.title)}</div>
+              <div class="lf-clipMeta">${item.durationSec || "—"}s • ${item.resolution || "—"}</div>
+              <div class="lf-clipTrim">
+                <label>In
+                  <input type="number" min="0" step="0.1" value="${item.trimInSec}" data-field="trimInSec" />
+                </label>
+                <label>Out
+                  <input type="number" min="0" step="0.1" value="${item.trimOutSec}" data-field="trimOutSec" />
+                </label>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function addToTimeline(asset) {
+    const track = state.timeline.tracks[0];
+    const duration = Math.max(0, Number(asset.duration_sec || asset.duration || 5));
+    const item = {
+      id: uuid(),
+      assetId: asset.id,
+      title: asset.title || "Clip",
+      url: asset.url || asset.output_url || "",
+      durationSec: duration,
+      trimInSec: 0,
+      trimOutSec: duration
+    };
+    track.items.push(item);
+    renderTimeline();
+  }
+
+  function openClipModal(item) {
+    const url = item.url || getGenerationUrl(item);
+    clipModalItem = { ...item, url };
+    clipModalTitle.textContent = item.title || "Clip preview";
+    clipModalMeta.textContent = item.kind ? `Kind: ${item.kind}` : "";
+    clipModalVideo.src = url || "";
+    openModal(clipModal);
+  }
+
+  async function apiLibrary(action, payload){
+    return fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ action, ...payload })
+    });
+  }
+
+  async function loadLibraryProjects(){
+    const r = await apiLibrary("library_list_projects", {});
+    libProjects = r.projects || [];
+  }
+
+  async function loadLibraryScenes(projectId){
+    const r = await apiLibrary("library_list_scenes", { project_id: projectId });
+    libScenes = r.scenes || [];
+  }
+
+  async function loadLibraryAssets(sceneId){
+    const r = await apiLibrary("library_list_assets", { scene_id: sceneId });
+    libAssets = r.assets || [];
+  }
+
+  function renderProjects(){
+    const q = String(libProjectSearch?.value || "").trim().toLowerCase();
+    const items = libProjects.filter(p => !q || String(p.title||"").toLowerCase().includes(q));
+    libProjectsList.innerHTML = items.map(p => {
+      const active = libSelectedProject?.id === p.id;
+      return `
+        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${p.id}">
+          <div class="lf-libraryMeta">
+            <div class="lf-libraryTitle">${escapeHtml(p.title)}</div>
+            <div class="lf-muted">${(p.updated_at||p.created_at||"").toString().slice(0,19).replace("T"," ")}</div>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No projects</div>`;
+  }
+
+  function renderScenes(){
+    const q = String(libSceneSearch?.value || "").trim().toLowerCase();
+    const items = libScenes.filter(s => !q || String(s.title||"").toLowerCase().includes(q));
+    libScenesList.innerHTML = items.map(s => {
+      const active = libSelectedScene?.id === s.id;
+      return `
+        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${s.id}">
+          <div class="lf-libraryMeta">
+            <div class="lf-libraryTitle">${escapeHtml(s.title)}</div>
+            <div class="lf-muted">Scene</div>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No scenes</div>`;
+  }
+
+  function renderAssets(){
+    if (!libSelectedScene){
+      libAssetsHint.textContent = "Select a scene";
+      libAssetsGrid.innerHTML = "";
+      return;
+    }
+    libAssetsHint.textContent = `Scene: ${libSelectedScene.title || "—"}`;
+    libAssetsGrid.innerHTML = (libAssets || []).map(a => {
+      const title = a.title || `${a.kind || "asset"} ${String(a.generation_id||"")}`.trim();
+      const url = a.url || a.thumb_url || "";
+      const kind = a.kind || "";
+      return `
+        <div class="lf-assetCard" data-id="${a.id}">
+          <video src="${escapeAttr(url)}" muted playsinline></video>
+          <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+            <div class="lf-libraryTitle" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+            ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
+          </div>
+          <div class="lf-assetActions">
+            <button class="lf-btnSmall" data-act="add">Add to Timeline</button>
+            <button class="lf-btnSmall" data-act="rename">✎</button>
+            <button class="lf-btnSmall" data-act="delete">X</button>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No assets yet</div>`;
+  }
+
+  function updateBreadcrumb(){
+    const p = libSelectedProject?.title || "—";
+    const s = libSelectedScene?.title || "—";
+    libBreadcrumb.textContent = `Project: ${p} / Scene: ${s}`;
+  }
+
+  function setLibTab(tab){
+    const isManager = tab === "manager";
+    libTabManager.classList.toggle("active", isManager);
+    libTabAdd.classList.toggle("active", !isManager);
+    libManagerView.style.display = isManager ? "grid" : "none";
+    libAddView.style.display = isManager ? "none" : "block";
+  }
+
+  async function refreshLibraryAll(){
+    await loadLibraryProjects();
+    if (!libSelectedProject && libProjects[0]) libSelectedProject = libProjects[0];
+    if (libSelectedProject){
+      await loadLibraryScenes(libSelectedProject.id);
+      if (!libSelectedScene && libScenes[0]) libSelectedScene = libScenes[0];
+    }
+    if (libSelectedScene){
+      await loadLibraryAssets(libSelectedScene.id);
+    }
+    updateBreadcrumb();
+    renderProjects();
+    renderScenes();
+    renderAssets();
+  }
+
+  async function refreshGenerationsForAdd(){
+    if (!libSelectedScene){
+      libGenGrid.innerHTML = `<div class="lf-muted">Select a scene first (Library tab).</div>`;
+      return;
+    }
+    libGenGrid.innerHTML = `<div class="lf-muted">Loading…</div>`;
+
+    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?limit=80&offset=0", { method:"GET" });
+    const gens = Array.isArray(data.generations) ? data.generations : [];
+    libGenerations = gens.filter(g => {
+      const lab = String(g.lab||"").toLowerCase();
+      const kind = String(g.kind||"").toLowerCase();
+      const status = String(g.status||"").toLowerCase();
+      const url = getGenerationUrl(g);
+      return lab === "cinema" && kind === "animation" && status === "succeeded" && url && isVideoUrl(url);
+    });
+
+    renderGenerationsGrid();
+  }
+
+  function renderGenerationsGrid(){
+    if (!libSelectedScene){
+      libGenGrid.innerHTML = `<div class="lf-muted">Select a scene first.</div>`;
+      return;
+    }
+    const q = String(libGenSearch?.value || "").trim().toLowerCase();
+    const kindFilter = String(libGenKind?.value || "").trim().toLowerCase();
+
+    const items = libGenerations.filter(g=>{
+      const title = String(g.title||"").toLowerCase();
+      const kind = String(g.kind||"").toLowerCase();
+      if (kindFilter && kind !== kindFilter) return false;
+      if (q && !title.includes(q)) return false;
+      return true;
+    });
+
+    libGenGrid.innerHTML = items.map(g=>{
+      const url = getGenerationUrl(g);
+      const title = g.title || `${g.kind || "item"} ${g.id}`;
+      const kind = g.kind || "";
+      return `
+        <div class="lf-assetCard" data-gen-id="${g.id}">
+          <video src="${escapeAttr(url)}" muted playsinline></video>
+          <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+            <div class="lf-libraryTitle" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+            ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
+          </div>
+          <div class="lf-assetActions">
+            <button class="lf-btnSmall" data-act="add-gen">Add</button>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No generations</div>`;
+  }
+
+  async function forceDownload(url, filename){
+    if (!url) return;
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename || "cinema-animation.mp4";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(blobUrl);
+  }
+
+  async function copyToClipboard(text){
+    if (!text) return;
+    if (navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const input = document.createElement("textarea");
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy");
+    input.remove();
+  }
 
   $("modeTabs").addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-mode]");
@@ -1094,227 +1322,225 @@ async function uploadToBucket(file, bucket) {
     setView(btn.dataset.view);
   });
 
-  $("viewportEditor").addEventListener("click", () => {
-    $("viewTabs").querySelectorAll("button").forEach(b => b.classList.remove("active"));
-    const editorBtn = $("viewTabs").querySelector('[data-view="editor"]');
-    editorBtn.classList.add("active");
-    setView("editor");
+  $("openCinemaLibrary").addEventListener("click", async () => {
+    setLibTab("manager");
+    openModal(cinemaLibraryModal);
+    await refreshLibraryAll();
   });
+  $("cinemaLibraryClose").addEventListener("click", () => closeModal(cinemaLibraryModal));
+  cinemaLibraryModal.addEventListener("click", (e) => {
+    if (e.target === cinemaLibraryModal) closeModal(cinemaLibraryModal);
+  });
+  libTabManager.addEventListener("click", () => setLibTab("manager"));
+  libTabAdd.addEventListener("click", async () => {
+    setLibTab("add");
+    await refreshGenerationsForAdd();
+  });
+  libRefresh.addEventListener("click", () => refreshLibraryAll());
+  libProjectSearch.addEventListener("input", renderProjects);
+  libSceneSearch.addEventListener("input", renderScenes);
 
-  $("projectsList").addEventListener("click", (e) => {
+  libProjectsList.addEventListener("click", async (e) => {
     const card = e.target.closest(".lf-libraryCard");
     if (!card) return;
     const id = card.dataset.id;
-    const action = e.target.dataset.action;
-    if (action === "rename") {
-      const project = state.library.projects.find(p => p.id === id);
-      const name = prompt("Rename project", project?.name || "");
-      if (name) project.name = name;
-      persistLibrary();
-      refreshLibrary();
-      return;
+    libSelectedProject = libProjects.find(p => String(p.id) === String(id)) || null;
+    libSelectedScene = null;
+    libScenes = [];
+    libAssets = [];
+    if (libSelectedProject){
+      await loadLibraryScenes(libSelectedProject.id);
+      if (libScenes[0]) libSelectedScene = libScenes[0];
     }
-    if (action === "delete") {
-      state.library.projects = state.library.projects.filter(p => p.id !== id);
-      if (state.selectedProjectId === id) {
-        state.selectedProjectId = state.library.projects[0]?.id || null;
-        state.selectedSceneId = null;
-        state.selectedClipId = null;
-      }
-      persistLibrary();
-      refreshLibrary();
-      return;
-    }
-    state.selectedProjectId = id;
-    state.selectedSceneId = getSelectedProject()?.scenes[0]?.id || null;
-    state.selectedClipId = null;
-    refreshLibrary();
+    if (libSelectedScene) await loadLibraryAssets(libSelectedScene.id);
+    updateBreadcrumb();
+    renderProjects();
+    renderScenes();
+    renderAssets();
   });
 
-  $("scenesList").addEventListener("click", (e) => {
+  libScenesList.addEventListener("click", async (e) => {
     const card = e.target.closest(".lf-libraryCard");
     if (!card) return;
     const id = card.dataset.id;
-    const action = e.target.dataset.action;
-    const project = getSelectedProject();
-    if (!project) return;
-    if (action === "rename") {
-      const scene = project.scenes.find(s => s.id === id);
-      const name = prompt("Rename scene", scene?.name || "");
-      if (name) scene.name = name;
-      persistLibrary();
-      refreshLibrary();
-      return;
-    }
-    if (action === "delete") {
-      project.scenes = project.scenes.filter(s => s.id !== id);
-      if (state.selectedSceneId === id) {
-        state.selectedSceneId = project.scenes[0]?.id || null;
-        state.selectedClipId = null;
-      }
-      persistLibrary();
-      refreshLibrary();
-      return;
-    }
-    state.selectedSceneId = id;
-    state.selectedClipId = getSelectedScene()?.clips[0]?.id || null;
-    refreshLibrary();
+    libSelectedScene = libScenes.find(s => String(s.id) === String(id)) || null;
+    libAssets = [];
+    if (libSelectedScene) await loadLibraryAssets(libSelectedScene.id);
+    updateBreadcrumb();
+    renderScenes();
+    renderAssets();
   });
 
-  $("clipsList").addEventListener("click", (e) => {
-    const card = e.target.closest(".lf-libraryCard");
+  libAssetsGrid.addEventListener("click", async (e) => {
+    const card = e.target.closest(".lf-assetCard");
     if (!card) return;
-    const id = card.dataset.id;
-    const action = e.target.dataset.action;
-    const scene = getSelectedScene();
-    if (!scene) return;
-    if (action === "rename") {
-      const clip = scene.clips.find(c => c.id === id);
-      const name = prompt("Rename clip", clip?.title || "");
-      if (name) clip.title = name;
-      persistLibrary();
-      refreshLibrary();
+    const assetId = card.dataset.id;
+    const actBtn = e.target.closest("button");
+    const asset = libAssets.find(a => String(a.id) === String(assetId));
+    if (!asset) return;
+
+    if (!actBtn) {
+      openClipModal(asset);
       return;
     }
-    if (action === "delete") {
-      scene.clips = scene.clips.filter(c => c.id !== id);
-      if (state.selectedClipId === id) {
-        state.selectedClipId = scene.clips[0]?.id || null;
-      }
-      persistLibrary();
-      refreshLibrary();
-      return;
+
+    const act = actBtn.dataset.act;
+    if (act === "add"){
+      addToTimeline(asset);
+      setStatus("Added to timeline", "ok");
+      setTimeout(() => setStatus(""), 1200);
     }
-    if (action === "open") {
-      state.selectedClipId = id;
-      renderViewport();
-      return;
+
+    if (act === "rename"){
+      const next = prompt("New asset name:", asset.title || "");
+      if (!next) return;
+      await apiLibrary("library_rename_asset", { asset_id: asset.id, title: next });
+      asset.title = next;
+      renderAssets();
     }
-    state.selectedClipId = id;
-    renderViewport();
+
+    if (act === "delete"){
+      if (!confirm("Remove asset from this scene?")) return;
+      await apiLibrary("library_delete_asset", { asset_id: asset.id });
+      libAssets = libAssets.filter(a => a.id !== asset.id);
+      renderAssets();
+    }
   });
 
-  $("clipsList").addEventListener("dragstart", (e) => {
-    const card = e.target.closest(".lf-libraryCard");
+  libNewProject.addEventListener("click", async () => {
+    const title = prompt("Project name:");
+    if (!title) return;
+    const r = await apiLibrary("library_create_project", { title });
+    libSelectedProject = r.project;
+    libSelectedScene = null;
+    await refreshLibraryAll();
+  });
+  libNewScene.addEventListener("click", async () => {
+    if (!libSelectedProject) {
+      setStatus("Select a project first", "err");
+      return;
+    }
+    const title = prompt("Scene name:");
+    if (!title) return;
+    const r = await apiLibrary("library_create_scene", { project_id: libSelectedProject.id, title });
+    libSelectedScene = r.scene;
+    await refreshLibraryAll();
+  });
+
+  libGenRefresh.addEventListener("click", refreshGenerationsForAdd);
+  libGenSearch.addEventListener("input", renderGenerationsGrid);
+  libGenKind.addEventListener("change", renderGenerationsGrid);
+  libGenGrid.addEventListener("click", async (e) => {
+    const card = e.target.closest(".lf-assetCard");
     if (!card) return;
-    e.dataTransfer.setData("text/plain", card.dataset.id);
+    const btn = e.target.closest("button");
+    if (!btn) {
+      const genId = card.dataset.genId;
+      const item = libGenerations.find(g => String(g.id) === String(genId));
+      if (item) openClipModal(item);
+      return;
+    }
+    if (btn.dataset.act !== "add-gen") return;
+    if (!libSelectedScene) {
+      setStatus("Select a scene first", "err");
+      return;
+    }
+    const genId = card.dataset.genId;
+    const g = libGenerations.find(x => String(x.id) === String(genId));
+    if (!g) return;
+
+    await apiLibrary("library_add_asset", {
+      scene_id: libSelectedScene.id,
+      generation_id: g.id,
+      title: g.title || null,
+      kind: g.kind || null,
+      url: getGenerationUrl(g),
+      thumb_url: getGenerationUrl(g)
+    });
+
+    setStatus("Added to Library", "ok");
+    setTimeout(() => setStatus(""), 1200);
+
+    await loadLibraryAssets(libSelectedScene.id);
+    if (libTabManager.classList.contains("active")) renderAssets();
   });
 
-  $("timelineList").addEventListener("dragstart", (e) => {
-    const item = e.target.closest(".lf-timelineItem");
+  clipModalClose.addEventListener("click", () => closeModal(clipModal));
+  clipModal.addEventListener("click", (e) => {
+    if (e.target === clipModal) closeModal(clipModal);
+  });
+  clipModalDownload.addEventListener("click", () => {
+    if (!clipModalItem?.url) return;
+    forceDownload(clipModalItem.url, `${(clipModalItem.title || "clip").replace(/\s+/g, "_")}.mp4`);
+  });
+  clipModalCopy.addEventListener("click", async () => {
+    if (!clipModalItem?.url) return;
+    await copyToClipboard(clipModalItem.url);
+    setStatus("Copied URL", "ok");
+    setTimeout(() => setStatus(""), 1200);
+  });
+
+  exportResolution.addEventListener("change", () => {
+    customResolutionWrap.style.display = exportResolution.value === "custom" ? "block" : "none";
+  });
+
+  $("timelineTracks").addEventListener("dragstart", (e) => {
+    const item = e.target.closest(".lf-clipItem");
     if (!item) return;
     item.classList.add("dragging");
     e.dataTransfer.setData("text/plain", item.dataset.id);
   });
-
-  $("timelineList").addEventListener("dragend", (e) => {
-    const item = e.target.closest(".lf-timelineItem");
+  $("timelineTracks").addEventListener("dragend", (e) => {
+    const item = e.target.closest(".lf-clipItem");
     if (item) item.classList.remove("dragging");
   });
-
-  $("timelineList").addEventListener("dragover", (e) => {
+  $("timelineTracks").addEventListener("dragover", (e) => {
     e.preventDefault();
   });
-
-  $("timelineList").addEventListener("drop", (e) => {
+  $("timelineTracks").addEventListener("drop", (e) => {
     e.preventDefault();
+    const track = state.timeline.tracks[0];
     const id = e.dataTransfer.getData("text/plain");
-    const scene = getSelectedScene();
-    if (!scene) return;
-    const target = e.target.closest(".lf-timelineItem");
-    if (!target) return;
-    const fromIndex = scene.clips.findIndex(c => c.id === id);
-    const toIndex = scene.clips.findIndex(c => c.id === target.dataset.id);
-    if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
-    const [clip] = scene.clips.splice(fromIndex, 1);
-    scene.clips.splice(toIndex, 0, clip);
-    persistLibrary();
+    const target = e.target.closest(".lf-clipItem");
+    if (!id || !target) return;
+    const fromIndex = track.items.findIndex(i => i.id === id);
+    const toIndex = track.items.findIndex(i => i.id === target.dataset.id);
+    if (fromIndex == -1 || toIndex == -1 || fromIndex == toIndex) return;
+    const [moved] = track.items.splice(fromIndex, 1);
+    track.items.splice(toIndex, 0, moved);
     renderTimeline();
   });
-
-  $("timelineList").addEventListener("input", (e) => {
-    const item = e.target.closest(".lf-timelineItem");
-    if (!item) return;
-    const clip = getSelectedScene()?.clips.find(c => c.id === item.dataset.id);
-    if (!clip) return;
+  $("timelineTracks").addEventListener("input", (e) => {
+    const itemEl = e.target.closest(".lf-clipItem");
+    if (!itemEl) return;
+    const id = itemEl.dataset.id;
     const field = e.target.dataset.field;
-    if (field) {
-      clip[field] = Number(e.target.value) || 0;
-      persistLibrary();
-    }
-  });
-
-  $("newProject").addEventListener("click", () => {
-    const name = prompt("Project name", "New Project");
-    if (!name) return;
-    const project = { id: uuid(), name, scenes: [] };
-    state.library.projects.push(project);
-    state.selectedProjectId = project.id;
-    state.selectedSceneId = null;
-    persistLibrary();
-    refreshLibrary();
-  });
-
-  $("newScene").addEventListener("click", () => {
-    const project = getSelectedProject();
-    if (!project) return;
-    const name = prompt("Scene name", "New Scene");
-    if (!name) return;
-    const scene = { id: uuid(), name, clips: [] };
-    project.scenes.push(scene);
-    state.selectedSceneId = scene.id;
-    persistLibrary();
-    refreshLibrary();
-  });
-
-  $("projectSearch").addEventListener("input", renderProjects);
-  $("sceneSearch").addEventListener("input", renderScenes);
-
-  $("openGenModal").addEventListener("click", async () => {
-    openModal($("genModal"));
-    await fetchGenerationsForAnimation();
-  });
-  $("genModalClose").addEventListener("click", () => closeModal($("genModal")));
-  $("genRefresh").addEventListener("click", fetchGenerationsForAnimation);
-  $("genSearch").addEventListener("input", renderGenerations);
-
-  $("genGrid").addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-action='add']");
-    if (!btn) return;
-    const card = e.target.closest(".lf-genCard");
-    const gen = state.generations.find(g => String(g.id) === String(card.dataset.id));
-    if (!gen) return;
-    const clip = createClipFromGeneration(gen);
-    addClipToScene(clip);
-  });
-
-  $("viewportDownload").addEventListener("click", () => {
-    if (viewportDownloadLink.href && viewportDownloadLink.href !== "#") {
-      viewportDownloadLink.click();
-    }
-  });
-
-  $("viewportAdd").addEventListener("click", () => {
-    if (state.latestClip) {
-      addClipToScene({ ...state.latestClip, id: uuid() });
-    }
-  });
-
-  saveClipBtn.addEventListener("click", () => {
-    if (state.latestClip) {
-      addClipToScene({ ...state.latestClip, id: uuid() });
-      saveClipBtn.disabled = true;
-    }
+    const track = state.timeline.tracks[0];
+    const item = track.items.find(i => i.id === id);
+    if (!item || !field) return;
+    const value = Math.max(0, Number(e.target.value || 0));
+    item[field] = value;
   });
 
   $("exportProject").addEventListener("click", () => {
-    const project = getSelectedProject();
-    if (!project) return;
-    const blob = new Blob([JSON.stringify(project, null, 2)], { type: "application/json" });
+    const resolution = exportResolution.value === "custom" ? customResolution.value || "custom" : exportResolution.value;
+    state.timeline.export = {
+      format: exportFormat.value,
+      resolution,
+      fps: Number(exportFps.value || 24)
+    };
+    const payload = {
+      meta: {
+        project: libSelectedProject ? { id: libSelectedProject.id, title: libSelectedProject.title } : null,
+        scene: libSelectedScene ? { id: libSelectedScene.id, title: libSelectedScene.title } : null
+      },
+      timeline: state.timeline
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${project.name.replace(/\s+/g, "_")}_project.json`;
+    a.download = "cinema_animation_project.json";
     a.click();
     URL.revokeObjectURL(url);
   });
@@ -1325,15 +1551,15 @@ async function uploadToBucket(file, bucket) {
       const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/status?jobId=${encodeURIComponent(jobId)}`, { method: "GET" });
       if (data.status === "processing") {
         if (data.stage === "upscaling") {
-          statusText.textContent = "Upgrading quality (Cinematic Upscale)...";
+          setStatus("Upgrading quality (Cinematic Upscale)...");
         } else {
-          statusText.textContent = "Generating...";
+          setStatus("Generating...");
         }
       }
       if (["succeeded", "failed", "canceled"].includes(data.status)) {
         done = true;
         if (data.status === "succeeded") {
-          statusText.textContent = "Done";
+          setStatus("Done");
           const outputUrl = data.output_url || data.result_url || data.url;
           if (outputUrl && isVideoUrl(outputUrl)) {
             const clip = {
@@ -1353,7 +1579,7 @@ async function uploadToBucket(file, bucket) {
             renderViewport();
           }
         } else {
-          statusText.textContent = data.status === "canceled" ? "Canceled" : "Failed";
+          setStatus(data.status === "canceled" ? "Canceled" : "Failed", "err");
         }
       }
       await new Promise(r => setTimeout(r, 1800));
@@ -1361,7 +1587,7 @@ async function uploadToBucket(file, bucket) {
   }
 
   async function handleGenerate() {
-    statusText.textContent = "";
+    setStatus("");
     saveClipBtn.disabled = true;
     
     const session = await getSession();
@@ -1376,24 +1602,42 @@ async function uploadToBucket(file, bucket) {
     try {
       if (state.mode === "cinema") {
         const image = $("cinemaImage").files[0];
+        const endImage = $("cinemaEndImage").files[0];
         if (!image) throw new Error("Please upload a start image.");
 
-        statusText.textContent = "Uploading start image...";
+        setStatus("Uploading start image...");
         const imageUrl = await uploadToBucket(image, "inputs");
 
-        fd.append("presetId", "kling_v26");
+        const uiAR = $("cinemaAspect").value;
+        const apiAR = uiAR === "21:9" ? "16:9" : uiAR;
+
+        if (endImage) {
+          setStatus("Uploading end image...");
+          const endImageUrl = await uploadToBucket(endImage, "inputs");
+          fd.append("presetId", "kling_v25_turbo_pro");
+          fd.append("end_image_url", endImageUrl);
+        } else {
+          fd.append("presetId", "kling_v26");
+          fd.append("generate_audio", $("cinemaAudio").checked);
+        }
+
         fd.append("scene", $("cinemaPrompt").value || "cinematic scene");
         fd.append("image_url", imageUrl);
         fd.append("duration", $("cinemaDuration").value);
-        fd.append("aspect_ratio", $("cinemaAspect").value);
-        fd.append("generate_audio", $("cinemaAudio").checked);
+        fd.append("aspect_ratio", apiAR);
 
       } else {
         const image = $("motionImage").files[0];
         const video = $("motionVideo").files[0];
         if (!image || !video) throw new Error("Upload reference image and video.");
+
+        const meta = await getVideoMeta(video);
+        if (meta?.width !== 1920 || meta?.height !== 1080) {
+          setStatus("Motion Control supports only 1920×1080 (16:9). Please upload a 1920×1080 video.", "err");
+          return;
+        }
         
-        statusText.textContent = "Uploading assets...";
+        setStatus("Uploading assets...");
         
         const imageUrl = await uploadToBucket(image, "inputs");
         const videoUrl = await uploadToBucket(video, "inputs_video");
@@ -1406,20 +1650,19 @@ async function uploadToBucket(file, bucket) {
         fd.append("mode", mode);
         fd.append("keep_original_sound", $("motionKeepSound").checked);
 
-        const meta = await getVideoMeta(video);
         if (meta?.duration) {
           fd.append("video_duration_sec", Math.round(meta.duration));
         }
       }
 
-      statusText.textContent = "Starting generation...";
+      setStatus("Starting generation...");
       const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/start`, { method: "POST", body: fd });
       
-      statusText.textContent = "Job Started";
+      setStatus("Job Started");
       await pollJob(data.jobId);
       
     } catch (e) {
-      statusText.textContent = e.message;
+      setStatus(e.message, "err");
     } finally {
       $("generateBtn").disabled = false;
     }
@@ -1430,15 +1673,36 @@ async function uploadToBucket(file, bucket) {
       const v = document.createElement("video");
       v.preload = "metadata";
       v.src = URL.createObjectURL(file);
-      v.onloadedmetadata = () => resolve({ duration: v.duration });
+      v.onloadedmetadata = () => resolve({ duration: v.duration, width: v.videoWidth, height: v.videoHeight });
       v.onerror = reject;
     });
   }
 
   $("generateBtn").addEventListener("click", handleGenerate);
 
-  loadLibrary();
-  refreshLibrary();
+  saveClipBtn.addEventListener("click", async () => {
+    if (!state.latestClip) return;
+    if (!libSelectedScene) {
+      setStatus("Select a scene in Library first", "err");
+      return;
+    }
+    await apiLibrary("library_add_asset", {
+      scene_id: libSelectedScene.id,
+      generation_id: state.latestClip.generationId || null,
+      title: state.latestClip.title || null,
+      kind: "animation",
+      url: state.latestClip.output_url,
+      thumb_url: state.latestClip.output_url
+    });
+    setStatus("Saved to Library", "ok");
+    saveClipBtn.disabled = true;
+    await loadLibraryAssets(libSelectedScene.id);
+    renderAssets();
+  });
+
   setMode("cinema");
   setView("viewport");
+  updateCinemaAudioVisibility();
+  renderTimeline();
+  renderViewport();
 </script>
