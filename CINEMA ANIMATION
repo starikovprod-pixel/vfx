@@ -328,6 +328,28 @@
     background:rgba(255,255,255,.06);
     color:#fff;
   }
+  .lf-chip.preset{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(43,108,255,.12);
+    border-color:rgba(43,108,255,.4);
+  }
+  .lf-labelRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .lf-labelRow label{ margin:0; }
+  .lf-presetRow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
   .lf-divider{
     height:1px;
     width:100%;
@@ -797,6 +819,11 @@
     color: rgba(255,255,255,.78);
     z-index:2;
   }
+  .lf-loaderHint{
+    font-size:11px;
+    color:rgba(255,255,255,.65);
+    z-index:2;
+  }
 
   .lf-overlay.upscaling{
     background: radial-gradient(1000px 600px at 50% 40%, rgba(175,82,222,.14), rgba(0,0,0,.90) 55%, rgba(0,0,0,.95));
@@ -804,6 +831,36 @@
   .lf-overlay.upscaling .ring{
     border-color: rgba(175,82,222,.35);
     border-top-color: rgba(255,255,255,.85);
+  }
+
+  .lf-presetGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    gap:12px;
+  }
+  .lf-presetCard{
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:14px;
+    padding:14px;
+    background:rgba(255,255,255,.04);
+    cursor:pointer;
+    transition: all .2s ease;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .lf-presetCard .title{
+    font-weight:900;
+    letter-spacing:.3px;
+  }
+  .lf-presetCard .desc{
+    font-size:11px;
+    color:rgba(255,255,255,.7);
+  }
+  .lf-presetCard.active{
+    border-color:rgba(43,108,255,.6);
+    box-shadow:0 0 0 1px rgba(43,108,255,.3), 0 20px 40px rgba(0,0,0,.4);
+    background:rgba(43,108,255,.12);
   }
 
   /* Export Render Overlay */
@@ -876,8 +933,14 @@
             </div>
 
             <div class="lf-field">
-              <label>Prompt / Scene text</label>
+              <div class="lf-labelRow">
+                <label>Prompt / Scene text</label>
+                <button class="lf-btnSmall" id="openPromptPresets" type="button">Presets</button>
+              </div>
               <textarea id="cinemaPrompt" rows="4" placeholder="Describe the cinematic action..."></textarea>
+              <div class="lf-presetRow">
+                <div class="lf-chip preset" id="cinemaPresetBadge">Preset: Cinematic</div>
+              </div>
             </div>
 
             <div class="lf-row2">
@@ -931,8 +994,14 @@
             </div>
 
             <div class="lf-field">
-              <label>Prompt / Scene text</label>
+              <div class="lf-labelRow">
+                <label>Prompt / Scene text</label>
+                <button class="lf-btnSmall" id="openMotionPresets" type="button">Presets</button>
+              </div>
               <textarea id="motionPrompt" rows="4" placeholder="Describe the motion-controlled scene..."></textarea>
+              <div class="lf-presetRow">
+                <div class="lf-chip preset" id="motionPresetBadge">Preset: Cinematic</div>
+              </div>
             </div>
 
             <div class="lf-row2">
@@ -944,6 +1013,7 @@
                 </select>
               </div>
               <div class="lf-field">
+                <label style="visibility:hidden;">Mode</label>
                 <div class="lf-checkRow">
                   <input type="checkbox" id="motionKeepSound" checked />
                   <span>Keep Sound</span>
@@ -978,15 +1048,16 @@
           </div>
 
           <div class="lf-stageWrap" id="viewportWrap">
+            <div id="viewportOverlay" class="lf-overlay" style="display:none;">
+              <div class="lf-loaderCore">
+                <div class="ring"></div>
+                <div class="lf-loaderLabel" id="viewportOverlayTitle">Generating…</div>
+              </div>
+              <div class="lf-loaderTime" id="viewportOverlayTime">04:00</div>
+              <div class="lf-loaderHint">This may take up to 4 minutes</div>
+            </div>
             <div class="lf-resultCard" id="viewportCard">
               <video id="viewportVideo" playsinline></video>
-              <div id="viewportOverlay" class="lf-overlay" style="display:none;">
-                <div class="lf-loaderCore">
-                  <div class="ring"></div>
-                  <div class="lf-loaderLabel" id="viewportOverlayTitle">Generating…</div>
-                </div>
-                <div class="lf-loaderTime" id="viewportOverlayTime">04:00</div>
-              </div>
               <div class="lf-resbar" id="viewportResbar">
                 <div class="lf-muted" id="viewportMeta">No clip selected</div>
                 <a id="viewportDownloadLink" href="#" download>Download</a>
@@ -1150,6 +1221,19 @@
   </div>
 </div>
 
+<div class="lf-modal" id="promptPresetModal">
+  <div class="lf-modalCard" style="width:min(720px, 96vw);">
+    <div class="lf-modalHeader">
+      <div>
+        <div class="lf-h2">Prompt Presets</div>
+        <div class="lf-muted">Pick one cinematic preset to prefix your prompt.</div>
+      </div>
+      <button class="lf-btnSmall" id="promptPresetClose" type="button">Close</button>
+    </div>
+    <div class="lf-presetGrid" id="promptPresetGrid"></div>
+  </div>
+</div>
+
 <script>
   const BACKEND_BASE = "https://ai-vfx-backend.vercel.app";
   const $ = (id) => document.getElementById(id);
@@ -1162,6 +1246,7 @@
     view: "viewport",
     latestClip: null,
     isGenerating: false,
+    promptPreset: "cinematic",
     // EDITOR STATE
     editor: {
         tracks: [{ id: 't1', name: 'Video 1', clips: [] }],
@@ -1178,6 +1263,27 @@
     }
   };
 
+  const PROMPT_PRESETS = {
+    cinematic: `Cinematic video shot with realistic optics and natural camera behavior.
+Smooth, continuous camera motion, film-like pacing, no cuts or jumps.
+Natural depth of field, accurate focal length, soft focus falloff, subtle motion blur.
+Physically correct lighting with cinematic contrast, soft highlights, deep but clean shadows.
+Film color science, natural skin tones, controlled exposure, no HDR or digital look.
+Stable framing, professional camera movement, high-end movie realism.`,
+    action: `Cinematic action shot with intentional handheld camera movement.
+Natural camera shake driven by operator motion, not digital jitter.
+Dynamic but controlled framing, realistic inertia and weight.
+Shallow depth of field with active focus pulls, subtle motion blur.
+High-contrast cinematic lighting, practical highlights, deep shadows.
+Film color science, raw realistic look, no digital artifacts or HDR.`,
+    slowmo: `Cinematic extreme slow-motion shot with high-speed camera feel.
+Time-dilated motion with smooth temporal interpolation, no stutter.
+Stable, deliberate camera movement with natural inertia.
+Shallow depth of field, precise focus, soft motion blur trails.
+Physically accurate lighting, rich cinematic contrast.
+Film color science, clean highlights, deep shadows, no HDR or digital look.`
+  };
+
   // Элементы UI (ссылки на DOM)
   const statusText = $("statusText");
   const viewportVideo = $("viewportVideo");
@@ -1190,6 +1296,10 @@
   const viewportOverlayTitle = $("viewportOverlayTitle");
   const viewportOverlayTime = $("viewportOverlayTime");
   const creditBadge = $("creditBadge");
+  const openPromptPresets = $("openPromptPresets");
+  const openMotionPresets = $("openMotionPresets");
+  const cinemaPresetBadge = $("cinemaPresetBadge");
+  const motionPresetBadge = $("motionPresetBadge");
 
   const cinemaLibraryModal = $("cinemaLibraryModal");
   const libTabManager = $("libTabManager");
@@ -1220,6 +1330,9 @@
   const clipModalCopy = $("clipModalCopy");
   const clipModalAdd = $("clipModalAdd");
   const clipModalDelete = $("clipModalDelete");
+  const promptPresetModal = $("promptPresetModal");
+  const promptPresetGrid = $("promptPresetGrid");
+  const promptPresetClose = $("promptPresetClose");
 
   // Editor DOM
   const edVideo = $("editorVideo");
@@ -1243,6 +1356,37 @@
   $("btn-back").addEventListener("click", () => {
     location.href = "https://lightfull.ai/cinema_lab";
   });
+
+  if (openPromptPresets) {
+    openPromptPresets.addEventListener("click", () => {
+      renderPresetModal();
+      openModal(promptPresetModal);
+    });
+  }
+  if (openMotionPresets) {
+    openMotionPresets.addEventListener("click", () => {
+      renderPresetModal();
+      openModal(promptPresetModal);
+    });
+  }
+  if (promptPresetClose) {
+    promptPresetClose.addEventListener("click", () => closeModal(promptPresetModal));
+  }
+  if (promptPresetModal) {
+    promptPresetModal.addEventListener("click", (e) => {
+      if (e.target === promptPresetModal) closeModal(promptPresetModal);
+    });
+  }
+  if (promptPresetGrid) {
+    promptPresetGrid.addEventListener("click", (e) => {
+      const target = e.target.closest("[data-preset]");
+      if (!target) return;
+      state.promptPreset = target.dataset.preset;
+      updatePresetBadges();
+      renderPresetModal();
+      closeModal(promptPresetModal);
+    });
+  }
 
   async function getSession() {
     const { data } = await window.sb.auth.getSession();
@@ -1329,6 +1473,47 @@
     return escapeHtml(s).replaceAll("'","&#39;");
   }
 
+  function getPresetLabel(key){
+    if (!key) return "None";
+    return key === "slowmo" ? "Slow-mo" : key.charAt(0).toUpperCase() + key.slice(1);
+  }
+
+  function updatePresetBadges() {
+    const label = getPresetLabel(state.promptPreset);
+    const text = state.promptPreset ? `Preset: ${label}` : "Preset: None";
+    if (cinemaPresetBadge) {
+      cinemaPresetBadge.textContent = text;
+      cinemaPresetBadge.style.display = state.promptPreset ? "inline-flex" : "none";
+    }
+    if (motionPresetBadge) {
+      motionPresetBadge.textContent = text;
+      motionPresetBadge.style.display = state.promptPreset ? "inline-flex" : "none";
+    }
+  }
+
+  function buildScenePrompt(userText, fallbackText) {
+    const presetKey = state.promptPreset;
+    const presetText = presetKey ? PROMPT_PRESETS[presetKey] : "";
+    const baseText = userText || fallbackText;
+    return presetText ? `${presetText}\n\n${baseText}` : baseText;
+  }
+
+  function renderPresetModal() {
+    if (!promptPresetGrid) return;
+    const options = [
+      { key: "cinematic", title: "Cinematic", desc: "Smooth, film-like camera behavior and natural optics." },
+      { key: "action", title: "Action", desc: "Dynamic handheld energy with controlled chaos." },
+      { key: "slowmo", title: "Slow-mo", desc: "High-speed, time-dilated cinematic slow motion." }
+    ];
+    promptPresetGrid.innerHTML = options.map(({ key, title, desc }) => {
+      const active = key === state.promptPreset ? "active" : "";
+      return `<button class="lf-presetCard ${active}" type="button" data-preset="${escapeAttr(key)}">
+        <div class="title">${escapeHtml(title)}</div>
+        <div class="desc">${escapeHtml(desc)}</div>
+      </button>`;
+    }).join("");
+  }
+
   function updateCinemaAudioVisibility() {
     const endImage = $("cinemaEndImage").files[0];
     const showAudio = !endImage;
@@ -1377,6 +1562,7 @@
 
   function renderViewport() {
     const clip = state.latestClip;
+    if (state.isGenerating) setViewportEmpty(false);
     if (!clip) {
       viewportVideo.style.display = "none";
       viewportVideo.removeAttribute("src");
@@ -2273,7 +2459,7 @@
     document.querySelector('#viewTabs [data-view="viewport"]').classList.add("active");
     renderViewport();
     if (viewportOverlay) viewportOverlay.classList.remove("upscaling");
-    setViewportOverlay(true, "Generating…", "04:00");
+    setViewportOverlay(true, "Uploading…", "04:00");
 
     const fd = new FormData();
     fd.append("origin_path", "/cinema_animation");
@@ -2286,6 +2472,7 @@
         if (!image) throw new Error("Please upload a start image.");
 
         setStatus("Uploading start image...");
+        setViewportOverlay(true, "Uploading…", "04:00");
         const imageUrl = await uploadToBucket(image, "inputs");
 
         const uiAR = $("cinemaAspect").value;
@@ -2293,6 +2480,7 @@
 
         if (endImage) {
           setStatus("Uploading end image...");
+          setViewportOverlay(true, "Uploading…", "04:00");
           const endImageUrl = await uploadToBucket(endImage, "inputs");
           fd.append("presetId", "kling_v25_turbo_pro");
           fd.append("end_image_url", endImageUrl);
@@ -2301,7 +2489,8 @@
           fd.append("generate_audio", $("cinemaAudio").checked);
         }
 
-        fd.append("scene", $("cinemaPrompt").value || "cinematic scene");
+        const userText = $("cinemaPrompt").value || "cinematic scene";
+        fd.append("scene", buildScenePrompt(userText, "cinematic scene"));
         fd.append("image_url", imageUrl);
         fd.append("duration", $("cinemaDuration").value);
         fd.append("aspect_ratio", apiAR);
@@ -2318,13 +2507,15 @@
         }
          
         setStatus("Uploading assets...");
+        setViewportOverlay(true, "Uploading…", "04:00");
          
         const imageUrl = await uploadToBucket(image, "inputs");
         const videoUrl = await uploadToBucket(video, "inputs_video");
 
         const mode = $("motionMode").value;
         fd.append("presetId", mode === "pro" ? "kling_v26_motion_pro" : "kling_v26_motion_std");
-        fd.append("scene", $("motionPrompt").value || "cinematic motion");
+        const userText = $("motionPrompt").value || "cinematic motion";
+        fd.append("scene", buildScenePrompt(userText, "cinematic motion"));
         fd.append("image_url", imageUrl);
         fd.append("video_url", videoUrl);
         fd.append("mode", mode);
@@ -2332,6 +2523,7 @@
       }
 
       setStatus("Starting generation...");
+      setViewportOverlay(true, "Starting…", "04:00");
       const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/start`, { method: "POST", body: fd });
       
       setStatus("Job Started");
@@ -2418,5 +2610,6 @@
   setView("viewport");
   updateCinemaAudioVisibility();
   updateCreditBadge();
+  updatePresetBadges();
   renderViewport();
 </script>
