@@ -12,6 +12,12 @@
     --radius:16px;
     --danger:#ff465a;
     --ok:#39ff14;
+    /* Editor vars */
+    --timeline-bg: #111;
+    --track-bg: #1a1a1a;
+    --clip-bg: #2b4c85;
+    --clip-border: #4d7cba;
+    --playhead: #ff465a;
   }
 
   .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
@@ -183,6 +189,8 @@
     background:linear-gradient(135deg, rgba(43,108,255,.9), rgba(100,140,255,.7));
     border:1px solid rgba(43,108,255,.8);
   }
+  .lf-btnSmall.danger { color:var(--danger); border-color:rgba(255, 70, 90, 0.3); }
+  .lf-btnSmall.danger:hover { background:rgba(255, 70, 90, 0.1); }
 
   .lf-btn{
     width:100%;
@@ -356,85 +364,167 @@
   .lf-editor{
     display:none;
     flex:1;
-    padding:16px;
-    gap:16px;
+    flex-direction: column;
+    padding:0;
+    background: #0a0a0a;
   }
-  .lf-editor.active{ display:flex; flex-direction:column; }
+  .lf-editor.active{ display:flex; }
 
-  .lf-trackList{
-    flex:1;
-    border:1px solid var(--border);
-    border-radius:16px;
-    background:var(--bg-card);
-    padding:14px;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
+  /* TIMELINE STYLES */
+  .lf-player-wrap {
+    flex: 1; min-height: 240px; background: #000; display: flex; flex-direction:column; position:relative;
+    border-bottom:1px solid var(--border);
   }
-  .lf-track{
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:14px;
-    background:rgba(255,255,255,.02);
-    padding:12px;
-    display:grid;
-    grid-template-columns:120px 1fr;
-    gap:14px;
+  .lf-player-view { 
+      flex:1; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      position: relative; 
+      background: #000;
+      overflow: hidden;
   }
-  .lf-trackHeader{
-    font-weight:900;
-    font-size:13px;
-    color:var(--text-sec);
+  .lf-player-view video { 
+      max-width: 100%; 
+      max-height: 100%; 
+      object-fit: contain; 
+      display: block;
   }
-  .lf-trackLane{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    min-height:70px;
-    align-items:flex-start;
+  /* Fix: Hide video visually but keep in DOM for logic */
+  .lf-player-view video.hidden {
+      visibility: hidden;
   }
-  .lf-clipItem{
-    min-width:160px;
-    max-width:240px;
-    padding:10px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.12);
-    background:rgba(255,255,255,.04);
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    cursor:grab;
+
+  .lf-player-controls { height:40px; border-top:1px solid #222; background:#111; display:flex; align-items:center; justify-content:center; gap:16px; }
+  .lf-icon-btn { background:none; border:none; color:#fff; font-size:14px; cursor:pointer; padding:6px; opacity:0.8; }
+  .lf-icon-btn:hover { opacity:1; }
+
+  .lf-timeline-area {
+    height: 320px;
+    background: var(--timeline-bg);
+    display: flex;
+    flex-direction: column;
+    user-select: none;
   }
-  .lf-clipItem.dragging{ opacity:0.5; }
-  .lf-clipTitle{ font-weight:900; font-size:13px; }
-  .lf-clipMeta{ color:var(--text-sec); font-size:12px; }
-  .lf-clipTrim{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
+  .lf-timeline-toolbar {
+    height: 36px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 10px;
+    background: #181818;
   }
-  .lf-clipTrim label{
-    display:flex;
-    flex-direction:column;
-    gap:4px;
-    font-size:11px;
-    color:var(--text-sec);
+  .lf-timeline-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    overflow: hidden;
+    position: relative;
   }
-  .lf-clipTrim input{
-    background:var(--bg-input);
-    border:1px solid var(--border);
-    color:var(--text-main);
-    border-radius:8px;
-    padding:6px 8px;
-    font-size:12px;
+  .lf-track-headers {
+    background: #141414;
+    border-right: 1px solid var(--border);
+    overflow:hidden;
   }
-  .lf-exportSettings{
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:14px;
-    background:var(--bg-card);
-    display:flex;
-    flex-direction:column;
-    gap:12px;
+  .lf-track-header {
+    height: 60px;
+    border-bottom: 1px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #777;
+  }
+  .lf-timeline-scroll {
+    overflow-x: scroll;
+    overflow-y: auto;
+    background: var(--timeline-bg);
+    position: relative;
+  }
+  .lf-ruler-wrap {
+    height: 24px;
+    border-bottom: 1px solid #333;
+    background: #181818;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-image: linear-gradient(90deg, #444 1px, transparent 1px);
+    background-size: 100px 100%;
+    width: 20000px;
+    cursor: pointer;
+  }
+  .lf-ruler-wrap:hover { background-color: #1f1f1f; }
+   
+  .lf-tracks-container {
+    position: relative;
+    width: 20000px;
+  }
+  .lf-track-lane {
+    height: 60px;
+    border-bottom: 1px solid #2a2a2a;
+    background: var(--track-bg);
+    position: relative;
+  }
+  .lf-clip-block {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    background: var(--clip-bg);
+    border: 1px solid var(--clip-border);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: grab;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .lf-clip-block:hover { background: #3d5e95; }
+  .lf-clip-block.selected { border: 2px solid #fff; z-index: 5; }
+  /* Cursor styles based on tool */
+  .cursor-razor .lf-clip-block { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" opacity="0"></rect><line x1="12" y1="2" x2="12" y2="22" stroke="red"></line><path d="M12 12 L18 18" stroke="red" stroke-width="1"></path></svg>') 12 12, crosshair; }
+   
+  .lf-clip-name {
+    font-size: 10px;
+    font-weight: 700;
+    color:#fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+  }
+  .lf-clip-handle {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 10px;
+    background: rgba(0,0,0,0.1);
+    cursor: col-resize;
+    z-index: 2;
+  }
+  .lf-clip-handle:hover { background: var(--accent); }
+  .lf-handle-l { left: 0; }
+  .lf-handle-r { right: 0; }
+
+  #lf-playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--playhead);
+    z-index: 100;
+    pointer-events: none;
+  }
+  #lf-playhead-cap {
+    width: 11px;
+    height: 12px;
+    background: var(--playhead);
+    position: absolute;
+    top: -12px;
+    left: -5px;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 50% 100%, 0% 50%);
   }
 
   .lf-modal{
@@ -519,6 +609,24 @@
     text-align:center;
     font-weight:900;
   }
+
+  /* Export Render Overlay */
+  #renderOverlay {
+    position: absolute; inset:0; background:rgba(0,0,0,0.85); z-index: 200;
+    display:none; align-items:center; justify-content:center; flex-direction:column;
+  }
+   
+  .lf-project-info {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 700;
+      margin-left: 10px;
+      border: 1px solid var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      display:none;
+  }
+  .lf-project-info.visible { display:inline-block; }
 
   @media (max-width: 1200px){
     #lf-workspace{ grid-template-columns:1fr; }
@@ -687,58 +795,57 @@
           </div>
 
           <div class="lf-editor" id="editorView">
-            <div class="lf-row" style="justify-content:space-between;">
-              <div>
-                <div class="lf-h2">Editor Timeline</div>
-                <div class="lf-muted">Arrange clips, trim in/out, export sequence</div>
+              <div class="lf-player-wrap">
+                  <div class="lf-player-view">
+                     <video id="editorVideo" playsinline></video>
+                     <div id="renderOverlay">
+                        <div class="lf-h2" style="margin-bottom:10px;">Rendering...</div>
+                        <div class="lf-muted" id="renderStatus">Frame 0</div>
+                     </div>
+                  </div>
+                  <div class="lf-player-controls">
+                     <button class="lf-icon-btn" id="edPrevFrame">I&lt;</button>
+                     <button class="lf-icon-btn" id="edPlayPause">▶</button>
+                     <button class="lf-icon-btn" id="edNextFrame">&gt;I</button>
+                     <div style="font-family:monospace; font-size:12px; color:#aaa;">
+                        <span id="edTime">00:00.0</span>
+                     </div>
+                  </div>
               </div>
-              <button class="lf-btnSmall" id="exportProject" type="button">Export Project</button>
-            </div>
-
-            <div class="lf-exportSettings">
-              <div class="lf-row2">
-                <div class="lf-field">
-                  <label>Format</label>
-                  <select id="exportFormat" class="lf-select">
-                    <option value="mp4">mp4</option>
-                    <option value="mov">mov</option>
-                    <option value="webm">webm</option>
-                  </select>
-                </div>
-                <div class="lf-field">
-                  <label>Resolution</label>
-                  <select id="exportResolution" class="lf-select">
-                    <option value="1920x1080">1920x1080</option>
-                    <option value="3840x2160">3840x2160</option>
-                    <option value="custom">Custom</option>
-                  </select>
-                </div>
+               
+              <div class="lf-timeline-area">
+                  <div class="lf-timeline-toolbar">
+                     <button class="lf-btnSmall active" id="toolSelect">Cursor (V)</button>
+                     <button class="lf-btnSmall" id="toolRazor">Split (C)</button>
+                     <div class="lf-vdiv"></div>
+                     <div class="lf-muted" style="font-size:11px;">Project:</div>
+                     <div id="projectResInfo" class="lf-project-info">Unknown</div>
+                     <div class="lf-vdiv"></div>
+                     <button class="lf-btnSmall" id="edAddTrack">+ Track</button>
+                     <button class="lf-btnSmall danger" id="edClear">Clear</button>
+                     <div style="flex:1"></div>
+                     </div>
+                  <div class="lf-timeline-body" id="timelineBody">
+                     <div class="lf-track-headers" id="edHeaders"></div>
+                     <div class="lf-timeline-scroll" id="edScroll">
+                        <div class="lf-ruler-wrap" id="edRuler"></div>
+                        <div id="edTracksContainer" class="lf-tracks-container">
+                           <div id="lf-playhead">
+                              <div id="lf-playhead-cap"></div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
               </div>
-              <div class="lf-row2">
-                <div class="lf-field">
-                  <label>FPS</label>
-                  <select id="exportFps" class="lf-select">
-                    <option value="24">24</option>
-                    <option value="30">30</option>
-                    <option value="60">60</option>
-                  </select>
-                </div>
-                <div class="lf-field" id="customResolutionWrap" style="display:none;">
-                  <label>Custom Resolution</label>
-                  <input type="text" id="customResolution" placeholder="e.g. 2560x1440" />
-                </div>
-              </div>
-            </div>
-
-            <div class="lf-trackList" id="timelineTracks">
-              <div class="lf-empty" id="timelineEmpty">No clips in timeline</div>
-            </div>
           </div>
+
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<canvas id="exportCanvas" style="display:none;"></canvas>
 
 <div class="lf-modal" id="cinemaLibraryModal">
   <div class="lf-modalCard">
@@ -820,24 +927,32 @@
 
 <script>
   const BACKEND_BASE = "https://ai-vfx-backend.vercel.app";
-  const LIB_KEY = "LF_CINEMA_ANIMATION_LIBRARY";
   const $ = (id) => document.getElementById(id);
   const { createClient } = supabase;
-  const SUPABASE_URL = "https://vqnmzstiaosqeoltcwbq.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbm16c3RpYW9zcWVvbHRjd2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwMDA1MzcsImV4cCI6MjA4MzU3NjUzN30.12MycLBd_SpBwFz52alQFtIuWiguAunqh4AX7TbIkkk";
-
-
-
+  function uuid(){ return crypto.randomUUID(); }
+    
+  // --- STATE ---
   const state = {
     mode: "cinema",
     view: "viewport",
     latestClip: null,
-    timeline: {
-      tracks: [{ id: "v1", type: "video", items: [] }],
-      export: { format: "mp4", resolution: "1920x1080", fps: 24 }
+    // EDITOR STATE
+    editor: {
+        tracks: [{ id: 't1', name: 'Video 1', clips: [] }],
+        currentTime: 0,
+        isPlaying: false,
+        isExporting: false,
+        tool: 'select', // select, razor
+        pxPerSec: 100, // Zoom level
+        selectedClip: null,
+        // Параметры проекта
+        projectWidth: 1920,
+        projectHeight: 1080,
+        hasMedia: false // Флаг, был ли добавлен хоть один файл
     }
   };
 
+  // Элементы UI (ссылки на DOM)
   const modeHint = $("modeHint");
   const statusText = $("statusText");
   const viewportVideo = $("viewportVideo");
@@ -846,12 +961,6 @@
   const viewportResbar = $("viewportResbar");
   const saveClipBtn = $("saveClip");
   const cinemaAudioRow = $("cinemaAudioRow");
-
-  const exportFormat = $("exportFormat");
-  const exportResolution = $("exportResolution");
-  const exportFps = $("exportFps");
-  const customResolutionWrap = $("customResolutionWrap");
-  const customResolution = $("customResolution");
 
   const cinemaLibraryModal = $("cinemaLibraryModal");
   const libTabManager = $("libTabManager");
@@ -881,6 +990,17 @@
   const clipModalDownload = $("clipModalDownload");
   const clipModalCopy = $("clipModalCopy");
 
+  // Editor DOM
+  const edVideo = $("editorVideo");
+  const edScroll = $("edScroll");
+  const edContainer = $("edTracksContainer");
+  const edHeaders = $("edHeaders");
+  const edPlayhead = $("lf-playhead");
+  const edTimeDisplay = $("edTime");
+  const edRuler = $("edRuler");
+  const timelineBody = $("timelineBody");
+  const projectResInfo = $("projectResInfo");
+   
   let libProjects = [];
   let libScenes = [];
   let libAssets = [];
@@ -892,8 +1012,6 @@
   $("btn-back").addEventListener("click", () => {
     location.href = "https://lightfull.ai/cinema_lab";
   });
-
-  function uuid(){ return crypto.randomUUID(); }
 
   async function getSession() {
     const { data } = await window.sb.auth.getSession();
@@ -922,22 +1040,21 @@
   async function fetchJsonWithAuth(url, opts={}) {
     let s = await getSession();
     if (!s) { location.href = "/login"; return; }
-    
+     
     let headers = { ...opts.headers, Authorization: "Bearer " + s.access_token };
-    
     let r = await fetch(url, { ...opts, headers });
-    
+     
     if (r.status === 401) {
       await window.sb.auth.refreshSession();
       s = await getSession();
       headers.Authorization = "Bearer " + s.access_token;
       r = await fetch(url, { ...opts, headers });
     }
-    
+     
     const ct = r.headers.get("content-type") || "";
     const raw = await r.text();
     let j = null;
-    
+     
     if (ct.includes("application/json")) {
       try { j = JSON.parse(raw); } catch(e) {}
     }
@@ -1024,6 +1141,7 @@
     } else {
       $("viewportWrap").style.display = "none";
       $("editorView").classList.add("active");
+      renderEditorTimeline();
     }
   }
 
@@ -1055,60 +1173,289 @@
   setupDropzone($("motionImageDrop"), $("motionImage"), $("motionImagePreview"), $("motionImageTitle"));
   setupDropzone($("motionVideoDrop"), $("motionVideo"), null, $("motionVideoTitle"));
 
-  function renderTimeline() {
-    const track = state.timeline.tracks[0];
-    const timeline = $("timelineTracks");
-    if (!track.items.length) {
-      timeline.innerHTML = '<div class="lf-empty" id="timelineEmpty">No clips in timeline</div>';
-      return;
+  // ==========================================
+  // 1. RENDER TIMELINE (Отрисовка)
+  // ==========================================
+  function renderEditorTimeline() {
+    // 1. Заголовки дорожек
+    edHeaders.innerHTML = state.editor.tracks.map(t => 
+        `<div class="lf-track-header">${t.name}</div>`
+    ).join("");
+
+    // 2. Очистка и отрисовка клипов
+    const existingLanes = edContainer.querySelectorAll(".lf-track-lane");
+    existingLanes.forEach(e => e.remove());
+
+    // Отрисовываем каждую дорожку
+    state.editor.tracks.forEach((track, i) => {
+        const lane = document.createElement("div");
+        lane.className = "lf-track-lane";
+        lane.style.top = (i * 61) + "px"; // Высота дорожки 60px + 1px border
+
+        track.clips.forEach(clip => {
+            const width = clip.dur * state.editor.pxPerSec;
+            const left = clip.start * state.editor.pxPerSec;
+            
+            const el = document.createElement("div");
+            el.className = `lf-clip-block ${state.editor.selectedClip === clip ? 'selected' : ''}`;
+            el.style.left = left + "px";
+            el.style.width = width + "px";
+            el.innerHTML = `
+                <div class="lf-clip-handle lf-handle-l" data-act="trim-l"></div>
+                <div class="lf-clip-name">${escapeHtml(clip.name)}</div>
+                <div class="lf-clip-handle lf-handle-r" data-act="trim-r"></div>
+            `;
+            // Важно: передаем индекс дорожки (i) в обработчик
+            el.onmousedown = (e) => handleClipMouse(e, clip, i);
+            lane.appendChild(el);
+        });
+        edContainer.appendChild(lane);
+    });
+     
+    // Курсор инструмента
+    if (state.editor.tool === 'razor') {
+        timelineBody.classList.add('cursor-razor');
+    } else {
+        timelineBody.classList.remove('cursor-razor');
     }
-    timeline.innerHTML = `
-      <div class="lf-track" data-track="${track.id}">
-        <div class="lf-trackHeader">Track 1</div>
-        <div class="lf-trackLane">
-          ${track.items.map(item => `
-            <div class="lf-clipItem" draggable="true" data-id="${item.id}">
-              <div class="lf-clipTitle">${escapeHtml(item.title)}</div>
-              <div class="lf-clipMeta">${item.durationSec || "—"}s • ${item.resolution || "—"}</div>
-              <div class="lf-clipTrim">
-                <label>In
-                  <input type="number" min="0" step="0.1" value="${item.trimInSec}" data-field="trimInSec" />
-                </label>
-                <label>Out
-                  <input type="number" min="0" step="0.1" value="${item.trimOutSec}" data-field="trimOutSec" />
-                </label>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      </div>
-    `;
+
+    updatePlayheadPos();
   }
 
-  function addToTimeline(asset) {
-    const track = state.timeline.tracks[0];
-    const duration = Math.max(0, Number(asset.duration_sec || asset.duration || 5));
-    const item = {
-      id: uuid(),
-      assetId: asset.id,
-      title: asset.title || "Clip",
-      url: asset.url || asset.output_url || "",
-      durationSec: duration,
-      trimInSec: 0,
-      trimOutSec: duration
+  // ==========================================
+  // 2. PLAYHEAD & SYNC (Синхронизация видео)
+  // ==========================================
+  function updatePlayheadPos() {
+    const left = state.editor.currentTime * state.editor.pxPerSec;
+    edPlayhead.style.left = left + "px";
+     
+    // Time format
+    const m = Math.floor(state.editor.currentTime / 60);
+    const s = Math.floor(state.editor.currentTime % 60);
+    const ms = Math.floor((state.editor.currentTime % 1) * 10);
+    edTimeDisplay.textContent = `${m}:${String(s).padStart(2,'0')}.${ms}`;
+
+    if (!state.editor.isExporting) syncVideoFrame();
+  }
+
+  function syncVideoFrame() {
+    // Ищем клип на текущем времени. Приоритет: нижние дорожки перекрывают верхние.
+    let activeClip = null;
+    let offset = 0;
+     
+    // Идем с конца (последняя дорожка = верхний слой Z-index)
+    for (let i = state.editor.tracks.length - 1; i >= 0; i--) {
+        const track = state.editor.tracks[i];
+        const c = track.clips.find(clip => 
+            state.editor.currentTime >= clip.start && 
+            state.editor.currentTime < (clip.start + clip.dur)
+        );
+        if (c) { 
+            activeClip = c; 
+            offset = state.editor.currentTime - c.start; 
+            break; 
+        }
+    }
+
+    if (activeClip) {
+        // ПОКАЗЫВАЕМ ВИДЕО
+        edVideo.classList.remove('hidden'); 
+        
+        if (edVideo.src !== activeClip.url) edVideo.src = activeClip.url;
+        
+        const targetTime = activeClip.offset + offset;
+        
+        // Синхронизация: если рассинхрон больше 0.25с, делаем seek
+        if (Math.abs(edVideo.currentTime - targetTime) > 0.25) {
+            edVideo.currentTime = targetTime;
+        }
+        
+        if (state.editor.isPlaying) {
+             edVideo.play().catch(()=>{});
+        } else {
+             edVideo.pause();
+        }
+    } else {
+        // ПУСТОТА -> СКРЫВАЕМ ВИДЕО (ЧЕРНЫЙ ЭКРАН)
+        // Останавливаем, чтобы не грузить ресурсы
+        if (!edVideo.paused) edVideo.pause();
+        edVideo.classList.add('hidden');
+    }
+  }
+
+  // ==========================================
+  // 3. MOUSE HANDLER (DRAG & DROP & SPLIT)
+  // ==========================================
+  function handleClipMouse(e, clip, trackIndex) {
+    e.stopPropagation();
+     
+    // --- ИНСТРУМЕНТ: НОЖНИЦЫ (SPLIT) ---
+    if (state.editor.tool === 'razor') {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const clickX = e.clientX - edScroll.getBoundingClientRect().left + edScroll.scrollLeft;
+        const splitTime = clickX / state.editor.pxPerSec;
+
+        if (splitTime > clip.start && splitTime < (clip.start + clip.dur)) {
+            const splitPoint = splitTime - clip.start;
+            const remaining = clip.dur - splitPoint;
+            
+            // Правая часть
+            const newClip = {
+                ...clip,
+                id: uuid(),
+                start: splitTime,
+                dur: remaining,
+                offset: clip.offset + splitPoint
+            };
+            
+            // Левая часть (обновляем текущий клип)
+            clip.dur = splitPoint;
+            
+            state.editor.tracks[trackIndex].clips.push(newClip);
+            renderEditorTimeline();
+        }
+        return;
+    }
+
+    // --- ИНСТРУМЕНТ: CURSOR (MOVE / TRIM) ---
+    state.editor.selectedClip = clip;
+    renderEditorTimeline();
+
+    const startX = e.clientX;
+    const startY = e.clientY; // Для вертикального драга
+    const startLeft = clip.start;
+    const startDur = clip.dur;
+    const startOffset = clip.offset;
+    const sourceDur = clip.sourceDur || 9999;
+    const action = e.target.dataset.act || 'move';
+     
+    // Высота одной дорожки (из CSS: 60px height + 1px border)
+    const TRACK_HEIGHT = 61;
+
+    const onMove = (ev) => {
+        const dx = (ev.clientX - startX) / state.editor.pxPerSec;
+        const dy = ev.clientY - startY;
+        
+        if (action === 'move') {
+            // 1. Горизонтальное перемещение
+            clip.start = Math.max(0, startLeft + dx);
+
+            // 2. Вертикальное перемещение (Смена дорожки)
+            // ИСПРАВЛЕНИЕ: Ограничиваем перемещение только существующими дорожками
+            // Не создаем новые дорожки при драге вниз, чтобы избежать "полета"
+            const trackDiff = Math.round(dy / TRACK_HEIGHT);
+            let targetTrackIndex = Math.max(0, Math.min(trackIndex + trackDiff, state.editor.tracks.length - 1));
+
+            // Если индекс изменился, перемещаем клип в массивах данных
+            if (targetTrackIndex !== trackIndex) {
+                // Удаляем из старой
+                const oldTrack = state.editor.tracks[trackIndex];
+                oldTrack.clips = oldTrack.clips.filter(c => c.id !== clip.id);
+                
+                // Добавляем в новую
+                const newTrack = state.editor.tracks[targetTrackIndex];
+                newTrack.clips.push(clip);
+                
+                // Обновляем текущий индекс для следующего тика onMove
+                trackIndex = targetTrackIndex;
+            }
+
+        } else if (action === 'trim-r') {
+            // Растягивание вправо
+            const maxDur = sourceDur - startOffset;
+            let newDur = Math.max(0.1, startDur + dx);
+            if (newDur > maxDur) newDur = maxDur; // Ограничение по длине исходника
+            clip.dur = newDur;
+
+        } else if (action === 'trim-l') {
+            // Растягивание влево
+            let newStart = Math.min(startLeft + startDur - 0.1, startLeft + dx);
+            let delta = newStart - startLeft;
+            
+            if (startOffset + delta < 0) {
+                 delta = -startOffset;
+                 newStart = startLeft + delta;
+            }
+            
+            clip.start = newStart;
+            clip.dur = startDur - delta;
+            clip.offset = startOffset + delta;
+        }
+        renderEditorTimeline();
     };
-    track.items.push(item);
-    renderTimeline();
+
+    const onUp = () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+        // Сортировка клипов после перетаскивания (опционально, для порядка)
+        state.editor.tracks.forEach(t => t.clips.sort((a,b) => a.start - b.start));
+        renderEditorTimeline();
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
   }
 
-  function openClipModal(item) {
-    const url = item.url || getGenerationUrl(item);
-    clipModalItem = { ...item, url };
-    clipModalTitle.textContent = item.title || "Clip preview";
-    clipModalMeta.textContent = item.kind ? `Kind: ${item.kind}` : "";
-    clipModalVideo.src = url || "";
-    openModal(clipModal);
+  // ==========================================
+  // 4. ДОБАВЛЕНИЕ МЕДИА И АВТО-РАЗРЕШЕНИЕ
+  // ==========================================
+  async function getVideoMeta(url) {
+      return new Promise((resolve) => {
+          const v = document.createElement("video");
+          v.preload = "metadata";
+          v.src = url;
+          v.onloadedmetadata = () => resolve({ duration: v.duration, w: v.videoWidth, h: v.videoHeight });
+          v.onerror = () => resolve({ duration: 5, w: 1920, h: 1080 });
+      });
   }
+
+  window.addAssetToEditor = async function(asset) {
+      setStatus("Loading media info...");
+      const url = asset.url || asset.thumb_url;
+      const meta = await getVideoMeta(url);
+      const sourceDur = meta.duration || 10;
+
+      // Логика установки разрешения проекта по первому файлу
+      if (!state.editor.hasMedia) {
+          state.editor.projectWidth = meta.w;
+          state.editor.projectHeight = meta.h;
+          state.editor.hasMedia = true;
+          
+          // Обновляем UI
+          projectResInfo.textContent = `${meta.w}x${meta.h}`;
+          projectResInfo.classList.add("visible");
+      }
+
+      const track = state.editor.tracks[0];
+      let endTime = 0;
+      track.clips.forEach(c => { if((c.start + c.dur) > endTime) endTime = c.start + c.dur; });
+      
+      track.clips.push({
+          id: uuid(),
+          name: asset.title || "Clip",
+          url: url,
+          start: endTime,
+          dur: sourceDur,
+          sourceDur: sourceDur,
+          offset: 0,
+          origW: meta.w, // Сохраняем оригинальные размеры
+          origH: meta.h
+      });
+      renderEditorTimeline();
+      setStatus("Added clip to Editor", "ok");
+  };
+
+  // ==========================================
+  // 5. ИСПРАВЛЕННЫЙ ЭКСПОРТ (УБРАН)
+  // ==========================================
+  /*
+  $("exportVideoBtn").onclick = async () => {
+      // EXPORT FUNCTIONALITY DISABLED AS REQUESTED
+      // ... code removed ...
+  };
+  */
+
+
+  // --- REST OF LIBRARY & API LOGIC ---
 
   async function apiLibrary(action, payload){
     return fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
@@ -1386,9 +1733,12 @@
 
     const act = actBtn.dataset.act;
     if (act === "add"){
-      addToTimeline(asset);
-      setStatus("Added to timeline", "ok");
-      setTimeout(() => setStatus(""), 1200);
+      if (state.view === 'editor') {
+          addAssetToEditor(asset);
+      } else {
+          setStatus("Switch to Editor tab to add", "err");
+          setTimeout(() => setStatus(""), 1200);
+      }
     }
 
     if (act === "rename"){
@@ -1480,71 +1830,6 @@
     setTimeout(() => setStatus(""), 1200);
   });
 
-  exportResolution.addEventListener("change", () => {
-    customResolutionWrap.style.display = exportResolution.value === "custom" ? "block" : "none";
-  });
-
-  $("timelineTracks").addEventListener("dragstart", (e) => {
-    const item = e.target.closest(".lf-clipItem");
-    if (!item) return;
-    item.classList.add("dragging");
-    e.dataTransfer.setData("text/plain", item.dataset.id);
-  });
-  $("timelineTracks").addEventListener("dragend", (e) => {
-    const item = e.target.closest(".lf-clipItem");
-    if (item) item.classList.remove("dragging");
-  });
-  $("timelineTracks").addEventListener("dragover", (e) => {
-    e.preventDefault();
-  });
-  $("timelineTracks").addEventListener("drop", (e) => {
-    e.preventDefault();
-    const track = state.timeline.tracks[0];
-    const id = e.dataTransfer.getData("text/plain");
-    const target = e.target.closest(".lf-clipItem");
-    if (!id || !target) return;
-    const fromIndex = track.items.findIndex(i => i.id === id);
-    const toIndex = track.items.findIndex(i => i.id === target.dataset.id);
-    if (fromIndex == -1 || toIndex == -1 || fromIndex == toIndex) return;
-    const [moved] = track.items.splice(fromIndex, 1);
-    track.items.splice(toIndex, 0, moved);
-    renderTimeline();
-  });
-  $("timelineTracks").addEventListener("input", (e) => {
-    const itemEl = e.target.closest(".lf-clipItem");
-    if (!itemEl) return;
-    const id = itemEl.dataset.id;
-    const field = e.target.dataset.field;
-    const track = state.timeline.tracks[0];
-    const item = track.items.find(i => i.id === id);
-    if (!item || !field) return;
-    const value = Math.max(0, Number(e.target.value || 0));
-    item[field] = value;
-  });
-
-  $("exportProject").addEventListener("click", () => {
-    const resolution = exportResolution.value === "custom" ? customResolution.value || "custom" : exportResolution.value;
-    state.timeline.export = {
-      format: exportFormat.value,
-      resolution,
-      fps: Number(exportFps.value || 24)
-    };
-    const payload = {
-      meta: {
-        project: libSelectedProject ? { id: libSelectedProject.id, title: libSelectedProject.title } : null,
-        scene: libSelectedScene ? { id: libSelectedScene.id, title: libSelectedScene.title } : null
-      },
-      timeline: state.timeline
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "cinema_animation_project.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
   async function pollJob(jobId) {
     let done = false;
     while (!done) {
@@ -1573,7 +1858,7 @@
               trimStartSec: 0,
               trimEndSec: Math.round(data.duration || data.durationSec || 0)
             };
-            
+             
             state.latestClip = clip;
             saveClipBtn.disabled = false; 
             renderViewport();
@@ -1589,7 +1874,7 @@
   async function handleGenerate() {
     setStatus("");
     saveClipBtn.disabled = true;
-    
+     
     const session = await getSession();
     if (!session) return;
 
@@ -1598,7 +1883,7 @@
     const fd = new FormData();
     fd.append("origin_path", "/cinema_animation");
     fd.append("enhance", "true");
-    
+     
     try {
       if (state.mode === "cinema") {
         const image = $("cinemaImage").files[0];
@@ -1630,15 +1915,9 @@
         const image = $("motionImage").files[0];
         const video = $("motionVideo").files[0];
         if (!image || !video) throw new Error("Upload reference image and video.");
-
-        const meta = await getVideoMeta(video);
-        if (meta?.width !== 1920 || meta?.height !== 1080) {
-          setStatus("Motion Control supports only 1920×1080 (16:9). Please upload a 1920×1080 video.", "err");
-          return;
-        }
-        
+         
         setStatus("Uploading assets...");
-        
+         
         const imageUrl = await uploadToBucket(image, "inputs");
         const videoUrl = await uploadToBucket(video, "inputs_video");
 
@@ -1649,10 +1928,6 @@
         fd.append("video_url", videoUrl);
         fd.append("mode", mode);
         fd.append("keep_original_sound", $("motionKeepSound").checked);
-
-        if (meta?.duration) {
-          fd.append("video_duration_sec", Math.round(meta.duration));
-        }
       }
 
       setStatus("Starting generation...");
@@ -1666,16 +1941,6 @@
     } finally {
       $("generateBtn").disabled = false;
     }
-  }
-
-  async function getVideoMeta(file) {
-    return new Promise((resolve, reject) => {
-      const v = document.createElement("video");
-      v.preload = "metadata";
-      v.src = URL.createObjectURL(file);
-      v.onloadedmetadata = () => resolve({ duration: v.duration, width: v.videoWidth, height: v.videoHeight });
-      v.onerror = reject;
-    });
   }
 
   $("generateBtn").addEventListener("click", handleGenerate);
@@ -1700,9 +1965,55 @@
     renderAssets();
   });
 
+  // Timeline interaction
+  edRuler.addEventListener("mousedown", (e) => {
+      const updateTime = (ev) => {
+          const rect = edScroll.getBoundingClientRect();
+          const x = ev.clientX - rect.left + edScroll.scrollLeft;
+          state.editor.currentTime = Math.max(0, x / state.editor.pxPerSec);
+          updatePlayheadPos();
+      };
+      updateTime(e);
+      const onMove = (ev) => updateTime(ev);
+      const onUp = () => {
+          window.removeEventListener("mousemove", onMove);
+          window.removeEventListener("mouseup", onUp);
+      };
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+  });
+
+  // Init loop
+  let lastTime = 0;
+  function editorLoop(t) {
+    requestAnimationFrame(editorLoop);
+    if (state.view !== 'editor' || state.editor.isExporting) return;
+     
+    if (state.editor.isPlaying) {
+        const dt = (t - lastTime) / 1000;
+        const cleanDt = dt > 0.1 ? 0.016 : dt;
+        state.editor.currentTime += cleanDt;
+        updatePlayheadPos();
+        
+        const viewW = edScroll.clientWidth;
+        const x = state.editor.currentTime * state.editor.pxPerSec;
+        if (x > edScroll.scrollLeft + viewW) edScroll.scrollLeft = x - 50;
+    }
+    lastTime = t;
+  }
+  requestAnimationFrame(editorLoop);
+   
+  // Timeline buttons
+  $("edPlayPause").onclick = () => { state.editor.isPlaying = !state.editor.isPlaying; $("edPlayPause").textContent = state.editor.isPlaying ? "||" : "▶"; };
+  $("edPrevFrame").onclick = () => { state.editor.currentTime = Math.max(0, state.editor.currentTime - 0.1); updatePlayheadPos(); };
+  $("edNextFrame").onclick = () => { state.editor.currentTime += 0.1; updatePlayheadPos(); };
+  $("toolSelect").onclick = () => { state.editor.tool = 'select'; $("toolSelect").classList.add("active"); $("toolRazor").classList.remove("active"); timelineBody.classList.remove('cursor-razor'); };
+  $("toolRazor").onclick = () => { state.editor.tool = 'razor'; $("toolRazor").classList.add("active"); $("toolSelect").classList.remove("active"); timelineBody.classList.add('cursor-razor'); };
+  $("edAddTrack").onclick = () => { state.editor.tracks.push({ id: uuid(), name: `Video ${state.editor.tracks.length+1}`, clips: [] }); renderEditorTimeline(); };
+  $("edClear").onclick = () => { if(confirm("Clear timeline?")) { state.editor.tracks.forEach(t => t.clips = []); state.editor.currentTime = 0; state.editor.hasMedia = false; projectResInfo.classList.remove("visible"); renderEditorTimeline(); }};
+
   setMode("cinema");
   setView("viewport");
   updateCinemaAudioVisibility();
-  renderTimeline();
   renderViewport();
 </script>
