@@ -839,6 +839,8 @@
     gap:12px;
   }
   .lf-presetCard{
+    appearance:none;
+    -webkit-appearance:none;
     border:1px solid rgba(255,255,255,.12);
     border-radius:14px;
     padding:14px;
@@ -848,19 +850,36 @@
     display:flex;
     flex-direction:column;
     gap:8px;
+    text-align:left;
+    color:#fff;
   }
   .lf-presetCard .title{
-    font-weight:900;
+    font-weight:1000;
     letter-spacing:.3px;
+    font-size:14px;
+    background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,.75) 45%, rgba(175,82,222,.95) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
   .lf-presetCard .desc{
     font-size:11px;
-    color:rgba(255,255,255,.7);
+    color:rgba(255,255,255,.70);
   }
   .lf-presetCard.active{
-    border-color:rgba(43,108,255,.6);
-    box-shadow:0 0 0 1px rgba(43,108,255,.3), 0 20px 40px rgba(0,0,0,.4);
+    border-color:rgba(43,108,255,.65);
+    box-shadow:0 0 0 1px rgba(43,108,255,.25), 0 20px 40px rgba(0,0,0,.45);
     background:rgba(43,108,255,.12);
+  }
+  .lf-presetCard.active .title{
+    background: linear-gradient(135deg, #ffffff 0%, rgba(43,108,255,.95) 55%, rgba(175,82,222,.95) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color: transparent;
+  }
+  .lf-presetCard:hover{
+    border-color:rgba(255,255,255,.22);
+    background:rgba(255,255,255,.06);
   }
 
   /* Export Render Overlay */
@@ -939,7 +958,7 @@
               </div>
               <textarea id="cinemaPrompt" rows="4" placeholder="Describe the cinematic action..."></textarea>
               <div class="lf-presetRow">
-                <div class="lf-chip preset" id="cinemaPresetBadge">Preset: Cinematic</div>
+                <div class="lf-chip preset" id="cinemaPresetBadge">Preset: None</div>
               </div>
             </div>
 
@@ -1000,7 +1019,7 @@
               </div>
               <textarea id="motionPrompt" rows="4" placeholder="Describe the motion-controlled scene..."></textarea>
               <div class="lf-presetRow">
-                <div class="lf-chip preset" id="motionPresetBadge">Preset: Cinematic</div>
+                <div class="lf-chip preset" id="motionPresetBadge">Preset: None</div>
               </div>
             </div>
 
@@ -1246,7 +1265,7 @@
     view: "viewport",
     latestClip: null,
     isGenerating: false,
-    promptPreset: "cinematic",
+    promptPreset: null,
     // EDITOR STATE
     editor: {
         tracks: [{ id: 't1', name: 'Video 1', clips: [] }],
@@ -1381,7 +1400,8 @@ Film color science, clean highlights, deep shadows, no HDR or digital look.`
     promptPresetGrid.addEventListener("click", (e) => {
       const target = e.target.closest("[data-preset]");
       if (!target) return;
-      state.promptPreset = target.dataset.preset;
+      const key = target.dataset.preset;
+      state.promptPreset = state.promptPreset === key ? null : key;
       updatePresetBadges();
       renderPresetModal();
       closeModal(promptPresetModal);
@@ -1479,8 +1499,8 @@ Film color science, clean highlights, deep shadows, no HDR or digital look.`
   }
 
   function updatePresetBadges() {
-    const label = getPresetLabel(state.promptPreset);
-    const text = state.promptPreset ? `Preset: ${label}` : "Preset: None";
+    const label = state.promptPreset ? getPresetLabel(state.promptPreset) : "";
+    const text = state.promptPreset ? `Preset: ${label}` : "";
     if (cinemaPresetBadge) {
       cinemaPresetBadge.textContent = text;
       cinemaPresetBadge.style.display = state.promptPreset ? "inline-flex" : "none";
