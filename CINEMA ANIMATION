@@ -122,7 +122,7 @@
   }
 
   .lf-h2{ font-size:16px; font-weight:1000; margin:0; }
-  .lf-muted{ color:var(--text-sec); font-size:12px; }
+  .lf-muted{ color:var(--text-sec); font-size:11px; }
 
   .lf-section{
     background:var(--bg-card);
@@ -171,6 +171,17 @@
 
   .lf-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .lf-row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .lf-checkRow{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:48px;
+    padding:0 10px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--bg-input);
+  }
+  .lf-checkRow input{ transform: translateY(1px); }
 
   .lf-btnSmall{
     border:1px solid rgba(255,255,255,.12);
@@ -184,10 +195,19 @@
     user-select:none;
   }
   .lf-btnSmall:hover{ border-color:rgba(43,108,255,.55); background:rgba(43,108,255,.12); }
-  .lf-btnSmall.active{ border-color:rgba(43,108,255,.85); background:rgba(43,108,255,.22); }
+  .lf-btnSmall.active{
+    border-color: rgba(43,108,255,.85) !important;
+    background: rgba(43,108,255,.18) !important;
+  }
   .lf-gradBtn{
-    background:linear-gradient(135deg, rgba(43,108,255,.9), rgba(100,140,255,.7));
-    border:1px solid rgba(43,108,255,.8);
+    border:1px solid rgba(255,255,255,.12) !important;
+    background: linear-gradient(135deg, rgba(43,108,255,.95), rgba(175,82,222,.75)) !important;
+    color:#fff !important;
+    box-shadow: 0 10px 24px rgba(43,108,255,.18);
+  }
+  .lf-gradBtn:hover{
+    filter: brightness(1.05);
+    box-shadow: 0 12px 28px rgba(43,108,255,.22);
   }
   .lf-btnSmall.danger { color:var(--danger); border-color:rgba(255, 70, 90, 0.3); }
   .lf-btnSmall.danger:hover { background:rgba(255, 70, 90, 0.1); }
@@ -254,35 +274,49 @@
     display:flex;
     flex-direction:column;
     gap:10px;
+    max-height:360px;
     overflow:auto;
     padding-right:4px;
-    max-height:280px;
   }
-
   .lf-libraryCard{
     display:flex;
-    align-items:center;
-    justify-content:space-between;
     gap:10px;
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.08);
-    background:rgba(255,255,255,.02);
+    align-items:center;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:14px;
+    padding:10px;
+    background:rgba(0,0,0,.25);
     cursor:pointer;
   }
-  .lf-libraryCard.active{
-    border-color:rgba(43,108,255,.7);
-    background:rgba(43,108,255,.12);
+  .lf-libraryCard img{
+    width:64px;
+    height:64px;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.12);
   }
-  .lf-libraryMeta{ display:flex; flex-direction:column; gap:2px; }
-  .lf-libraryTitle{ font-weight:900; font-size:13px; }
+  .lf-libraryMeta{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:0;
+  }
+  .lf-libraryTitle{
+    font-weight:900;
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
   .lf-cardActions{ display:flex; gap:6px; }
   .lf-chip{
     font-size:11px;
-    padding:4px 8px;
+    font-weight:900;
+    padding:3px 8px;
     border-radius:999px;
-    border:1px solid rgba(255,255,255,.18);
-    color:var(--text-sec);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+    color:#fff;
   }
   .lf-divider{
     height:1px;
@@ -429,7 +463,7 @@
   }
   .lf-track-header {
     height: 60px;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 0;
     display: flex;
     align-items: center;
     padding: 0 10px;
@@ -463,7 +497,7 @@
   }
   .lf-track-lane {
     height: 60px;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 0;
     background: var(--track-bg);
     position: relative;
   }
@@ -481,6 +515,7 @@
     justify-content: center;
     padding: 0 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    background-image: none;
   }
   .lf-clip-block:hover { background: #3d5e95; }
   .lf-clip-block.selected { border: 2px solid #fff; z-index: 5; }
@@ -488,13 +523,14 @@
   .cursor-razor .lf-clip-block { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" opacity="0"></rect><line x1="12" y1="2" x2="12" y2="22" stroke="red"></line><path d="M12 12 L18 18" stroke="red" stroke-width="1"></path></svg>') 12 12, crosshair; }
    
   .lf-clip-name {
-    font-size: 10px;
-    font-weight: 700;
+    font-size:11px;
+    font-weight:800;
+    line-height:1;
     color:#fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    pointer-events: none;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    pointer-events:none;
   }
   .lf-clip-handle {
     position: absolute;
@@ -530,35 +566,62 @@
   .lf-modal{
     position:fixed;
     inset:0;
+    background:rgba(0,0,0,.72);
     display:none;
     align-items:center;
     justify-content:center;
-    background:rgba(0,0,0,.8);
-    backdrop-filter: blur(4px);
+    padding:20px;
     z-index:9999;
   }
-  .lf-modal.open{ display:flex; }
+  #cinemaLibraryModal{z-index:9999!important}
   .lf-modalCard{
-    width:min(1200px, 94vw);
-    max-height:88vh;
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:22px;
-    padding:20px;
+    width:min(900px, 96vw);
+    max-height:90vh;
     overflow:auto;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    box-shadow:0 24px 50px rgba(0,0,0,.45);
   }
   .lf-modalHeader{
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap:12px;
-    margin-bottom:12px;
   }
-
+  .lf-modal input[type="text"]{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
+    padding:10px 12px;
+    border-radius:12px;
+    font-size:14px;
+  }
+  .lf-modalCard img{
+    width:100%;
+    max-height:420px;
+    object-fit:contain;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:#070707;
+  }
   .lf-libraryGrid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
     gap:12px;
+  }
+  .lf-libraryGrid .lf-libraryCard{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .lf-libraryGrid .lf-libraryCard img{
+    width:100%;
+    height:140px;
   }
   .lf-genCard{
     border:1px solid rgba(255,255,255,.08);
@@ -580,26 +643,28 @@
   .lf-genThumb video{ width:100%; height:100%; object-fit:cover; }
   .lf-genMeta{ display:flex; flex-direction:column; gap:4px; }
   .lf-assetCard{
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:14px;
-    background:rgba(255,255,255,.02);
-    overflow:hidden;
+    position: relative;
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.25);
+    cursor: pointer;
     display:flex;
     flex-direction:column;
-    gap:8px;
-    padding:10px;
+    gap:10px;
   }
   .lf-assetCard video{
     width:100%;
-    height:120px;
+    height:140px;
     object-fit:cover;
-    border-radius:10px;
-    background:#000;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.12);
+    background:#070707;
   }
   .lf-assetActions{
     display:flex;
-    flex-wrap:wrap;
     gap:8px;
+    flex-wrap:wrap;
   }
   #clipModal{ z-index:10050; }
   .lf-status.err{ color:var(--danger); }
@@ -649,16 +714,13 @@
 
         <div class="lf-divider"></div>
 
-        <div class="lf-section">
-          <div>
+          <div class="lf-section">
             <div class="lf-h2">Generation</div>
-            <div class="lf-muted" id="modeHint">CINEMA (img2vid)</div>
+            <div class="lf-pillGroup" id="modeTabs">
+              <button class="lf-btnSmall active" data-mode="cinema" type="button">CINEMA</button>
+              <button class="lf-btnSmall" data-mode="motion" type="button">MOTION CONTROL</button>
+            </div>
           </div>
-          <div class="lf-pillGroup" id="modeTabs">
-            <button class="lf-btnSmall active" data-mode="cinema" type="button">CINEMA</button>
-            <button class="lf-btnSmall" data-mode="motion" type="button">MOTION CONTROL</button>
-          </div>
-        </div>
 
         <div id="cinemaForm">
           <div class="lf-section">
@@ -751,10 +813,10 @@
                 </select>
               </div>
               <div class="lf-field">
-                <label class="lf-row" style="gap:8px;">
+                <div class="lf-checkRow">
                   <input type="checkbox" id="motionKeepSound" checked />
-                  Keep Original Sound
-                </label>
+                  <span>Keep Original Sound</span>
+                </div>
               </div>
             </div>
           </div>
@@ -848,7 +910,7 @@
 <canvas id="exportCanvas" style="display:none;"></canvas>
 
 <div class="lf-modal" id="cinemaLibraryModal">
-  <div class="lf-modalCard">
+  <div class="lf-modalCard" style="width:min(1280px, 96vw);">
     <div class="lf-modalHeader">
       <div>
         <div class="lf-h2">Cinema Library</div>
@@ -857,53 +919,75 @@
       <button class="lf-btnSmall" id="cinemaLibraryClose" type="button">Close</button>
     </div>
 
-    <div class="lf-row" style="gap:10px; flex-wrap:wrap;">
-      <button class="lf-btnSmall active" id="libTabManager" type="button">Library</button>
-      <button class="lf-btnSmall" id="libTabAdd" type="button">Add from Generations</button>
+    <div class="lf-row" style="justify-content:space-between; gap:12px; flex-wrap:wrap;">
+      <div class="lf-row" style="gap:8px; flex-wrap:wrap;">
+        <button class="lf-btnSmall active" id="libTabManager" type="button">Library</button>
+        <button class="lf-btnSmall" id="libTabAdd" type="button">Add from Generations</button>
+      </div>
+
+      <div class="lf-row" style="gap:8px; flex-wrap:wrap;">
+        <button class="lf-btnSmall" id="libRefresh" type="button">Refresh</button>
+      </div>
     </div>
 
-    <div id="libManagerView" style="margin-top:16px; display:grid; grid-template-columns:220px 220px 1fr; gap:16px;">
-      <div>
+    <div id="libManagerView" style="display:grid; grid-template-columns: 320px 320px 1fr; gap:12px; min-height:520px;">
+      <div class="lf-section" style="height:100%; overflow:hidden;">
         <div class="lf-row" style="justify-content:space-between;">
           <div class="lf-h2">Projects</div>
           <button class="lf-btnSmall" id="libNewProject" type="button">＋</button>
         </div>
-        <input id="libProjectSearch" type="text" placeholder="Search projects..." />
+        <input id="libProjectSearch" type="text" placeholder="Search projects..." style="margin-top:10px;" />
         <div class="lf-libraryList" id="libProjectsList" style="margin-top:10px; max-height:420px;"></div>
       </div>
-      <div>
+
+      <div class="lf-section" style="height:100%; overflow:hidden;">
         <div class="lf-row" style="justify-content:space-between;">
           <div class="lf-h2">Scenes</div>
           <button class="lf-btnSmall" id="libNewScene" type="button">＋</button>
         </div>
-        <input id="libSceneSearch" type="text" placeholder="Search scenes..." />
+        <input id="libSceneSearch" type="text" placeholder="Search scenes..." style="margin-top:10px;" />
         <div class="lf-libraryList" id="libScenesList" style="margin-top:10px; max-height:420px;"></div>
       </div>
-      <div>
-        <div class="lf-row" style="justify-content:space-between;">
+
+      <div class="lf-section" style="height:100%; overflow:hidden;">
+        <div class="lf-row" style="justify-content:space-between; align-items:flex-end;">
           <div>
             <div class="lf-h2">Assets</div>
             <div class="lf-muted" id="libAssetsHint">Select a scene</div>
           </div>
-          <button class="lf-btnSmall" id="libRefresh" type="button">Refresh</button>
+          <div class="lf-row" style="gap:8px;">
+            <button class="lf-btnSmall" id="libAddSelectedGen" type="button" disabled>Add selected</button>
+          </div>
         </div>
+
         <div id="libAssetsGrid" class="lf-libraryGrid" style="margin-top:10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); max-height:460px; overflow:auto;"></div>
       </div>
     </div>
 
-    <div id="libAddView" style="margin-top:16px; display:none;">
-      <div class="lf-row" style="justify-content:space-between; align-items:center;">
-        <div class="lf-h2">Add from Generations</div>
-        <button class="lf-btnSmall" id="libGenRefresh" type="button">Refresh</button>
+    <div id="libAddView" style="display:none;">
+      <div class="lf-section">
+        <div class="lf-row" style="justify-content:space-between;">
+          <div>
+            <div class="lf-h2">Add from Generations</div>
+            <div class="lf-muted">Pick items and add to the selected Scene.</div>
+          </div>
+          <div class="lf-row" style="gap:8px;">
+            <button class="lf-btnSmall" id="libGenRefresh" type="button">Refresh</button>
+          </div>
+        </div>
+
+        <div class="lf-row" style="gap:10px; margin-top:10px; flex-wrap:wrap;">
+          <input id="libGenSearch" type="text" placeholder="Search by title..." style="flex:1; min-width:260px;" />
+          <select id="libGenKind" class="lf-select" style="width:200px;">
+            <option value="">All kinds</option>
+            <option value="shot">shot</option>
+            <option value="character">character</option>
+            <option value="animation">animation</option>
+          </select>
+        </div>
+
+        <div id="libGenGrid" class="lf-libraryGrid" style="margin-top:12px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-height:520px; overflow:auto;"></div>
       </div>
-      <div class="lf-row" style="margin-top:10px; gap:10px; flex-wrap:wrap;">
-        <input id="libGenSearch" type="text" placeholder="Search generations..." style="flex:1; min-width:240px;" />
-        <select id="libGenKind" class="lf-select" style="min-width:180px;">
-          <option value="">All kinds</option>
-          <option value="animation">Animation</option>
-        </select>
-      </div>
-      <div id="libGenGrid" class="lf-libraryGrid" style="margin-top:12px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-height:520px; overflow:auto;"></div>
     </div>
   </div>
 </div>
@@ -953,7 +1037,6 @@
   };
 
   // Элементы UI (ссылки на DOM)
-  const modeHint = $("modeHint");
   const statusText = $("statusText");
   const viewportVideo = $("viewportVideo");
   const viewportMeta = $("viewportMeta");
@@ -1128,7 +1211,6 @@
 
   function setMode(mode) {
     state.mode = mode;
-    modeHint.textContent = mode === "cinema" ? "CINEMA (img2vid)" : "MOTION CONTROL";
     $("cinemaForm").style.display = mode === "cinema" ? "block" : "none";
     $("motionForm").style.display = mode === "motion" ? "block" : "none";
   }
@@ -1190,7 +1272,6 @@
     state.editor.tracks.forEach((track, i) => {
         const lane = document.createElement("div");
         lane.className = "lf-track-lane";
-        lane.style.top = (i * 61) + "px"; // Высота дорожки 60px + 1px border
 
         track.clips.forEach(clip => {
             const width = clip.dur * state.editor.pxPerSec;
@@ -1323,18 +1404,20 @@
 
     const startX = e.clientX;
     const startY = e.clientY; // Для вертикального драга
+    let baseTrackIndex = trackIndex;
+    let baseY = startY;
     const startLeft = clip.start;
     const startDur = clip.dur;
     const startOffset = clip.offset;
     const sourceDur = clip.sourceDur || 9999;
     const action = e.target.dataset.act || 'move';
      
-    // Высота одной дорожки (из CSS: 60px height + 1px border)
-    const TRACK_HEIGHT = 61;
+    // Высота одной дорожки (из CSS: 60px height)
+    const TRACK_HEIGHT = 60;
 
     const onMove = (ev) => {
         const dx = (ev.clientX - startX) / state.editor.pxPerSec;
-        const dy = ev.clientY - startY;
+        const dy = ev.clientY - baseY;
         
         if (action === 'move') {
             // 1. Горизонтальное перемещение
@@ -1343,8 +1426,8 @@
             // 2. Вертикальное перемещение (Смена дорожки)
             // ИСПРАВЛЕНИЕ: Ограничиваем перемещение только существующими дорожками
             // Не создаем новые дорожки при драге вниз, чтобы избежать "полета"
-            const trackDiff = Math.round(dy / TRACK_HEIGHT);
-            let targetTrackIndex = Math.max(0, Math.min(trackIndex + trackDiff, state.editor.tracks.length - 1));
+            const trackDiff = Math.trunc(dy / TRACK_HEIGHT);
+            let targetTrackIndex = Math.max(0, Math.min(baseTrackIndex + trackDiff, state.editor.tracks.length - 1));
 
             // Если индекс изменился, перемещаем клип в массивах данных
             if (targetTrackIndex !== trackIndex) {
@@ -1358,6 +1441,8 @@
                 
                 // Обновляем текущий индекс для следующего тика onMove
                 trackIndex = targetTrackIndex;
+                baseTrackIndex = targetTrackIndex;
+                baseY = ev.clientY;
             }
 
         } else if (action === 'trim-r') {
@@ -1408,11 +1493,30 @@
       });
   }
 
+  async function getVideoMetaFromFile(file) {
+      return new Promise((resolve) => {
+          const v = document.createElement("video");
+          const url = URL.createObjectURL(file);
+          v.preload = "metadata";
+          v.src = url;
+          v.onloadedmetadata = () => {
+              URL.revokeObjectURL(url);
+              resolve({ duration: v.duration, w: v.videoWidth, h: v.videoHeight });
+          };
+          v.onerror = () => {
+              URL.revokeObjectURL(url);
+              resolve({ duration: 0, w: 0, h: 0 });
+          };
+      });
+  }
+
   window.addAssetToEditor = async function(asset) {
       setStatus("Loading media info...");
       const url = asset.url || asset.thumb_url;
       const meta = await getVideoMeta(url);
       const sourceDur = meta.duration || 10;
+      const kind = String(asset.kind || "").toLowerCase();
+      const clipName = kind === "animation" ? (asset.title || "animation") : "clip";
 
       // Логика установки разрешения проекта по первому файлу
       if (!state.editor.hasMedia) {
@@ -1431,7 +1535,7 @@
       
       track.clips.push({
           id: uuid(),
-          name: asset.title || "Clip",
+          name: clipName,
           url: url,
           start: endTime,
           dur: sourceDur,
@@ -1477,7 +1581,11 @@
 
   async function loadLibraryAssets(sceneId){
     const r = await apiLibrary("library_list_assets", { scene_id: sceneId });
-    libAssets = r.assets || [];
+    libAssets = (r.assets || []).filter(a => {
+      const kind = String(a.kind || "").toLowerCase();
+      const url = String(a.url || a.thumb_url || "");
+      return kind === "animation" || isVideoUrl(url);
+    });
   }
 
   function renderProjects(){
@@ -1531,7 +1639,7 @@
             ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
           </div>
           <div class="lf-assetActions">
-            <button class="lf-btnSmall" data-act="add">Add to Timeline</button>
+            <button class="lf-btnSmall" data-act="add">Add to Editor</button>
             <button class="lf-btnSmall" data-act="rename">✎</button>
             <button class="lf-btnSmall" data-act="delete">X</button>
           </div>
@@ -1618,7 +1726,7 @@
             ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
           </div>
           <div class="lf-assetActions">
-            <button class="lf-btnSmall" data-act="add-gen">Add</button>
+            <button class="lf-btnSmall" data-act="add-gen">Add to Library</button>
           </div>
         </div>
       `;
@@ -1667,6 +1775,19 @@
     $("viewTabs").querySelectorAll("button").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     setView(btn.dataset.view);
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key !== "Delete") return;
+    const active = document.activeElement;
+    if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) return;
+    const clip = state.editor.selectedClip;
+    if (!clip) return;
+    state.editor.tracks.forEach(t => {
+      t.clips = t.clips.filter(c => c.id !== clip.id);
+    });
+    state.editor.selectedClip = null;
+    renderEditorTimeline();
   });
 
   $("openCinemaLibrary").addEventListener("click", async () => {
@@ -1733,12 +1854,12 @@
 
     const act = actBtn.dataset.act;
     if (act === "add"){
-      if (state.view === 'editor') {
-          addAssetToEditor(asset);
-      } else {
-          setStatus("Switch to Editor tab to add", "err");
-          setTimeout(() => setStatus(""), 1200);
-      }
+      closeModal(cinemaLibraryModal);
+      setView("editor");
+      document.querySelectorAll("#viewTabs button").forEach(b => b.classList.remove("active"));
+      document.querySelector('#viewTabs [data-view="editor"]').classList.add("active");
+      await addAssetToEditor(asset);
+      return;
     }
 
     if (act === "rename"){
@@ -1915,6 +2036,12 @@
         const image = $("motionImage").files[0];
         const video = $("motionVideo").files[0];
         if (!image || !video) throw new Error("Upload reference image and video.");
+
+        const videoMeta = await getVideoMetaFromFile(video);
+        if (videoMeta.w !== 1920 || videoMeta.h !== 1080) {
+          setStatus("Motion Control supports only 1920×1080 (16:9). Please upload a 1920×1080 video.", "err");
+          return;
+        }
          
         setStatus("Uploading assets...");
          
