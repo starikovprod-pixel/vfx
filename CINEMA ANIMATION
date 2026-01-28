@@ -174,14 +174,22 @@
   .lf-checkRow{
     display:flex;
     align-items:center;
+    justify-content:flex-start;
     gap:8px;
     height:48px;
-    padding:0 10px;
+    padding:0 12px;
     border:1px solid var(--border);
     border-radius:12px;
     background:var(--bg-input);
+    white-space:nowrap;
   }
   .lf-checkRow input{ transform: translateY(1px); }
+  .lf-checkRow span{
+    font-size:13px;
+    font-weight:800;
+    color:#fff;
+    line-height:1;
+  }
 
   .lf-btnSmall{
     border:1px solid rgba(255,255,255,.12);
@@ -327,7 +335,7 @@
 
   .lf-viewportCard{
     background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-    border-bottom:1px solid var(--border);
+    border-bottom:0;
     position:relative;
     display:flex;
     flex-direction:column;
@@ -369,6 +377,7 @@
 
   .lf-resultCard{
     width:min(1200px, 100%);
+    position:relative;
     border-radius:18px;
     overflow:hidden;
     border:1px solid rgba(255,255,255,.08);
@@ -655,7 +664,8 @@
   }
   .lf-assetCard video{
     width:100%;
-    height:140px;
+    aspect-ratio:16/9;
+    height:auto;
     object-fit:cover;
     border-radius:12px;
     border:1px solid rgba(255,255,255,.12);
@@ -664,7 +674,13 @@
   .lf-assetActions{
     display:flex;
     gap:8px;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
+    align-items:center;
+  }
+  .lf-assetActions .lf-btnSmall{
+    padding:7px 10px;
+    font-size:12px;
+    border-radius:12px;
   }
   #clipModal{ z-index:10050; }
   .lf-status.err{ color:var(--danger); }
@@ -673,6 +689,19 @@
     color:#3a3a3a;
     text-align:center;
     font-weight:900;
+  }
+
+  .lf-overlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:rgba(0,0,0,.55);
+    backdrop-filter: blur(3px);
+    z-index:5;
   }
 
   /* Export Render Overlay */
@@ -815,7 +844,7 @@
               <div class="lf-field">
                 <div class="lf-checkRow">
                   <input type="checkbox" id="motionKeepSound" checked />
-                  <span>Keep Original Sound</span>
+                  <span>Keep Sound</span>
                 </div>
               </div>
             </div>
@@ -849,6 +878,10 @@
           <div class="lf-stageWrap" id="viewportWrap">
             <div class="lf-resultCard" id="viewportCard">
               <video id="viewportVideo" playsinline></video>
+              <div id="viewportOverlay" class="lf-overlay" style="display:none;">
+                <div class="lf-h2" id="viewportOverlayTitle">Generating…</div>
+                <div class="lf-muted" id="viewportOverlayTime">04:00</div>
+              </div>
               <div class="lf-resbar" id="viewportResbar">
                 <div class="lf-muted" id="viewportMeta">No clip selected</div>
                 <a id="viewportDownloadLink" href="#" download>Download</a>
@@ -883,7 +916,6 @@
                      <div class="lf-muted" style="font-size:11px;">Project:</div>
                      <div id="projectResInfo" class="lf-project-info">Unknown</div>
                      <div class="lf-vdiv"></div>
-                     <button class="lf-btnSmall" id="edAddTrack">+ Track</button>
                      <button class="lf-btnSmall danger" id="edClear">Clear</button>
                      <div style="flex:1"></div>
                      </div>
@@ -1002,8 +1034,12 @@
       <button class="lf-btnSmall" id="clipModalClose" type="button">Close</button>
     </div>
     <video id="clipModalVideo" controls playsinline style="width:100%; max-height:70vh; background:#000; border-radius:14px;"></video>
-    <div class="lf-row" style="justify-content:flex-end; margin-top:12px;">
-      <button class="lf-btnSmall" id="clipModalDownload" type="button">Download</button>
+    <div class="lf-row" style="justify-content:space-between; margin-top:12px; gap:10px; flex-wrap:wrap;">
+      <div class="lf-row" style="gap:8px; flex-wrap:wrap;">
+        <button class="lf-btnSmall" id="clipModalAdd" type="button">Add to Editor</button>
+        <button class="lf-btnSmall" id="clipModalDownload" type="button">Download</button>
+        <button class="lf-btnSmall danger" id="clipModalDelete" type="button">Delete</button>
+      </div>
       <button class="lf-btnSmall" id="clipModalCopy" type="button">Copy URL</button>
     </div>
   </div>
@@ -1020,6 +1056,7 @@
     mode: "cinema",
     view: "viewport",
     latestClip: null,
+    isGenerating: false,
     // EDITOR STATE
     editor: {
         tracks: [{ id: 't1', name: 'Video 1', clips: [] }],
@@ -1044,6 +1081,10 @@
   const viewportResbar = $("viewportResbar");
   const saveClipBtn = $("saveClip");
   const cinemaAudioRow = $("cinemaAudioRow");
+  const viewportOverlay = $("viewportOverlay");
+  const viewportOverlayTitle = $("viewportOverlayTitle");
+  const viewportOverlayTime = $("viewportOverlayTime");
+  const creditBadge = $("creditBadge");
 
   const cinemaLibraryModal = $("cinemaLibraryModal");
   const libTabManager = $("libTabManager");
@@ -1072,6 +1113,8 @@
   const clipModalClose = $("clipModalClose");
   const clipModalDownload = $("clipModalDownload");
   const clipModalCopy = $("clipModalCopy");
+  const clipModalAdd = $("clipModalAdd");
+  const clipModalDelete = $("clipModalDelete");
 
   // Editor DOM
   const edVideo = $("editorVideo");
@@ -1186,6 +1229,36 @@
     const showAudio = !endImage;
     cinemaAudioRow.style.display = showAudio ? "block" : "none";
     if (!showAudio) $("cinemaAudio").checked = false;
+    updateCreditBadge();
+  }
+
+  function updateCreditBadge() {
+    if (!creditBadge) return;
+    const cinemaPricing = {
+      base: { "5": 2, "6": 3, "8": 4 },
+      endFrame: { "5": 3, "6": 4, "8": 5 }
+    };
+    const motionPricing = { std: 2, pro: 3 };
+    if (state.mode === "motion") {
+      const mode = $("motionMode").value;
+      creditBadge.textContent = `${motionPricing[mode] || motionPricing.std} cr`;
+      return;
+    }
+    const duration = $("cinemaDuration").value;
+    const hasEndImage = !!$("cinemaEndImage").files[0];
+    const price = hasEndImage ? cinemaPricing.endFrame[duration] : cinemaPricing.base[duration];
+    creditBadge.textContent = `${price || cinemaPricing.base["5"]} cr`;
+  }
+
+  function setViewportOverlay(visible, title, timeLeft) {
+    if (!viewportOverlay) return;
+    viewportOverlay.style.display = visible ? "flex" : "none";
+    if (title) viewportOverlayTitle.textContent = title;
+    if (timeLeft) viewportOverlayTime.textContent = timeLeft;
+    if (visible) {
+      viewportVideo.style.display = "none";
+      viewportResbar.style.display = "none";
+    }
   }
 
   function renderViewport() {
@@ -1198,6 +1271,7 @@
       viewportResbar.style.display = "none";
       viewportDownloadLink.href = "#";
       viewportDownloadLink.removeAttribute("download");
+      if (!state.isGenerating) setViewportOverlay(false);
       return;
     }
     viewportVideo.style.display = "block";
@@ -1213,6 +1287,7 @@
     state.mode = mode;
     $("cinemaForm").style.display = mode === "cinema" ? "block" : "none";
     $("motionForm").style.display = mode === "motion" ? "block" : "none";
+    updateCreditBadge();
   }
 
   function setView(view) {
@@ -1254,6 +1329,10 @@
   setupDropzone($("cinemaEndDrop"), $("cinemaEndImage"), $("cinemaEndPreview"), $("cinemaEndTitle"), updateCinemaAudioVisibility);
   setupDropzone($("motionImageDrop"), $("motionImage"), $("motionImagePreview"), $("motionImageTitle"));
   setupDropzone($("motionVideoDrop"), $("motionVideo"), null, $("motionVideoTitle"));
+  $("cinemaDuration").addEventListener("change", updateCreditBadge);
+  $("cinemaAspect").addEventListener("change", updateCreditBadge);
+  $("motionMode").addEventListener("change", updateCreditBadge);
+  $("cinemaEndImage").addEventListener("change", updateCreditBadge);
 
   // ==========================================
   // 1. RENDER TIMELINE (Отрисовка)
@@ -1640,6 +1719,7 @@
           </div>
           <div class="lf-assetActions">
             <button class="lf-btnSmall" data-act="add">Add to Editor</button>
+            <button class="lf-btnSmall" data-act="download">Download</button>
             <button class="lf-btnSmall" data-act="rename">✎</button>
             <button class="lf-btnSmall" data-act="delete">X</button>
           </div>
@@ -1777,6 +1857,13 @@
     setView(btn.dataset.view);
   });
 
+  viewportDownloadLink.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const clip = state.latestClip;
+    if (!clip?.output_url) return;
+    await forceDownload(clip.output_url, `${(clip.title || "clip").replace(/\s+/g, "_")}.mp4`);
+  });
+
   window.addEventListener("keydown", (e) => {
     if (e.key !== "Delete") return;
     const active = document.activeElement;
@@ -1848,7 +1935,7 @@
     if (!asset) return;
 
     if (!actBtn) {
-      openClipModal(asset);
+      openClipModal({ ...asset, __isLibraryAsset: true });
       return;
     }
 
@@ -1859,6 +1946,12 @@
       document.querySelectorAll("#viewTabs button").forEach(b => b.classList.remove("active"));
       document.querySelector('#viewTabs [data-view="editor"]').classList.add("active");
       await addAssetToEditor(asset);
+      return;
+    }
+
+    if (act === "download") {
+      const url = asset.url || asset.thumb_url;
+      await forceDownload(url, `${(asset.title || "animation").replace(/\s+/g, "_")}.mp4`);
       return;
     }
 
@@ -1908,7 +2001,7 @@
     if (!btn) {
       const genId = card.dataset.genId;
       const item = libGenerations.find(g => String(g.id) === String(genId));
-      if (item) openClipModal(item);
+      if (item) openClipModal({ ...item, __isLibraryAsset: false });
       return;
     }
     if (btn.dataset.act !== "add-gen") return;
@@ -1940,22 +2033,69 @@
   clipModal.addEventListener("click", (e) => {
     if (e.target === clipModal) closeModal(clipModal);
   });
+  function getClipModalUrl(item) {
+    return item?.url || item?.thumb_url || getGenerationUrl(item) || "";
+  }
+
+  function openClipModal(item){
+    clipModalItem = item;
+    const url = getClipModalUrl(item);
+    clipModalTitle.textContent = item.title || "Clip preview";
+    clipModalMeta.textContent = item.kind ? `Kind: ${item.kind}` : "";
+    clipModalVideo.src = url;
+    clipModalAdd.style.display = "inline-flex";
+    clipModalDelete.style.display = item.__isLibraryAsset ? "inline-flex" : "none";
+    openModal(clipModal);
+  }
+
+  clipModalAdd.addEventListener("click", async () => {
+    if (!clipModalItem) return;
+    closeModal(clipModal);
+    closeModal(cinemaLibraryModal);
+    setView("editor");
+    document.querySelectorAll("#viewTabs button").forEach(b => b.classList.remove("active"));
+    document.querySelector('#viewTabs [data-view="editor"]').classList.add("active");
+    await addAssetToEditor({
+      ...clipModalItem,
+      url: getClipModalUrl(clipModalItem)
+    });
+  });
+
+  clipModalDelete.addEventListener("click", async () => {
+    if (!clipModalItem?.__isLibraryAsset) return;
+    if (!confirm("Remove asset from this scene?")) return;
+    await apiLibrary("library_delete_asset", { asset_id: clipModalItem.id });
+    libAssets = libAssets.filter(a => a.id !== clipModalItem.id);
+    renderAssets();
+    closeModal(clipModal);
+  });
   clipModalDownload.addEventListener("click", () => {
-    if (!clipModalItem?.url) return;
-    forceDownload(clipModalItem.url, `${(clipModalItem.title || "clip").replace(/\s+/g, "_")}.mp4`);
+    const url = getClipModalUrl(clipModalItem);
+    if (!url) return;
+    forceDownload(url, `${(clipModalItem.title || "clip").replace(/\s+/g, "_")}.mp4`);
   });
   clipModalCopy.addEventListener("click", async () => {
-    if (!clipModalItem?.url) return;
-    await copyToClipboard(clipModalItem.url);
+    const url = getClipModalUrl(clipModalItem);
+    if (!url) return;
+    await copyToClipboard(url);
     setStatus("Copied URL", "ok");
     setTimeout(() => setStatus(""), 1200);
   });
 
   async function pollJob(jobId) {
+    const deadlineSec = 240;
+    const startMs = Date.now();
     let done = false;
     while (!done) {
       const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/status?jobId=${encodeURIComponent(jobId)}`, { method: "GET" });
       if (data.status === "processing") {
+        const elapsedSec = (Date.now() - startMs) / 1000;
+        const remaining = Math.max(0, Math.ceil(deadlineSec - elapsedSec));
+        const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+        const ss = String(remaining % 60).padStart(2, "0");
+        const title = data.stage === "upscaling" ? "Upscaling…" : "Generating…";
+        state.isGenerating = true;
+        setViewportOverlay(true, title, `${mm}:${ss}`);
         if (data.stage === "upscaling") {
           setStatus("Upgrading quality (Cinematic Upscale)...");
         } else {
@@ -1964,6 +2104,8 @@
       }
       if (["succeeded", "failed", "canceled"].includes(data.status)) {
         done = true;
+        state.isGenerating = false;
+        setViewportOverlay(false);
         if (data.status === "succeeded") {
           setStatus("Done");
           const outputUrl = data.output_url || data.result_url || data.url;
@@ -2000,6 +2142,13 @@
     if (!session) return;
 
     $("generateBtn").disabled = true;
+    state.isGenerating = true;
+    state.latestClip = null;
+    setView("viewport");
+    document.querySelectorAll("#viewTabs button").forEach(b => b.classList.remove("active"));
+    document.querySelector('#viewTabs [data-view="viewport"]').classList.add("active");
+    renderViewport();
+    setViewportOverlay(true, "Generating…", "04:00");
 
     const fd = new FormData();
     fd.append("origin_path", "/cinema_animation");
@@ -2065,6 +2214,8 @@
       
     } catch (e) {
       setStatus(e.message, "err");
+      state.isGenerating = false;
+      setViewportOverlay(false);
     } finally {
       $("generateBtn").disabled = false;
     }
@@ -2136,11 +2287,11 @@
   $("edNextFrame").onclick = () => { state.editor.currentTime += 0.1; updatePlayheadPos(); };
   $("toolSelect").onclick = () => { state.editor.tool = 'select'; $("toolSelect").classList.add("active"); $("toolRazor").classList.remove("active"); timelineBody.classList.remove('cursor-razor'); };
   $("toolRazor").onclick = () => { state.editor.tool = 'razor'; $("toolRazor").classList.add("active"); $("toolSelect").classList.remove("active"); timelineBody.classList.add('cursor-razor'); };
-  $("edAddTrack").onclick = () => { state.editor.tracks.push({ id: uuid(), name: `Video ${state.editor.tracks.length+1}`, clips: [] }); renderEditorTimeline(); };
   $("edClear").onclick = () => { if(confirm("Clear timeline?")) { state.editor.tracks.forEach(t => t.clips = []); state.editor.currentTime = 0; state.editor.hasMedia = false; projectResInfo.classList.remove("visible"); renderEditorTimeline(); }};
 
   setMode("cinema");
   setView("viewport");
   updateCinemaAudioVisibility();
+  updateCreditBadge();
   renderViewport();
 </script>
