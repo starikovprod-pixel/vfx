@@ -624,6 +624,13 @@
     grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
     gap:12px;
   }
+  /* Make video asset cards wide */
+  #libAssetsGrid,
+  #libGenGrid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap:12px;
+  }
   .lf-libraryGrid .lf-libraryCard{
     flex-direction:column;
     align-items:flex-start;
@@ -666,6 +673,7 @@
     width:100%;
     aspect-ratio:16/9;
     height:auto;
+    min-height:150px;
     object-fit:cover;
     border-radius:12px;
     border:1px solid rgba(255,255,255,.12);
@@ -681,6 +689,18 @@
     padding:7px 10px;
     font-size:12px;
     border-radius:12px;
+    white-space:nowrap;
+    flex:0 0 auto;
+  }
+  .lf-assetActions .lf-btnSmall[data-act="add"]{
+    min-width:120px;
+    justify-content:center;
+  }
+  .lf-assetActions .lf-btnSmall[data-act="rename"],
+  .lf-assetActions .lf-btnSmall[data-act="delete"]{
+    width:36px;
+    padding:7px 0;
+    text-align:center;
   }
   #clipModal{ z-index:10050; }
   .lf-status.err{ color:var(--danger); }
@@ -992,7 +1012,7 @@
           </div>
         </div>
 
-        <div id="libAssetsGrid" class="lf-libraryGrid" style="margin-top:10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); max-height:460px; overflow:auto;"></div>
+        <div id="libAssetsGrid" class="lf-libraryGrid" style="margin-top:10px; max-height:460px; overflow:auto;"></div>
       </div>
     </div>
 
@@ -1018,7 +1038,7 @@
           </select>
         </div>
 
-        <div id="libGenGrid" class="lf-libraryGrid" style="margin-top:12px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-height:520px; overflow:auto;"></div>
+        <div id="libGenGrid" class="lf-libraryGrid" style="margin-top:12px; max-height:520px; overflow:auto;"></div>
       </div>
     </div>
   </div>
