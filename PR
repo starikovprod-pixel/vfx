@@ -1001,6 +1001,8 @@
 
   // Editor DOM
   const edVideo = $("editorVideo");
+  edVideo.crossOrigin = "anonymous";
+  edVideo.playsInline = true;
   const edScroll = $("edScroll");
   const edContainer = $("edTracksContainer");
   const edHeaders = $("edHeaders");
@@ -1337,6 +1339,7 @@
     const startOffset = clip.offset;
     const sourceDur = clip.sourceDur || 9999;
     const action = e.target.dataset.act || 'move';
+    let createdNewTrack = false;
     
     // Высота одной дорожки (из CSS: 60px height + 1px border)
     const TRACK_HEIGHT = 61;
@@ -1356,9 +1359,10 @@
             let targetTrackIndex = trackIndex + trackDiff;
 
             // Если тянем ниже последней дорожки -> Создаем новую
-            if (targetTrackIndex >= state.editor.tracks.length) {
+            if (targetTrackIndex >= state.editor.tracks.length && !createdNewTrack) {
                 // Добавляем новую дорожку (ограничим создание одной за раз для UX)
                  state.editor.tracks.push({ id: uuid(), name: `Video ${state.editor.tracks.length+1}`, clips: [] });
+                 createdNewTrack = true;
             }
             
             // Ограничиваем индекс
@@ -1427,6 +1431,20 @@
           v.onloadedmetadata = () => resolve({ duration: v.duration, w: v.videoWidth, h: v.videoHeight });
           v.onerror = () => resolve({ duration: 5, w: 1920, h: 1080 });
       });
+  }
+
+  function waitVideoReady(v){
+    return new Promise(resolve=>{
+      if (v.readyState >= 2 && v.videoWidth > 0) return resolve(); // HAVE_CURRENT_DATA
+      const onReady = () => {
+        v.removeEventListener("loadedmetadata", onReady);
+        v.removeEventListener("canplay", onReady);
+        resolve();
+      };
+      v.addEventListener("loadedmetadata", onReady, { once:true });
+      v.addEventListener("canplay", onReady, { once:true });
+      setTimeout(onReady, 1500); // страховка
+    });
   }
 
   window.addAssetToEditor = async function(asset) {
@@ -1503,8 +1521,8 @@
       // Инициализация MediaRecorder
       const stream = canvas.captureStream(30); // Запрашиваем 30 FPS у канваса
       let mimeType = "video/webm;codecs=vp9";
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = "video/webm;codecs=vp8";
       if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = "video/webm";
-      if (MediaRecorder.isTypeSupported("video/mp4")) mimeType = "video/mp4"; // Chrome/Edge support
 
       const recorder = new MediaRecorder(stream, { 
           mimeType, 
@@ -1519,9 +1537,9 @@
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `exported_video_${width}x${height}_${Date.now()}.${mimeType === "video/mp4" ? "mp4" : "webm"}`;
+          a.download = `exported_video_${width}x${height}_${Date.now()}.webm`;
           a.click();
-          URL.revokeObjectURL(url);
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
           
           // Reset UI
           state.editor.isExporting = false;
@@ -1531,7 +1549,7 @@
           edVideo.muted = false; // Unmute
       };
 
-      recorder.start();
+      recorder.start(1000);
       edVideo.muted = true; // Глушим звук при рендере, чтобы не шумело
 
       // --- RENDER LOOP ---
@@ -1565,32 +1583,41 @@
           if (activeClip) {
              if (edVideo.src !== activeClip.url) {
                  edVideo.src = activeClip.url;
+                 await waitVideoReady(edVideo);
              }
-             
-             const targetVidTime = activeClip.offset + offset;
 
-             // Жесткое ожидание кадра
-             edVideo.currentTime = targetVidTime;
-             
+             // ждём готовность размеров (на всякий)
+             if (!edVideo.videoWidth || !edVideo.videoHeight) {
+                 await waitVideoReady(edVideo);
+             }
+
+             const targetVidTime = Math.max(0, activeClip.offset + offset);
+             try { edVideo.currentTime = targetVidTime; } catch(e){}
+
+             // ждём seeked (но не вечно)
              await new Promise(resolve => {
-                 // Если кадр уже готов (разница времени мала и состояние ready), не ждем
-                 if (edVideo.readyState >= 3 && Math.abs(edVideo.currentTime - targetVidTime) < 0.1) {
-                     resolve();
-                 } else {
-                     // Иначе ждем события seeked
-                     const onSeek = () => { 
-                         edVideo.removeEventListener('seeked', onSeek); 
-                         resolve(); 
+                 const done = () => resolve();
+                 if (edVideo.readyState >= 2) {
+                     const onSeek = () => {
+                         edVideo.removeEventListener("seeked", onSeek);
+                         resolve();
                      };
-                     // Тайм-аут на случай зависания декодера (1000мс)
-                     setTimeout(() => { 
-                         edVideo.removeEventListener('seeked', onSeek); 
-                         resolve(); 
-                     }, 1000);
-                     
-                     edVideo.addEventListener('seeked', onSeek);
+                     edVideo.addEventListener("seeked", onSeek);
+                     setTimeout(() => {
+                         edVideo.removeEventListener("seeked", onSeek);
+                         resolve();
+                     }, 700);
+                 } else {
+                     setTimeout(done, 200);
                  }
              });
+
+             // если вдруг всё ещё нет размеров — пропускаем кадр
+             if (!edVideo.videoWidth || !edVideo.videoHeight) {
+                 $("renderStatus").textContent = `Rendering: ${Math.round((currentTime / maxTime) * 100)}% (${currentTime.toFixed(1)}s)`;
+                 currentTime += step;
+                 return setTimeout(processFrame, 0);
+             }
 
              // Рисуем с сохранением пропорций (Contain)
              const vRatio = edVideo.videoWidth / edVideo.videoHeight;
