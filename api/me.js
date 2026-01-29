@@ -89,7 +89,12 @@ async function getTablesSnapshot() {
     [names]
   );
 
-  const set = new Set(rows.map((r) => r.t).filter(Boolean));
+  const set = new Set(
+    rows
+      .map((r) => String(r.t || ""))
+      .filter(Boolean)
+      .map((s) => (s.includes(".") ? s.split(".").pop() : s))
+  );
   __tablesCache = {
     hasBalancesTable: set.has("user_balances"),
     hasProfilesTable: set.has("user_profiles"),
@@ -164,6 +169,7 @@ export default async function handler(req, res) {
       return res.status(401).json({ ok: false, error: "Missing Bearer token" });
 
     step("token_ok");
+    await pool.query(`set statement_timeout = 8000`);
     const user = await getUserFromSupabase(token);
     step("supabase_user_ok");
     const userId = user.id;
@@ -204,7 +210,10 @@ export default async function handler(req, res) {
 
     // ===== POST actions (multi-action endpoint) =====
     if (req.method === "POST") {
+      step("post_start");
+      step("before_read_body");
       const body = await readJsonBody(req);
+      step("after_read_body");
 
       // backward compatible: old clients send {action:"redeem_promo"}
       const action = String(body.action || body.op || "").trim();
@@ -686,6 +695,7 @@ export default async function handler(req, res) {
     }
 
     // ===== GET (existing + new query modes) =====
+    step("get_start");
     // profiles flag
     let has_password = false;
     if (hasProfilesTable) {
