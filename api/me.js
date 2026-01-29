@@ -1,14 +1,13 @@
 import crypto from "crypto";
 import { pool } from "../lib/db.js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-
 export const config = {
   api: { bodyParser: false },
-  // выбери один регион (чаще всего для EU базы лучше FRA)
-  regions: ["fra1"],
+  regions: ["lhr1"],
 };
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 function setCors(req, res) {
   const origin = String(req.headers.origin || "");
@@ -150,7 +149,8 @@ export default async function handler(req, res) {
   try {
     // env
     const missing = [];
-    if (!process.env.POSTGRES_URL) missing.push("POSTGRES_URL");
+    if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL)
+      missing.push("DATABASE_URL/POSTGRES_URL");
     if (!SUPABASE_URL) missing.push("SUPABASE_URL");
     if (!SUPABASE_ANON_KEY) missing.push("SUPABASE_ANON_KEY");
     if (missing.length)
