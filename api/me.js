@@ -1,7 +1,14 @@
+import crypto from "crypto";
 import { pool } from "../lib/db.js";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+export const config = {
+  api: { bodyParser: false },
+  // выбери один регион (чаще всего для EU базы лучше FRA)
+  regions: ["fra1"],
+};
 
 function setCors(req, res) {
   const origin = String(req.headers.origin || "");
@@ -25,18 +32,26 @@ function getBearerToken(req) {
 }
 
 async function getUserFromSupabase(accessToken) {
-  const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      apikey: SUPABASE_ANON_KEY,
-    },
-  });
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 8000);
 
-  if (!r.ok) {
-    const txt = await r.text();
-    throw new Error(`Supabase auth failed: ${r.status} ${txt}`);
+  try {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      signal: ac.signal,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        apikey: SUPABASE_ANON_KEY,
+      },
+    });
+
+    if (!r.ok) {
+      const txt = await r.text();
+      throw new Error(`Supabase auth failed: ${r.status} ${txt}`);
+    }
+    return r.json();
+  } finally {
+    clearTimeout(timer);
   }
-  return r.json();
 }
 
 async function readJsonBody(req) {
@@ -52,9 +67,42 @@ async function readJsonBody(req) {
   }
 }
 
-async function tableExists(tableName) {
-  const { rows } = await pool.query(`select to_regclass($1) as t`, [tableName]);
-  return !!rows?.[0]?.t;
+let __tablesCache = null;
+let __tablesCacheAt = 0;
+
+async function getTablesSnapshot() {
+  const now = Date.now();
+  if (__tablesCache && now - __tablesCacheAt < 60_000) return __tablesCache;
+
+  const names = [
+    "public.user_balances",
+    "public.user_profiles",
+    "public.promo_redemptions",
+    "public.generations",
+    "public.cinema_projects",
+    "public.library_projects",
+    "public.library_scenes",
+    "public.library_scene_assets",
+  ];
+
+  const { rows } = await pool.query(
+    `select to_regclass(x) as t from unnest($1::text[]) x`,
+    [names]
+  );
+
+  const set = new Set(rows.map((r) => r.t).filter(Boolean));
+  __tablesCache = {
+    hasBalancesTable: set.has("user_balances"),
+    hasProfilesTable: set.has("user_profiles"),
+    hasPromoTable: set.has("promo_redemptions"),
+    hasGenerationsTable: set.has("generations"),
+    hasProjectsTable: set.has("cinema_projects"),
+    hasLibraryProjectsTable: set.has("library_projects"),
+    hasLibraryScenesTable: set.has("library_scenes"),
+    hasLibrarySceneAssetsTable: set.has("library_scene_assets"),
+  };
+  __tablesCacheAt = now;
+  return __tablesCache;
 }
 
 function parsePagination(req) {
@@ -87,6 +135,13 @@ function clampTitle(t, max = 120) {
 export default async function handler(req, res) {
   setCors(req, res);
 
+  const rid = crypto.randomUUID();
+  res.setHeader("x-request-id", rid);
+
+  const t0 = Date.now();
+  const step = (name) => console.log(`[me] ${rid} ${name} +${Date.now() - t0}ms`);
+  step("start");
+
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "GET" && req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "Method not allowed" });
@@ -108,27 +163,30 @@ export default async function handler(req, res) {
     if (!token)
       return res.status(401).json({ ok: false, error: "Missing Bearer token" });
 
+    step("token_ok");
     const user = await getUserFromSupabase(token);
+    step("supabase_user_ok");
     const userId = user.id;
     const email = user.email || null;
 
     // tables exist?
-    const hasBalancesTable = await tableExists("public.user_balances");
-    const hasProfilesTable = await tableExists("public.user_profiles");
-    const hasPromoTable = await tableExists("public.promo_redemptions");
-    const hasGenerationsTable = await tableExists("public.generations");
-    const hasProjectsTable = await tableExists("public.cinema_projects");
-
-    // --- NEW Library tables ---
-    const hasLibraryProjectsTable = await tableExists("public.library_projects");
-    const hasLibraryScenesTable = await tableExists("public.library_scenes");
-    const hasLibrarySceneAssetsTable = await tableExists(
-      "public.library_scene_assets"
-    );
+    step("before_table_exists");
+    const {
+      hasBalancesTable,
+      hasProfilesTable,
+      hasPromoTable,
+      hasGenerationsTable,
+      hasProjectsTable,
+      hasLibraryProjectsTable,
+      hasLibraryScenesTable,
+      hasLibrarySceneAssetsTable,
+    } = await getTablesSnapshot();
+    step("after_table_exists");
 
     // ensure balances row
     let credits = 0;
     if (hasBalancesTable) {
+      step("before_balances");
       await pool.query(
         `insert into public.user_balances (user_id, credits)
          values ($1::uuid, 0)
@@ -141,6 +199,7 @@ export default async function handler(req, res) {
         [userId]
       );
       credits = Number(bal.rows?.[0]?.credits ?? 0);
+      step("after_balances");
     }
 
     // ===== POST actions (multi-action endpoint) =====
@@ -630,6 +689,7 @@ export default async function handler(req, res) {
     // profiles flag
     let has_password = false;
     if (hasProfilesTable) {
+      step("before_profiles");
       await pool.query(
         `insert into public.user_profiles (user_id)
          values ($1::uuid)
@@ -641,6 +701,7 @@ export default async function handler(req, res) {
         [userId]
       );
       has_password = !!p.rows?.[0]?.has_password;
+      step("after_profiles");
     }
 
     const pg = parsePagination(req);
@@ -714,6 +775,7 @@ export default async function handler(req, res) {
     let total_generations = 0;
 
     if (hasGenerationsTable) {
+      step("before_generations");
       const countRes = await pool.query(
         `select count(*)::int as c
          from public.generations
@@ -759,6 +821,7 @@ export default async function handler(req, res) {
         );
         generations = gens.rows || [];
       }
+      step("after_generations");
     }
 
     return res.status(200).json({
