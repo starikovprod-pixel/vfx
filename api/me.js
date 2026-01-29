@@ -169,9 +169,9 @@ export default async function handler(req, res) {
       return res.status(401).json({ ok: false, error: "Missing Bearer token" });
 
     step("token_ok");
+    await pool.query(`set statement_timeout = 8000`);
     const user = await getUserFromSupabase(token);
     step("supabase_user_ok");
-    await pool.query(`set statement_timeout = 8000`);
     const userId = user.id;
     const email = user.email || null;
 
