@@ -647,6 +647,14 @@
     }
   }
 
+  async function getMyUserId(){
+    try{
+      if(!window.sb) return null;
+      const { data } = await window.sb.auth.getUser();
+      return data?.user?.id || null;
+    }catch(e){ return null; }
+  }
+
   async function api(path, opts = {}) {
     const method = (opts.method || "GET").toUpperCase();
     const token = await getSessionToken();
@@ -733,8 +741,7 @@
     $grid.querySelectorAll("img.lf-thumb").forEach(img => {
       const thumb = img.getAttribute("data-thumb") || "";
       const fallback = img.getAttribute("data-fallback") || "";
-      if (!thumb && fallback) img.src = fallback;
-      else img.src = thumb;
+      img.src = thumb || fallback || "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
 
       img.onerror = () => {
         if (fallback && img.src !== fallback) img.src = fallback;
@@ -896,6 +903,7 @@
     try{
       const json = await api(`/api/feed/comments?post_id=${encodeURIComponent(current.id)}&limit=80&offset=0`, { method:"GET" });
       const arr = Array.isArray(json.items) ? json.items : [];
+      const myId = await getMyUserId();
       if(arr.length === 0){
         $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">No comments yet.</div>`;
         return;
@@ -904,6 +912,12 @@
         const av = c.avatar_url ? `<img src="${c.avatar_url}" />` : "";
         const name = c.display_name || c.username || "user";
         const when = (c.created_at || "").replace("T"," ").slice(0,16);
+        const mine = myId && String(c.user_id) === String(myId);
+        const tools = mine ? `
+          <span style="margin-left:auto; display:flex; gap:8px;">
+            <button class="btn-mini" style="padding:6px 10px;" data-edit="${c.id}">Edit</button>
+            <button class="btn-mini" style="padding:6px 10px;" data-del="${c.id}">Delete</button>
+          </span>` : "";
         return `
           <div class="c-item">
             <div class="avatar">${av}</div>
@@ -911,12 +925,39 @@
               <div class="c-top">
                 <div class="c-name">${safe(name)}</div>
                 <div class="c-time">${safe(when)}</div>
+                ${tools}
               </div>
               <div class="c-body">${safe(c.body)}</div>
             </div>
           </div>
         `;
       }).join("");
+
+      $cList.querySelectorAll("[data-del]").forEach(b=>{
+        b.onclick = async () => {
+          const id = b.getAttribute("data-del");
+          if(!confirm("Delete comment?")) return;
+          try{
+            await api("/api/feed/comment_delete", { method:"POST", body: JSON.stringify({ comment_id: id }) });
+            await loadComments();
+            toast("Deleted");
+          }catch(e){ toast(e.message); }
+        };
+      });
+
+      $cList.querySelectorAll("[data-edit]").forEach(b=>{
+        b.onclick = async () => {
+          const id = b.getAttribute("data-edit");
+          const newText = prompt("Edit comment:", "");
+          if(newText === null) return;
+          try{
+            await api("/api/feed/comment_edit", { method:"POST", body: JSON.stringify({ comment_id: id, body: newText }) });
+            await loadComments();
+            toast("Updated");
+          }catch(e){ toast(e.message); }
+        };
+      });
+
       $cList.scrollTop = $cList.scrollHeight;
     }catch(e){
       $cList.innerHTML = `<div class="lf-empty" style="padding:18px;color:var(--danger)">${e.message}</div>`;
