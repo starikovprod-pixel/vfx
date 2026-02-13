@@ -1,0 +1,1040 @@
+<style>
+  :root{
+    --bg-body:#050505;
+    --bg-panel:#111111;
+    --bg-card:#181818;
+    --bg-modal:#1f1f1f;
+    --bg-input:#222222;
+    --border:#2b2b2b;
+    --accent:#2b6cff;
+    --accent-hover:#1a5cff;
+    --text-main:#ffffff;
+    --text-sec:#a0a0a0;
+    --radius:16px;
+    --danger: #ff465a;
+    --ok: #39ff14;
+    --warn: #ffd166;
+  }
+
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+  #lf-feed * { box-sizing:border-box; outline:none; }
+
+  #lf-feed{
+    background:var(--bg-body);
+    color:var(--text-main);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    min-height:calc(100vh - 74px);
+    position: relative;
+  }
+
+  #lf-main{
+    padding:26px 18px 40px;
+    max-width:1400px;
+    margin:0 auto;
+  }
+
+  .lf-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 18px;
+  }
+
+  .lf-h1{
+    font-size:34px;
+    font-weight:900;
+    letter-spacing:-.6px;
+    margin:0;
+  }
+  .lf-sub{ margin-top:6px; color:var(--text-sec); font-size:13px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+  /* Controls row */
+  .lf-controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:flex-end;
+  }
+
+  .seg{
+    display:flex;
+    gap:6px;
+    padding:6px;
+    background: rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:999px;
+  }
+  .seg button{
+    border:0;
+    background: transparent;
+    color: rgba(255,255,255,0.75);
+    padding: 8px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:13px;
+    transition:.15s;
+    white-space:nowrap;
+  }
+  .seg button:hover{ background: rgba(255,255,255,0.06); color:#fff; }
+  .seg button.active{ background:#fff; color:#000; }
+
+  .pill{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:999px;
+    font-size:13px;
+    color: rgba(255,255,255,0.85);
+  }
+  .pill input[type="checkbox"]{ transform: scale(1.05); }
+
+  .btn-mini{
+    border:0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color:#fff;
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:13px;
+    transition:.15s;
+  }
+  .btn-mini:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+
+  /* Grid */
+  .lf-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:16px;
+    padding-bottom: 60px;
+  }
+
+  .lf-card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    height: 340px;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    position: relative;
+  }
+  .lf-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .lf-media{
+    height: 100%;
+    width: 100%;
+    background:#000;
+    position:relative;
+  }
+  .lf-media img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  /* Top-left badges */
+  .badge{
+    position:absolute;
+    top:10px; left:10px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.10);
+    padding: 5px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing:.2px;
+    display:flex;
+    gap:6px;
+    align-items:center;
+    backdrop-filter: blur(4px);
+  }
+  .badge .dot{ width:7px; height:7px; border-radius:50%; background:#fff; }
+  .badge .dot.video{ background: #7c5cff; }
+  .badge .dot.image{ background: #39ff14; }
+
+  .badge-right{
+    left:auto; right:10px;
+  }
+
+  /* Bottom overlay */
+  .card-bottom{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    padding: 46px 14px 12px;
+    background: linear-gradient(to top, rgba(0,0,0,0.92), transparent);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .card-author{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .avatar{
+    width:28px; height:28px;
+    border-radius:50%;
+    background: rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.12);
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .author-txt{ min-width:0; }
+  .author-name{
+    font-size:13px; font-weight:800;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .author-username{
+    font-size:12px; color: rgba(255,255,255,0.65);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  .card-title{
+    font-size:14px;
+    font-weight:800;
+    margin-top:2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  .card-stats{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    color: rgba(255,255,255,0.78);
+    font-size:12px;
+    font-weight:700;
+  }
+  .stat{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .lf-loader{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: rgba(255,255,255,0.55);
+    padding: 18px 0 0;
+    font-size: 13px;
+  }
+
+  .lf-empty{
+    padding: 40px; text-align: center; color: var(--text-sec);
+    background: rgba(255,255,255,0.02); border-radius: 18px; border: 1px dashed var(--border);
+  }
+
+  /* MODAL */
+  .lf-modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .lf-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  .lf-modal {
+    width: 92%;
+    max-width: 1200px;
+    height: 88vh;
+    background: var(--bg-modal);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
+    position: relative;
+  }
+
+  .m-preview {
+    flex: 1;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .m-preview img, .m-preview video {
+    max-width: 100%; max-height: 100%; width: 100%; height: 100%;
+    object-fit: contain;
+    display:block;
+  }
+
+  .m-sidebar {
+    width: 380px;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 22px;
+    background: var(--bg-card);
+    flex-shrink: 0;
+    gap: 14px;
+  }
+
+  .m-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    transition: 0.2s;
+  }
+  .m-close:hover { background: #fff; color: #000; }
+
+  .m-head{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .m-head .avatar{ width:36px; height:36px; }
+  .m-head a{
+    color:#fff; text-decoration:none;
+    font-weight:900;
+  }
+  .m-head a:hover{ text-decoration:underline; }
+  .m-head .sub{
+    color: rgba(255,255,255,0.65);
+    font-size:12px;
+    margin-top:2px;
+  }
+
+  .m-title{
+    font-size:18px;
+    font-weight:900;
+    letter-spacing:-.2px;
+    margin-top:2px;
+  }
+  .m-meta{
+    color: rgba(255,255,255,0.65);
+    font-size:12px;
+  }
+
+  .m-actions{
+    display:flex;
+    gap:10px;
+  }
+  .btn-act{
+    flex:1;
+    border:0;
+    padding: 12px 10px;
+    border-radius: 14px;
+    cursor:pointer;
+    font-weight:900;
+    color:#fff;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: .15s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .btn-act:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+  .btn-act.primary{ background:#fff; color:#000; border:none; }
+  .btn-act.primary:hover{ background:#ddd; }
+  .btn-act.on{
+    background: rgba(43,108,255,0.22);
+    border-color: rgba(43,108,255,0.45);
+  }
+
+  .m-stats{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .m-stats .stat{ background: rgba(0,0,0,0.35); border-color: rgba(255,255,255,0.10); }
+
+  .m-comments{
+    margin-top: 6px;
+    border-top:1px solid rgba(255,255,255,0.08);
+    padding-top: 12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height: 0;
+    flex:1;
+  }
+
+  .c-list{
+    overflow:auto;
+    padding-right: 6px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    flex:1;
+    min-height: 0;
+  }
+  .c-item{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+  }
+  .c-item .avatar{ width:28px; height:28px; }
+  .c-bubble{
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.10);
+    border-radius: 14px;
+    padding: 10px 12px;
+    flex:1;
+  }
+  .c-top{
+    display:flex;
+    gap:8px;
+    align-items:baseline;
+    flex-wrap:wrap;
+    margin-bottom:6px;
+  }
+  .c-name{ font-weight:900; font-size:12px; }
+  .c-time{ color: rgba(255,255,255,0.55); font-size:11px; }
+  .c-body{ color:#fff; font-size:13px; line-height:1.35; white-space:pre-wrap; }
+
+  .c-form{
+    display:flex;
+    gap:8px;
+  }
+  .c-input{
+    flex:1;
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 10px 12px;
+    color:#fff;
+    font-size:13px;
+  }
+  .c-send{
+    width: 92px;
+    border:0;
+    border-radius: 14px;
+    cursor:pointer;
+    font-weight:900;
+    background:#fff;
+    color:#000;
+  }
+  .c-send:hover{ background:#ddd; }
+
+  .toast{
+    position: fixed;
+    left: 18px;
+    bottom: 18px;
+    z-index: 10000;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(255,255,255,0.12);
+    color:#fff;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 13px;
+    opacity:0;
+    transform: translateY(10px);
+    pointer-events:none;
+    transition:.18s;
+  }
+  .toast.show{
+    opacity:1;
+    transform: translateY(0);
+  }
+
+  @media(max-width: 980px){
+    .lf-modal { flex-direction: column; height: 92vh; }
+    .m-sidebar { width: 100%; height: 46vh; border-left: none; border-top: 1px solid var(--border); }
+    .m-preview { height: 46vh; }
+  }
+</style>
+
+<div id="lf-feed">
+  <div id="lf-main">
+
+    <div class="lf-top">
+      <div>
+        <h1 class="lf-h1">Feed</h1>
+        <div class="lf-sub">
+          <span>Explore the best user generations.</span>
+          <span id="auth-hint" style="color:rgba(255,255,255,0.55)">Login to like / save / comment.</span>
+        </div>
+      </div>
+
+      <div class="lf-controls">
+        <div class="seg" id="seg-sort">
+          <button class="active" data-sort="trending">Trending</button>
+          <button data-sort="new">New</button>
+          <button data-sort="top">Top</button>
+          <button data-sort="discussed">Discussed</button>
+        </div>
+
+        <div class="pill">
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer;">
+            <input type="checkbox" id="only-video" />
+            Video only
+          </label>
+        </div>
+
+        <button class="btn-mini" id="btn-refresh">Refresh</button>
+      </div>
+    </div>
+
+    <div id="grid" class="lf-grid">Loading...</div>
+    <div class="lf-loader" id="loader" style="display:none;">Loading more…</div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="lf-modal-backdrop" id="modal-backdrop">
+    <button class="m-close" id="modal-close">✕</button>
+
+    <div class="lf-modal" onclick="event.stopPropagation()">
+      <div class="m-preview" id="m-view"></div>
+
+      <div class="m-sidebar">
+        <div class="m-head">
+          <div class="avatar" id="m-avatar"></div>
+          <div style="min-width:0">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <a id="m-userlink" href="#" target="_blank" rel="noopener">user</a>
+              <span class="m-meta" id="m-date"></span>
+            </div>
+            <div class="sub" id="m-userline">@username</div>
+          </div>
+        </div>
+
+        <div class="m-title" id="m-title">Title</div>
+
+        <div class="m-stats" id="m-stats"></div>
+
+        <div class="m-actions">
+          <button class="btn-act" id="btn-like">❤️ Like</button>
+          <button class="btn-act" id="btn-save">???? Save</button>
+        </div>
+
+        <div class="m-comments">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:900">Comments</div>
+            <button class="btn-mini" id="btn-reload-comments" style="padding:8px 10px;">Reload</button>
+          </div>
+
+          <div class="c-list" id="c-list">
+            <div class="lf-empty" style="padding:18px;">Loading…</div>
+          </div>
+
+          <div class="c-form">
+            <input class="c-input" id="c-input" placeholder="Write a comment…" />
+            <button class="c-send" id="c-send">Send</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(() => {
+  const BACKEND = "https://api.lightfull.ai"; // твой backend домен
+  const PAGE_SIZE = 24;
+
+  // feed state
+  let sort = "trending";
+  let offset = 0;
+  let loading = false;
+  let hasMore = true;
+  let items = [];
+  let onlyVideo = false;
+
+  // modal state
+  let current = null;
+  let liked = false;
+  let saved = false;
+
+  // elements
+  const $grid = document.getElementById("grid");
+  const $loader = document.getElementById("loader");
+  const $segSort = document.getElementById("seg-sort");
+  const $onlyVideo = document.getElementById("only-video");
+  const $btnRefresh = document.getElementById("btn-refresh");
+  const $authHint = document.getElementById("auth-hint");
+
+  const $modal = document.getElementById("modal-backdrop");
+  const $modalClose = document.getElementById("modal-close");
+  const $mView = document.getElementById("m-view");
+  const $mAvatar = document.getElementById("m-avatar");
+  const $mUserlink = document.getElementById("m-userlink");
+  const $mUserline = document.getElementById("m-userline");
+  const $mDate = document.getElementById("m-date");
+  const $mTitle = document.getElementById("m-title");
+  const $mStats = document.getElementById("m-stats");
+  const $btnLike = document.getElementById("btn-like");
+  const $btnSave = document.getElementById("btn-save");
+  const $cList = document.getElementById("c-list");
+  const $cInput = document.getElementById("c-input");
+  const $cSend = document.getElementById("c-send");
+  const $btnReloadComments = document.getElementById("btn-reload-comments");
+
+  const $toast = document.getElementById("toast");
+
+  function toast(msg){
+    $toast.textContent = msg;
+    $toast.classList.add("show");
+    setTimeout(()=> $toast.classList.remove("show"), 1400);
+  }
+
+  function showLoader(v){ $loader.style.display = v ? "flex" : "none"; }
+
+  function isVideoItem(it){
+    return (it.media_type || "").toLowerCase() === "video";
+  }
+
+  function safe(s){ return String(s || ""); }
+
+  function fmtDate(ts){
+    const s = safe(ts);
+    return s ? s.replace("T"," ").slice(0,16) : "";
+  }
+
+  function getClientId(){
+    const key = "lf_client_id";
+    let v = localStorage.getItem(key);
+    if(!v){
+      v = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);
+      localStorage.setItem(key, v);
+    }
+    return v;
+  }
+
+  async function getSessionToken(){
+    try{
+      if(!window.sb) return null;
+      const { data } = await window.sb.auth.getSession();
+      return data?.session?.access_token || null;
+    }catch(e){
+      return null;
+    }
+  }
+
+  async function api(path, opts={}){
+    const token = await getSessionToken();
+    const headers = Object.assign({"Content-Type":"application/json"}, opts.headers || {});
+    if(token) headers.Authorization = "Bearer " + token;
+    const res = await fetch(BACKEND + path, Object.assign({}, opts, { headers }));
+    let json = null;
+    try{ json = await res.json(); }catch(e){ json = null; }
+    if(!res.ok){
+      const msg = json?.error || json?.details || ("HTTP " + res.status);
+      throw new Error(msg);
+    }
+    return json;
+  }
+
+  function renderCard(it){
+    const video = isVideoItem(it);
+    let thumb = it.thumb_url || it.media_url || "";
+thumb = thumb ? encodeURI(thumb) : "";
+    const username = it.username || "user";
+    const display = it.display_name || username;
+    const avatar = it.avatar_url || "";
+    const title = it.title || "Untitled";
+
+    const stats = `
+      <div class="stat">LIKE ${it.like_count || 0}</div>
+<div class="stat">COMM ${it.comment_count || 0}</div>
+<div class="stat">SAVE ${it.save_count || 0}</div>
+<div class="stat">VIEW ${it.view_count || 0}</div>
+
+    `;
+
+    const avatarHtml = avatar ? `<img src="${avatar}" />` : ``;
+
+    return `
+      <div class="lf-card" data-id="${it.id}">
+        <div class="lf-media">
+          <img src="${thumb}" loading="lazy"
+     onerror="this.onerror=null; this.src='${encodeURI(it.media_url || "")}';" />
+          <div class="badge"><span class="dot ${video ? "video":"image"}"></span> ${video ? "VIDEO":"IMAGE"}</div>
+          <div class="badge badge-right">#${it.generation_id}</div>
+
+          <div class="card-bottom">
+            <div class="card-author">
+              <div class="avatar">${avatarHtml}</div>
+              <div class="author-txt">
+                <div class="author-name">${safe(display)}</div>
+                <div class="author-username">@${safe(username)}</div>
+              </div>
+            </div>
+
+            <div class="card-title">${safe(title)}</div>
+
+            <div class="card-stats">
+              ${stats}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderGrid(){
+    const list = onlyVideo ? items.filter(isVideoItem) : items;
+    if(list.length === 0){
+      $grid.innerHTML = `<div class="lf-empty">No items yet.</div>`;
+      return;
+    }
+    $grid.innerHTML = list.map(renderCard).join("");
+
+    // click handlers
+    $grid.querySelectorAll(".lf-card").forEach(card=>{
+      card.addEventListener("click", ()=>{
+        const id = card.getAttribute("data-id");
+        const it = items.find(x=> String(x.id) === String(id));
+        if(it) openModal(it);
+      });
+    });
+  }
+
+  async function fetchPage(reset=false){
+    if(loading) return;
+    loading = true;
+    showLoader(true);
+
+    try{
+      if(reset){
+        offset = 0;
+        hasMore = true;
+        items = [];
+        $grid.innerHTML = "Loading...";
+      }
+
+      const q = `?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`;
+      const json = await api(`/api/feed/list${q}`, { method:"GET" });
+
+      const page = Array.isArray(json.items) ? json.items : [];
+      // append uniq by id
+      const seen = new Set(items.map(x=> String(x.id)));
+      for(const it of page){
+        const k = String(it.id);
+        if(!seen.has(k)){
+          seen.add(k);
+          items.push(it);
+        }
+      }
+
+      offset = json.nextOffset ?? (offset + page.length);
+      hasMore = !!json.hasMore;
+
+      renderGrid();
+    }catch(e){
+      $grid.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`;
+      hasMore = false;
+    }finally{
+      loading = false;
+      showLoader(false);
+    }
+  }
+
+  // MODAL
+  function setStatsUI(it){
+    const stats = `
+      <div class="stat">❤️ <span id="st-like">${it.like_count || 0}</span></div>
+      <div class="stat">???? <span id="st-com">${it.comment_count || 0}</span></div>
+      <div class="stat">???? <span id="st-save">${it.save_count || 0}</span></div>
+      <div class="stat">????️ <span id="st-view">${it.view_count || 0}</span></div>
+    `;
+    $mStats.innerHTML = stats;
+  }
+
+  function setActionButtons(){
+    $btnLike.classList.toggle("on", liked);
+    $btnSave.classList.toggle("on", saved);
+    $btnLike.textContent = liked ? "❤️ Liked" : "❤️ Like";
+    $btnSave.textContent = saved ? "???? Saved" : "???? Save";
+  }
+
+  function renderModalMedia(it){
+    const media = it.media_url || it.thumb_url || "";
+    const video = isVideoItem(it) && (String(media).toLowerCase().endsWith(".mp4") || String(media).toLowerCase().endsWith(".webm") || String(media).toLowerCase().includes("fal.media"));
+
+    if(video){
+      $mView.innerHTML = `<video src="${media}" controls autoplay playsinline style="width:100%;height:100%;object-fit:contain"></video>`;
+    }else{
+      $mView.innerHTML = `<img src="${media}" />`;
+    }
+  }
+
+  async function openModal(it){
+    current = JSON.parse(JSON.stringify(it)); // copy
+    liked = false;
+    saved = false;
+    setActionButtons();
+
+    // head
+    const avatar = it.avatar_url || "";
+    $mAvatar.innerHTML = avatar ? `<img src="${avatar}" />` : "";
+    const uname = it.username || "user";
+    const dname = it.display_name || uname;
+    $mUserline.textContent = "@" + uname;
+    $mUserlink.textContent = dname;
+    $mUserlink.href = "/u/" + uname; // ты сделаешь отдельную страницу в тильде с этим путём (или редирект на другой домен)
+    $mDate.textContent = fmtDate(it.published_at);
+    $mTitle.textContent = it.title || "Untitled";
+
+    setStatsUI(it);
+    renderModalMedia(it);
+
+    $modal.classList.add("open");
+
+    // 1) view ping (dedupe в БД)
+    try{
+      const token = await getSessionToken();
+      const payload = { post_id: it.id, client_id: getClientId() };
+      // если токен есть — всё равно ок (бек сам попробует взять user)
+      const headers = {"Content-Type":"application/json"};
+      if(token) headers.Authorization = "Bearer " + token;
+
+      const r = await fetch(BACKEND + "/api/feed/view", { method:"POST", headers, body: JSON.stringify(payload) });
+      if(r.ok){
+        const j = await r.json();
+        if(j?.counts){
+          current.view_count = j.counts.view_count ?? current.view_count;
+          current.like_count = j.counts.like_count ?? current.like_count;
+          current.comment_count = j.counts.comment_count ?? current.comment_count;
+          current.save_count = j.counts.save_count ?? current.save_count;
+          setStatsUI(current);
+          // sync to items
+          const idx = items.findIndex(x=> String(x.id)===String(current.id));
+          if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); }
+        }
+      }
+    }catch(e){}
+
+    // 2) load comments
+    await loadComments();
+
+    // (опционально) тут можно добавить api/feed/state, если ты его сделаешь — чтобы подсветить liked/saved
+    // сейчас просто оставляем как false, но функционал лайк/сейв работает.
+  }
+
+  function closeModal(){
+    $modal.classList.remove("open");
+    current = null;
+    $mView.innerHTML = "";
+    $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">Loading…</div>`;
+    $cInput.value = "";
+  }
+
+  async function requireLoginOrWarn(){
+    const token = await getSessionToken();
+    if(!token){
+      toast("Login required");
+      return null;
+    }
+    return token;
+  }
+
+  async function loadComments(){
+    if(!current) return;
+    $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">Loading…</div>`;
+    try{
+      const json = await api(`/api/feed/comments?post_id=${encodeURIComponent(current.id)}&limit=80&offset=0`, { method:"GET" });
+      const arr = Array.isArray(json.items) ? json.items : [];
+      if(arr.length === 0){
+        $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">No comments yet.</div>`;
+        return;
+      }
+      $cList.innerHTML = arr.map(c=>{
+        const av = c.avatar_url ? `<img src="${c.avatar_url}" />` : "";
+        const name = c.display_name || c.username || "user";
+        const when = (c.created_at || "").replace("T"," ").slice(0,16);
+        return `
+          <div class="c-item">
+            <div class="avatar">${av}</div>
+            <div class="c-bubble">
+              <div class="c-top">
+                <div class="c-name">${safe(name)}</div>
+                <div class="c-time">${safe(when)}</div>
+              </div>
+              <div class="c-body">${safe(c.body)}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+      $cList.scrollTop = $cList.scrollHeight;
+    }catch(e){
+      $cList.innerHTML = `<div class="lf-empty" style="padding:18px;color:var(--danger)">${e.message}</div>`;
+    }
+  }
+
+  async function doLikeToggle(){
+    if(!current) return;
+    const token = await requireLoginOrWarn();
+    if(!token) return;
+
+    try{
+      const path = liked ? "/api/feed/unlike" : "/api/feed/like";
+      const json = await api(path, { method:"POST", body: JSON.stringify({ post_id: current.id }) });
+      if(json?.counts){
+        current.like_count = json.counts.like_count ?? current.like_count;
+        current.comment_count = json.counts.comment_count ?? current.comment_count;
+        current.save_count = json.counts.save_count ?? current.save_count;
+        current.view_count = json.counts.view_count ?? current.view_count;
+        setStatsUI(current);
+      }
+      liked = !liked;
+      setActionButtons();
+
+      // sync to grid
+      const idx = items.findIndex(x=> String(x.id)===String(current.id));
+      if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); }
+
+    }catch(e){
+      toast(e.message);
+    }
+  }
+
+  async function doSaveToggle(){
+    if(!current) return;
+    const token = await requireLoginOrWarn();
+    if(!token) return;
+
+    try{
+      const path = saved ? "/api/feed/unsave" : "/api/feed/save";
+      const json = await api(path, { method:"POST", body: JSON.stringify({ post_id: current.id }) });
+      if(json?.counts){
+        current.like_count = json.counts.like_count ?? current.like_count;
+        current.comment_count = json.counts.comment_count ?? current.comment_count;
+        current.save_count = json.counts.save_count ?? current.save_count;
+        current.view_count = json.counts.view_count ?? current.view_count;
+        setStatsUI(current);
+      }
+      saved = !saved;
+      setActionButtons();
+
+      const idx = items.findIndex(x=> String(x.id)===String(current.id));
+      if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); }
+
+    }catch(e){
+      toast(e.message);
+    }
+  }
+
+  async function sendComment(){
+    if(!current) return;
+    const token = await requireLoginOrWarn();
+    if(!token) return;
+
+    const text = ($cInput.value || "").trim();
+    if(!text) return;
+
+    $cSend.disabled = true;
+    try{
+      const json = await api("/api/feed/comment", { method:"POST", body: JSON.stringify({ post_id: current.id, body: text }) });
+      $cInput.value = "";
+      if(json?.counts){
+        current.comment_count = json.counts.comment_count ?? current.comment_count;
+        setStatsUI(current);
+
+        const idx = items.findIndex(x=> String(x.id)===String(current.id));
+        if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); }
+      }
+      await loadComments();
+      toast("Sent");
+    }catch(e){
+      toast(e.message);
+    }finally{
+      $cSend.disabled = false;
+    }
+  }
+
+  // events
+  $modalClose.onclick = closeModal;
+  $modal.onclick = (e)=>{ if(e.target === $modal) closeModal(); };
+
+  $btnLike.onclick = doLikeToggle;
+  $btnSave.onclick = doSaveToggle;
+
+  $cSend.onclick = sendComment;
+  $cInput.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      sendComment();
+    }
+  });
+
+  $btnReloadComments.onclick = loadComments;
+
+  $segSort.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active"));
+      btn.classList.add("active");
+      sort = btn.dataset.sort;
+      await fetchPage(true);
+    });
+  });
+
+  $onlyVideo.addEventListener("change", ()=>{
+    onlyVideo = $onlyVideo.checked;
+    renderGrid();
+  });
+
+  $btnRefresh.addEventListener("click", ()=> fetchPage(true));
+
+  // infinite scroll
+  window.addEventListener("scroll", ()=>{
+    if(!hasMore || loading) return;
+    const nearBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900);
+    if(nearBottom) fetchPage(false);
+  });
+
+  async function updateAuthHint(){
+    const token = await getSessionToken();
+    $authHint.style.display = token ? "none" : "inline";
+  }
+
+  async function init(){
+    await updateAuthHint();
+    // если пользователь логинится/разлогинивается — можно обновлять подсказку
+    try{
+      if(window.sb){
+        window.sb.auth.onAuthStateChange(()=> updateAuthHint());
+      }
+    }catch(e){}
+    await fetchPage(true);
+  }
+
+  init();
+})();
+</script>
