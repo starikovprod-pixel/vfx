@@ -537,8 +537,8 @@
         <div class="m-stats" id="m-stats"></div>
 
         <div class="m-actions">
-          <button class="btn-act" id="btn-like">❤️ Like</button>
-          <button class="btn-act" id="btn-save">???? Save</button>
+          <button class="btn-act" id="btn-like">Like</button>
+          <button class="btn-act" id="btn-save">Save</button>
         </div>
 
         <div class="m-comments">
@@ -647,14 +647,22 @@
     }
   }
 
-  async function api(path, opts={}){
+  async function api(path, opts = {}) {
+    const method = (opts.method || "GET").toUpperCase();
     const token = await getSessionToken();
-    const headers = Object.assign({"Content-Type":"application/json"}, opts.headers || {});
-    if(token) headers.Authorization = "Bearer " + token;
+
+    const headers = Object.assign({}, opts.headers || {});
+    // Content-Type нужен только когда есть body
+    if (opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
+
+    // Авторизацию шлём только если это НЕ публичный GET
+    const isPublicGet = method === "GET" && path.startsWith("/api/feed/list");
+    if (token && !isPublicGet) headers.Authorization = "Bearer " + token;
+
     const res = await fetch(BACKEND + path, Object.assign({}, opts, { headers }));
     let json = null;
-    try{ json = await res.json(); }catch(e){ json = null; }
-    if(!res.ok){
+    try { json = await res.json(); } catch(e) { json = null; }
+    if (!res.ok) {
       const msg = json?.error || json?.details || ("HTTP " + res.status);
       throw new Error(msg);
     }
@@ -663,8 +671,10 @@
 
   function renderCard(it){
     const video = isVideoItem(it);
-    let thumb = it.thumb_url || it.media_url || "";
-thumb = thumb ? encodeURI(thumb) : "";
+    const thumbRaw = it.thumb_url || it.media_url || "";
+    const mediaRaw = it.media_url || "";
+    const thumb = thumbRaw ? encodeURI(thumbRaw) : "";
+    const media = mediaRaw ? encodeURI(mediaRaw) : "";
     const username = it.username || "user";
     const display = it.display_name || username;
     const avatar = it.avatar_url || "";
@@ -683,8 +693,12 @@ thumb = thumb ? encodeURI(thumb) : "";
     return `
       <div class="lf-card" data-id="${it.id}">
         <div class="lf-media">
-          <img src="${thumb}" loading="lazy"
-     onerror="this.onerror=null; this.src='${encodeURI(it.media_url || "")}';" />
+          <img class="lf-thumb"
+               src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+               data-thumb="${thumb}"
+               data-fallback="${media}"
+               loading="lazy"
+               decoding="async" />
           <div class="badge"><span class="dot ${video ? "video":"image"}"></span> ${video ? "VIDEO":"IMAGE"}</div>
           <div class="badge badge-right">#${it.generation_id}</div>
 
@@ -715,6 +729,17 @@ thumb = thumb ? encodeURI(thumb) : "";
       return;
     }
     $grid.innerHTML = list.map(renderCard).join("");
+
+    $grid.querySelectorAll("img.lf-thumb").forEach(img => {
+      const thumb = img.getAttribute("data-thumb") || "";
+      const fallback = img.getAttribute("data-fallback") || "";
+      if (!thumb && fallback) img.src = fallback;
+      else img.src = thumb;
+
+      img.onerror = () => {
+        if (fallback && img.src !== fallback) img.src = fallback;
+      };
+    });
 
     // click handlers
     $grid.querySelectorAll(".lf-card").forEach(card=>{
@@ -769,10 +794,10 @@ thumb = thumb ? encodeURI(thumb) : "";
   // MODAL
   function setStatsUI(it){
     const stats = `
-      <div class="stat">❤️ <span id="st-like">${it.like_count || 0}</span></div>
-      <div class="stat">???? <span id="st-com">${it.comment_count || 0}</span></div>
-      <div class="stat">???? <span id="st-save">${it.save_count || 0}</span></div>
-      <div class="stat">????️ <span id="st-view">${it.view_count || 0}</span></div>
+      <div class="stat">LIKE <span id="st-like">${it.like_count || 0}</span></div>
+      <div class="stat">COMM <span id="st-com">${it.comment_count || 0}</span></div>
+      <div class="stat">SAVE <span id="st-save">${it.save_count || 0}</span></div>
+      <div class="stat">VIEW <span id="st-view">${it.view_count || 0}</span></div>
     `;
     $mStats.innerHTML = stats;
   }
@@ -780,8 +805,8 @@ thumb = thumb ? encodeURI(thumb) : "";
   function setActionButtons(){
     $btnLike.classList.toggle("on", liked);
     $btnSave.classList.toggle("on", saved);
-    $btnLike.textContent = liked ? "❤️ Liked" : "❤️ Like";
-    $btnSave.textContent = saved ? "???? Saved" : "???? Save";
+    $btnLike.textContent = liked ? "Liked" : "Like";
+    $btnSave.textContent = saved ? "Saved" : "Save";
   }
 
   function renderModalMedia(it){
