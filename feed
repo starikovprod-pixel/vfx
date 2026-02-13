@@ -450,6 +450,82 @@
   }
   .c-send:hover{ background:#ddd; }
 
+  .c-tools{
+    margin-left:auto;
+    display:flex;
+    gap:6px;
+    align-items:center;
+  }
+
+  .icon-btn{
+    width:28px;
+    height:28px;
+    border-radius:10px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.06);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.15s;
+    flex: 0 0 auto;
+  }
+  .icon-btn:hover{
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.20);
+  }
+  .icon-btn.danger:hover{
+    background: rgba(255,70,90,0.12);
+    border-color: rgba(255,70,90,0.35);
+  }
+  .icon-btn svg{
+    width:14px;
+    height:14px;
+    opacity: .9;
+  }
+
+  .c-editbox{
+    margin-top:8px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .c-editbox textarea{
+    width:100%;
+    min-height:70px;
+    resize: vertical;
+    border-radius: 12px;
+    padding:10px 12px;
+    color:#fff;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-size:13px;
+  }
+  .c-edit-actions{
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+  }
+  .c-mini{
+    padding:8px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+    cursor:pointer;
+    font-weight:800;
+    font-size:12px;
+  }
+  .c-mini.primary{
+    background:#fff;
+    color:#000;
+    border: none;
+  }
+  .c-mini.danger{
+    border-color: rgba(255,70,90,0.35);
+    color: #ff98a2;
+  }
+
   .toast{
     position: fixed;
     left: 18px;
@@ -581,6 +657,8 @@
   let current = null;
   let liked = false;
   let saved = false;
+  let editingCommentId = null;
+  let deletingCommentId = null;
 
   // elements
   const $grid = document.getElementById("grid");
@@ -679,10 +757,6 @@
 
   function renderCard(it){
     const video = isVideoItem(it);
-    const thumbRaw = it.thumb_url || it.media_url || "";
-    const mediaRaw = it.media_url || "";
-    const thumb = thumbRaw ? encodeURI(thumbRaw) : "";
-    const media = mediaRaw ? encodeURI(mediaRaw) : "";
     const username = it.username || "user";
     const display = it.display_name || username;
     const avatar = it.avatar_url || "";
@@ -703,8 +777,7 @@
         <div class="lf-media">
           <img class="lf-thumb"
                src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
-               data-thumb="${thumb}"
-               data-fallback="${media}"
+               data-id="${it.id}"
                loading="lazy"
                decoding="async" />
           <div class="badge"><span class="dot ${video ? "video":"image"}"></span> ${video ? "VIDEO":"IMAGE"}</div>
@@ -739,12 +812,19 @@
     $grid.innerHTML = list.map(renderCard).join("");
 
     $grid.querySelectorAll("img.lf-thumb").forEach(img => {
-      const thumb = img.getAttribute("data-thumb") || "";
-      const fallback = img.getAttribute("data-fallback") || "";
-      img.src = thumb || fallback || "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
+      const id = img.getAttribute("data-id");
+      const it = items.find(x => String(x.id) === String(id));
+      if (!it) return;
+
+      const thumb = (it.thumb_url || it.media_url || "").trim();
+      const media = (it.media_url || "").trim();
+
+      img.referrerPolicy = "no-referrer";
+
+      img.src = thumb || media || img.src;
 
       img.onerror = () => {
-        if (fallback && img.src !== fallback) img.src = fallback;
+        if (media && img.src !== media) img.src = media;
       };
     });
 
@@ -904,6 +984,19 @@
       const json = await api(`/api/feed/comments?post_id=${encodeURIComponent(current.id)}&limit=80&offset=0`, { method:"GET" });
       const arr = Array.isArray(json.items) ? json.items : [];
       const myId = await getMyUserId();
+      const editIcon = `
+<svg viewBox="0 0 24 24" fill="none">
+  <path d="M12 20h9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
+        stroke="white" stroke-width="2" stroke-linejoin="round"/>
+</svg>`;
+
+      const trashIcon = `
+<svg viewBox="0 0 24 24" fill="none">
+  <path d="M3 6h18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <path d="M8 6V4h8v2" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M19 6l-1 14H6L5 6" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+</svg>`;
       if(arr.length === 0){
         $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">No comments yet.</div>`;
         return;
@@ -914,10 +1007,32 @@
         const when = (c.created_at || "").replace("T"," ").slice(0,16);
         const mine = myId && String(c.user_id) === String(myId);
         const tools = mine ? `
-          <span style="margin-left:auto; display:flex; gap:8px;">
-            <button class="btn-mini" style="padding:6px 10px;" data-edit="${c.id}">Edit</button>
-            <button class="btn-mini" style="padding:6px 10px;" data-del="${c.id}">Delete</button>
-          </span>` : "";
+          <div class="c-tools">
+            <button class="icon-btn" data-edit="${c.id}" title="Edit">${editIcon}</button>
+            <button class="icon-btn danger" data-del="${c.id}" title="Delete">${trashIcon}</button>
+          </div>` : "";
+        const isEditing = String(editingCommentId) === String(c.id);
+        const isDeleting = String(deletingCommentId) === String(c.id);
+
+        const bodyHtml = isEditing ? `
+          <div class="c-editbox">
+            <textarea data-edit-ta="${c.id}">${safe(c.body)}</textarea>
+            <div class="c-edit-actions">
+              <button class="c-mini" data-edit-cancel="${c.id}">Cancel</button>
+              <button class="c-mini primary" data-edit-save="${c.id}">Save</button>
+            </div>
+          </div>
+        ` : `
+          <div class="c-body">${safe(c.body)}</div>
+        `;
+
+        const deleteHtml = isDeleting ? `
+          <div class="c-edit-actions" style="margin-top:10px; justify-content:flex-end;">
+            <span style="color:rgba(255,255,255,0.6); font-size:12px; margin-right:auto;">Delete this comment?</span>
+            <button class="c-mini" data-del-cancel="${c.id}">Cancel</button>
+            <button class="c-mini danger" data-del-ok="${c.id}">Delete</button>
+          </div>
+        ` : "";
         return `
           <div class="c-item">
             <div class="avatar">${av}</div>
@@ -927,33 +1042,73 @@
                 <div class="c-time">${safe(when)}</div>
                 ${tools}
               </div>
-              <div class="c-body">${safe(c.body)}</div>
+              ${bodyHtml}
+              ${deleteHtml}
             </div>
           </div>
         `;
       }).join("");
 
-      $cList.querySelectorAll("[data-del]").forEach(b=>{
+      $cList.querySelectorAll("[data-edit]").forEach(b=>{
+        b.onclick = () => {
+          editingCommentId = b.getAttribute("data-edit");
+          deletingCommentId = null;
+          loadComments();
+        };
+      });
+
+      $cList.querySelectorAll("[data-edit-cancel]").forEach(b=>{
+        b.onclick = () => {
+          editingCommentId = null;
+          loadComments();
+        };
+      });
+
+      $cList.querySelectorAll("[data-edit-save]").forEach(b=>{
         b.onclick = async () => {
-          const id = b.getAttribute("data-del");
-          if(!confirm("Delete comment?")) return;
+          const id = b.getAttribute("data-edit-save");
+          const ta = $cList.querySelector(`[data-edit-ta="${id}"]`);
+          const text = (ta?.value || "").trim();
+          if(!text) return toast("Empty");
+
           try{
-            await api("/api/feed/comment_delete", { method:"POST", body: JSON.stringify({ comment_id: id }) });
+            await api("/api/feed/comment_edit", {
+              method:"POST",
+              body: JSON.stringify({ comment_id: id, body: text })
+            });
+            editingCommentId = null;
             await loadComments();
-            toast("Deleted");
+            toast("Updated");
           }catch(e){ toast(e.message); }
         };
       });
 
-      $cList.querySelectorAll("[data-edit]").forEach(b=>{
+      $cList.querySelectorAll("[data-del]").forEach(b=>{
+        b.onclick = () => {
+          deletingCommentId = b.getAttribute("data-del");
+          editingCommentId = null;
+          loadComments();
+        };
+      });
+
+      $cList.querySelectorAll("[data-del-cancel]").forEach(b=>{
+        b.onclick = () => {
+          deletingCommentId = null;
+          loadComments();
+        };
+      });
+
+      $cList.querySelectorAll("[data-del-ok]").forEach(b=>{
         b.onclick = async () => {
-          const id = b.getAttribute("data-edit");
-          const newText = prompt("Edit comment:", "");
-          if(newText === null) return;
+          const id = b.getAttribute("data-del-ok");
           try{
-            await api("/api/feed/comment_edit", { method:"POST", body: JSON.stringify({ comment_id: id, body: newText }) });
+            await api("/api/feed/comment_delete", {
+              method:"POST",
+              body: JSON.stringify({ comment_id: id })
+            });
+            deletingCommentId = null;
             await loadComments();
-            toast("Updated");
+            toast("Deleted");
           }catch(e){ toast(e.message); }
         };
       });
