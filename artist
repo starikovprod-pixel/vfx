@@ -140,8 +140,8 @@
 
   /* POSTS FEED */
   .feed{
-    width:min(860px,100%);
-    margin:0 auto;
+    width: min(860px, 100%);
+    margin:0;
     display:flex;
     flex-direction:column;
     gap:0;
@@ -308,6 +308,7 @@
   }
   .mini:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
   .mini.on.like{ color:var(--danger); border-color: rgba(255,70,90,0.45); background: rgba(255,70,90,0.14); }
+  .mini.on.save{ color:#2b6cff; border-color: rgba(43,108,255,0.45); background: rgba(43,108,255,0.18); }
   .mini svg{ width:16px; height:16px; stroke: currentColor; fill:none; stroke-width:2; }
   .mini.danger{ color:#ffd3d8; border-color: rgba(255,70,90,0.35); }
 
@@ -625,6 +626,7 @@
     background:#000;
     aspect-ratio: 1 / 1;
     cursor:pointer;
+    transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
   }
   .col-item img, .col-item video{
     position:absolute; inset:0;
@@ -633,18 +635,35 @@
     display:block;
   }
   .drag-handle{
-    position:absolute; top:10px; right:10px;
+    position:absolute;
+    top:50%;
+    left:50%;
+    right:auto;
+    transform: translate(-50%, -50%);
+    padding:0;
+    width:42px;
+    height:42px;
+    border-radius:14px;
     background: rgba(0,0,0,0.55);
     border:1px solid rgba(255,255,255,0.12);
-    border-radius:10px;
-    padding:6px 8px;
-    font-weight:900;
-    font-size:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     color:#fff;
     cursor:grab;
     user-select:none;
   }
-  .col-item.dragging{ opacity:.55; transform: scale(.98); }
+  .drag-handle svg{
+    width:20px;
+    height:20px;
+    stroke:#fff;
+    opacity:.9;
+  }
+  .col-item.dragging{
+    opacity:.6;
+    transform: scale(.98);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  }
 
   /* Media Viewer (super top) */
   .mv-backdrop{
@@ -753,6 +772,20 @@
   .mv-dots button.on{ background:#fff; }
 
   /* Sheets */
+
+  #emoGrid button{
+    height:44px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    cursor:pointer;
+    font-size:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",sans-serif;
+  }
+  #emoGrid button:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
   .sheet-backdrop{ position:fixed; inset:0; z-index:14000; background:rgba(0,0,0,0.86); backdrop-filter: blur(5px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:.18s; }
   .sheet-backdrop.open{ opacity:1; pointer-events:auto; }
   .sheet{
@@ -892,7 +925,7 @@
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
   @media(max-width: 980px){
-    .feed{ width:min(720px,100%); }
+    .feed{ width:min(720px,100%); margin:0; }
     .pslide img, .pslide video{ max-height:300px; }
     .lf-modal { flex-direction:column; height:92vh; }
     .m-sidebar { width:100%; height:46vh; border-left:none; border-top:1px solid var(--border); }
@@ -1171,6 +1204,22 @@
   </div>
 
 
+  <div class="sheet-backdrop" id="emoB">
+    <div class="sheet" onclick="event.stopPropagation()" style="max-width:560px;height:auto;max-height:80vh;">
+      <div class="sheet-head">
+        <div class="sheet-title">Emoji</div>
+        <button class="sheet-close" id="emoClose">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="search" style="width:100%;">
+          <span style="opacity:.75;font-weight:900;">Search</span>
+          <input id="emoSearch" placeholder="smile, fire, cat..." />
+        </div>
+        <div id="emoGrid" style="display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin-top:12px;max-height:320px;overflow:auto;"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1288,10 +1337,16 @@
   const $ceSave = document.getElementById("ceSave");
   const $ceText = document.getElementById("ceText");
 
+  const $emoB = document.getElementById("emoB");
+  const $emoClose = document.getElementById("emoClose");
+  const $emoSearch = document.getElementById("emoSearch");
+  const $emoGrid = document.getElementById("emoGrid");
+
   // State
   let username = "";
   let profile = null;
   let myProfile = null;
+  let myUserId = null;
   let isOwnProfile = false;
   let followState = false;
 
@@ -1351,6 +1406,45 @@
     edit: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="2"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="currentColor" stroke-width="2"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18" stroke="currentColor" stroke-width="2"/><path d="M8 6V4h8v2" stroke="currentColor" stroke-width="2"/><path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="2"/><path d="M10 11v6" stroke="currentColor" stroke-width="2"/><path d="M14 11v6" stroke="currentColor" stroke-width="2"/></svg>'
   };
+
+  const EMOJI_CPS = [
+    0x1F600,0x1F604,0x1F601,0x1F60E,0x1F913,0x1F978,0x1F607,0x1F642,0x1F609,0x1F60D,0x1F618,0x1F929,0x1F624,0x1F608,0x1F47B,0x1F916,
+    0x1F525,0x26A1,0x1F48E,0x2728,0x1F319,0x2B50,0x2600,0x1F308,0x2601,0x2744,0x1F480,0x1F9E0,0x1F441,0x1F3AC,0x1F3A5,0x1F39E,
+    0x1F3AE,0x1F579,0x1F3A8,0x1F58C,0x1F9E9,0x1F3A7,0x1F3B5,0x1F977,0x1F98A,0x1F431,0x1F436,0x1F43C,0x1F984,0x1F438,0x1F435,0x1F989,
+    0x1F33F,0x2618,0x1F344,0x1F30A,0x1F3DD,0x1F3D4,0x1F3D9,0x1F680,0x1F6F8,0x1F6F0,0x1F9EA,0x2699,0x1F9F0,0x1F527,0x1F52E,0x1F4CC,
+    0x2764,0x1F5A4,0x1F499,0x1F49C,0x1F90D,0x1F49B,0x1F49A,0x1F4A5,0x1F4AB,0x1FAE7,0x1F9FF,0x1F3C6,0x1F4BC,0x1F4F7,0x1F4A1,0x1F9CA
+  ];
+  const EMOJIS = EMOJI_CPS.map(cp => String.fromCodePoint(cp));
+
+  let emoTargetInput = null;
+
+  function openEmojiPicker(inputEl){
+    if(!$emoB || !$emoSearch || !$emoGrid) return;
+    emoTargetInput = inputEl;
+    $emoSearch.value = "";
+    renderEmojiGrid("");
+    $emoB.classList.add("open");
+    setTimeout(()=> $emoSearch.focus(), 0);
+  }
+  function closeEmojiPicker(){
+    if(!$emoB) return;
+    $emoB.classList.remove("open");
+    emoTargetInput = null;
+  }
+  function renderEmojiGrid(q){
+    if(!$emoGrid) return;
+    const query = (q||"").trim().toLowerCase();
+    const list = EMOJIS.filter(e => !query || e.includes(query));
+    $emoGrid.innerHTML = list.map(e=> `<button type="button" data-em="${e}">${e}</button>`).join("");
+    $emoGrid.querySelectorAll("[data-em]").forEach(b=>{
+      b.onclick = ()=>{
+        if(!emoTargetInput) return;
+        emoTargetInput.value = (emoTargetInput.value || "") + b.getAttribute("data-em");
+        emoTargetInput.focus();
+        closeEmojiPicker();
+      };
+    });
+  }
 
   function qs(name){ const u = new URL(location.href); return u.searchParams.get(name) || ""; }
   function safe(s){ return String(s||""); }
@@ -1626,6 +1720,17 @@
       offset = j.nextOffset != null ? j.nextOffset : (offset + page.length);
       hasMore = !!j.hasMore;
 
+      const token = await getSessionToken();
+      if(token){
+        for(const p of page){
+          try{
+            const st = await api(`/api/posts/state?post_id=${encodeURIComponent(p.id)}`, { method:"GET" });
+            p._liked = !!st.liked;
+            p._saved = !!st.saved;
+          }catch(e){}
+        }
+      }
+
       // preload library first page if empty (so media viewer can open)
       if(!libraryItems.length){
         try{ await loadLibrary(true); }catch(e){}
@@ -1772,6 +1877,7 @@
               <div class="post-actions">
                 <button class="mini ${p._liked ? "on like" : ""}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button>
                 <button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button>
+                <button class="mini ${p._saved ? "on save" : ""}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button>
                 <div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div>
 
                 ${isOwnProfile ? `
@@ -1786,7 +1892,7 @@
                 <div class="pc-form">
                   ${myAvatarHTML()}
                   <input class="pc-input" id="pc-in-${escapeHtml(p.id)}" placeholder="Write a comment…" />
-                  <button class="mini" type="button" data-emo="${escapeHtml(p.id)}">😀</button>
+                  <button class="mini" type="button" data-emo="${escapeHtml(p.id)}">Emoji</button>
                   <button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button>
                 </div>
               </div>
@@ -1834,6 +1940,22 @@
           }catch(e){ toast(e.message||"Failed"); }
         }
 
+        if(act === "save") {
+          try{
+            await requireToken();
+            const endpoint = post._saved ? "/api/posts/unsave" : "/api/posts/save";
+            const j = await api(endpoint, { method:"POST", body: JSON.stringify({ post_id: pid }) });
+            post._saved = !post._saved;
+            if(j?.counts){
+              post.like_count = j.counts.like_count;
+              post.comment_count = j.counts.comment_count;
+              post.save_count = j.counts.save_count;
+              post.view_count = j.counts.view_count;
+            }
+            renderPosts();
+          }catch(e){ toast(e.message||"Failed"); }
+        }
+
         if(act === "toggle-comments"){
           const box = $grid.querySelector(`[data-comments="${CSS.escape(pid)}"]`);
           if(!box) return;
@@ -1870,11 +1992,7 @@
       b.onclick = ()=>{
         const pid = b.getAttribute("data-emo");
         const inp = document.getElementById("pc-in-" + pid);
-        if(!inp) return;
-        const em = prompt("Emoji:", "😂");
-        if(!em) return;
-        inp.value = (inp.value||"") + em;
-        inp.focus();
+        if(inp) openEmojiPicker(inp);
       };
     });
 
@@ -1918,7 +2036,7 @@
         return;
       }
 
-      const myId = String(myProfile?.user_id || myProfile?.id || "");
+      const myId = myUserId ? String(myUserId) : "";
       listEl.innerHTML = arr.map(c=>{
         const avEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
         const avHtml = avEmoji ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
@@ -1930,7 +2048,7 @@
             <div class="avatar ${avEmoji ? "emoji" : ""}">${avHtml}</div>
             <div class="pc-bubble">
               <div class="pc-top">
-                <a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||"")}">${escapeHtml(c.display_name||c.username||"user")}${c.verified ? `<span class="vfy">${VERIFIED_SVG}</span>` : ``}</a>
+                <a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||"")}">${escapeHtml(c.display_name||c.username||"user")}${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}</a>
                 <div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div>
                 ${(canEdit || canDelete) ? `
                   <div style="margin-left:auto;display:flex;gap:8px;">
@@ -2200,7 +2318,12 @@
             ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>`
             : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />`
           }
-          ${colReorderMode ? `<div class="drag-handle">drag</div>` : ``}
+          ${colReorderMode ? `
+            <div class="drag-handle" title="Drag">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+            </div>` : ``}
         </div>
       `;
     }).join("");
@@ -3028,6 +3151,10 @@
   $ceClose.onclick = closeCommentEditor;
   $ceCancel.onclick = closeCommentEditor;
   $ceB.onclick = (e)=>{ if(e.target === $ceB) closeCommentEditor(); };
+  $emoClose.onclick = closeEmojiPicker;
+  $emoB.onclick = (e)=>{ if(e.target === $emoB) closeEmojiPicker(); };
+  $emoSearch.oninput = ()=> renderEmojiGrid($emoSearch.value);
+
   $ceSave.onclick = async ()=>{
     try{
       await requireToken();
@@ -3053,6 +3180,7 @@
     }
 
     await loadProfileHeaderOnce();
+    myUserId = await getCurrentUserId();
     try{
       const me = await api("/api/me", { method:"GET" });
       myProfile = me?.profile || (me?.user_id ? {
