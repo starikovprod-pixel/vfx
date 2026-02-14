@@ -207,6 +207,9 @@
   .c-send{ width:46px; border:0; border-radius:14px; background:#fff; color:#000; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .c-send svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.6; }
 
+  .toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(12px); background:rgba(15,15,15,0.96); color:#fff; border:1px solid rgba(255,255,255,0.16); border-radius:12px; padding:10px 14px; font-weight:800; font-size:13px; z-index:10020; opacity:0; pointer-events:none; transition:.18s ease; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
   @media(max-width: 980px){
     .lf-modal { flex-direction:column; height:92vh; }
     .m-sidebar { width:100%; height:46vh; border-left:none; border-top:1px solid var(--border); }
@@ -216,6 +219,7 @@
 
 <div id="lf-u">
   <div class="vfy-tip" id="vfyTip">Verified — awarded at 100 followers. Helps ranking in Feed.</div>
+  <div class="toast" id="toast"></div>
   <div class="wrap">
     <div class="top">
       <div>
@@ -225,7 +229,6 @@
             <div class="pname" id="p-name">Loading…</div>
             <div class="puser" id="p-user">@…</div>
             <div class="fcnt"><span>Followers</span><b id="p-followers">0</b></div>
-            <button class="p-follow" id="p-follow-btn" style="display:none;">Follow</button>
           </div>
         </div>
         <div class="pbio" id="p-bio" style="display:none;"></div>
@@ -233,6 +236,7 @@
       </div>
 
       <div class="controls">
+        <button class="p-follow" id="p-follow-btn" style="display:none;">Follow</button>
         <div class="seg" id="seg-sort">
           <button class="active" data-sort="new">New</button>
           <button data-sort="top">Top</button>
@@ -324,6 +328,7 @@
   const $pLinks = document.getElementById("p-links");
   const $pFollowers = document.getElementById("p-followers");
   const $pFollowBtn = document.getElementById("p-follow-btn");
+  const $toast = document.getElementById("toast");
   const $seg = document.getElementById("seg-sort");
   const $range = document.getElementById("range");
 
@@ -379,6 +384,12 @@
 
   function qs(name){ const u = new URL(location.href); return u.searchParams.get(name) || ""; }
   function safe(s){ return String(s||""); }
+  function toast(msg){
+    if(!$toast) return;
+    $toast.textContent = String(msg || "");
+    $toast.classList.add("show");
+    setTimeout(()=> $toast.classList.remove("show"), 1600);
+  }
   function fmtDate(ts){ return safe(ts).replace("T"," ").slice(0,16); }
   function getFollowCache(){
     try { return JSON.parse(localStorage.getItem(LS_FOLLOW) || "{}"); } catch(e){ return {}; }
@@ -561,6 +572,7 @@
         $pFollowBtn.disabled = false;
         $pFollowBtn.textContent = followState ? "Following" : "Follow";
         $pFollowBtn.classList.toggle("on", followState);
+        $pFollowBtn.classList.toggle("follow", true);
       }
 
       let page = Array.isArray(j.works) ? j.works : [];
@@ -726,14 +738,15 @@
   async function toggleFollow(){
     if(isOwnProfile || !profile?.user_id) return;
     const token = await getSessionToken();
-    if(!token){ alert("Login required"); return; }
+    if(!token){ toast("Login required"); return; }
     const path = followState ? "/api/social/unfollow" : "/api/social/follow";
-    const payload = followState ? { following_id: profile.user_id } : { user_id: profile.user_id };
+    const payload = { following_id: profile.user_id };
     const j = await api(path, { method:"POST", body: JSON.stringify(payload) });
     followState = !followState;
     cacheSet(profile.user_id, followState);
     $pFollowBtn.textContent = followState ? "Following" : "Follow";
     $pFollowBtn.classList.toggle("on", followState);
+    $pFollowBtn.classList.toggle("follow", true);
     items = items.map(x => String(x.user_id) === String(profile.user_id) ? Object.assign({}, x, { following: followState }) : x);
     renderGrid();
     if(j && typeof j.follower_count !== "undefined") {
@@ -824,7 +837,7 @@
   });
 
   $mclose.onclick = closeModal;
-  $pFollowBtn.onclick = () => { toggleFollow().catch(e=>alert(e.message||"Failed")); };
+  $pFollowBtn.onclick = () => { toggleFollow().catch(e=>toast(e.message||"Failed")); };
   $mb.onclick = (e) => { if(e.target === $mb) closeModal(); };
   $likeBtn.onclick = toggleLike;
   $saveBtn.onclick = toggleSave;
@@ -832,7 +845,7 @@
   $csend.onclick = sendComment;
   $titleEditBtn.onclick = startTitleEdit;
   $titleCancel.onclick = () => { $titleEdit.style.display = "none"; };
-  $titleSave.onclick = async () => { try{ await saveTitle(); }catch(e){ alert(e.message || "Save failed"); } };
+  $titleSave.onclick = async () => { try{ await saveTitle(); }catch(e){ toast(e.message || "Save failed"); } };
 
   username = (qs("username") || "").trim();
   if(!username){
