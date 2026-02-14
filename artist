@@ -70,8 +70,23 @@
   .fcnt span{ color: rgba(255,255,255,0.55); font-weight:800; }
   .fcnt b{ color:#fff; }
 
-  .vfy{ width:18px; height:18px; color:var(--blue); display:inline-flex; align-items:center; justify-content:center; pointer-events:none; flex:0 0 auto; transform: translateY(1px); }
-  .vfy svg{ width:18px; height:18px; display:block; fill:currentColor; }
+  .vfy{
+    width:16px;
+    height:16px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--blue);
+    flex:0 0 auto;
+    transform:none;
+    vertical-align:middle;
+  }
+  .vfy svg{
+    width:16px;
+    height:16px;
+    display:block;
+    fill:currentColor;
+  }
   .pname .vfy{ width:20px; height:20px; }
   .pname .vfy svg{ width:20px; height:20px; }
   .vfy-tip{ position:fixed; z-index:20050; display:none; max-width:220px; background:#0b0b0b; color:#fff; border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:8px 10px; font-size:12px; line-height:1.3; pointer-events:none; }
@@ -348,10 +363,12 @@
     align-items:center;
     justify-content:center;
     cursor:pointer;
+    color:#fff;
   }
   .cact:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
-  .cact svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; }
+  .cact svg{ width:16px; height:16px; stroke:#fff; fill:none; stroke-width:2; }
   .cact.danger{ color:#ffd3d8; border-color: rgba(255,70,90,0.35); }
+  .cact.danger svg{ stroke:#ffd3d8; }
   .cact.danger:hover{ border-color: rgba(255,70,90,0.55); }
 
   /* Comments block under post */
@@ -387,8 +404,20 @@
     display:flex; gap:8px; align-items:center; flex-wrap:wrap;
     margin-bottom:6px;
   }
+  .pc-footer{
+    margin-top:8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .pc-actions{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
   .pc-name{ font-weight:950; font-size:12px; color:#fff; text-decoration:none; display:flex; gap:6px; align-items:center; }
-  .pc-time{ font-size:11px; color:rgba(255,255,255,0.55); transform: translateY(1px); }
+  .pc-time{ font-size:11px; color:rgba(255,255,255,0.55); transform:none; }
   .pc-body{ font-size:13px; line-height:1.35; white-space:pre-wrap; }
   .pc-mention{ color:#fff; font-weight:900; text-decoration:none; }
   .pc-mention:hover{ text-decoration:underline; }
@@ -401,12 +430,7 @@
     flex-wrap:wrap;
     align-items:center;
   }
-  .pc-replyto-user{
-    color:#fff;
-    text-decoration:none;
-    font-weight:900;
-  }
-  .pc-replyto-user:hover{ text-decoration:underline; }
+  .pc-replyto-user{ font-weight:900; }
   .pc-replyto-jump{
     border:0;
     background: rgba(255,255,255,0.06);
@@ -2176,12 +2200,10 @@
                   ${escapeHtml(c.display_name||c.username||"user")}
                   ${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}
                 </a>
-                <div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div>
-                <div style="margin-left:auto;display:flex;gap:8px;">
-                  <button class="cic ${c.liked_by_me ? "on" : ""}" data-clike="${escapeHtml(c.id)}">${ICONS.like}<span>${c.like_count||0}</span></button>
-                  ${canEdit ? `<button class="cact" data-c-edit="${escapeHtml(c.id)}" title="Edit">${ICONS.edit}</button>` : ""}
-                  <button class="cact" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
-                  ${canDelete ? `<button class="cact danger" data-c-del="${escapeHtml(c.id)}" title="Delete">${ICONS.trash}</button>` : ""}
+                <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+                  <button class="cic ${c.liked_by_me ? "on" : ""}" data-clike="${escapeHtml(c.id)}" title="Like">
+                    ${ICONS.like}<span>${c.like_count||0}</span>
+                  </button>
                 </div>
               </div>
               ${c.reply_to_comment_id ? `
@@ -2203,6 +2225,15 @@
                   <button class="mini" data-emo-edit="${c.id}">Emoji</button>
                   <button class="mini" data-c-cancel="${c.id}">Cancel</button>
                   <button class="mini on save" data-c-save="${c.id}">Save</button>
+                </div>
+              </div>
+              <div class="pc-footer">
+                <div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div>
+
+                <div class="pc-actions">
+                  ${canEdit ? `<button class="cact" data-c-edit="${escapeHtml(c.id)}" title="Edit">${ICONS.edit}</button>` : ""}
+                  <button class="cact" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
+                  ${canDelete ? `<button class="cact danger" data-c-del="${escapeHtml(c.id)}" title="Delete">${ICONS.trash}</button>` : ""}
                 </div>
               </div>
             </div>
