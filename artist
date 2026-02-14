@@ -358,9 +358,7 @@
   function fmtDate(ts){ return safe(ts).replace("T"," ").slice(0,16); }
 
   function isVideo(it){
-    const mt = (it.media_type||"").toLowerCase();
-    const url = (it.media_url||"").toLowerCase();
-    return mt === "video" || url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".mov");
+    return String(it.media_type || "").toLowerCase() === "video";
   }
 
   async function getSessionToken(){
@@ -378,7 +376,8 @@
     const token = await getSessionToken();
     const headers = Object.assign({}, opts.headers || {});
     if(opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
-    if(token && method !== "GET") headers.Authorization = "Bearer " + token;
+    const needsAuthGet = method === "GET" && path.startsWith("/api/feed/state");
+    if(token && (method !== "GET" || needsAuthGet)) headers.Authorization = "Bearer " + token;
     const r = await fetch(BACKEND + path, Object.assign({}, opts, { headers }));
     const j = await r.json().catch(()=> ({}));
     if(!r.ok) throw new Error(j?.error || j?.details || ("HTTP "+r.status));
