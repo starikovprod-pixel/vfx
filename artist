@@ -60,7 +60,7 @@
   .chip svg{ width:14px; height:14px; display:block; }
 
   .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-  .p-follow{ margin-top:10px; height:38px; padding:0 14px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color:#fff; cursor:pointer; font-weight:900; transition:.15s; }
+  .p-follow{ height:38px; padding:0 14px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color:#fff; cursor:pointer; font-weight:900; transition:.15s; display:inline-flex; align-items:center; justify-content:center; line-height:38px; margin:0; }
   .p-follow:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
   .p-follow.on{ border-color: rgba(110,168,255,0.45); background: rgba(110,168,255,0.18); }
   .seg{
@@ -458,7 +458,11 @@
     if(token && (method !== "GET" || needsAuthGet)) headers.Authorization = "Bearer " + token;
     const r = await fetch(BACKEND + path, Object.assign({}, opts, { headers }));
     const j = await r.json().catch(()=> ({}));
-    if(!r.ok) throw new Error(j?.error || j?.details || ("HTTP "+r.status));
+    if(!r.ok) {
+      const msg = j?.error || j?.details || ("HTTP " + r.status);
+      console.error("API FAIL:", path, { status: r.status, body: j });
+      throw new Error(msg);
+    }
     return j;
   }
 
@@ -561,9 +565,9 @@
         $pFollowBtn.style.display = "inline-flex";
         $pFollowBtn.disabled = true;
         if(pid && cacheHas(pid)){
-          const v = cacheGet(pid);
-          $pFollowBtn.textContent = v ? "Following" : "Follow";
-          $pFollowBtn.classList.toggle("on", v);
+          followState = cacheGet(pid);
+          $pFollowBtn.textContent = followState ? "Following" : "Follow";
+          $pFollowBtn.classList.toggle("on", followState);
         }else{
           $pFollowBtn.textContent = "…";
           $pFollowBtn.classList.toggle("on", false);
@@ -739,29 +743,34 @@
     if(isOwnProfile || !profile?.user_id) return;
     const token = await getSessionToken();
     if(!token){ toast("Login required"); return; }
-    const path = followState ? "/api/social/unfollow" : "/api/social/follow";
-    const payload = { following_id: profile.user_id };
-    const j = await api(path, { method:"POST", body: JSON.stringify(payload) });
-    followState = !followState;
-    cacheSet(profile.user_id, followState);
-    $pFollowBtn.textContent = followState ? "Following" : "Follow";
-    $pFollowBtn.classList.toggle("on", followState);
-    $pFollowBtn.classList.toggle("follow", true);
-    items = items.map(x => String(x.user_id) === String(profile.user_id) ? Object.assign({}, x, { following: followState }) : x);
-    renderGrid();
-    if(j && typeof j.follower_count !== "undefined") {
-      profile.follower_count = j.follower_count;
-      profile.verified = !!j.verified;
-      $pFollowers.textContent = profile.follower_count ?? 0;
-      $pName.innerHTML = `${safe(profile.display_name || profile.username || username)} ${verifiedBadgeHTML(profile.verified === true)}`;
-      bindVerifiedTooltip($pName);
-      if(current){
-        current.follower_count = profile.follower_count;
-        current.verified = profile.verified;
-        $mFollowers.innerHTML = `<span>Followers</span><b>${current.follower_count ?? 0}</b>`;
-        $mUserlink.innerHTML = `${safe(current.display_name || current.username || "user")} ${verifiedBadgeHTML(current.verified === true)}`;
-        bindVerifiedTooltip($mUserlink.parentElement);
+    try{
+      const path = followState ? "/api/social/unfollow" : "/api/social/follow";
+      const payload = { following_id: profile.user_id };
+      const j = await api(path, { method:"POST", body: JSON.stringify(payload) });
+      followState = !followState;
+      cacheSet(profile.user_id, followState);
+      $pFollowBtn.textContent = followState ? "Following" : "Follow";
+      $pFollowBtn.classList.toggle("on", followState);
+      $pFollowBtn.classList.toggle("follow", true);
+      items = items.map(x => String(x.user_id) === String(profile.user_id) ? Object.assign({}, x, { following: followState }) : x);
+      renderGrid();
+      if(j && typeof j.follower_count !== "undefined") {
+        profile.follower_count = j.follower_count;
+        profile.verified = !!j.verified;
+        $pFollowers.textContent = profile.follower_count ?? 0;
+        $pName.innerHTML = `${safe(profile.display_name || profile.username || username)} ${verifiedBadgeHTML(profile.verified === true)}`;
+        bindVerifiedTooltip($pName);
+        if(current){
+          current.follower_count = profile.follower_count;
+          current.verified = profile.verified;
+          $mFollowers.innerHTML = `<span>Followers</span><b>${current.follower_count ?? 0}</b>`;
+          $mUserlink.innerHTML = `${safe(current.display_name || current.username || "user")} ${verifiedBadgeHTML(current.verified === true)}`;
+          bindVerifiedTooltip($mUserlink.parentElement);
+        }
       }
+    }catch(e){
+      console.error("FOLLOW/UNFOLLOW ERROR:", e);
+      alert(e?.message || String(e));
     }
   }
 
