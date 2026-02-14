@@ -119,26 +119,29 @@
     cursor:pointer; transition: transform 0.2s ease, border-color 0.2s ease; position: relative;
   }
   .lf-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.3); }
-  .lf-media{ height:100%; width:100%; position:relative; background:#000; }
-  .lf-media .lf-poster{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-  }
-  .lf-media .lf-hover-video{
+  .lf-media{ position:relative; width:100%; height:100%; background:#000; }
+  .lf-media video{
     position:absolute;
     inset:0;
     width:100%;
     height:100%;
     object-fit:cover;
     display:block;
+  }
+  .lf-media .lf-hover-video{
     opacity:0;
     pointer-events:none;
     transition:opacity .15s ease;
   }
   .lf-card:hover .lf-hover-video{ opacity:1; }
-  .lf-card:hover .lf-poster{ opacity:0; }
+  .lf-card:hover .lf-poster-video{ opacity:0; }
+  .lf-media .lf-thumb{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
 
   .badge{
     position:absolute; top:10px; left:10px; background: rgba(0,0,0,0.55);
@@ -658,17 +661,14 @@
 
     $grid.innerHTML = items.map(it=>{
       const video = isVideo(it);
-      const thumb = (it.thumb_url || "").trim();
-      const media = (it.media_url || "").trim();
-      const poster = thumb || "";
+      const media = (it.media_url || it.thumb_url || "").trim();
       const mediaHtml = video
         ? `
-          <img class="lf-poster"
-               src="${escapeHtml(poster || "data:image/gif;base64,R0lGODlhAQABAAAAACw=")}"
-               data-media="${escapeHtml(media)}"
-               alt=""
-               loading="lazy"
-               decoding="async" />
+          <video class="lf-poster-video"
+                 muted
+                 playsinline
+                 preload="metadata"
+                 src="${escapeHtml(media)}"></video>
           <video class="lf-hover-video"
                  muted
                  playsinline
@@ -677,9 +677,8 @@
           </video>
         `
         : `
-          <img class="lf-poster"
-               src="${escapeHtml(poster || media)}"
-               alt=""
+          <img class="lf-thumb"
+               src="${escapeHtml(it.thumb_url || it.media_url || "")}"
                loading="lazy"
                decoding="async" />
         `;
@@ -720,11 +719,11 @@
     });
 
     wireHoverVideos();
-    hydrateVideoPosters($grid);
+    primePosterVideos();
   }
 
   function wireHoverVideos(){
-    document.querySelectorAll(".lf-card[data-kind='video']").forEach(card=>{
+    document.querySelectorAll(".lf-card").forEach(card=>{
       if(card.dataset.hoverBound === "1") return;
       card.dataset.hoverBound = "1";
 
@@ -745,6 +744,16 @@
           v.currentTime = 0;
         }catch(e){}
       });
+    });
+  }
+
+  function primePosterVideos(){
+    document.querySelectorAll("video.lf-poster-video").forEach(v=>{
+      if(v.dataset.primed === "1") return;
+      v.dataset.primed = "1";
+      // иногда нужно дождаться хоть одного кадра
+      v.addEventListener("loadeddata", () => {}, { once:true });
+      v.load();
     });
   }
 
