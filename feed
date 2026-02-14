@@ -97,19 +97,23 @@
   }
   .pill input[type="checkbox"]{ transform: scale(1.05); }
 
-  .btn-mini{
+  /* New Icon Button Style for Refresh */
+  .btn-refresh-icon {
     border:0;
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.12);
     color:#fff;
-    padding: 8px 12px;
-    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
     cursor:pointer;
-    font-weight:700;
-    font-size:13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition:.15s;
   }
-  .btn-mini:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+  .btn-refresh-icon:hover { background: #fff; color: #000; }
+  .btn-refresh-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; }
 
   /* Grid */
   .lf-grid{
@@ -182,7 +186,10 @@
     display:flex;
     flex-direction:column;
     gap:10px;
+    opacity: 0;
+    transition: 0.2s;
   }
+  .lf-card:hover .card-bottom { opacity: 1; }
 
   .card-author{
     display:flex;
@@ -233,6 +240,7 @@
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.08);
   }
+  .stat svg { width: 14px; height: 14px; fill: currentColor; }
 
   .lf-loader{
     width:100%;
@@ -373,7 +381,9 @@
   .btn-act.on{
     background: rgba(43,108,255,0.22);
     border-color: rgba(43,108,255,0.45);
+    color: var(--accent);
   }
+  .btn-act svg { width: 18px; height: 18px; fill: currentColor; }
 
   .m-stats{
     display:flex;
@@ -440,15 +450,20 @@
     font-size:13px;
   }
   .c-send{
-    width: 92px;
+    width: 48px;
+    height: 48px;
     border:0;
     border-radius: 14px;
     cursor:pointer;
     font-weight:900;
     background:#fff;
     color:#000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .c-send:hover{ background:#ddd; }
+  .c-send svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 3; }
 
   .c-tools{
     margin-left:auto;
@@ -482,48 +497,6 @@
     width:14px;
     height:14px;
     opacity: .9;
-  }
-
-  .c-editbox{
-    margin-top:8px;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-  .c-editbox textarea{
-    width:100%;
-    min-height:70px;
-    resize: vertical;
-    border-radius: 12px;
-    padding:10px 12px;
-    color:#fff;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.12);
-    font-size:13px;
-  }
-  .c-edit-actions{
-    display:flex;
-    gap:8px;
-    justify-content:flex-end;
-  }
-  .c-mini{
-    padding:8px 10px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.06);
-    color:#fff;
-    cursor:pointer;
-    font-weight:800;
-    font-size:12px;
-  }
-  .c-mini.primary{
-    background:#fff;
-    color:#000;
-    border: none;
-  }
-  .c-mini.danger{
-    border-color: rgba(255,70,90,0.35);
-    color: #ff98a2;
   }
 
   .toast{
@@ -581,7 +554,9 @@
           </label>
         </div>
 
-        <button class="btn-mini" id="btn-refresh">Refresh</button>
+        <button class="btn-refresh-icon" id="btn-refresh" title="Refresh">
+          <svg viewBox="0 0 24 24"><path d="M21 2v6h-6M3 22v-6h6M21 12c0 4.97-4.03 9-9 9-3.33 0-6.25-1.81-7.81-4.5M3 12c0-4.97 4.03-9 9-9 3.33 0 6.25 1.81 7.81 4.5"/></svg>
+        </button>
       </div>
     </div>
 
@@ -589,7 +564,6 @@
     <div class="lf-loader" id="loader" style="display:none;">Loading more…</div>
   </div>
 
-  <!-- MODAL -->
   <div class="lf-modal-backdrop" id="modal-backdrop">
     <button class="m-close" id="modal-close">✕</button>
 
@@ -620,7 +594,9 @@
         <div class="m-comments">
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <div style="font-weight:900">Comments</div>
-            <button class="btn-mini" id="btn-reload-comments" style="padding:8px 10px;">Reload</button>
+            <button class="icon-btn" id="btn-reload-comments" title="Reload">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </button>
           </div>
 
           <div class="c-list" id="c-list">
@@ -629,7 +605,7 @@
 
           <div class="c-form">
             <input class="c-input" id="c-input" placeholder="Write a comment…" />
-            <button class="c-send" id="c-send">Send</button>
+            <button class="c-send" id="c-send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
           </div>
         </div>
 
@@ -642,8 +618,15 @@
 
 <script>
 (() => {
-  const BACKEND = "https://api.lightfull.ai"; // твой backend домен
+  const BACKEND = "https://api.lightfull.ai"; 
   const PAGE_SIZE = 24;
+
+  const ICONS = {
+    like: '<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>',
+    comm: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    save: '<svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>',
+    view: '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'
+  };
 
   // feed state
   let sort = "trending";
@@ -738,10 +721,8 @@
     const token = await getSessionToken();
 
     const headers = Object.assign({}, opts.headers || {});
-    // Content-Type нужен только когда есть body
     if (opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
 
-    // Авторизацию шлём только если это НЕ публичный GET
     const isPublicGet = method === "GET" && path.startsWith("/api/feed/list");
     if (token && !isPublicGet) headers.Authorization = "Bearer " + token;
 
@@ -763,11 +744,10 @@
     const title = it.title || "Untitled";
 
     const stats = `
-      <div class="stat">LIKE ${it.like_count || 0}</div>
-<div class="stat">COMM ${it.comment_count || 0}</div>
-<div class="stat">SAVE ${it.save_count || 0}</div>
-<div class="stat">VIEW ${it.view_count || 0}</div>
-
+      <div class="stat">${ICONS.like} ${it.like_count || 0}</div>
+      <div class="stat">${ICONS.comm} ${it.comment_count || 0}</div>
+      <div class="stat">${ICONS.save} ${it.save_count || 0}</div>
+      <div class="stat">${ICONS.view} ${it.view_count || 0}</div>
     `;
 
     const avatarHtml = avatar ? `<img src="${avatar}" />` : ``;
@@ -776,7 +756,7 @@
       <div class="lf-card" data-id="${it.id}">
         <div class="lf-media">
           <img class="lf-thumb"
-               src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+               src="${it.thumb_url || it.media_url}"
                data-id="${it.id}"
                loading="lazy"
                decoding="async" />
@@ -786,10 +766,10 @@
           <div class="card-bottom">
             <div class="card-author">
               <div class="avatar">${avatarHtml}</div>
-              <div class="author-txt">
-                <div class="author-name">${safe(display)}</div>
-                <div class="author-username">@${safe(username)}</div>
-              </div>
+              <a class="author-link" href="/artist?username=${encodeURIComponent(username)}" onclick="event.stopPropagation()" style="text-decoration:none;color:inherit;min-width:0">
+  <div class="author-name">${safe(display)}</div>
+  <div class="author-username">@${safe(username)}</div>
+</a>
             </div>
 
             <div class="card-title">${safe(title)}</div>
@@ -810,23 +790,6 @@
       return;
     }
     $grid.innerHTML = list.map(renderCard).join("");
-
-    $grid.querySelectorAll("img.lf-thumb").forEach(img => {
-      const id = img.getAttribute("data-id");
-      const it = items.find(x => String(x.id) === String(id));
-      if (!it) return;
-
-      const thumb = (it.thumb_url || it.media_url || "").trim();
-      const media = (it.media_url || "").trim();
-
-      img.referrerPolicy = "no-referrer";
-
-      img.src = thumb || media || img.src;
-
-      img.onerror = () => {
-        if (media && img.src !== media) img.src = media;
-      };
-    });
 
     // click handlers
     $grid.querySelectorAll(".lf-card").forEach(card=>{
@@ -855,7 +818,6 @@
       const json = await api(`/api/feed/list${q}`, { method:"GET" });
 
       const page = Array.isArray(json.items) ? json.items : [];
-      // append uniq by id
       const seen = new Set(items.map(x=> String(x.id)));
       for(const it of page){
         const k = String(it.id);
@@ -881,10 +843,10 @@
   // MODAL
   function setStatsUI(it){
     const stats = `
-      <div class="stat">LIKE <span id="st-like">${it.like_count || 0}</span></div>
-      <div class="stat">COMM <span id="st-com">${it.comment_count || 0}</span></div>
-      <div class="stat">SAVE <span id="st-save">${it.save_count || 0}</span></div>
-      <div class="stat">VIEW <span id="st-view">${it.view_count || 0}</span></div>
+      <div class="stat">${ICONS.like} <span id="st-like">${it.like_count || 0}</span></div>
+      <div class="stat">${ICONS.comm} <span id="st-com">${it.comment_count || 0}</span></div>
+      <div class="stat">${ICONS.save} <span id="st-save">${it.save_count || 0}</span></div>
+      <div class="stat">${ICONS.view} <span id="st-view">${it.view_count || 0}</span></div>
     `;
     $mStats.innerHTML = stats;
   }
@@ -892,8 +854,8 @@
   function setActionButtons(){
     $btnLike.classList.toggle("on", liked);
     $btnSave.classList.toggle("on", saved);
-    $btnLike.textContent = liked ? "Liked" : "Like";
-    $btnSave.textContent = saved ? "Saved" : "Save";
+    $btnLike.innerHTML = `${ICONS.like} <span>${liked ? "Liked" : "Like"}</span>`;
+    $btnSave.innerHTML = `${ICONS.save} <span>${saved ? "Saved" : "Save"}</span>`;
   }
 
   function renderModalMedia(it){
@@ -901,26 +863,26 @@
     const video = isVideoItem(it) && (String(media).toLowerCase().endsWith(".mp4") || String(media).toLowerCase().endsWith(".webm") || String(media).toLowerCase().includes("fal.media"));
 
     if(video){
-      $mView.innerHTML = `<video src="${media}" controls autoplay playsinline style="width:100%;height:100%;object-fit:contain"></video>`;
+      $mView.innerHTML = `<video src="${media}" controls autoplay playsinline loop style="width:100%;height:100%;object-fit:contain"></video>`;
     }else{
       $mView.innerHTML = `<img src="${media}" />`;
     }
   }
 
   async function openModal(it){
-    current = JSON.parse(JSON.stringify(it)); // copy
+    current = JSON.parse(JSON.stringify(it));
     liked = false;
     saved = false;
     setActionButtons();
 
-    // head
     const avatar = it.avatar_url || "";
     $mAvatar.innerHTML = avatar ? `<img src="${avatar}" />` : "";
     const uname = it.username || "user";
     const dname = it.display_name || uname;
     $mUserline.textContent = "@" + uname;
     $mUserlink.textContent = dname;
-    $mUserlink.href = "/u/" + uname; // ты сделаешь отдельную страницу в тильде с этим путём (или редирект на другой домен)
+    $mUserlink.href = "/artist?username=" + encodeURIComponent(uname);
+    $mUserlink.onclick = (e) => { e.stopPropagation(); };
     $mDate.textContent = fmtDate(it.published_at);
     $mTitle.textContent = it.title || "Untitled";
 
@@ -929,11 +891,9 @@
 
     $modal.classList.add("open");
 
-    // 1) view ping (dedupe в БД)
     try{
       const token = await getSessionToken();
       const payload = { post_id: it.id, client_id: getClientId() };
-      // если токен есть — всё равно ок (бек сам попробует взять user)
       const headers = {"Content-Type":"application/json"};
       if(token) headers.Authorization = "Bearer " + token;
 
@@ -941,23 +901,15 @@
       if(r.ok){
         const j = await r.json();
         if(j?.counts){
-          current.view_count = j.counts.view_count ?? current.view_count;
-          current.like_count = j.counts.like_count ?? current.like_count;
-          current.comment_count = j.counts.comment_count ?? current.comment_count;
-          current.save_count = j.counts.save_count ?? current.save_count;
+          Object.assign(current, j.counts);
           setStatsUI(current);
-          // sync to items
           const idx = items.findIndex(x=> String(x.id)===String(current.id));
           if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); }
         }
       }
     }catch(e){}
 
-    // 2) load comments
     await loadComments();
-
-    // (опционально) тут можно добавить api/feed/state, если ты его сделаешь — чтобы подсветить liked/saved
-    // сейчас просто оставляем как false, но функционал лайк/сейв работает.
   }
 
   function closeModal(){
@@ -984,19 +936,10 @@
       const json = await api(`/api/feed/comments?post_id=${encodeURIComponent(current.id)}&limit=80&offset=0`, { method:"GET" });
       const arr = Array.isArray(json.items) ? json.items : [];
       const myId = await getMyUserId();
-      const editIcon = `
-<svg viewBox="0 0 24 24" fill="none">
-  <path d="M12 20h9" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
-        stroke="white" stroke-width="2" stroke-linejoin="round"/>
-</svg>`;
+      
+      const editIcon = `<svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+      const trashIcon = `<svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
 
-      const trashIcon = `
-<svg viewBox="0 0 24 24" fill="none">
-  <path d="M3 6h18" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  <path d="M8 6V4h8v2" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-  <path d="M19 6l-1 14H6L5 6" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-</svg>`;
       if(arr.length === 0){
         $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">No comments yet.</div>`;
         return;
@@ -1006,11 +949,13 @@
         const name = c.display_name || c.username || "user";
         const when = (c.created_at || "").replace("T"," ").slice(0,16);
         const mine = myId && String(c.user_id) === String(myId);
+        
         const tools = mine ? `
           <div class="c-tools">
-            <button class="icon-btn" data-edit="${c.id}" title="Edit">${editIcon}</button>
-            <button class="icon-btn danger" data-del="${c.id}" title="Delete">${trashIcon}</button>
+            <button class="icon-btn" data-edit="${c.id}">${editIcon}</button>
+            <button class="icon-btn danger" data-del="${c.id}">${trashIcon}</button>
           </div>` : "";
+          
         const isEditing = String(editingCommentId) === String(c.id);
         const isDeleting = String(deletingCommentId) === String(c.id);
 
@@ -1033,6 +978,7 @@
             <button class="c-mini danger" data-del-ok="${c.id}">Delete</button>
           </div>
         ` : "";
+        
         return `
           <div class="c-item">
             <div class="avatar">${av}</div>
@@ -1050,212 +996,88 @@
       }).join("");
 
       $cList.querySelectorAll("[data-edit]").forEach(b=>{
-        b.onclick = () => {
-          editingCommentId = b.getAttribute("data-edit");
-          deletingCommentId = null;
-          loadComments();
-        };
+        b.onclick = () => { editingCommentId = b.dataset.edit; deletingCommentId = null; loadComments(); };
       });
-
       $cList.querySelectorAll("[data-edit-cancel]").forEach(b=>{
-        b.onclick = () => {
-          editingCommentId = null;
-          loadComments();
-        };
+        b.onclick = () => { editingCommentId = null; loadComments(); };
       });
-
       $cList.querySelectorAll("[data-edit-save]").forEach(b=>{
         b.onclick = async () => {
-          const id = b.getAttribute("data-edit-save");
+          const id = b.dataset.editSave;
           const ta = $cList.querySelector(`[data-edit-ta="${id}"]`);
           const text = (ta?.value || "").trim();
           if(!text) return toast("Empty");
-
           try{
-            await api("/api/feed/comment_edit", {
-              method:"POST",
-              body: JSON.stringify({ comment_id: id, body: text })
-            });
-            editingCommentId = null;
-            await loadComments();
-            toast("Updated");
+            await api("/api/feed/comment_edit", { method:"POST", body: JSON.stringify({ comment_id: id, body: text }) });
+            editingCommentId = null; await loadComments(); toast("Updated");
           }catch(e){ toast(e.message); }
         };
       });
-
       $cList.querySelectorAll("[data-del]").forEach(b=>{
-        b.onclick = () => {
-          deletingCommentId = b.getAttribute("data-del");
-          editingCommentId = null;
-          loadComments();
-        };
+        b.onclick = () => { deletingCommentId = b.dataset.del; editingCommentId = null; loadComments(); };
       });
-
       $cList.querySelectorAll("[data-del-cancel]").forEach(b=>{
-        b.onclick = () => {
-          deletingCommentId = null;
-          loadComments();
-        };
+        b.onclick = () => { deletingCommentId = null; loadComments(); };
       });
-
       $cList.querySelectorAll("[data-del-ok]").forEach(b=>{
         b.onclick = async () => {
-          const id = b.getAttribute("data-del-ok");
+          const id = b.dataset.delOk;
           try{
-            await api("/api/feed/comment_delete", {
-              method:"POST",
-              body: JSON.stringify({ comment_id: id })
-            });
-            deletingCommentId = null;
-            await loadComments();
-            toast("Deleted");
+            await api("/api/feed/comment_delete", { method:"POST", body: JSON.stringify({ comment_id: id }) });
+            deletingCommentId = null; await loadComments(); toast("Deleted");
           }catch(e){ toast(e.message); }
         };
       });
-
       $cList.scrollTop = $cList.scrollHeight;
-    }catch(e){
-      $cList.innerHTML = `<div class="lf-empty" style="padding:18px;color:var(--danger)">${e.message}</div>`;
-    }
+    }catch(e){ $cList.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`; }
   }
 
   async function doLikeToggle(){
-    if(!current) return;
-    const token = await requireLoginOrWarn();
-    if(!token) return;
-
+    if(!current) return; const token = await requireLoginOrWarn(); if(!token) return;
     try{
       const path = liked ? "/api/feed/unlike" : "/api/feed/like";
       const json = await api(path, { method:"POST", body: JSON.stringify({ post_id: current.id }) });
-      if(json?.counts){
-        current.like_count = json.counts.like_count ?? current.like_count;
-        current.comment_count = json.counts.comment_count ?? current.comment_count;
-        current.save_count = json.counts.save_count ?? current.save_count;
-        current.view_count = json.counts.view_count ?? current.view_count;
-        setStatsUI(current);
-      }
-      liked = !liked;
-      setActionButtons();
-
-      // sync to grid
-      const idx = items.findIndex(x=> String(x.id)===String(current.id));
-      if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); }
-
-    }catch(e){
-      toast(e.message);
-    }
+      if(json?.counts){ Object.assign(current, json.counts); setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); } }
+      liked = !liked; setActionButtons();
+    }catch(e){ toast(e.message); }
   }
 
   async function doSaveToggle(){
-    if(!current) return;
-    const token = await requireLoginOrWarn();
-    if(!token) return;
-
+    if(!current) return; const token = await requireLoginOrWarn(); if(!token) return;
     try{
       const path = saved ? "/api/feed/unsave" : "/api/feed/save";
       const json = await api(path, { method:"POST", body: JSON.stringify({ post_id: current.id }) });
-      if(json?.counts){
-        current.like_count = json.counts.like_count ?? current.like_count;
-        current.comment_count = json.counts.comment_count ?? current.comment_count;
-        current.save_count = json.counts.save_count ?? current.save_count;
-        current.view_count = json.counts.view_count ?? current.view_count;
-        setStatsUI(current);
-      }
-      saved = !saved;
-      setActionButtons();
-
-      const idx = items.findIndex(x=> String(x.id)===String(current.id));
-      if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); }
-
-    }catch(e){
-      toast(e.message);
-    }
+      if(json?.counts){ Object.assign(current, json.counts); setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); } }
+      saved = !saved; setActionButtons();
+    }catch(e){ toast(e.message); }
   }
 
   async function sendComment(){
-    if(!current) return;
-    const token = await requireLoginOrWarn();
-    if(!token) return;
-
-    const text = ($cInput.value || "").trim();
-    if(!text) return;
-
-    $cSend.disabled = true;
+    if(!current) return; const token = await requireLoginOrWarn(); if(!token) return;
+    const text = ($cInput.value || "").trim(); if(!text) return; $cSend.disabled = true;
     try{
       const json = await api("/api/feed/comment", { method:"POST", body: JSON.stringify({ post_id: current.id, body: text }) });
-      $cInput.value = "";
-      if(json?.counts){
-        current.comment_count = json.counts.comment_count ?? current.comment_count;
-        setStatsUI(current);
-
-        const idx = items.findIndex(x=> String(x.id)===String(current.id));
-        if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); }
-      }
-      await loadComments();
-      toast("Sent");
-    }catch(e){
-      toast(e.message);
-    }finally{
-      $cSend.disabled = false;
-    }
+      $cInput.value = ""; if(json?.counts){ current.comment_count = json.counts.comment_count; setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx].comment_count = json.counts.comment_count; renderGrid(); } }
+      await loadComments(); toast("Sent");
+    }catch(e){ toast(e.message); }finally{ $cSend.disabled = false; }
   }
 
-  // events
   $modalClose.onclick = closeModal;
   $modal.onclick = (e)=>{ if(e.target === $modal) closeModal(); };
-
   $btnLike.onclick = doLikeToggle;
   $btnSave.onclick = doSaveToggle;
-
   $cSend.onclick = sendComment;
-  $cInput.addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){
-      e.preventDefault();
-      sendComment();
-    }
-  });
-
+  $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendComment(); } });
   $btnReloadComments.onclick = loadComments;
-
   $segSort.querySelectorAll("button").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active"));
-      btn.classList.add("active");
-      sort = btn.dataset.sort;
-      await fetchPage(true);
-    });
+    btn.onclick = async ()=>{ $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active")); btn.classList.add("active"); sort = btn.dataset.sort; await fetchPage(true); };
   });
+  $onlyVideo.onchange = ()=>{ onlyVideo = $onlyVideo.checked; renderGrid(); };
+  $btnRefresh.onclick = ()=> fetchPage(true);
+  window.onscroll = ()=>{ if(hasMore && !loading && (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900)) fetchPage(false); };
 
-  $onlyVideo.addEventListener("change", ()=>{
-    onlyVideo = $onlyVideo.checked;
-    renderGrid();
-  });
-
-  $btnRefresh.addEventListener("click", ()=> fetchPage(true));
-
-  // infinite scroll
-  window.addEventListener("scroll", ()=>{
-    if(!hasMore || loading) return;
-    const nearBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900);
-    if(nearBottom) fetchPage(false);
-  });
-
-  async function updateAuthHint(){
-    const token = await getSessionToken();
-    $authHint.style.display = token ? "none" : "inline";
-  }
-
-  async function init(){
-    await updateAuthHint();
-    // если пользователь логинится/разлогинивается — можно обновлять подсказку
-    try{
-      if(window.sb){
-        window.sb.auth.onAuthStateChange(()=> updateAuthHint());
-      }
-    }catch(e){}
-    await fetchPage(true);
-  }
-
+  async function updateAuthHint(){ const token = await getSessionToken(); $authHint.style.display = token ? "none" : "inline"; }
+  async function init(){ await updateAuthHint(); try{ if(window.sb){ window.sb.auth.onAuthStateChange(()=> updateAuthHint()); } }catch(e){} await fetchPage(true); }
   init();
 })();
 </script>
