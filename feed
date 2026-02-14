@@ -98,6 +98,20 @@
   .pill input[type="checkbox"]{ transform: scale(1.05); }
 
   /* New Icon Button Style for Refresh */
+
+  .tab-btn{
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+    padding: 8px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:13px;
+    transition:.15s;
+  }
+  .tab-btn:hover{ background: rgba(255,255,255,0.10); }
+
   .btn-refresh-icon {
     border:0;
     background: rgba(255,255,255,0.06);
@@ -378,12 +392,9 @@
   .btn-act:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
   .btn-act.primary{ background:#fff; color:#000; border:none; }
   .btn-act.primary:hover{ background:#ddd; }
-  .btn-act.on{
-    background: rgba(43,108,255,0.22);
-    border-color: rgba(43,108,255,0.45);
-    color: var(--accent);
-  }
-  .btn-act svg { width: 18px; height: 18px; fill: currentColor; }
+  .btn-act.on.like { color: #ff465a; border-color: rgba(255,70,90,0.45); background: rgba(255,70,90,0.14); }
+  .btn-act.on.save { color: #2b6cff; border-color: rgba(43,108,255,0.45); background: rgba(43,108,255,0.18); }
+  .btn-act svg { width: 18px; height: 18px; }
 
   .m-stats{
     display:flex;
@@ -417,7 +428,7 @@
     gap:10px;
     align-items:flex-start;
   }
-  .c-item .avatar{ width:28px; height:28px; }
+  .c-item .avatar{ width:28px; height:28px; flex:0 0 auto; }
   .c-bubble{
     background: rgba(255,255,255,0.06);
     border:1px solid rgba(255,255,255,0.10);
@@ -427,13 +438,13 @@
   }
   .c-top{
     display:flex;
-    gap:8px;
-    align-items:baseline;
+    align-items:center;
+    gap:10px;
     flex-wrap:wrap;
     margin-bottom:6px;
   }
   .c-name{ font-weight:900; font-size:12px; }
-  .c-time{ color: rgba(255,255,255,0.55); font-size:11px; }
+  .c-time{ color: rgba(255,255,255,0.55); font-size:11px; margin-left:6px; }
   .c-body{ color:#fff; font-size:13px; line-height:1.35; white-space:pre-wrap; }
 
   .c-form{
@@ -472,7 +483,34 @@
     align-items:center;
   }
 
+  .c-editbox textarea{
+    width:100%;
+    min-height:70px;
+    resize:none;
+    border-radius:12px;
+    padding:10px 12px;
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    color:#fff;
+    font-size:13px;
+    outline:none;
+  }
+  .c-edit-actions{ display:flex; gap:8px; margin-top:10px; justify-content:flex-end; }
+  .c-mini{
+    padding:8px 10px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+    cursor:pointer;
+    font-weight:900;
+    font-size:12px;
+  }
+  .c-mini.primary{ background:#fff; color:#000; border:none; }
+  .c-mini.danger{ border-color: rgba(255,70,90,0.35); color:#ff98a2; }
+
   .icon-btn{
+    color:#fff;
     width:28px;
     height:28px;
     border-radius:10px;
@@ -497,7 +535,15 @@
     width:14px;
     height:14px;
     opacity: .9;
+    stroke: currentColor;
+    fill: none;
   }
+
+  .author-link{ border-radius:10px; padding:2px 6px; margin-left:-6px; transition:.15s; cursor:pointer; text-decoration:none; color:inherit; min-width:0; }
+  .author-link:hover{ background: rgba(255,255,255,0.10); }
+  .author-link:active{ background: rgba(255,255,255,0.16); }
+
+  #btn-video-only.active{ background:#fff; color:#000; }
 
   .toast{
     position: fixed;
@@ -544,15 +590,10 @@
           <button class="active" data-sort="trending">Trending</button>
           <button data-sort="new">New</button>
           <button data-sort="top">Top</button>
-          <button data-sort="discussed">Discussed</button>
+          <button data-sort="recs">Recs</button>
         </div>
 
-        <div class="pill">
-          <label style="display:flex;gap:8px;align-items:center;cursor:pointer;">
-            <input type="checkbox" id="only-video" />
-            Video only
-          </label>
-        </div>
+        <button class="tab-btn" id="btn-video-only" type="button">Video only</button>
 
         <button class="btn-refresh-icon" id="btn-refresh" title="Refresh">
           <svg viewBox="0 0 24 24"><path d="M21 2v6h-6M3 22v-6h6M21 12c0 4.97-4.03 9-9 9-3.33 0-6.25-1.81-7.81-4.5M3 12c0-4.97 4.03-9 9-9 3.33 0 6.25 1.81 7.81 4.5"/></svg>
@@ -589,6 +630,7 @@
         <div class="m-actions">
           <button class="btn-act" id="btn-like">Like</button>
           <button class="btn-act" id="btn-save">Save</button>
+          <button class="btn-act" id="btn-dl" title="Download"></button>
         </div>
 
         <div class="m-comments">
@@ -622,10 +664,11 @@
   const PAGE_SIZE = 24;
 
   const ICONS = {
-    like: '<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>',
+    like: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.6-9.5-9C.6 8.6 2.6 5 6.5 5c2.1 0 3.6 1.2 4.5 2.4C11.9 6.2 13.4 5 15.5 5 19.4 5 21.4 8.6 21.5 12c-2.5 4.4-9.5 9-9.5 9z"/></svg>',
     comm: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
     save: '<svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>',
-    view: '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'
+    view: '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>',
+    dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>'
   };
 
   // feed state
@@ -635,6 +678,8 @@
   let hasMore = true;
   let items = [];
   let onlyVideo = false;
+  let rerenderTimer = null;
+  let tokenCache = { v:null, exp:0 };
 
   // modal state
   let current = null;
@@ -647,7 +692,7 @@
   const $grid = document.getElementById("grid");
   const $loader = document.getElementById("loader");
   const $segSort = document.getElementById("seg-sort");
-  const $onlyVideo = document.getElementById("only-video");
+  const $btnVideoOnly = document.getElementById("btn-video-only");
   const $btnRefresh = document.getElementById("btn-refresh");
   const $authHint = document.getElementById("auth-hint");
 
@@ -662,6 +707,7 @@
   const $mStats = document.getElementById("m-stats");
   const $btnLike = document.getElementById("btn-like");
   const $btnSave = document.getElementById("btn-save");
+  const $btnDl = document.getElementById("btn-dl");
   const $cList = document.getElementById("c-list");
   const $cInput = document.getElementById("c-input");
   const $cSend = document.getElementById("c-send");
@@ -700,9 +746,13 @@
 
   async function getSessionToken(){
     try{
+      const now = Date.now();
+      if(tokenCache.v && now < tokenCache.exp) return tokenCache.v;
       if(!window.sb) return null;
       const { data } = await window.sb.auth.getSession();
-      return data?.session?.access_token || null;
+      const t = data?.session?.access_token || null;
+      tokenCache = { v:t, exp: now + 30000 };
+      return t;
     }catch(e){
       return null;
     }
@@ -761,12 +811,11 @@
                loading="lazy"
                decoding="async" />
           <div class="badge"><span class="dot ${video ? "video":"image"}"></span> ${video ? "VIDEO":"IMAGE"}</div>
-          <div class="badge badge-right">#${it.generation_id}</div>
 
           <div class="card-bottom">
             <div class="card-author">
               <div class="avatar">${avatarHtml}</div>
-              <a class="author-link" href="/artist?username=${encodeURIComponent(username)}" onclick="event.stopPropagation()" style="text-decoration:none;color:inherit;min-width:0">
+              <a class="author-link" href="/artist?username=${encodeURIComponent(username)}" onclick="event.stopPropagation()">
   <div class="author-name">${safe(display)}</div>
   <div class="author-username">@${safe(username)}</div>
 </a>
@@ -781,6 +830,11 @@
         </div>
       </div>
     `;
+  }
+
+  function scheduleRerender(){
+    clearTimeout(rerenderTimer);
+    rerenderTimer = setTimeout(renderGrid, 200);
   }
 
   function renderGrid(){
@@ -818,6 +872,7 @@
       const json = await api(`/api/feed/list${q}`, { method:"GET" });
 
       const page = Array.isArray(json.items) ? json.items : [];
+      if(sort === "recs"){ page.sort(() => Math.random() - 0.5); }
       const seen = new Set(items.map(x=> String(x.id)));
       for(const it of page){
         const k = String(it.id);
@@ -852,6 +907,8 @@
   }
 
   function setActionButtons(){
+    $btnLike.classList.toggle("like", true);
+    $btnSave.classList.toggle("save", true);
     $btnLike.classList.toggle("on", liked);
     $btnSave.classList.toggle("on", saved);
     $btnLike.innerHTML = `${ICONS.like} <span>${liked ? "Liked" : "Like"}</span>`;
@@ -889,6 +946,27 @@
     setStatsUI(it);
     renderModalMedia(it);
 
+    $btnDl.innerHTML = ICONS.dl;
+    $btnDl.onclick = async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const url = (it.media_url || it.thumb_url || "").trim();
+      if(!url) return;
+      try{
+        const resp = await fetch(url, { mode:"cors" });
+        const blob = await resp.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = (it.title || "download").replace(/[^\w\- ]+/g, "").slice(0,40) + (url.toLowerCase().includes(".mp4") ? ".mp4" : ".png");
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      }catch(err){
+        window.open(url, "_blank");
+      }
+    };
+
     $modal.classList.add("open");
 
     try{
@@ -904,7 +982,7 @@
           Object.assign(current, j.counts);
           setStatsUI(current);
           const idx = items.findIndex(x=> String(x.id)===String(current.id));
-          if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); }
+          if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); scheduleRerender(); }
         }
       }
     }catch(e){}
@@ -1037,7 +1115,7 @@
     try{
       const path = liked ? "/api/feed/unlike" : "/api/feed/like";
       const json = await api(path, { method:"POST", body: JSON.stringify({ post_id: current.id }) });
-      if(json?.counts){ Object.assign(current, json.counts); setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); } }
+      if(json?.counts){ Object.assign(current, json.counts); setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); scheduleRerender(); } }
       liked = !liked; setActionButtons();
     }catch(e){ toast(e.message); }
   }
@@ -1047,7 +1125,7 @@
     try{
       const path = saved ? "/api/feed/unsave" : "/api/feed/save";
       const json = await api(path, { method:"POST", body: JSON.stringify({ post_id: current.id }) });
-      if(json?.counts){ Object.assign(current, json.counts); setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); renderGrid(); } }
+      if(json?.counts){ Object.assign(current, json.counts); setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); scheduleRerender(); } }
       saved = !saved; setActionButtons();
     }catch(e){ toast(e.message); }
   }
@@ -1057,7 +1135,7 @@
     const text = ($cInput.value || "").trim(); if(!text) return; $cSend.disabled = true;
     try{
       const json = await api("/api/feed/comment", { method:"POST", body: JSON.stringify({ post_id: current.id, body: text }) });
-      $cInput.value = ""; if(json?.counts){ current.comment_count = json.counts.comment_count; setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx].comment_count = json.counts.comment_count; renderGrid(); } }
+      $cInput.value = ""; if(json?.counts){ current.comment_count = json.counts.comment_count; setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx].comment_count = json.counts.comment_count; scheduleRerender(); } }
       await loadComments(); toast("Sent");
     }catch(e){ toast(e.message); }finally{ $cSend.disabled = false; }
   }
@@ -1072,7 +1150,7 @@
   $segSort.querySelectorAll("button").forEach(btn=>{
     btn.onclick = async ()=>{ $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active")); btn.classList.add("active"); sort = btn.dataset.sort; await fetchPage(true); };
   });
-  $onlyVideo.onchange = ()=>{ onlyVideo = $onlyVideo.checked; renderGrid(); };
+  $btnVideoOnly.onclick = ()=>{ onlyVideo = !onlyVideo; $btnVideoOnly.classList.toggle("active", onlyVideo); renderGrid(); };
   $btnRefresh.onclick = ()=> fetchPage(true);
   window.onscroll = ()=>{ if(hasMore && !loading && (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900)) fetchPage(false); };
 
