@@ -354,59 +354,74 @@
   }
 
   async function refreshMeAndUI(){
-    const { data } = await sb.auth.getSession();
-    const s = data?.session;
-    if (!s?.user) return null;
+    try{
+      const { data } = await sb.auth.getSession();
+      const s = data?.session;
+      if (!s?.user) return null;
+      if (!s?.access_token) return null;
 
-    const r = await fetch(BACKEND_BASE + "/api/me", {
-      headers: { Authorization: "Bearer " + s.access_token }
-    });
-    const me = await r.json().catch(()=>({}));
+      const r = await fetch(BACKEND_BASE + "/api/me", {
+        headers: { Authorization: "Bearer " + s.access_token }
+      });
 
-    if (me && me.ok !== false) {
-      $("lfhdr-credits").textContent = me.credits ?? 0;
-      renderLibrary(me.generations || []);
+      const me = await r.json().catch(()=>({}));
+
+      if (r.ok && me && me.ok !== false) {
+        $("lfhdr-credits").textContent = me.credits ?? 0;
+        renderLibrary(me.generations || []);
+      }
+      return me;
+    } catch(e){
+      const msg = String(e?.message || e);
+      if (msg.toLowerCase().includes("abort") || e?.name === "AbortError") return null;
+      console.warn("refreshMeAndUI failed:", e);
+      return null;
     }
-    return me;
   }
 
   async function initProfile(){
-    const { data } = await sb.auth.getSession();
-    const s = data?.session;
+    try{
+      const { data } = await sb.auth.getSession();
+      const s = data?.session;
 
-    const $email = $("lfhdr-email");
-    const $avatar = $("lfhdr-avatar");
-    const $credits = $("lfhdr-credits");
+      const $email = $("lfhdr-email");
+      const $avatar = $("lfhdr-avatar");
+      const $credits = $("lfhdr-credits");
 
-    const $popupLib = $("lfhdr-popup-lib");
-    const $logout = $("lfhdr-logout");
-    const $login = $("lfhdr-login");
-    const $promo = $("lfhdr-promo");
+      const $popupLib = $("lfhdr-popup-lib");
+      const $logout = $("lfhdr-logout");
+      const $login = $("lfhdr-login");
+      const $promo = $("lfhdr-promo");
 
-    if (!s?.user) {
-      $email.textContent = "Guest";
-      $avatar.textContent = "?";
-      $credits.textContent = "—";
+      if (!s?.user) {
+        $email.textContent = "Guest";
+        $avatar.textContent = "?";
+        $credits.textContent = "—";
 
-      $popupLib.style.display = "none";
-      $promo.style.display = "none";
-      $logout.style.display = "none";
+        $popupLib.style.display = "none";
+        $promo.style.display = "none";
+        $logout.style.display = "none";
 
-      $login.style.display = "flex";
-      $login.onclick = ()=>location.href = BASE + "/login";
-      return;
+        $login.style.display = "flex";
+        $login.onclick = ()=>location.href = BASE + "/login";
+        return;
+      }
+
+      $popupLib.style.display = "flex";
+      $promo.style.display = "flex";
+      $logout.style.display = "flex";
+      $login.style.display = "none";
+
+      const email = s.user.email || "—";
+      $email.textContent = email;
+      $avatar.textContent = email.slice(0,1).toUpperCase();
+
+      await refreshMeAndUI();
+    } catch(e){
+      const msg = String(e?.message || e);
+      if (msg.toLowerCase().includes("abort") || e?.name === "AbortError") return;
+      console.warn("initProfile failed:", e);
     }
-
-    $popupLib.style.display = "flex";
-    $promo.style.display = "flex";
-    $logout.style.display = "flex";
-    $login.style.display = "none";
-
-    const email = s.user.email || "—";
-    $email.textContent = email;
-    $avatar.textContent = email.slice(0,1).toUpperCase();
-
-    try{ await refreshMeAndUI(); } catch(e){}
   }
 
   $("lfhdr-promo").addEventListener("click", async ()=>{
