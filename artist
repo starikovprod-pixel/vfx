@@ -119,9 +119,26 @@
     cursor:pointer; transition: transform 0.2s ease, border-color 0.2s ease; position: relative;
   }
   .lf-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.3); }
-  .lf-media{ height:100%; width:100%; background:#000; position:relative; }
-  .lf-thumb{ width:100%; height:100%; object-fit:cover; display:block; }
-  .lf-media video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .lf-media{ height:100%; width:100%; position:relative; background:#000; }
+  .lf-media .lf-poster{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .lf-media .lf-hover-video{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease;
+  }
+  .lf-card:hover .lf-hover-video{ opacity:1; }
+  .lf-card:hover .lf-poster{ opacity:0; }
 
   .badge{
     position:absolute; top:10px; left:10px; background: rgba(0,0,0,0.55);
@@ -408,6 +425,98 @@
       .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
 
+  const POSTER_CACHE_PREFIX = "lf_poster_v1:";
+
+  // короткий ключ, чтобы localStorage не пух
+  function posterKey(url){
+    return POSTER_CACHE_PREFIX + btoa(unescape(encodeURIComponent(url))).slice(0,160);
+  }
+
+  function getCachedPoster(url){
+    try{ return sessionStorage.getItem(posterKey(url)) || ""; }catch(e){ return ""; }
+  }
+
+  function setCachedPoster(url, dataUrl){
+    try{ sessionStorage.setItem(posterKey(url), dataUrl); }catch(e){}
+  }
+
+  // вытаскиваем 1 кадр из видео и кладём как data:image/jpeg;base64,...
+  async function extractPosterDataUrl(mediaUrl){
+    return new Promise((resolve) => {
+      const v = document.createElement("video");
+      v.muted = true;
+      v.playsInline = true;
+      v.crossOrigin = "anonymous"; // если CORS позволит
+      v.preload = "metadata";
+      v.src = mediaUrl;
+
+      const cleanup = () => {
+        v.pause();
+        v.removeAttribute("src");
+        v.load();
+      };
+
+      v.addEventListener("error", () => { cleanup(); resolve(""); });
+
+      v.addEventListener("loadedmetadata", () => {
+        // если нет длительности/метаданных — выходим
+        if(!Number.isFinite(v.duration) || v.duration <= 0){
+          cleanup(); resolve(""); return;
+        }
+        // прыгаем чуть дальше 0, чтобы не был чёрный
+        const t = Math.min(0.2, Math.max(0.05, v.duration * 0.02));
+        try{ v.currentTime = t; } catch(e){ /* ignore */ }
+      }, { once:true });
+
+      v.addEventListener("seeked", () => {
+        try{
+          const canvas = document.createElement("canvas");
+          canvas.width = v.videoWidth || 640;
+          canvas.height = v.videoHeight || 360;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.70);
+          cleanup();
+          resolve(dataUrl);
+        } catch(e){
+          cleanup();
+          resolve("");
+        }
+      }, { once:true });
+    });
+  }
+
+  // Повесить генерацию постера на карточки
+  async function hydrateVideoPosters(root){
+    const cards = (root || document).querySelectorAll(".lf-card[data-kind='video']");
+    for(const card of cards){
+      const img = card.querySelector("img.lf-poster");
+      if(!img) continue;
+      if(img.dataset.hydrated === "1") continue;
+      img.dataset.hydrated = "1";
+
+      const mediaUrl = img.dataset.media || "";
+      if(!mediaUrl) continue;
+
+      // если есть нормальная картинка-постер — ок
+      if(img.src && !img.src.includes("data:image/gif")) continue;
+
+      // кеш
+      const cached = getCachedPoster(mediaUrl);
+      if(cached){
+        img.src = cached;
+        continue;
+      }
+
+      // пробуем вытащить кадр
+      const shot = await extractPosterDataUrl(mediaUrl);
+      if(shot){
+        img.src = shot;
+        setCachedPoster(mediaUrl, shot);
+      }
+    }
+  }
+
   function renderAvatarInto(el, avatar_type, avatar_url, avatar_emoji, fallbackLetter){
     const t = String(avatar_type || "image").toLowerCase();
     const em = (avatar_emoji || "").trim();
@@ -551,20 +660,33 @@
       const video = isVideo(it);
       const thumb = (it.thumb_url || "").trim();
       const media = (it.media_url || "").trim();
-      const mediaEl = video
-        ? `<video class="lf-thumb lf-video"
-                 poster="${escapeHtml(thumb || "")}"
-                 preload="none"
+      const poster = thumb || "";
+      const mediaHtml = video
+        ? `
+          <img class="lf-poster"
+               src="${escapeHtml(poster || "data:image/gif;base64,R0lGODlhAQABAAAAACw=")}"
+               data-media="${escapeHtml(media)}"
+               alt=""
+               loading="lazy"
+               decoding="async" />
+          <video class="lf-hover-video"
                  muted
                  playsinline
-                 loop>
-            <source src="${escapeHtml(media || "")}" type="video/mp4">
-           </video>`
-        : `<img class="lf-thumb" src="${escapeHtml(thumb || media || "")}" loading="lazy" decoding="async" />`;
+                 preload="none">
+            <source src="${escapeHtml(media)}" type="video/mp4">
+          </video>
+        `
+        : `
+          <img class="lf-poster"
+               src="${escapeHtml(poster || media)}"
+               alt=""
+               loading="lazy"
+               decoding="async" />
+        `;
       return `
-        <div class="lf-card" data-id="${it.id}">
+        <div class="lf-card" data-id="${it.id}" data-kind="${video ? "video" : "image"}">
           <div class="lf-media">
-            ${mediaEl}
+            ${mediaHtml}
             <div class="badge"><span class="dot ${video ? "video":"image"}"></span>${video ? "VIDEO":"IMAGE"}</div>
             <div class="card-bottom">
               <div class="card-author">
@@ -597,27 +719,33 @@
       };
     });
 
-    attachHoverPreviews();
+    wireHoverVideos();
+    hydrateVideoPosters($grid);
   }
 
-  function wireHoverPreview(card){
-    const video = card.querySelector("video.lf-video");
-    if(!video) return;
+  function wireHoverVideos(){
+    document.querySelectorAll(".lf-card[data-kind='video']").forEach(card=>{
+      if(card.dataset.hoverBound === "1") return;
+      card.dataset.hoverBound = "1";
 
-    card.addEventListener("mouseenter", async () => {
-      try{
-        await video.play();
-      }catch(e){}
+      const v = card.querySelector("video.lf-hover-video");
+      if(!v) return;
+
+      card.addEventListener("mouseenter", async () => {
+        try{
+          // грузим только при hover
+          v.load();
+          await v.play();
+        }catch(e){}
+      });
+
+      card.addEventListener("mouseleave", () => {
+        try{
+          v.pause();
+          v.currentTime = 0;
+        }catch(e){}
+      });
     });
-
-    card.addEventListener("mouseleave", () => {
-      video.pause();
-      video.currentTime = 0;
-    });
-  }
-
-  function attachHoverPreviews(){
-    document.querySelectorAll(".lf-card").forEach(wireHoverPreview);
   }
 
   function showLoader(v){ $loader.style.display = v ? "flex" : "none"; }
