@@ -235,7 +235,8 @@
   .pslide img, .pslide video{
     position:absolute; inset:0;
     width:100%; height:100%;
-    object-fit:cover;
+    object-fit:contain;
+    background:#000;
     display:block;
   }
   .pnav{
@@ -341,7 +342,21 @@
   .pc-form{
     display:flex; gap:10px; align-items:flex-start;
   }
-  .pc-form .avatar{ width:34px; height:34px; }
+  .pc-form .avatar{
+    width:36px;
+    height:36px;
+    border-radius:999px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.10);
+    flex:0 0 auto;
+  }
+  .pc-form .avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
   .pc-input{
     flex:1;
     background: rgba(255,255,255,0.05);
@@ -1639,11 +1654,14 @@
 
 
   function myAvatarHTML(){
-    if(!myProfile) return `<div class="avatar"></div>`;
+    const letter = ((myProfile?.display_name || myProfile?.username || "U").trim().slice(0,1) || "U").toUpperCase();
+    if(!myProfile){
+      return `<div class="avatar" style="display:flex;align-items:center;justify-content:center;font-weight:950;color:#fff">${letter}</div>`;
+    }
     const em = myProfile.avatar_type === "emoji" && myProfile.avatar_emoji;
     if(em) return `<div class="avatar emoji"><span>${escapeHtml(myProfile.avatar_emoji)}</span></div>`;
     if(myProfile.avatar_url) return `<div class="avatar"><img src="${escapeHtml(myProfile.avatar_url)}"></div>`;
-    return `<div class="avatar"></div>`;
+    return `<div class="avatar" style="display:flex;align-items:center;justify-content:center;font-weight:950;color:#fff">${letter}</div>`;
   }
 
   function renderPosts(){
@@ -1835,9 +1853,14 @@
         listEl.innerHTML = `<div class="empty" style="padding:18px">No comments yet.</div>`;
         return;
       }
+
+      const myId = String(myProfile?.user_id || myProfile?.id || "");
       listEl.innerHTML = arr.map(c=>{
         const avEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
         const avHtml = avEmoji ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
+        const isMine = myId && String(c.user_id) === myId;
+        const canDelete = isMine || isOwnProfile === true;
+        const canEdit = isMine || isOwnProfile === true;
         return `
           <div class="pc-item">
             <div class="avatar ${avEmoji ? "emoji" : ""}">${avHtml}</div>
@@ -1845,12 +1868,58 @@
               <div class="pc-top">
                 <div class="pc-name">${escapeHtml(c.display_name||c.username||"user")}</div>
                 <div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div>
+                ${(canEdit || canDelete) ? `
+                  <div style="margin-left:auto;display:flex;gap:8px;">
+                    ${canEdit ? `<button class="mini" data-c-edit="${escapeHtml(c.id)}">Edit</button>` : ""}
+                    ${canDelete ? `<button class="mini danger" data-c-del="${escapeHtml(c.id)}">Delete</button>` : ""}
+                  </div>
+                ` : ""}
               </div>
               <div class="pc-body">${escapeHtml(c.body)}</div>
             </div>
           </div>
         `;
       }).join("");
+
+      listEl.querySelectorAll("[data-c-del]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-c-del");
+          if(!cid) return;
+          if(!confirm("Delete this comment?")) return;
+          try{
+            await requireToken();
+            await api("/api/posts/comment_delete", { method:"POST", body: JSON.stringify({ comment_id: cid }) });
+            const p = postItems.find(x=> String(x.id)===String(post_id));
+            if(p) p.comment_count = Math.max((p.comment_count||0) - 1, 0);
+            await loadPostComments(post_id);
+            renderPosts();
+            toast("Deleted");
+          }catch(e){
+            toast(e.message||"Failed");
+          }
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-edit]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-c-edit");
+          if(!cid) return;
+          const currentBody = btn.closest('.pc-bubble')?.querySelector('.pc-body')?.textContent || "";
+          const body = prompt("Edit comment", currentBody);
+          if(body == null) return;
+          const text = body.trim();
+          if(!text) return toast("Empty");
+          try{
+            await requireToken();
+            await api("/api/posts/comment_edit", { method:"POST", body: JSON.stringify({ comment_id: cid, body: text }) });
+            await loadPostComments(post_id);
+            toast("Updated");
+          }catch(e){
+            toast(e.message||"Failed");
+          }
+        };
+      });
+
       const post = postItems.find(x=> String(x.id) === String(post_id));
       const viewAllBtn = $grid.querySelector(`[data-viewall="${CSS.escape(post_id)}"]`);
       if(viewAllBtn){
@@ -1863,6 +1932,7 @@
       listEl.innerHTML = `<div class="empty" style="padding:18px;color:#ff98a2">Error: ${escapeHtml(e.message)}</div>`;
     }
   }
+
 
   async function sendPostComment(post_id){
     try{
@@ -1908,7 +1978,7 @@
 
       // render cover media (not autoplay)
       if(isV){
-        $slide.innerHTML = `<video src="${escapeHtml(url)}" playsinline controls style="width:100%;height:100%;object-fit:cover"></video>`;
+        $slide.innerHTML = `<video src="${escapeHtml(url)}" playsinline controls style="width:100%;height:100%;object-fit:contain;background:#000"></video>`;
       } else {
         $slide.innerHTML = `<img src="${escapeHtml(item.thumb_url || item.media_url || "")}" loading="lazy" decoding="async" />`;
       }
