@@ -548,10 +548,15 @@
 
     $grid.innerHTML = items.map(it=>{
       const video = isVideo(it);
+      const thumb = (it.thumb_url || "").trim();
+      const media = (it.media_url || "").trim();
+      const mediaEl = video
+        ? `<video class="lf-thumb" src="${escapeHtml(media)}" muted autoplay loop playsinline preload="metadata"></video>`
+        : `<img class="lf-thumb" src="${escapeHtml(thumb || media)}" loading="lazy" decoding="async" />`;
       return `
         <div class="lf-card" data-id="${it.id}">
           <div class="lf-media">
-            <img class="lf-thumb" data-id="${it.id}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" />
+            ${mediaEl}
             <div class="badge"><span class="dot ${video ? "video":"image"}"></span>${video ? "VIDEO":"IMAGE"}</div>
             <div class="card-bottom">
               <div class="card-author">
@@ -574,14 +579,6 @@
       `;
     }).join("");
 
-    $grid.querySelectorAll("img.lf-thumb").forEach(img=>{
-      const id = img.getAttribute("data-id");
-      const it = items.find(x=> String(x.id)===String(id));
-      if(!it) return;
-      img.referrerPolicy = "no-referrer";
-      img.src = (it.thumb_url || it.media_url || "").trim();
-      img.onerror = () => { if(it.media_url && img.src !== it.media_url) img.src = it.media_url; };
-    });
     bindVerifiedTooltip($grid);
 
     $grid.querySelectorAll(".lf-card").forEach(c=>{

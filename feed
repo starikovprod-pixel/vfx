@@ -807,7 +807,13 @@
   function showLoader(v){ $loader.style.display = v ? "flex" : "none"; }
 
   function isVideoItem(it){
-    return (it.media_type || "").toLowerCase() === "video";
+    const kind = String(it.kind || it.media_type || "").toLowerCase();
+    const url = String(it.media_url || it.thumb_url || "").toLowerCase();
+    return (
+      kind === "video" ||
+      url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".mov") ||
+      url.includes("fal.media")
+    );
   }
 
   function safe(s){ return String(s || ""); }
@@ -1187,11 +1193,9 @@
 
   function renderModalMedia(it){
     const media = it.media_url || it.thumb_url || "";
-    const video = isVideoItem(it) && (String(media).toLowerCase().endsWith(".mp4") || String(media).toLowerCase().endsWith(".webm") || String(media).toLowerCase().includes("fal.media"));
-
-    if(video){
+    if(isVideoItem(it)){
       $mView.innerHTML = `<video src="${media}" controls autoplay playsinline loop style="width:100%;height:100%;object-fit:contain"></video>`;
-    }else{
+    } else {
       $mView.innerHTML = `<img src="${media}" />`;
     }
   }
