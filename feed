@@ -236,6 +236,22 @@
     overflow:hidden;
   }
   .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  /* Emoji avatars */
+  .avatar.emoji,
+  .pava.emoji,
+  .pava#p-ava.emoji,
+  .lfhdr-avatar.emoji,
+  .lfhdr-dd-ava.emoji{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+    user-select:none;
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",sans-serif;
+  }
+  .avatar.emoji{ font-size:18px; }
+  .pava.emoji{ font-size:34px; }
+  .lfhdr-avatar.emoji, .lfhdr-dd-ava.emoji{ font-size:22px; }
   .author-txt{ min-width:0; }
   .author-name{
     font-size:13px; font-weight:800;
@@ -796,6 +812,36 @@
 
   function safe(s){ return String(s || ""); }
 
+  function escapeHtml(s){
+    return String(s||"")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  function renderAvatarInto(el, avatar_type, avatar_url, avatar_emoji, fallbackLetter){
+    const t = String(avatar_type || "image").toLowerCase();
+    const em = (avatar_emoji || "").trim();
+    const url = (avatar_url || "").trim();
+
+    el.classList.remove("emoji");
+    el.innerHTML = "";
+
+    if(t === "emoji" && em){
+      el.classList.add("emoji");
+      el.innerHTML = `<span aria-label="avatar emoji">${escapeHtml(em)}</span>`;
+      return;
+    }
+
+    if(url){
+      el.innerHTML = `<img src="${escapeHtml(url)}" alt="" />`;
+      return;
+    }
+
+    if(fallbackLetter){
+      el.textContent = String(fallbackLetter).slice(0,1).toUpperCase();
+    }
+  }
+
   function getFollowCache(){
     try { return JSON.parse(localStorage.getItem(LS_FOLLOW) || "{}"); } catch(e){ return {}; }
   }
@@ -871,10 +917,13 @@
     $sideList.innerHTML = list.map((it)=>{
       const uname = it.username || "user";
       const dname = it.display_name || uname;
-      const av = it.avatar_url ? `<img src="${it.avatar_url}" />` : "";
+      const avIsEmoji = (it.avatar_type === "emoji" && it.avatar_emoji);
+      const avHtml = avIsEmoji
+        ? `<span>${escapeHtml(it.avatar_emoji)}</span>`
+        : (it.avatar_url ? `<img src="${escapeHtml(it.avatar_url)}" />` : "");
       return `
         <a class="side-item" href="/artist?username=${encodeURIComponent(uname)}">
-          <div class="avatar">${av}</div>
+          <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avHtml}</div>
           <div style="min-width:0">
             <div class="side-name">${safe(dname)} ${verifiedBadgeHTML(it.verified === true)}</div>
             <div class="side-user">@${safe(uname)}</div>
@@ -975,7 +1024,6 @@
     const video = isVideoItem(it);
     const username = it.username || "user";
     const display = it.display_name || username;
-    const avatar = it.avatar_url || "";
     const title = it.title || "Untitled";
 
     const stats = `
@@ -985,7 +1033,10 @@
       <div class="stat">${ICONS.view} ${it.view_count || 0}</div>
     `;
 
-    const avatarHtml = avatar ? `<img src="${avatar}" />` : ``;
+    const avIsEmoji = (it.avatar_type === "emoji" && it.avatar_emoji);
+    const avatarHtml = avIsEmoji
+      ? `<span>${escapeHtml(it.avatar_emoji)}</span>`
+      : (it.avatar_url ? `<img src="${escapeHtml(it.avatar_url)}" />` : "");
 
     return `
       <div class="lf-card" data-id="${it.id}">
@@ -999,7 +1050,7 @@
 
           <div class="card-bottom">
             <div class="card-author">
-              <div class="avatar">${avatarHtml}</div>
+              <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
               <a class="author-link" href="/artist?username=${encodeURIComponent(username)}" onclick="event.stopPropagation()">
   <div class="author-name">${safe(display)} ${verifiedBadgeHTML(it.verified === true)}</div>
   <div class="author-username">@${safe(username)}</div>
@@ -1165,8 +1216,7 @@
     }
     setActionButtons();
 
-    const avatar = it.avatar_url || "";
-    $mAvatar.innerHTML = avatar ? `<img src="${avatar}" />` : "";
+    renderAvatarInto($mAvatar, it.avatar_type, it.avatar_url, it.avatar_emoji);
     const uname = it.username || "user";
     const dname = it.display_name || uname;
     $mUserline.textContent = "@" + uname;
@@ -1280,7 +1330,10 @@
         return;
       }
       $cList.innerHTML = arr.map(c=>{
-        const av = c.avatar_url ? `<img src="${c.avatar_url}" />` : "";
+        const avIsEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
+        const av = avIsEmoji
+          ? `<span>${escapeHtml(c.avatar_emoji)}</span>`
+          : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
         const name = c.display_name || c.username || "user";
         const when = (c.created_at || "").replace("T"," ").slice(0,16);
         const mine = myId && String(c.user_id) === String(myId);
@@ -1316,7 +1369,7 @@
         
         return `
           <div class="c-item">
-            <div class="avatar">${av}</div>
+            <div class="avatar ${avIsEmoji ? "emoji" : ""}">${av}</div>
             <div class="c-bubble">
               <div class="c-top">
                 <div class="c-name">${safe(name)}</div>
