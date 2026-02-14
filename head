@@ -1,0 +1,461 @@
+<style>
+  :root{
+    --bg-body:#050505;
+    --bg-panel:#111111;
+    --bg-card:#181818;
+    --bg-input:#222222;
+    --border:#2b2b2b;
+    --accent:#2b6cff;
+    --accent-hover:#1a5cff;
+    --text-main:#ffffff;
+    --text-sec:#a0a0a0;
+    --header-h:74px;
+  }
+
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+
+  #lfhdr * { box-sizing:border-box; }
+  #lfhdr{
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    color:var(--text-main);
+  }
+
+  #lfhdr header{
+    height:var(--header-h);
+    padding:0 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:rgba(5,5,5,.92);
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:1000;
+    backdrop-filter: blur(10px);
+  }
+
+  .lfhdr-brand{
+    display:flex; align-items:center; gap:10px;
+    font-weight:1000; letter-spacing:-.4px; font-size:20px;
+    cursor:pointer;
+    user-select:none;
+  }
+
+  .lfhdr-switch{
+    background:var(--bg-input);
+    padding:5px;
+    border-radius:999px;
+    display:flex; gap:5px;
+    border:1px solid var(--border);
+    align-items:center;
+  }
+  .lfhdr-switch button{
+    border:0; background:transparent;
+    color:var(--text-sec);
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:900;
+    font-size:14px;
+    white-space:nowrap;
+    display:flex; align-items:center; gap:8px;
+    transition: .15s;
+  }
+  .lfhdr-switch button:hover{ color:#fff; background:rgba(255,255,255,0.05); }
+  .lfhdr-switch button.active{
+    background:var(--bg-body);
+    color:var(--text-main);
+    box-shadow:0 6px 16px rgba(0,0,0,.35);
+  }
+
+  /* ChatGPT tab */
+  .lfhdr-switch .lfhdr-tab-chatgpt{
+    margin-left:8px;
+    padding-left:18px;
+    padding-right:18px;
+    color:rgba(255,255,255,.95);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.05);
+    position:relative;
+  }
+  .lfhdr-switch .lfhdr-tab-chatgpt::before{
+    content:"";
+    width:1px;
+    height:18px;
+    background:rgba(255,255,255,.10);
+    display:inline-block;
+    margin-right:12px;
+    transform: translateY(2px);
+  }
+  .lfhdr-switch .lfhdr-tab-chatgpt.active{
+    background:rgba(255,255,255,.08);
+    border-color:rgba(255,255,255,.20);
+    box-shadow:0 10px 26px rgba(0,0,0,.45);
+  }
+
+  .lfhdr-profile{ position:relative; }
+  .lfhdr-avatar{
+    width:42px; height:42px;
+    border-radius:999px;
+    background:linear-gradient(135deg,#2b2b2b,#4a4a4a);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:1000;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,.08);
+    user-select:none;
+  }
+  .lfhdr-dd{
+    position:absolute;
+    top:52px; right:0;
+    width:270px;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:10px;
+    box-shadow:0 18px 70px rgba(0,0,0,.7);
+    display:none;
+    z-index:2000;
+  }
+  .lfhdr-dd.show{ display:block; }
+  .lfhdr-dd .item{
+    padding:12px 12px;
+    border-radius:10px;
+    color:var(--text-sec);
+    display:flex; justify-content:space-between; gap:10px;
+    cursor:pointer;
+    font-weight:800;
+    font-size:14px;
+  }
+  .lfhdr-dd .item:hover{ background:rgba(255,255,255,.04); color:var(--text-main); }
+  .lfhdr-dd .divider{ height:1px; background:var(--border); margin:8px 0; }
+
+  .lfhdr-dd .item.primary {
+    color:#fff;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.03);
+  }
+  .lfhdr-dd .item.primary:hover{
+    border-color:rgba(255,255,255,.18);
+    background:rgba(255,255,255,.06);
+  }
+
+  /* Library popup */
+  .lfhdr-modal{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.86);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:3000;
+  }
+  .lfhdr-modal .box{
+    width:980px; max-width:95vw;
+    height:82vh;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .lfhdr-modal .head{
+    padding:16px 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid var(--border);
+    font-weight:1000;
+  }
+  .lfhdr-modal .body{
+    padding:18px;
+    overflow:auto;
+  }
+  .lfhdr-libgrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:12px;
+  }
+  .lfhdr-libitem{
+    aspect-ratio:16/9;
+    background:#000;
+    border-radius:10px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.08);
+    cursor:pointer;
+  }
+  .lfhdr-libitem:hover{ border-color:rgba(255,255,255,.25); }
+  .lfhdr-libitem img,.lfhdr-libitem video{ width:100%; height:100%; object-fit:cover; display:block; }
+</style>
+
+<div id="lfhdr">
+  <header>
+    <div class="lfhdr-brand" id="lfhdr-brand">Lightfull</div>
+
+    <div class="lfhdr-switch">
+      <button type="button" data-tab="flow">Flow</button>
+      <button type="button" data-tab="video">Video</button>
+      <button type="button" data-tab="image">Image</button>
+      
+      <button type="button" data-tab="cinema_lab">Cinema Lab</button>
+      
+      <button type="button" data-tab="node_studio">Node Studio</button>
+
+      <button type="button" data-tab="product">Product Creation</button>
+
+      <button type="button" data-tab="editor">
+        Editor
+      </button>
+
+      <button type="button" data-tab="library">Library</button>
+      <button type="button" data-tab="chatgpt" class="lfhdr-tab-chatgpt">ChatGPT</button>
+    </div>
+
+    <div class="lfhdr-profile">
+      <div class="lfhdr-avatar" id="lfhdr-avatar">U</div>
+
+      <div class="lfhdr-dd" id="lfhdr-dd">
+        <div class="item" style="cursor:default;opacity:.85"><span id="lfhdr-email">—</span></div>
+        <div class="divider"></div>
+
+        <div class="item" style="cursor:default">
+          <span>Credits</span>
+          <strong id="lfhdr-credits" style="color:#fff">—</strong>
+        </div>
+
+        <div class="item" id="lfhdr-plans" style="color:var(--text-sec); cursor:default;">
+          <span>Plans</span>
+          </div>
+
+        <div class="item" id="lfhdr-popup-lib"><span>Library</span></div>
+        <div class="item" id="lfhdr-promo"><span>Promo code</span></div>
+
+        <div class="divider"></div>
+
+        <div class="item primary" id="lfhdr-login" style="display:none"><span>Login</span></div>
+        <div class="item" id="lfhdr-logout" style="color:#ff465a"><span>Logout</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="lfhdr-modal" id="lfhdr-libModal">
+    <div class="box">
+      <div class="head">
+        <div>Library</div>
+        <div style="cursor:pointer" id="lfhdr-libClose">✕</div>
+      </div>
+      <div class="body">
+        <div class="lfhdr-libgrid" id="lfhdr-libGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  const BASE = location.origin;
+  const EDITOR_URL = "https://lightfull.ai/lf-editor";
+  const SUPABASE_URL = "https://vqnmzstiaosqeoltcwbq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbm16c3RpYW9zcWVvbHRjd2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwMDA1MzcsImV4cCI6MjA4MzU3NjUzN30.12MycLBd_SpBwFz52alQFtIuWiguAunqh4AX7TbIkkk";
+  const BACKEND_BASE = "https://api.lightfull.ai";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+  });
+  window.sb = sb;
+
+  const $ = (id)=>document.getElementById(id);
+  const btns = Array.from(document.querySelectorAll('[data-tab]'));
+
+  function mark(tab){
+    btns.forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  }
+
+  function setActiveByUrl(){
+    const href = location.href.toLowerCase();
+    const p = location.pathname.toLowerCase();
+    
+    if (href.includes("/lf-editor")) return mark("editor");
+
+    // Check for Node Studio in URL
+    if (p.includes("node_studio")) return mark("node_studio");
+    
+    // NEW: Cinema Lab and related pages logic
+    if (p.includes("cinema_lab") || 
+        p.includes("cinema_animation") || 
+        p.includes("cinema_shot") || 
+        p.includes("cinema_character")) {
+      return mark("cinema_lab");
+    }
+    
+    if (p.includes("product_creation")) return mark("product");
+    if (p.includes("chatgpt")) return mark("chatgpt");
+    if (p.includes("library")) return mark("library");
+
+    if (p.includes("/video")) return mark("video");
+    if (p.includes("/image")) return mark("image");
+    
+    if (p.includes("nano")) return mark("image");
+    if (p.includes("kling")) return mark("video");
+
+    if (p === "/" || p.includes("flow")) return mark("flow");
+
+    return mark("flow");
+  }
+
+  function go(tab){
+    if (tab === "video")       return location.href = "https://lightfull.ai/video";
+    if (tab === "image")       return location.href = "https://lightfull.ai/image";
+    
+    // NEW: Cinema Lab redirect
+    if (tab === "cinema_lab")  return location.href = "https://lightfull.ai/cinema_lab";
+    
+    if (tab === "node_studio") return location.href = "https://lightfull.ai/node_studio";
+    if (tab === "flow")        return location.href = BASE + "/flow";
+    if (tab === "product")     return location.href = "https://lightfull.ai/product_creation";
+    if (tab === "editor")      return location.href = EDITOR_URL;
+    if (tab === "library")     return location.href = BASE + "/library";
+    if (tab === "chatgpt")     return location.href = BASE + "/chatgpt";
+  }
+
+  $("lfhdr-brand").addEventListener("click", ()=>go("flow"));
+  btns.forEach(b => b.addEventListener("click", ()=>go(b.dataset.tab)));
+
+  // dropdown
+  const dd = $("lfhdr-dd");
+  $("lfhdr-avatar").addEventListener("click",(e)=>{ e.stopPropagation(); dd.classList.toggle("show"); });
+  document.addEventListener("click", ()=>dd.classList.remove("show"));
+
+  // library popup
+  const libModal = $("lfhdr-libModal");
+  function openLib(){ libModal.style.display="flex"; }
+  function closeLib(){ libModal.style.display="none"; }
+
+  $("lfhdr-popup-lib").addEventListener("click", ()=>{ dd.classList.remove("show"); openLib(); });
+  $("lfhdr-libClose").addEventListener("click", closeLib);
+  libModal.addEventListener("click",(e)=>{ if(e.target===libModal) closeLib(); });
+
+  function renderLibrary(list){
+    const el = $("lfhdr-libGrid");
+    if (!Array.isArray(list) || list.length===0){
+      el.innerHTML = "<div style='color:var(--text-sec)'>Пока пусто.</div>";
+      return;
+    }
+    el.innerHTML = list.map(g=>{
+      const url = g.output_url;
+      if (!url) return "";
+      const u = url.toLowerCase();
+      const isVideo = u.includes(".mp4") || u.includes(".webm") || u.includes(".mov") || u.includes("fal.media");
+      const media = isVideo
+        ? `<video src="${url}" muted playsinline loop onmouseover="this.play()" onmouseout="this.pause()"></video>`
+        : `<img src="${url}" />`;
+      return `<div class="lfhdr-libitem" onclick="window.open('${url}','_blank')">${media}</div>`;
+    }).join("");
+  }
+
+  async function refreshMeAndUI(){
+    const { data } = await sb.auth.getSession();
+    const s = data?.session;
+    if (!s?.user) return null;
+
+    const r = await fetch(BACKEND_BASE + "/api/me", {
+      headers: { Authorization: "Bearer " + s.access_token }
+    });
+    const me = await r.json().catch(()=>({}));
+
+    if (me && me.ok !== false) {
+      $("lfhdr-credits").textContent = me.credits ?? 0;
+      renderLibrary(me.generations || []);
+    }
+    return me;
+  }
+
+  async function initProfile(){
+    const { data } = await sb.auth.getSession();
+    const s = data?.session;
+
+    const $email = $("lfhdr-email");
+    const $avatar = $("lfhdr-avatar");
+    const $credits = $("lfhdr-credits");
+
+    const $popupLib = $("lfhdr-popup-lib");
+    const $logout = $("lfhdr-logout");
+    const $login = $("lfhdr-login");
+    const $promo = $("lfhdr-promo");
+
+    if (!s?.user) {
+      $email.textContent = "Guest";
+      $avatar.textContent = "?";
+      $credits.textContent = "—";
+
+      $popupLib.style.display = "none";
+      $promo.style.display = "none";
+      $logout.style.display = "none";
+
+      $login.style.display = "flex";
+      $login.onclick = ()=>location.href = BASE + "/login";
+      return;
+    }
+
+    $popupLib.style.display = "flex";
+    $promo.style.display = "flex";
+    $logout.style.display = "flex";
+    $login.style.display = "none";
+
+    const email = s.user.email || "—";
+    $email.textContent = email;
+    $avatar.textContent = email.slice(0,1).toUpperCase();
+
+    try{ await refreshMeAndUI(); } catch(e){}
+  }
+
+  $("lfhdr-promo").addEventListener("click", async ()=>{
+    dd.classList.remove("show");
+    const code = prompt("Enter promo code:");
+    if (!code) return;
+
+    const { data } = await sb.auth.getSession();
+    const s = data?.session;
+    if (!s?.access_token) {
+      alert("Please login");
+      location.href = BASE + "/login";
+      return;
+    }
+
+    try{
+      const r = await fetch(BACKEND_BASE + "/api/me", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + s.access_token,
+        },
+        body: JSON.stringify({ action: "redeem_promo", code }),
+      });
+
+      const j = await r.json().catch(()=>({}));
+
+      if (!r.ok || j.ok === false) {
+        alert(j.error || ("Promo failed (HTTP " + r.status + ")"));
+        return;
+      }
+
+      $("lfhdr-credits").textContent = j.credits ?? $("lfhdr-credits").textContent;
+      alert("✅ Promo activated: +" + (j.added ?? 10) + " credits");
+      try{ await refreshMeAndUI(); }catch(_){}
+    } catch(e){
+      alert("Error: " + (e?.message || e));
+    }
+  });
+
+  $("lfhdr-logout").addEventListener("click", async ()=>{
+    try{ await sb.auth.signOut(); }catch(e){}
+    location.href = BASE + "/login";
+  });
+
+  sb.auth.onAuthStateChange(() => { initProfile(); });
+
+  setActiveByUrl();
+  initProfile();
+  window.addEventListener("hashchange", setActiveByUrl);
+})();
+</script>
