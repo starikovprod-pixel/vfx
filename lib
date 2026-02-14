@@ -1,0 +1,620 @@
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+<style>
+  :root{
+    --bg-body:#050505;
+    --bg-panel:#111111;
+    --bg-card:#181818;
+    --bg-modal:#1f1f1f;
+    --bg-input:#222222;
+    --border:#2b2b2b;
+    --accent:#2b6cff;
+    --accent-hover:#1a5cff;
+    --text-main:#ffffff;
+    --text-sec:#a0a0a0;
+    --radius:16px;
+    --danger: #ff465a;
+    --ok: #39ff14;
+    --warn: #ffd166;
+  }
+
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+  #lf-lib * { box-sizing:border-box; outline:none; }
+
+  #lf-lib{
+    background:var(--bg-body);
+    color:var(--text-main);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    min-height:calc(100vh - 74px);
+    position: relative;
+  }
+
+  #lf-main{
+    padding:26px 18px 40px;
+    max-width:1400px;
+    margin:0 auto;
+  }
+
+  /* Header & Tabs */
+  .lf-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 18px;
+  }
+
+  .lf-h1{
+    font-size:34px;
+    font-weight:900;
+    letter-spacing:-.6px;
+    margin:0;
+  }
+  .lf-sub{ margin-top:4px; color:var(--text-sec); font-size:13px; }
+
+  .lf-tabs{
+    display:flex;
+    gap:8px;
+  }
+  .tab-btn{
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-sec);
+    padding: 8px 16px;
+    border-radius: 99px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s;
+  }
+  .tab-btn:hover{ color: #fff; background: rgba(255,255,255,0.05); }
+  .tab-btn.active{
+    background: #fff;
+    color: #000;
+  }
+  .tab-btn.active-trash{
+    background: rgba(255, 70, 90, 0.2);
+    color: #ff98a2;
+    border: 1px solid rgba(255, 70, 90, 0.5);
+  }
+
+  /* Grid */
+  .lf-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:16px;
+    padding-bottom: 60px;
+  }
+
+  .lf-card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    height: 320px;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    position: relative;
+  }
+  .lf-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .lf-media{
+    height:100%;
+    width: 100%;
+    background:#000;
+    position:relative;
+  }
+  .lf-media img, .lf-media video, model-viewer{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  /* Status Badge on Card */
+  .card-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .dot{ width:6px;height:6px;border-radius:50%; background:#fff; }
+  .dot.ok{ background: var(--ok); }
+  .dot.warn{ background: var(--warn); }
+  .dot.bad{ background: var(--danger); }
+
+  .card-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 40px 14px 14px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .lf-card:hover .card-overlay { opacity: 1; }
+
+  .mini-date {
+    font-size: 12px; color: rgba(255,255,255,0.7);
+    position: absolute; bottom: 14px; left: 14px;
+  }
+
+  /* Loader */
+  .lf-loader{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: rgba(255,255,255,0.55);
+    padding: 18px 0 0;
+    font-size: 13px;
+  }
+
+  /* MODAL */
+  .lf-modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .lf-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  .lf-modal {
+    width: 90%;
+    max-width: 1100px;
+    height: 85vh;
+    background: var(--bg-modal);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
+  }
+
+  .m-preview {
+    flex: 1;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .m-preview img, .m-preview video, .m-preview model-viewer {
+    max-width: 100%; max-height: 100%; width: 100%; height: 100%;
+  }
+
+  .m-sidebar {
+    width: 340px;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    background: var(--bg-card);
+    flex-shrink: 0;
+  }
+
+  .m-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    transition: 0.2s;
+  }
+  .m-close:hover { background: #fff; color: #000; }
+
+  .m-info-row { margin-bottom: 16px; }
+  .m-label { font-size: 11px; text-transform: uppercase; color: var(--text-sec); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .m-val { font-size: 14px; color: #fff; word-break: break-all; }
+  .m-val.mono { font-family: monospace; color: rgba(255,255,255,0.5); font-size: 12px; }
+
+  .m-actions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+
+  .btn {
+    border:0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: 0.2s;
+    text-decoration: none;
+    width: 100%;
+  }
+  .btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+  .btn.primary { background: #fff; color: #000; border: none; }
+  .btn.primary:hover { background: #ddd; }
+  .btn.danger { color: var(--danger); border-color: rgba(255, 70, 90, 0.3); }
+  .btn.danger:hover { background: rgba(255, 70, 90, 0.1); border-color: var(--danger); }
+
+  @media(max-width: 900px){
+    .lf-modal { flex-direction: column; height: 90vh; }
+    .m-sidebar { width: 100%; height: auto; border-left: none; border-top: 1px solid var(--border); }
+    .m-preview { height: 50%; }
+  }
+
+  .lf-empty{
+    padding: 40px; text-align: center; color: var(--text-sec);
+    background: rgba(255,255,255,0.02); border-radius: 18px; border: 1px dashed var(--border);
+  }
+</style>
+
+<div id="lf-lib">
+  <div id="lf-main">
+    <div class="lf-top">
+      <div>
+        <h1 class="lf-h1">Library</h1>
+        <div class="lf-sub">
+          User: <span id="m-email">...</span> | Credits: <span id="m-credits">0</span>
+        </div>
+      </div>
+
+      <div class="lf-tabs">
+        <button class="tab-btn active" data-tab="all">Library</button>
+        <button class="tab-btn" data-tab="process">Processing <span id="cnt-proc" style="opacity:0.5;font-size:0.9em">0</span></button>
+        <button class="tab-btn" data-tab="trash">Trash</button>
+      </div>
+    </div>
+
+    <div id="grid" class="lf-grid">Loading...</div>
+    <div class="lf-loader" id="loader" style="display:none;">Loading more…</div>
+  </div>
+
+  <div class="lf-modal-backdrop" id="modal-backdrop">
+    <button class="m-close" id="modal-close">✕</button>
+    <div class="lf-modal" onclick="event.stopPropagation()">
+      <div class="m-preview" id="m-view-container"></div>
+      <div class="m-sidebar">
+        <div class="m-info-row">
+          <div class="m-label">Status</div>
+          <div class="m-val" id="m-status-text">Done</div>
+        </div>
+        <div class="m-info-row">
+          <div class="m-label">Created At</div>
+          <div class="m-val" id="m-date">2023-10-10</div>
+        </div>
+        <div class="m-info-row">
+          <div class="m-label">File ID</div>
+          <div class="m-val mono" id="m-id">123-123</div>
+        </div>
+
+        <div class="m-actions">
+          <button class="btn primary" id="btn-download">Download File</button>
+          <button class="btn" id="btn-copy-link">Copy URL</button>
+          <button class="btn danger" id="btn-toggle-hide">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const BACKEND = "https://api.lightfull.ai";
+  const LS_HIDDEN_KEY = "lf_hidden_items_v2";
+
+  // Pagination state
+  const PAGE_SIZE = 24;
+  let offset = 0;
+  let total = null;     // total_generations from backend
+  let loading = false;
+  let hasMore = true;
+
+  // Data state
+  let allItems = [];
+  let currentTab = "all"; // all, process, trash
+  let currentItem = null;
+
+  // Elements
+  const $grid = document.getElementById("grid");
+  const $email = document.getElementById("m-email");
+  const $credits = document.getElementById("m-credits");
+  const $tabs = document.querySelectorAll(".tab-btn");
+  const $countProc = document.getElementById("cnt-proc");
+  const $loader = document.getElementById("loader");
+
+  // Modal Elements
+  const $modal = document.getElementById("modal-backdrop");
+  const $modalClose = document.getElementById("modal-close");
+  const $viewCont = document.getElementById("m-view-container");
+  const $mStatus = document.getElementById("m-status-text");
+  const $mDate = document.getElementById("m-date");
+  const $mId = document.getElementById("m-id");
+  const $btnDown = document.getElementById("btn-download");
+  const $btnCopy = document.getElementById("btn-copy-link");
+  const $btnHide = document.getElementById("btn-toggle-hide");
+
+  // --- Helpers ---
+
+  function getHiddenIds() {
+    try { return JSON.parse(localStorage.getItem(LS_HIDDEN_KEY) || "[]"); } catch(e){ return []; }
+  }
+  function setHiddenIds(ids) {
+    localStorage.setItem(LS_HIDDEN_KEY, JSON.stringify(ids));
+  }
+  function toggleHideId(id) {
+    id = String(id);
+    let ids = getHiddenIds();
+    if(ids.includes(id)) ids = ids.filter(x => x !== id);
+    else ids.push(id);
+    setHiddenIds(ids);
+    renderGrid();
+    if(currentItem && String(currentItem.id) === id) updateModal(currentItem);
+  }
+
+  function isVideo(url) {
+    const u = String(url||"").toLowerCase();
+    return u.endsWith(".mp4") || u.endsWith(".mov") || u.endsWith(".webm") || u.includes("fal.media");
+  }
+  function is3D(url) {
+    const u = String(url||"").toLowerCase();
+    return u.endsWith(".glb") || u.endsWith(".gltf");
+  }
+
+  function getStatus(raw) {
+    const v = String(raw||"").toLowerCase();
+    if (["succeeded","success","done"].includes(v)) return { text:"Done", dot:"ok", type:"done" };
+    if (["failed","error","canceled"].includes(v)) return { text:"Failed", dot:"bad", type:"done" };
+    if (["starting","processing","running","in_progress"].includes(v)) return { text:"Processing", dot:"warn", type:"process" };
+    return { text: v, dot:"", type:"done" };
+  }
+
+  function uniqAppend(prev, next) {
+    // Защита от дублей по id
+    const seen = new Set(prev.map(x => String(x.id)));
+    const out = prev.slice();
+    for (const it of next) {
+      const key = String(it.id);
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(it);
+      }
+    }
+    return out;
+  }
+
+  async function forceDownload(url, filename){
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch(e) {
+      window.open(url, '_blank');
+    }
+  }
+
+  function showLoader(v){
+    $loader.style.display = v ? "flex" : "none";
+  }
+
+  // --- Data Load ---
+
+  async function fetchPage(reset=false) {
+    if (loading) return;
+    loading = true;
+    showLoader(true);
+
+    try {
+      if(!window.sb) throw new Error("Supabase not found");
+      const { data } = await window.sb.auth.getSession();
+      if(!data.session) throw new Error("No session");
+
+      if (reset) {
+        offset = 0;
+        total = null;
+        hasMore = true;
+        allItems = [];
+      }
+
+      const r = await fetch(`${BACKEND}/api/me?limit=${PAGE_SIZE}&offset=${offset}`, {
+        headers: { Authorization: "Bearer " + data.session.access_token }
+      });
+      const json = await r.json();
+      if (!json?.ok) throw new Error(json?.error || "API error");
+
+      $email.textContent = json.user?.email || "...";
+      $credits.textContent = json.credits ?? 0;
+
+      const page = Array.isArray(json.generations) ? json.generations : [];
+      allItems = uniqAppend(allItems, page);
+
+      // pagination state
+      const t = Number(json.total_generations ?? 0);
+      total = isNaN(t) ? total : t;
+
+      offset += page.length;
+      hasMore = (total == null) ? (page.length === PAGE_SIZE) : (offset < total);
+
+      renderGrid();
+    } catch(e) {
+      $grid.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`;
+      hasMore = false;
+    } finally {
+      loading = false;
+      showLoader(false);
+    }
+  }
+
+  async function init() {
+    $grid.innerHTML = "Loading...";
+    await fetchPage(true);
+  }
+
+  // --- Render ---
+
+  function renderGrid() {
+    const hiddenIds = getHiddenIds();
+
+    const processItems = allItems.filter(g => getStatus(g.status).type === "process" && !hiddenIds.includes(String(g.id)));
+    const normalItems  = allItems.filter(g => getStatus(g.status).type === "done" && !hiddenIds.includes(String(g.id)));
+    const trashItems   = allItems.filter(g => hiddenIds.includes(String(g.id)));
+
+    $countProc.textContent = processItems.length;
+
+    let list = [];
+    if(currentTab === "all") list = normalItems;
+    else if(currentTab === "process") list = processItems;
+    else if(currentTab === "trash") list = trashItems;
+
+    if(list.length === 0) {
+      $grid.innerHTML = `<div class="lf-empty">No files in this section.</div>`;
+      return;
+    }
+
+    $grid.innerHTML = list.map(item => {
+      const url = item.output_url || "";
+      const st = getStatus(item.status);
+      let mediaHtml = "";
+
+      if(!url) mediaHtml = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#444;">No Media</div>`;
+      else if(is3D(url)) mediaHtml = `<model-viewer src="${url}" shadow-intensity="1" auto-rotate="false" camera-controls="false" interaction-prompt="none"></model-viewer>`;
+      else if(isVideo(url)) mediaHtml = `<video src="${url}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`;
+      else mediaHtml = `<img src="${url}" loading="lazy" />`;
+
+      return `
+        <div class="lf-card" onclick="window.openModal('${item.id}')">
+          <div class="lf-media">${mediaHtml}</div>
+          <div class="card-badge"><span class="dot ${st.dot}"></span> ${st.text}</div>
+          <div class="mini-date">${(item.created_at||"").replace("T"," ").slice(0,16)}</div>
+          <div class="card-overlay">
+            <div class="btn primary" style="width:auto; padding:6px 14px; font-size:12px;">Open</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // --- Modal Logic ---
+
+  window.openModal = (id) => {
+    const item = allItems.find(x => String(x.id) === String(id));
+    if(!item) return;
+    currentItem = item;
+    updateModal(item);
+    $modal.classList.add("open");
+  };
+
+  function updateModal(item){
+    const url = item.output_url || "";
+    const st = getStatus(item.status);
+    const hiddenIds = getHiddenIds();
+    const isHidden = hiddenIds.includes(String(item.id));
+
+    let html = "";
+    if(!url) html = `<div style="color:#666">Processing or Failed</div>`;
+    else if(is3D(url)) {
+      html = `<model-viewer src="${url}" camera-controls auto-rotate shadow-intensity="1" style="width:100%;height:100%;background:#111;"></model-viewer>`;
+    } else if(isVideo(url)) {
+      html = `<video src="${url}" controls autoplay loop style="max-height:100%;max-width:100%"></video>`;
+    } else {
+      html = `<img src="${url}" style="object-fit:contain;" />`;
+    }
+    $viewCont.innerHTML = html;
+
+    $mStatus.innerHTML = `<span class="dot ${st.dot}" style="display:inline-block;margin-right:6px"></span> ${st.text}`;
+    $mDate.textContent = item.created_at || "";
+    $mId.textContent = item.id;
+
+    if(url) {
+      $btnDown.style.display = "flex";
+      $btnDown.onclick = () => {
+        const ext = (url.split('.').pop() || "bin").split("?")[0];
+        forceDownload(url, `generated-${item.id}.${ext}`);
+      };
+      $btnCopy.onclick = () => {
+        navigator.clipboard.writeText(url);
+        $btnCopy.textContent = "Copied!";
+        setTimeout(()=>$btnCopy.textContent="Copy URL", 1000);
+      };
+    } else {
+      $btnDown.style.display = "none";
+      $btnCopy.onclick = null;
+    }
+
+    if(isHidden) {
+      $btnHide.textContent = "Restore from Trash";
+      $btnHide.classList.remove("danger");
+      $btnHide.classList.add("primary");
+    } else {
+      $btnHide.textContent = "Move to Trash";
+      $btnHide.classList.add("danger");
+      $btnHide.classList.remove("primary");
+    }
+    $btnHide.onclick = () => {
+      toggleHideId(item.id);
+      if(!isHidden) $modal.classList.remove("open");
+    };
+  }
+
+  // --- Events ---
+
+  $modalClose.onclick = () => $modal.classList.remove("open");
+  $modal.onclick = (e) => { if(e.target === $modal) $modal.classList.remove("open"); };
+
+  $tabs.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      $tabs.forEach(b => b.classList.remove("active", "active-trash"));
+      currentTab = btn.dataset.tab;
+
+      if(currentTab === 'trash') btn.classList.add("active-trash");
+      else btn.classList.add("active");
+
+      // Рендерим из уже загруженного
+      renderGrid();
+
+      // Если юзер зашёл в Library и у нас ещё не всё подгружено — пусть скроллит, догрузка сама пойдёт.
+    });
+  });
+
+  // Infinite scroll
+  window.addEventListener("scroll", () => {
+    if (!hasMore || loading) return;
+    const nearBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900);
+    if (nearBottom) fetchPage(false);
+  });
+
+  // Start
+  init();
+})();
+</script>
