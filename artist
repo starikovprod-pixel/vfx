@@ -20,6 +20,14 @@
 
   .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
   #lf-u *{ box-sizing:border-box; }
+  /* Chrome/Edge */
+  *::-webkit-scrollbar{ width:10px; height:10px; }
+  *::-webkit-scrollbar-track{ background: rgba(255,255,255,0.04); border-radius:999px; }
+  *::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.14); border-radius:999px; border:2px solid rgba(0,0,0,0.0); }
+  *::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.22); }
+
+  /* Firefox */
+  *{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) rgba(255,255,255,0.05); }
   #lf-u{
     background:var(--bg-body);
     color:var(--text);
@@ -346,8 +354,24 @@
     margin-bottom:6px;
   }
   .pc-name{ font-weight:950; font-size:12px; color:#fff; text-decoration:none; display:flex; gap:6px; align-items:center; }
-  .pc-time{ font-size:11px; color:rgba(255,255,255,0.55); }
+  .pc-time{ font-size:11px; color:rgba(255,255,255,0.55); transform: translateY(1px); }
   .pc-body{ font-size:13px; line-height:1.35; white-space:pre-wrap; }
+  .pc-edit-ta{
+    width:100%;
+    min-height:90px;
+    resize:vertical;
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:14px;
+    color:#fff;
+    padding:10px 12px;
+    outline:none;
+    font-weight:800;
+    font-size:13px;
+    line-height:1.35;
+  }
+  .pc-ava-link{ display:block; flex:0 0 auto; }
+  .pc-ava-link:hover{ opacity:.9; }
 
   .pc-form{
     display:flex; gap:10px; align-items:flex-start;
@@ -1184,25 +1208,22 @@
     </div>
   </div>
 
-  <div class="sheet-backdrop" id="ceB">
-    <div class="sheet" onclick="event.stopPropagation()">
+
+  <div class="sheet-backdrop" id="cfB">
+    <div class="sheet" onclick="event.stopPropagation()" style="max-width:520px;height:auto;">
       <div class="sheet-head">
-        <div class="sheet-title">Edit comment</div>
-        <button class="sheet-close" id="ceClose">✕</button>
+        <div class="sheet-title" id="cfTitle">Confirm</div>
+        <button class="sheet-close" id="cfClose">✕</button>
       </div>
       <div class="sheet-body">
-        <div class="field">
-          <label>Comment</label>
-          <textarea id="ceText" style="min-height:140px"></textarea>
-        </div>
-        <div class="sheet-actions">
-          <button class="btn-primary" id="ceSave">Save</button>
-          <button class="btn-ghost" id="ceCancel">Cancel</button>
+        <div class="muted" id="cfText">—</div>
+        <div class="sheet-actions" style="justify-content:flex-end">
+          <button class="btn-ghost" id="cfCancel">Cancel</button>
+          <button class="btn-danger" id="cfOk">Delete</button>
         </div>
       </div>
     </div>
   </div>
-
 
   <div class="sheet-backdrop" id="emoB">
     <div class="sheet" onclick="event.stopPropagation()" style="max-width:560px;height:auto;max-height:80vh;">
@@ -1331,11 +1352,12 @@
   const $pickSearch = document.getElementById("pickSearch");
   const $pickHint = document.getElementById("pickHint");
 
-  const $ceB = document.getElementById("ceB");
-  const $ceClose = document.getElementById("ceClose");
-  const $ceCancel = document.getElementById("ceCancel");
-  const $ceSave = document.getElementById("ceSave");
-  const $ceText = document.getElementById("ceText");
+  const $cfB = document.getElementById("cfB");
+  const $cfTitle = document.getElementById("cfTitle");
+  const $cfText = document.getElementById("cfText");
+  const $cfClose = document.getElementById("cfClose");
+  const $cfCancel = document.getElementById("cfCancel");
+  const $cfOk = document.getElementById("cfOk");
 
   const $emoB = document.getElementById("emoB");
   const $emoClose = document.getElementById("emoClose");
@@ -1391,9 +1413,6 @@
   let pickResolve = null;
 
   const postCommentsMode = new Map();
-  let ceCommentId = null;
-  let cePostId = null;
-
   const ICONS = {
     like: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.6-9.5-9C.6 8.6 2.6 5 6.5 5c2.1 0 3.6 1.2 4.5 2.4C11.9 6.2 13.4 5 15.5 5 19.4 5 21.4 8.6 21.5 12c-2.5 4.4-9.5 9-9.5 9z"/></svg>',
     comm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
@@ -1443,6 +1462,19 @@
         emoTargetInput.focus();
         closeEmojiPicker();
       };
+    });
+  }
+
+  function confirmUI(title, text){
+    $cfTitle.textContent = title || "Confirm";
+    $cfText.textContent = text || "";
+    $cfB.classList.add("open");
+    return new Promise((resolve)=>{
+      const done = (v)=>{ $cfB.classList.remove("open"); resolve(v); };
+      $cfClose.onclick = ()=> done(false);
+      $cfCancel.onclick = ()=> done(false);
+      $cfB.onclick = (e)=>{ if(e.target === $cfB) done(false); };
+      $cfOk.onclick = ()=> done(true);
     });
   }
 
@@ -1514,6 +1546,19 @@
   async function getCurrentUserId(){
     try{ if(!window.sb) return null; const { data } = await window.sb.auth.getUser(); return data?.user?.id || null; }
     catch(e){ return null; }
+  }
+  async function fetchMyPublicProfile(accessToken){
+    try{
+      const r = await fetch("https://api.lightfull.ai/api/profile_public", {
+        method:"GET",
+        headers:{ Authorization: "Bearer " + accessToken }
+      });
+      const j = await r.json().catch(()=> ({}));
+      if(!r.ok) return null;
+      return j?.profile || null;
+    }catch(e){
+      return null;
+    }
   }
   async function requireToken(){ const t = await getSessionToken(); if(!t) throw new Error("Login required"); return t; }
 
@@ -1808,18 +1853,6 @@
   }
 
 
-  function openCommentEditor(comment_id, post_id, initialText){
-    ceCommentId = comment_id;
-    cePostId = post_id;
-    $ceText.value = initialText || "";
-    $ceB.classList.add("open");
-  }
-  function closeCommentEditor(){
-    $ceB.classList.remove("open");
-    ceCommentId = null;
-    cePostId = null;
-  }
-
   function renderPosts(){
     if(!postItems.length){
       $grid.innerHTML = `<div class="empty">No posts yet.</div>`;
@@ -2045,7 +2078,7 @@
         const canEdit = isMine;
         return `
           <div class="pc-item">
-            <div class="avatar ${avEmoji ? "emoji" : ""}">${avHtml}</div>
+            <a href="/artist?username=${encodeURIComponent(c.username||"")}" class="pc-ava-link"><div class="avatar ${avEmoji ? "emoji" : ""}">${avHtml}</div></a>
             <div class="pc-bubble">
               <div class="pc-top">
                 <a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||"")}">${escapeHtml(c.display_name||c.username||"user")}${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}</a>
@@ -2053,11 +2086,20 @@
                 ${(canEdit || canDelete) ? `
                   <div style="margin-left:auto;display:flex;gap:8px;">
                     ${canEdit ? `<button class="mini" data-c-edit="${escapeHtml(c.id)}">Edit</button>` : ""}
+                    <button class="mini" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}">Reply</button>
                     ${canDelete ? `<button class="mini danger" data-c-del="${escapeHtml(c.id)}">Delete</button>` : ""}
                   </div>
                 ` : ""}
               </div>
-              <div class="pc-body">${escapeHtml(c.body)}</div>
+              <div class="pc-body" data-body="${c.id}">${escapeHtml(c.body)}</div>
+              <div class="pc-edit" data-editbox="${c.id}" style="display:none; margin-top:10px;">
+                <textarea class="pc-edit-ta" data-ta="${c.id}"></textarea>
+                <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:8px;">
+                  <button class="mini" data-emo-edit="${c.id}">Emoji</button>
+                  <button class="mini" data-c-cancel="${c.id}">Cancel</button>
+                  <button class="mini on save" data-c-save="${c.id}">Save</button>
+                </div>
+              </div>
             </div>
           </div>
         `;
@@ -2069,14 +2111,16 @@
         btn.onclick = async ()=>{
           const cid = btn.getAttribute("data-c-del");
           if(!cid) return;
-          if(!confirm("Delete this comment?")) return;
+          const ok = await confirmUI("Delete comment", "Are you sure you want to delete this comment?");
+          if(!ok) return;
           try{
             await requireToken();
             await api("/api/posts/comment_delete", { method:"POST", body: JSON.stringify({ comment_id: cid }) });
             const p = postItems.find(x=> String(x.id)===String(post_id));
             if(p) p.comment_count = Math.max((p.comment_count||0) - 1, 0);
+            const commentsBtn = $grid.querySelector(`[data-act="toggle-comments"][data-post="${CSS.escape(String(post_id))}"] span`);
+            if(commentsBtn && p) commentsBtn.textContent = String(p.comment_count||0);
             await loadPostComments(post_id);
-            renderPosts();
             toast("Deleted");
           }catch(e){
             toast(e.message||"Failed");
@@ -2085,11 +2129,59 @@
       });
 
       listEl.querySelectorAll("[data-c-edit]").forEach(btn=>{
-        btn.onclick = async ()=>{
+        btn.onclick = ()=>{
           const cid = btn.getAttribute("data-c-edit");
-          if(!cid) return;
-          const currentBody = btn.closest('.pc-bubble')?.querySelector('.pc-body')?.textContent || "";
-          openCommentEditor(cid, post_id, currentBody);
+          const bodyEl = listEl.querySelector(`[data-body="${CSS.escape(cid)}"]`);
+          const boxEl = listEl.querySelector(`[data-editbox="${CSS.escape(cid)}"]`);
+          const ta = listEl.querySelector(`[data-ta="${CSS.escape(cid)}"]`);
+          if(!bodyEl || !boxEl || !ta) return;
+          ta.value = bodyEl.textContent || "";
+          boxEl.style.display = "block";
+          ta.focus();
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-cancel]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-c-cancel");
+          const boxEl = listEl.querySelector(`[data-editbox="${CSS.escape(cid)}"]`);
+          if(boxEl) boxEl.style.display = "none";
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-save]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-c-save");
+          const ta = listEl.querySelector(`[data-ta="${CSS.escape(cid)}"]`);
+          if(!ta) return;
+          const text = (ta.value||"").trim();
+          if(!text) return toast("Empty");
+          try{
+            await requireToken();
+            await api("/api/posts/comment_edit", { method:"POST", body: JSON.stringify({ comment_id: cid, body: text }) });
+            await loadPostComments(post_id);
+            toast("Updated");
+          }catch(e){
+            toast(e.message||"Failed");
+          }
+        };
+      });
+
+      listEl.querySelectorAll("[data-emo-edit]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-emo-edit");
+          const ta = listEl.querySelector(`[data-ta="${CSS.escape(cid)}"]`);
+          if(ta) openEmojiPicker(ta);
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-reply]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const uname = btn.getAttribute("data-u") || "";
+          const inp = document.getElementById("pc-in-" + post_id);
+          if(!inp) return;
+          inp.value = (inp.value||"") + `@${uname} `;
+          inp.focus();
         };
       });
 
@@ -2122,7 +2214,8 @@
       // refresh counts locally
       const p = postItems.find(x=> String(x.id)===String(post_id));
       if(p) p.comment_count = (p.comment_count||0) + 1;
-      renderPosts();
+      const commentsBtn = $grid.querySelector(`[data-act="toggle-comments"][data-post="${CSS.escape(String(post_id))}"] span`);
+      if(commentsBtn && p) commentsBtn.textContent = String(p.comment_count||0);
     }catch(e){
       toast(e.message||"Failed");
     }finally{
@@ -2142,6 +2235,15 @@
     const $prev = host.querySelector("[data-prev]");
     const $next = host.querySelector("[data-next]");
     const $dots = host.querySelector("[data-dots]");
+    const imgEl = document.createElement("img");
+    imgEl.loading = "lazy";
+    imgEl.decoding = "async";
+    const vidEl = document.createElement("video");
+    vidEl.setAttribute("playsinline", "");
+    vidEl.controls = true;
+    $slide.innerHTML = "";
+    $slide.appendChild(imgEl);
+    $slide.appendChild(vidEl);
 
     function set(i){
       idx = (i + mediaArr.length) % mediaArr.length;
@@ -2149,11 +2251,22 @@
       const url = (item.media_url || item.thumb_url || "").trim();
       const isV = isVideoUrl(url);
 
-      // render cover media (not autoplay)
       if(isV){
-        $slide.innerHTML = `<video src="${escapeHtml(url)}" playsinline controls></video>`;
+        imgEl.style.display = "none";
+        vidEl.style.display = "block";
+        if(vidEl.getAttribute("src") !== url){
+          vidEl.pause();
+          vidEl.setAttribute("src", url);
+          vidEl.load();
+        }
       } else {
-        $slide.innerHTML = `<img src="${escapeHtml(item.thumb_url || item.media_url || "")}" loading="lazy" decoding="async" />`;
+        vidEl.pause();
+        vidEl.style.display = "none";
+        imgEl.style.display = "block";
+        const nextSrc = (item.thumb_url || item.media_url || "").trim();
+        if(imgEl.getAttribute("src") !== nextSrc){
+          imgEl.setAttribute("src", nextSrc);
+        }
       }
 
       // click opens Media Viewer slider for whole post
@@ -3148,26 +3261,12 @@
   $mvNext.onclick = ()=> setMediaIndex(mvIndex+1);
   bindViewerSwipe();
 
-  $ceClose.onclick = closeCommentEditor;
-  $ceCancel.onclick = closeCommentEditor;
-  $ceB.onclick = (e)=>{ if(e.target === $ceB) closeCommentEditor(); };
   $emoClose.onclick = closeEmojiPicker;
   $emoB.onclick = (e)=>{ if(e.target === $emoB) closeEmojiPicker(); };
   $emoSearch.oninput = ()=> renderEmojiGrid($emoSearch.value);
-
-  $ceSave.onclick = async ()=>{
-    try{
-      await requireToken();
-      const text = ($ceText.value||"").trim();
-      if(!text) return toast("Empty");
-      await api("/api/posts/comment_edit", { method:"POST", body: JSON.stringify({ comment_id: ceCommentId, body: text }) });
-      closeCommentEditor();
-      await loadPostComments(cePostId);
-      toast("Updated");
-    }catch(e){
-      toast(e.message||"Failed");
-    }
-  };
+  $cfClose.onclick = ()=> $cfB.classList.remove("open");
+  $cfCancel.onclick = ()=> $cfB.classList.remove("open");
+  $cfB.onclick = (e)=>{ if(e.target === $cfB) $cfB.classList.remove("open"); };
 
   // -------- Init ----------
   async function init(){
@@ -3181,17 +3280,18 @@
 
     await loadProfileHeaderOnce();
     myUserId = await getCurrentUserId();
+
     try{
-      const me = await api("/api/me", { method:"GET" });
-      myProfile = me?.profile || (me?.user_id ? {
-        user_id: me.user_id,
-        username: me.username,
-        display_name: me.display_name,
-        avatar_url: me.avatar_url,
-        avatar_type: me.avatar_type,
-        avatar_emoji: me.avatar_emoji
-      } : null);
-    }catch(e){ myProfile = null; }
+      const { data } = await window.sb.auth.getSession();
+      const token = data?.session?.access_token;
+      if(token){
+        myProfile = await fetchMyPublicProfile(token);
+      }
+    }catch(e){}
+
+    if(!myProfile){
+      myProfile = { display_name:"User", username:"", avatar_type:"image", avatar_url:"", avatar_emoji:"" };
+    }
     renderTabControls();
     await switchTab("posts");
   }
