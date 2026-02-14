@@ -1,0 +1,287 @@
+<style>
+  #lf-profile *{ box-sizing:border-box; }
+  #lf-profile{
+    background:var(--bg-body,#050505);
+    color:#fff;
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    min-height: calc(100vh - 74px);
+  }
+  #lf-profile .wrap{ max-width: 980px; margin:0 auto; padding: 26px 18px 50px; }
+  #lf-profile .top{
+    display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap;
+    border-bottom:1px solid rgba(255,255,255,0.10); padding-bottom:18px; margin-bottom:18px;
+  }
+  #lf-profile h1{ margin:0; font-size:34px; font-weight:900; letter-spacing:-.6px; }
+  #lf-profile .sub{ margin-top:6px; color:rgba(255,255,255,0.65); font-size:13px; }
+
+  .card{
+    background: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.10);
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:14px;
+  }
+  @media(max-width: 860px){ .grid{ grid-template-columns:1fr; } }
+
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .label{ font-size:12px; font-weight:900; color:rgba(255,255,255,0.75); }
+  .hint{ font-size:12px; color:rgba(255,255,255,0.55); }
+
+  .input, .textarea{
+    width:100%;
+    border-radius: 14px;
+    padding: 12px 12px;
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    color:#fff;
+    font-size:14px;
+  }
+  .textarea{ min-height: 110px; resize: vertical; }
+
+  .row{
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+  }
+
+  .btn{
+    border:0;
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor:pointer;
+    font-weight:900;
+    background:#fff;
+    color:#000;
+  }
+  .btn:hover{ background:#ddd; }
+  .btn.ghost{
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.12);
+  }
+  .btn.ghost:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+
+  .status{
+    margin-top:12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border:1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.25);
+    font-size:13px;
+    color: rgba(255,255,255,0.8);
+  }
+  .status.err{ border-color: rgba(255,70,90,0.35); color:#ff98a2; background: rgba(255,70,90,0.08); }
+  .status.ok{ border-color: rgba(57,255,20,0.25); color:#b7ffb0; background: rgba(57,255,20,0.08); }
+
+  .preview{
+    display:flex; gap:14px; align-items:center; margin-bottom:14px;
+  }
+  .avatar{
+    width:56px; height:56px; border-radius:50%;
+    background: rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    overflow:hidden;
+    flex:0 0 auto;
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pname{ font-weight:900; font-size:16px; }
+  .puser{ color:rgba(255,255,255,0.65); font-size:13px; margin-top:2px; }
+</style>
+
+<div id="lf-profile">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Profile Settings</h1>
+        <div class="sub">Create your username and public profile for the Feed.</div>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="btn-open-public" style="display:none;">Open Public Profile</button>
+        <button class="btn" id="btn-save">Save</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="preview">
+        <div class="avatar" id="pv-avatar"></div>
+        <div>
+          <div class="pname" id="pv-name">—</div>
+          <div class="puser" id="pv-user">@—</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <div class="label">Username *</div>
+          <input class="input" id="f-username" placeholder="3-24 chars: a-z 0-9 _ -" />
+          <div class="hint">This becomes your public URL: /u/username</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Display name</div>
+          <input class="input" id="f-display" placeholder="Alex Starikov" />
+        </div>
+
+        <div class="field">
+          <div class="label">Avatar URL</div>
+          <input class="input" id="f-avatar" placeholder="https://...png" />
+          <div class="hint">Tip: use a square image.</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Bio</div>
+          <textarea class="textarea" id="f-bio" placeholder="VFX / 3D / Lightfull..."></textarea>
+        </div>
+
+        <div class="field">
+          <div class="label">YouTube</div>
+          <input class="input" id="f-yt" placeholder="https://youtube.com/..." />
+        </div>
+
+        <div class="field">
+          <div class="label">Instagram</div>
+          <input class="input" id="f-ig" placeholder="https://instagram.com/..." />
+        </div>
+
+        <div class="field">
+          <div class="label">Website</div>
+          <input class="input" id="f-site" placeholder="https://..." />
+        </div>
+      </div>
+
+      <div class="status" id="status" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const BACKEND = "https://api.lightfull.ai";
+  const ENDPOINT = "/api/profile_public"; // <-- если у тебя другое имя, поменяй здесь
+
+  const $status = document.getElementById("status");
+  const $btnSave = document.getElementById("btn-save");
+  const $btnOpenPublic = document.getElementById("btn-open-public");
+
+  const $u = document.getElementById("f-username");
+  const $d = document.getElementById("f-display");
+  const $a = document.getElementById("f-avatar");
+  const $b = document.getElementById("f-bio");
+  const $yt = document.getElementById("f-yt");
+  const $ig = document.getElementById("f-ig");
+  const $site = document.getElementById("f-site");
+
+  const $pvAvatar = document.getElementById("pv-avatar");
+  const $pvName = document.getElementById("pv-name");
+  const $pvUser = document.getElementById("pv-user");
+
+  function showStatus(msg, type){
+    $status.style.display = "block";
+    $status.className = "status" + (type ? (" " + type) : "");
+    $status.textContent = msg;
+  }
+
+  async function getToken(){
+    if(!window.sb) return null;
+    const { data } = await window.sb.auth.getSession();
+    return data?.session?.access_token || null;
+  }
+
+  async function api(method, body){
+    const token = await getToken();
+    if(!token) throw new Error("Login required");
+    const res = await fetch(BACKEND + ENDPOINT, {
+      method,
+      headers: {
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + token
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const j = await res.json().catch(()=> ({}));
+    if(!res.ok) throw new Error(j?.error || j?.details || ("HTTP " + res.status));
+    return j;
+  }
+
+  function updatePreview(){
+    const username = ($u.value || "").trim();
+    const display = ($d.value || "").trim();
+    const avatar = ($a.value || "").trim();
+
+    $pvName.textContent = display || "—";
+    $pvUser.textContent = username ? ("@" + username) : "@—";
+    $pvAvatar.innerHTML = avatar ? `<img src="${avatar}" />` : "";
+    $btnOpenPublic.style.display = username ? "inline-flex" : "none";
+  }
+
+  async function load(){
+    try{
+      showStatus("Loading...", "");
+      const j = await api("GET");
+      const p = j?.profile || null;
+
+      $u.value = p?.username || "";
+      $d.value = p?.display_name || "";
+      $a.value = p?.avatar_url || "";
+      $b.value = p?.bio || "";
+      $yt.value = p?.links?.youtube || "";
+      $ig.value = p?.links?.instagram || "";
+      $site.value = p?.links?.site || "";
+
+      updatePreview();
+      showStatus("Loaded.", "ok");
+      setTimeout(()=> $status.style.display="none", 800);
+    }catch(e){
+      showStatus(e.message, "err");
+    }
+  }
+
+  async function save(){
+    try{
+      $btnSave.disabled = true;
+      showStatus("Saving...", "");
+
+      const body = {
+        username: ($u.value || "").trim(),
+        display_name: ($d.value || "").trim(),
+        avatar_url: ($a.value || "").trim(),
+        bio: ($b.value || "").trim(),
+        links: {
+          youtube: ($yt.value || "").trim(),
+          instagram: ($ig.value || "").trim(),
+          site: ($site.value || "").trim()
+        }
+      };
+
+      const j = await api("POST", body);
+      const p = j?.profile;
+
+      $u.value = p?.username || body.username;
+      updatePreview();
+
+      showStatus("Saved.", "ok");
+      setTimeout(()=> $status.style.display="none", 900);
+    }catch(e){
+      // 409 username taken
+      if(String(e.message).toLowerCase().includes("taken")) showStatus("Username is already taken.", "err");
+      else showStatus(e.message, "err");
+    }finally{
+      $btnSave.disabled = false;
+    }
+  }
+
+  $btnSave.onclick = save;
+  [$u,$d,$a].forEach(el => el.addEventListener("input", updatePreview));
+
+  $btnOpenPublic.onclick = () => {
+    const username = ($u.value || "").trim();
+    if(!username) return;
+    window.open("/u/" + username, "_blank");
+  };
+
+  load();
+})();
+</script>
