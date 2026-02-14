@@ -139,23 +139,17 @@
 
   .feed-layout{ display:grid; grid-template-columns: minmax(0,1fr) 320px; gap:16px; }
   .feed-left{ min-width:0; }
-  .feed-right{ position:sticky; top:94px; align-self:start; height:calc(100vh - 110px); }
+  .feed-right{ position:relative; top:0; align-self:start; height:auto; }
   .side-card{ background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:12px; height:100%; display:flex; flex-direction:column; overflow:hidden; }
   .side-title{ font-size:13px; font-weight:900; color:rgba(255,255,255,0.72); margin-bottom:10px; flex:0 0 auto; }
-  .side-list{ flex:1 1 auto; overflow:auto; padding-right:6px; display:flex; flex-direction:column; gap:0; max-height:420px; border-top:1px solid rgba(255,255,255,0.08); scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.18) rgba(255,255,255,0.04); }
+  .side-list{ flex:0 0 auto; overflow:auto; padding-right:6px; display:flex; flex-direction:column; gap:0; max-height:560px; border-top:1px solid rgba(255,255,255,0.08); scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.18) rgba(255,255,255,0.04); }
   .side-list::-webkit-scrollbar{ width:10px; }
   .side-list::-webkit-scrollbar-track{ background:rgba(255,255,255,0.04); border-radius:999px; }
   .side-list::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.16); border-radius:999px; }
   .side-list::-webkit-scrollbar-thumb:hover{ background:rgba(255,255,255,0.26); }
-  .side-item{ display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff; padding:10px 8px; border-radius:12px; border:1px solid transparent; }
-  .side-item + .side-item{ border-top:1px solid rgba(255,255,255,0.06); border-top-left-radius:0; border-top-right-radius:0; }
+  .side-item{ display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff; padding:10px 8px; border-radius:12px; }
+  .side-item + .side-item{ border-top:1px solid rgba(255,255,255,0.06); border-top-left-radius:0; border-top-right-radius:0; margin-top:0; }
   .side-item:hover{ background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.10); }
-  .side-link{ display:flex; align-items:center; gap:10px; min-width:0; text-decoration:none; color:inherit; }
-  .side-actions{ margin-left:auto; display:flex; align-items:center; gap:8px; flex:0 0 auto; }
-  .side-follow-btn{ position:relative; height:28px; padding:0 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); color:transparent; font-weight:900; font-size:12px; cursor:pointer; transition:.15s; white-space:nowrap; }
-  .side-follow-btn::after{ content:"Following"; color:#fff; }
-  .side-follow-btn:hover{ background:rgba(255,70,90,0.12); border-color:rgba(255,70,90,0.35); }
-  .side-follow-btn:hover::after{ content:"Unfollow"; color:#ff98a2; }
   .side-name{ min-width:0; font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:6px; }
   .side-user{ min-width:0; font-size:12px; color:rgba(255,255,255,0.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
@@ -754,6 +748,7 @@
   let deletingCommentId = null;
   let followState = false;
   let myUserId = null;
+  let followingIds = new Set();
 
   // elements
   const $grid = document.getElementById("grid");
@@ -818,6 +813,26 @@
     return Object.prototype.hasOwnProperty.call(m, String(userId));
   }
 
+  async function syncFollowState(userId, onState){
+    if(!userId) return false;
+    let value = false;
+    if(cacheHas(userId)){
+      value = cacheGet(userId);
+      if(typeof onState === "function") onState(value);
+    }
+    const token = await getSessionToken();
+    if(!token) return value;
+    try{
+      const st = await api(`/api/social/state?user_id=${encodeURIComponent(userId)}`, { method:"GET" });
+      value = !!st.following;
+      cacheSet(userId, value);
+      if(typeof onState === "function") onState(value);
+      return value;
+    }catch(e){
+      return value;
+    }
+  }
+
   function fmtDate(ts){
     const s = safe(ts);
     return s ? s.replace("T"," ").slice(0,16) : "";
@@ -857,54 +872,31 @@
       const dname = it.display_name || uname;
       const av = it.avatar_url ? `<img src="${it.avatar_url}" />` : "";
       return `
-        <div class="side-item" data-following-id="${safe(it.user_id)}">
-          <a class="side-link" href="/artist?username=${encodeURIComponent(uname)}">
-            <div class="avatar">${av}</div>
-            <div style="min-width:0">
-              <div class="side-name">${safe(dname)} ${verifiedBadgeHTML(it.verified === true)}</div>
-              <div class="side-user">@${safe(uname)}</div>
-            </div>
-          </a>
-          <div class="side-actions">
-            <button class="side-follow-btn" type="button" data-unfollow="${safe(it.user_id)}">Following</button>
+        <a class="side-item" href="/artist?username=${encodeURIComponent(uname)}">
+          <div class="avatar">${av}</div>
+          <div style="min-width:0">
+            <div class="side-name">${safe(dname)} ${verifiedBadgeHTML(it.verified === true)}</div>
+            <div class="side-user">@${safe(uname)}</div>
           </div>
-        </div>`;
+        </a>`;
     }).join("");
     bindVerifiedTooltip($sideList);
-    $sideList.querySelectorAll("[data-unfollow]").forEach((btn)=>{
-      btn.onclick = async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const token = await getSessionToken();
-        if(!token){ toast("Login required"); return; }
-        const followingId = btn.getAttribute("data-unfollow");
-        try{
-          btn.disabled = true;
-          btn.textContent = "…";
-          await api("/api/social/unfollow", { method:"POST", body: JSON.stringify({ following_id: followingId }) });
-          cacheSet(followingId, false);
-          const row = btn.closest(".side-item");
-          if(row) row.remove();
-          if(sort === "following") await fetchPage(true);
-        }catch(err){
-          toast(err.message || "Unfollow failed");
-          btn.disabled = false;
-          btn.textContent = "Following";
-        }
-      };
-    });
   }
 
   async function loadFollowingSidebar(){
     const token = await getSessionToken();
     if(!token){
+      followingIds = new Set();
       $sideList.innerHTML = `<div class="lf-empty" style="padding:14px;">Login to see subscriptions.</div>`;
       return;
     }
     try{
-      const j = await api("/api/social/following?limit=16", { method:"GET" });
-      renderFollowingSidebar(Array.isArray(j.items) ? j.items : []);
+      const j = await api("/api/social/following?limit=200", { method:"GET" });
+      const arr = Array.isArray(j.items) ? j.items : [];
+      followingIds = new Set(arr.map((x) => String(x.user_id)));
+      renderFollowingSidebar(arr);
     }catch(e){
+      followingIds = new Set();
       $sideList.innerHTML = `<div class="lf-empty" style="padding:14px;color:var(--danger)">${safe(e.message)}</div>`;
     }
   }
@@ -939,6 +931,21 @@
       const { data } = await window.sb.auth.getUser();
       return data?.user?.id || null;
     }catch(e){ return null; }
+  }
+
+  async function refreshFollowingIds(){
+    const token = await getSessionToken();
+    if(!token){
+      followingIds = new Set();
+      return;
+    }
+    try{
+      const j = await api("/api/social/following?limit=200", { method:"GET" });
+      const arr = Array.isArray(j.items) ? j.items : [];
+      followingIds = new Set(arr.map((x) => String(x.user_id)));
+    }catch(e){
+      followingIds = new Set();
+    }
   }
 
   async function api(path, opts = {}) {
@@ -1053,7 +1060,12 @@
       const q = `?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`;
       const json = await api(`/api/feed/list${q}`, { method:"GET" });
 
-      const page = Array.isArray(json.items) ? json.items : [];
+      let page = Array.isArray(json.items) ? json.items : [];
+      if(sort === "following"){
+        if(followingIds.size === 0) await refreshFollowingIds();
+        page = page.filter((it) => followingIds.has(String(it.user_id)));
+        if(myUserId) page = page.filter((it) => String(it.user_id) !== String(myUserId));
+      }
       const seen = new Set(items.map(x=> String(x.id)));
       for(const it of page){
         const k = String(it.id);
@@ -1171,25 +1183,16 @@
 
     $btnDl.innerHTML = ICONS.dl;
     if(!myUserId) myUserId = await getMyUserId();
-    followState = !!current.following;
-    $btnFollow.textContent = followState ? "Following" : "Follow";
-    $btnFollow.classList.toggle('on', followState);
     if(myUserId && String(current.user_id) === String(myUserId)){
       $btnFollow.style.display = "none";
     }else{
       $btnFollow.style.display = "inline-flex";
-      if(current.user_id && cacheHas(current.user_id)){
-        followState = cacheGet(current.user_id);
+      const setFollowBtn = (v) => {
+        followState = !!v;
         $btnFollow.textContent = followState ? "Following" : "Follow";
-        $btnFollow.classList.toggle('on', followState);
-      }
-      try{
-        const st = await api(`/api/social/state?user_id=${encodeURIComponent(current.user_id)}`, { method:"GET" });
-        followState = !!st.following;
-        cacheSet(current.user_id, followState);
-      }catch(e){ followState = false; }
-      $btnFollow.textContent = followState ? "Following" : "Follow";
-      $btnFollow.classList.toggle('on', followState);
+        $btnFollow.classList.toggle("on", followState);
+      };
+      await syncFollowState(current.user_id, setFollowBtn);
     }
 
     $btnDl.onclick = async (e) => {
@@ -1433,6 +1436,7 @@
     await updateAuthHint();
     try{ if(window.sb){ window.sb.auth.onAuthStateChange(()=> { updateAuthHint(); loadFollowingSidebar(); }); } }catch(e){}
     myUserId = await getMyUserId();
+    await refreshFollowingIds();
     await loadFollowingSidebar();
     await fetchPage(true);
   }
