@@ -358,7 +358,13 @@
   function fmtDate(ts){ return safe(ts).replace("T"," ").slice(0,16); }
 
   function isVideo(it){
-    return String(it.media_type || "").toLowerCase() === "video";
+    const url = String(it.media_url || it.thumb_url || "").toLowerCase();
+    return (
+      url.endsWith(".mp4") ||
+      url.endsWith(".webm") ||
+      url.endsWith(".mov") ||
+      url.includes("fal.media")
+    );
   }
 
   async function getSessionToken(){
@@ -524,9 +530,13 @@
   }
 
   function renderModalMedia(it){
-    const url = (it.media_url || it.thumb_url || "").trim();
-    if(isVideo(it)) $mp.innerHTML = `<video src="${url}" controls autoplay playsinline loop style="width:100%;height:100%;object-fit:contain"></video>`;
-    else $mp.innerHTML = `<img src="${url}" />`;
+    const media = (it.media_url || "").trim();
+    const thumb = (it.thumb_url || "").trim();
+    if(isVideo(it)){
+      $mp.innerHTML = `<video src="${media || thumb}" controls autoplay playsinline loop style="width:100%;height:100%;object-fit:contain"></video>`;
+    } else {
+      $mp.innerHTML = `<img src="${media || thumb}" />`;
+    }
   }
 
   function startTitleEdit(){
