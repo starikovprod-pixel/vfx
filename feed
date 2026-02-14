@@ -431,6 +431,7 @@
   .btn-act.primary:hover{ background:#ddd; }
   .btn-act.on.like { color: #ff465a; border-color: rgba(255,70,90,0.45); background: rgba(255,70,90,0.14); }
   .btn-act.on.save { color: #2b6cff; border-color: rgba(43,108,255,0.45); background: rgba(43,108,255,0.18); }
+  .btn-act.on.follow{ border-color: rgba(110,168,255,0.45); background: rgba(110,168,255,0.18); }
   .btn-act svg { width: 18px; height: 18px; }
   .abtn { color:#fff; }
   .abtn svg { stroke: currentColor; fill: none; }
@@ -894,6 +895,7 @@
       const j = await api("/api/social/following?limit=200", { method:"GET" });
       const arr = Array.isArray(j.items) ? j.items : [];
       followingIds = new Set(arr.map((x) => String(x.user_id)));
+      arr.forEach((x)=> cacheSet(x.user_id, true));
       renderFollowingSidebar(arr);
     }catch(e){
       followingIds = new Set();
@@ -1191,6 +1193,7 @@
         followState = !!v;
         $btnFollow.textContent = followState ? "Following" : "Follow";
         $btnFollow.classList.toggle("on", followState);
+        $btnFollow.classList.toggle("follow", true);
       };
       await syncFollowState(current.user_id, setFollowBtn);
     }
@@ -1364,13 +1367,14 @@
     if(!token) return;
     try{
       const path = followState ? "/api/social/unfollow" : "/api/social/follow";
-      const payload = followState ? { following_id: current.user_id } : { user_id: current.user_id };
+      const payload = { following_id: current.user_id };
       const j = await api(path, { method:"POST", body: JSON.stringify(payload) });
       followState = !followState;
       current.following = followState;
       cacheSet(current.user_id, followState);
       $btnFollow.textContent = followState ? "Following" : "Follow";
       $btnFollow.classList.toggle('on', followState);
+      $btnFollow.classList.toggle("follow", true);
       items = items.map((x)=> String(x.user_id) === String(current.user_id) ? Object.assign({}, x, { following: followState }) : x);
       renderGrid();
       if(j && typeof j.follower_count !== 'undefined'){
