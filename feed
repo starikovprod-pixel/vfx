@@ -137,6 +137,17 @@
     padding-bottom: 60px;
   }
 
+  .feed-layout{ display:grid; grid-template-columns: minmax(0,1fr) 320px; gap:16px; }
+  .feed-left{ min-width:0; }
+  .feed-right{ position:sticky; top:94px; height:calc(100vh - 110px); }
+  .side-card{ background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:12px; height:100%; display:flex; flex-direction:column; }
+  .side-title{ font-size:13px; font-weight:900; color:rgba(255,255,255,0.72); margin-bottom:10px; }
+  .side-list{ display:flex; flex-direction:column; gap:8px; overflow:auto; padding-right:4px; }
+  .side-item{ display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff; padding:8px; border-radius:12px; border:1px solid transparent; }
+  .side-item:hover{ background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.10); }
+  .side-name{ min-width:0; font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:6px; }
+  .side-user{ min-width:0; font-size:12px; color:rgba(255,255,255,0.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
   .lf-card{
     background:var(--bg-card);
     border:1px solid var(--border);
@@ -224,6 +235,9 @@
   .author-name{
     font-size:13px; font-weight:800;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    display:flex;
+    align-items:center;
+    gap:6px;
   }
   .author-username{
     font-size:12px; color: rgba(255,255,255,0.65);
@@ -373,6 +387,24 @@
     display:flex;
     gap:10px;
   }
+  .fcnt{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-top:6px;
+    padding:6px 10px;
+    border-radius:999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.85);
+    font-size:12px;
+    font-weight:900;
+  }
+  .fcnt span{ color: rgba(255,255,255,0.55); font-weight:800; }
+  .fcnt b{ color:#fff; }
+  .vfy{ width:14px; height:14px; color:#6ea8ff; display:inline-flex; align-items:center; justify-content:center; pointer-events:none; flex:0 0 auto; }
+  .vfy svg{ width:14px; height:14px; display:block; fill:currentColor; }
+  .vfy-tip{ position:fixed; z-index:10001; display:none; max-width:220px; background:#0b0b0b; color:#fff; border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:8px 10px; font-size:12px; line-height:1.3; pointer-events:none; }
   .btn-act{
     flex:1;
     border:0;
@@ -569,6 +601,8 @@
   }
 
   @media(max-width: 980px){
+    .feed-layout{ grid-template-columns:1fr; }
+    .feed-right{ position:relative; top:0; height:auto; }
     .lf-modal { flex-direction: column; height: 92vh; }
     .m-sidebar { width: 100%; height: 46vh; border-left: none; border-top: 1px solid var(--border); }
     .m-preview { height: 46vh; }
@@ -592,7 +626,7 @@
           <button class="active" data-sort="trending">Trending</button>
           <button data-sort="new">New</button>
           <button data-sort="top">Top</button>
-          <button data-sort="recs">Recs</button>
+          <button data-sort="following">Following</button>
         </div>
 
         <button class="tab-btn" id="btn-video-only" type="button">Video only</button>
@@ -603,8 +637,19 @@
       </div>
     </div>
 
-    <div id="grid" class="lf-grid">Loading...</div>
-    <div class="lf-loader" id="loader" style="display:none;">Loading more…</div>
+    <div class="feed-layout">
+      <div class="feed-left">
+        <div id="grid" class="lf-grid">Loading...</div>
+        <div class="lf-loader" id="loader" style="display:none;">Loading more…</div>
+      </div>
+
+      <aside class="feed-right" id="follow-sidebar">
+        <div class="side-card">
+          <div class="side-title">Following</div>
+          <div class="side-list" id="side-list"></div>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <div class="lf-modal-backdrop" id="modal-backdrop">
@@ -622,6 +667,7 @@
               <span class="m-meta" id="m-date"></span>
             </div>
             <div class="sub" id="m-userline">@username</div>
+            <div class="fcnt" id="m-followers" style="display:none;"></div>
           </div>
         </div>
 
@@ -630,6 +676,7 @@
         <div class="m-stats" id="m-stats"></div>
 
         <div class="m-actions">
+          <button class="btn-act" id="btn-follow" style="display:none;">Follow</button>
           <button class="btn-act abtn" id="btn-like">Like</button>
           <button class="btn-act abtn" id="btn-save">Save</button>
           <button class="btn-act" id="btn-dl" title="Download"></button>
@@ -658,6 +705,7 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  <div class="vfy-tip" id="vfyTip">Verified — awarded at 100 followers. Helps ranking in Feed.</div>
 </div>
 
 <script>
@@ -673,6 +721,8 @@
     view: '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>',
     dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>'
   };
+  const VERIFIED_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z"/></svg>';
+  const VFY_TOOLTIP = 'Verified — awarded at 100 followers. Helps ranking in Feed.';
 
   // feed state
   let sort = "trending";
@@ -690,10 +740,13 @@
   let saved = false;
   let editingCommentId = null;
   let deletingCommentId = null;
+  let followState = false;
+  let myUserId = null;
 
   // elements
   const $grid = document.getElementById("grid");
   const $loader = document.getElementById("loader");
+  const $sideList = document.getElementById("side-list");
   const $segSort = document.getElementById("seg-sort");
   const $btnVideoOnly = document.getElementById("btn-video-only");
   const $btnRefresh = document.getElementById("btn-refresh");
@@ -710,6 +763,7 @@
   const $mStats = document.getElementById("m-stats");
   const $btnLike = document.getElementById("btn-like");
   const $btnSave = document.getElementById("btn-save");
+  const $btnFollow = document.getElementById("btn-follow");
   const $btnDl = document.getElementById("btn-dl");
   const $cList = document.getElementById("c-list");
   const $cInput = document.getElementById("c-input");
@@ -717,6 +771,8 @@
   const $btnReloadComments = document.getElementById("btn-reload-comments");
 
   const $toast = document.getElementById("toast");
+  const $mFollowers = document.getElementById("m-followers");
+  const $vfyTip = document.getElementById("vfyTip");
 
   function toast(msg){
     $toast.textContent = msg;
@@ -735,6 +791,58 @@
   function fmtDate(ts){
     const s = safe(ts);
     return s ? s.replace("T"," ").slice(0,16) : "";
+  }
+
+  function verifiedBadgeHTML(v){
+    return v ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : "";
+  }
+
+  function bindVerifiedTooltip(root=document){
+    root.querySelectorAll('.vfy[data-tip="verified"]').forEach((el)=>{
+      if(el.dataset.tipBound) return;
+      el.dataset.tipBound = "1";
+      const host = el.closest('.author-name, .side-name, .m-head') || el;
+      host.addEventListener("mouseenter", (ev)=>{
+        $vfyTip.textContent = VFY_TOOLTIP;
+        $vfyTip.style.display = "block";
+        $vfyTip.style.left = `${(ev.clientX || 0) + 12}px`;
+        $vfyTip.style.top = `${(ev.clientY || 0) + 12}px`;
+      });
+      host.addEventListener("mousemove", (ev)=>{
+        if($vfyTip.style.display !== "block") return;
+        $vfyTip.style.left = `${ev.clientX + 12}px`;
+        $vfyTip.style.top = `${ev.clientY + 12}px`;
+      });
+      host.addEventListener("mouseleave", ()=>{ $vfyTip.style.display = "none"; });
+    });
+  }
+
+  function renderFollowingSidebar(list){
+    if(!Array.isArray(list) || list.length === 0){
+      $sideList.innerHTML = `<div class="lf-empty" style="padding:14px;">No subscriptions yet.</div>`;
+      return;
+    }
+    $sideList.innerHTML = list.map((it)=>{
+      const uname = it.username || "user";
+      const dname = it.display_name || uname;
+      const av = it.avatar_url ? `<img src="${it.avatar_url}" />` : "";
+      return `<a class="side-item" href="/artist?username=${encodeURIComponent(uname)}"><div class="avatar">${av}</div><div style="min-width:0"><div class="side-name">${safe(dname)} ${verifiedBadgeHTML(it.verified === true)}</div><div class="side-user">@${safe(uname)}</div></div></a>`;
+    }).join("");
+    bindVerifiedTooltip($sideList);
+  }
+
+  async function loadFollowingSidebar(){
+    const token = await getSessionToken();
+    if(!token){
+      $sideList.innerHTML = `<div class="lf-empty" style="padding:14px;">Login to see subscriptions.</div>`;
+      return;
+    }
+    try{
+      const j = await api("/api/social/following?limit=12", { method:"GET" });
+      renderFollowingSidebar(Array.isArray(j.items) ? j.items : []);
+    }catch(e){
+      $sideList.innerHTML = `<div class="lf-empty" style="padding:14px;color:var(--danger)">${safe(e.message)}</div>`;
+    }
   }
 
   function getClientId(){
@@ -819,7 +927,7 @@
             <div class="card-author">
               <div class="avatar">${avatarHtml}</div>
               <a class="author-link" href="/artist?username=${encodeURIComponent(username)}" onclick="event.stopPropagation()">
-  <div class="author-name">${safe(display)}</div>
+  <div class="author-name">${safe(display)} ${verifiedBadgeHTML(it.verified === true)}</div>
   <div class="author-username">@${safe(username)}</div>
 </a>
             </div>
@@ -847,6 +955,7 @@
       return;
     }
     $grid.innerHTML = list.map(renderCard).join("");
+    bindVerifiedTooltip($grid);
 
     // click handlers
     $grid.querySelectorAll(".lf-card").forEach(card=>{
@@ -871,11 +980,16 @@
         $grid.innerHTML = "Loading...";
       }
 
+      if(sort === "following" && !(await getSessionToken())){
+        $grid.innerHTML = `<div class="lf-empty">Login to see following feed.</div>`;
+        hasMore = false;
+        return;
+      }
+
       const q = `?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`;
       const json = await api(`/api/feed/list${q}`, { method:"GET" });
 
       const page = Array.isArray(json.items) ? json.items : [];
-      if(sort === "recs"){ page.sort(() => Math.random() - 0.5); }
       const seen = new Set(items.map(x=> String(x.id)));
       for(const it of page){
         const k = String(it.id);
@@ -954,16 +1068,34 @@
     const uname = it.username || "user";
     const dname = it.display_name || uname;
     $mUserline.textContent = "@" + uname;
-    $mUserlink.textContent = dname;
+    $mUserlink.innerHTML = `${safe(dname)} ${verifiedBadgeHTML(it.verified === true)}`;
+    bindVerifiedTooltip($mUserlink.parentElement);
     $mUserlink.href = "/artist?username=" + encodeURIComponent(uname);
     $mUserlink.onclick = (e) => { e.stopPropagation(); };
     $mDate.textContent = fmtDate(it.published_at);
     $mTitle.textContent = it.title || "Untitled";
 
+    const fc = it.follower_count ?? 0;
+    $mFollowers.style.display = "inline-flex";
+    $mFollowers.innerHTML = `<span>Followers</span><b>${fc}</b>`;
+
     setStatsUI(it);
     renderModalMedia(it);
 
     $btnDl.innerHTML = ICONS.dl;
+    if(!myUserId) myUserId = await getMyUserId();
+    if(myUserId && String(current.user_id) === String(myUserId)){
+      $btnFollow.style.display = "none";
+    }else{
+      $btnFollow.style.display = "inline-flex";
+      try{
+        const st = await api(`/api/social/state?user_id=${encodeURIComponent(current.user_id)}`, { method:"GET" });
+        followState = !!st.following;
+      }catch(e){ followState = false; }
+      $btnFollow.textContent = followState ? "Following" : "Follow";
+      $btnFollow.classList.toggle('on', followState);
+    }
+
     $btnDl.onclick = async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -1127,6 +1259,29 @@
     }catch(e){ $cList.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`; }
   }
 
+  async function doFollowToggle(){
+    if(!current) return;
+    const token = await requireLoginOrWarn();
+    if(!token) return;
+    try{
+      const path = followState ? "/api/social/unfollow" : "/api/social/follow";
+      const j = await api(path, { method:"POST", body: JSON.stringify({ user_id: current.user_id }) });
+      followState = !followState;
+      $btnFollow.textContent = followState ? "Following" : "Follow";
+      $btnFollow.classList.toggle('on', followState);
+      if(j && typeof j.follower_count !== 'undefined'){
+        current.follower_count = j.follower_count;
+        current.verified = !!j.verified;
+        $mFollowers.innerHTML = `<span>Followers</span><b>${current.follower_count ?? 0}</b>`;
+        const idx = items.findIndex(x=> String(x.id)===String(current.id));
+        if(idx>=0){ items[idx] = Object.assign({}, items[idx], { follower_count: current.follower_count, verified: current.verified }); scheduleRerender(); }
+        $mUserlink.innerHTML = `${safe(current.display_name || current.username || 'user')} ${verifiedBadgeHTML(current.verified === true)}`;
+        bindVerifiedTooltip($mUserlink.parentElement);
+      }
+      await loadFollowingSidebar();
+    }catch(e){ toast(e.message); }
+  }
+
   async function doLikeToggle(){
     if(!current) return; const token = await requireLoginOrWarn(); if(!token) return;
     try{
@@ -1159,6 +1314,7 @@
 
   $modalClose.onclick = closeModal;
   $modal.onclick = (e)=>{ if(e.target === $modal) closeModal(); };
+  $btnFollow.onclick = doFollowToggle;
   $btnLike.onclick = doLikeToggle;
   $btnSave.onclick = doSaveToggle;
   $cSend.onclick = sendComment;
@@ -1172,7 +1328,13 @@
   window.onscroll = ()=>{ if(hasMore && !loading && (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900)) fetchPage(false); };
 
   async function updateAuthHint(){ const token = await getSessionToken(); $authHint.style.display = token ? "none" : "inline"; }
-  async function init(){ await updateAuthHint(); try{ if(window.sb){ window.sb.auth.onAuthStateChange(()=> updateAuthHint()); } }catch(e){} await fetchPage(true); }
+  async function init(){
+    await updateAuthHint();
+    try{ if(window.sb){ window.sb.auth.onAuthStateChange(()=> { updateAuthHint(); loadFollowingSidebar(); }); } }catch(e){}
+    myUserId = await getMyUserId();
+    await loadFollowingSidebar();
+    await fetchPage(true);
+  }
   init();
 })();
 </script>

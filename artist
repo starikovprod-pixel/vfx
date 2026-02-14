@@ -39,6 +39,13 @@
   .pname{ font-weight:900; font-size:22px; letter-spacing:-.2px; }
   .puser{ color:var(--muted); margin-top:2px; font-size:13px; }
   .pbio{ margin-top:10px; color: rgba(255,255,255,0.78); font-size:13px; max-width:720px; line-height:1.4; }
+  .pname{ display:flex; align-items:center; gap:8px; }
+  .fcnt{ display:inline-flex; align-items:center; gap:8px; margin-top:6px; padding:6px 10px; border-radius:999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.85); font-size:12px; font-weight:900; }
+  .fcnt span{ color: rgba(255,255,255,0.55); font-weight:800; }
+  .fcnt b{ color:#fff; }
+  .vfy{ width:14px; height:14px; color:#6ea8ff; display:inline-flex; align-items:center; justify-content:center; pointer-events:none; flex:0 0 auto; }
+  .vfy svg{ width:14px; height:14px; display:block; fill:currentColor; }
+  .vfy-tip{ position:fixed; z-index:10001; display:none; max-width:220px; background:#0b0b0b; color:#fff; border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:8px 10px; font-size:12px; line-height:1.3; pointer-events:none; }
 
   .links{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
   .chip{
@@ -51,6 +58,8 @@
   .chip svg{ width:14px; height:14px; display:block; }
 
   .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .p-follow{ border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color:#fff; padding: 10px 14px; border-radius:12px; cursor:pointer; font-weight:900; }
+  .p-follow.on{ border-color: rgba(110,168,255,0.45); background: rgba(110,168,255,0.18); }
   .seg{
     display:flex; gap:6px; padding:6px;
     background: rgba(255,255,255,0.03);
@@ -119,7 +128,7 @@
   .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
   .author-txt{ min-width:0; }
   .author-name,.author-username{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .author-name{ font-size:13px; font-weight:800; }
+  .author-name{ font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px; }
   .author-username{ font-size:12px; color: rgba(255,255,255,0.65); }
   .card-title{ font-size:14px; font-weight:800; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .card-stats{ display:flex; gap:10px; flex-wrap:wrap; color: rgba(255,255,255,0.78); font-size:12px; font-weight:700; }
@@ -203,6 +212,7 @@
 </style>
 
 <div id="lf-u">
+  <div class="vfy-tip" id="vfyTip">Verified — awarded at 100 followers. Helps ranking in Feed.</div>
   <div class="wrap">
     <div class="top">
       <div>
@@ -211,6 +221,7 @@
           <div>
             <div class="pname" id="p-name">Loading…</div>
             <div class="puser" id="p-user">@…</div>
+            <div class="fcnt"><span>Followers</span><b id="p-followers">0</b></div>
           </div>
         </div>
         <div class="pbio" id="p-bio" style="display:none;"></div>
@@ -218,6 +229,7 @@
       </div>
 
       <div class="controls">
+        <button class="p-follow" id="p-follow-btn" style="display:none;">Follow</button>
         <div class="seg" id="seg-sort">
           <button class="active" data-sort="new">New</button>
           <button data-sort="top">Top</button>
@@ -251,6 +263,7 @@
               <span class="m-meta" id="mmeta"></span>
             </div>
             <div class="sub" id="m-userline">@username</div>
+            <div class="fcnt" id="m-followers" style="display:none;"></div>
           </div>
         </div>
 
@@ -295,6 +308,8 @@
 (() => {
   const BACKEND = "https://api.lightfull.ai";
   const PAGE_SIZE = 24;
+  const VERIFIED_SVG = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z\"/></svg>";
+  const VFY_TOOLTIP = "Verified — awarded at 100 followers. Helps ranking in Feed.";
 
   const $grid = document.getElementById("grid");
   const $loader = document.getElementById("loader");
@@ -303,6 +318,8 @@
   const $pUser = document.getElementById("p-user");
   const $pBio = document.getElementById("p-bio");
   const $pLinks = document.getElementById("p-links");
+  const $pFollowers = document.getElementById("p-followers");
+  const $pFollowBtn = document.getElementById("p-follow-btn");
   const $seg = document.getElementById("seg-sort");
   const $range = document.getElementById("range");
 
@@ -313,6 +330,7 @@
   const $mUserlink = document.getElementById("m-userlink");
   const $mUserline = document.getElementById("m-userline");
   const $mmeta = document.getElementById("mmeta");
+  const $mFollowers = document.getElementById("m-followers");
   const $mtitle = document.getElementById("mtitle");
   const $mstats = document.getElementById("mstats");
   const $likeBtn = document.getElementById("likeBtn");
@@ -327,6 +345,7 @@
   const $titleInput = document.getElementById("title-input");
   const $titleSave = document.getElementById("title-save");
   const $titleCancel = document.getElementById("title-cancel");
+  const $vfyTip = document.getElementById("vfyTip");
 
   let username = "";
   let sort = "new";
@@ -337,6 +356,7 @@
   let items = [];
   let profile = null;
   let isOwnProfile = false;
+  let followState = false;
 
   let current = null;
   let liked = false;
@@ -356,6 +376,17 @@
   function qs(name){ const u = new URL(location.href); return u.searchParams.get(name) || ""; }
   function safe(s){ return String(s||""); }
   function fmtDate(ts){ return safe(ts).replace("T"," ").slice(0,16); }
+  function verifiedBadgeHTML(v){ return v ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ""; }
+  function bindVerifiedTooltip(root=document){
+    root.querySelectorAll('.vfy[data-tip="verified"]').forEach((el)=>{
+      if(el.dataset.tipBound) return;
+      el.dataset.tipBound = "1";
+      const host = el.closest('.author-name, .pname, .m-head') || el;
+      host.addEventListener('mouseenter', (ev)=>{ $vfyTip.textContent = VFY_TOOLTIP; $vfyTip.style.display='block'; $vfyTip.style.left=`${ev.clientX+12}px`; $vfyTip.style.top=`${ev.clientY+12}px`; });
+      host.addEventListener('mousemove', (ev)=>{ if($vfyTip.style.display==='block'){ $vfyTip.style.left=`${ev.clientX+12}px`; $vfyTip.style.top=`${ev.clientY+12}px`; } });
+      host.addEventListener('mouseleave', ()=>{ $vfyTip.style.display='none'; });
+    });
+  }
 
   function isVideo(it){
     const url = String(it.media_url || it.thumb_url || "").toLowerCase();
@@ -393,8 +424,10 @@
   function renderProfile(p){
     profile = p || {};
     const dn = p.display_name || p.username || username;
-    $pName.textContent = dn || "User";
+    $pName.innerHTML = `${safe(dn || "User")} ${verifiedBadgeHTML(p.verified === true)}`;
+    bindVerifiedTooltip($pName);
     $pUser.textContent = "@" + (p.username || username);
+    $pFollowers.textContent = p.follower_count ?? 0;
     $pAva.innerHTML = p.avatar_url ? `<img src="${p.avatar_url}" />` : "";
 
     const bio = (p.bio||"").trim();
@@ -430,7 +463,7 @@
               <div class="card-author">
                 <div class="avatar">${avatar ? `<img src="${avatar}" />` : ""}</div>
                 <div class="author-txt">
-                  <div class="author-name">${safe(displayName)}</div>
+                  <div class="author-name">${safe(displayName)} ${verifiedBadgeHTML(profile?.verified === true)}</div>
                   <div class="author-username">@${safe(userName)}</div>
                 </div>
               </div>
@@ -455,6 +488,7 @@
       img.src = (it.thumb_url || it.media_url || "").trim();
       img.onerror = () => { if(it.media_url && img.src !== it.media_url) img.src = it.media_url; };
     });
+    bindVerifiedTooltip($grid);
 
     $grid.querySelectorAll(".lf-card").forEach(c=>{
       c.onclick = () => {
@@ -479,6 +513,17 @@
 
       const me = await getCurrentUserId();
       isOwnProfile = !!(me && (String(me) === String((j.profile||{}).user_id)));
+      if(isOwnProfile){
+        $pFollowBtn.style.display = "none";
+      }else{
+        $pFollowBtn.style.display = "inline-flex";
+        try{
+          const st = await api(`/api/social/state?user_id=${encodeURIComponent((j.profile||{}).user_id)}`, { method:"GET" });
+          followState = !!st.following;
+        }catch(e){ followState = false; }
+        $pFollowBtn.textContent = followState ? "Following" : "Follow";
+        $pFollowBtn.classList.toggle("on", followState);
+      }
 
       let page = Array.isArray(j.works) ? j.works : [];
       if(sort === "top"){
@@ -577,9 +622,12 @@
 
     $mAvatar.innerHTML = av ? `<img src="${av}" />` : "";
     $mUserline.textContent = "@" + uname;
-    $mUserlink.textContent = dname;
+    $mUserlink.innerHTML = `${safe(dname)} ${verifiedBadgeHTML((it.verified ?? profile?.verified) === true)}`;
+    bindVerifiedTooltip($mUserlink.parentElement);
     $mUserlink.href = "/artist?username=" + encodeURIComponent(uname);
     $mmeta.textContent = fmtDate(it.published_at);
+    $mFollowers.style.display = "inline-flex";
+    $mFollowers.innerHTML = `<span>Followers</span><b>${it.follower_count ?? profile?.follower_count ?? 0}</b>`;
     $mtitle.textContent = it.title || "Untitled";
     $titleEditBtn.style.display = isOwnProfile ? "inline-flex" : "none";
 
@@ -636,6 +684,32 @@
   }
 
   async function requireToken(){ const t = await getSessionToken(); if(!t) throw new Error("Login required"); return t; }
+
+  async function toggleFollow(){
+    if(isOwnProfile || !profile?.user_id) return;
+    const token = await getSessionToken();
+    if(!token){ alert("Login required"); return; }
+    const path = followState ? "/api/social/unfollow" : "/api/social/follow";
+    const j = await api(path, { method:"POST", body: JSON.stringify({ user_id: profile.user_id }) });
+    followState = !followState;
+    $pFollowBtn.textContent = followState ? "Following" : "Follow";
+    $pFollowBtn.classList.toggle("on", followState);
+    if(j && typeof j.follower_count !== "undefined") {
+      profile.follower_count = j.follower_count;
+      profile.verified = !!j.verified;
+      $pFollowers.textContent = profile.follower_count ?? 0;
+      $pName.innerHTML = `${safe(profile.display_name || profile.username || username)} ${verifiedBadgeHTML(profile.verified === true)}`;
+      bindVerifiedTooltip($pName);
+      if(current){
+        current.follower_count = profile.follower_count;
+        current.verified = profile.verified;
+        $mFollowers.innerHTML = `<span>Followers</span><b>${current.follower_count ?? 0}</b>`;
+        $mUserlink.innerHTML = `${safe(current.display_name || current.username || "user")} ${verifiedBadgeHTML(current.verified === true)}`;
+        bindVerifiedTooltip($mUserlink.parentElement);
+      }
+      renderGrid();
+    }
+  }
 
   async function toggleLike(){
     if(!current) return;
@@ -709,6 +783,7 @@
   });
 
   $mclose.onclick = closeModal;
+  $pFollowBtn.onclick = () => { toggleFollow().catch(e=>alert(e.message||"Failed")); };
   $mb.onclick = (e) => { if(e.target === $mb) closeModal(); };
   $likeBtn.onclick = toggleLike;
   $saveBtn.onclick = toggleSave;
