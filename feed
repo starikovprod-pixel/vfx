@@ -139,12 +139,23 @@
 
   .feed-layout{ display:grid; grid-template-columns: minmax(0,1fr) 320px; gap:16px; }
   .feed-left{ min-width:0; }
-  .feed-right{ position:sticky; top:94px; height:calc(100vh - 110px); }
-  .side-card{ background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:12px; height:100%; display:flex; flex-direction:column; }
-  .side-title{ font-size:13px; font-weight:900; color:rgba(255,255,255,0.72); margin-bottom:10px; }
-  .side-list{ display:flex; flex-direction:column; gap:8px; overflow:auto; padding-right:4px; }
-  .side-item{ display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff; padding:8px; border-radius:12px; border:1px solid transparent; }
+  .feed-right{ position:sticky; top:94px; align-self:start; height:calc(100vh - 110px); }
+  .side-card{ background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:12px; height:100%; display:flex; flex-direction:column; overflow:hidden; }
+  .side-title{ font-size:13px; font-weight:900; color:rgba(255,255,255,0.72); margin-bottom:10px; flex:0 0 auto; }
+  .side-list{ flex:1 1 auto; overflow:auto; padding-right:6px; display:flex; flex-direction:column; gap:0; max-height:420px; border-top:1px solid rgba(255,255,255,0.08); scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.18) rgba(255,255,255,0.04); }
+  .side-list::-webkit-scrollbar{ width:10px; }
+  .side-list::-webkit-scrollbar-track{ background:rgba(255,255,255,0.04); border-radius:999px; }
+  .side-list::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.16); border-radius:999px; }
+  .side-list::-webkit-scrollbar-thumb:hover{ background:rgba(255,255,255,0.26); }
+  .side-item{ display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff; padding:10px 8px; border-radius:12px; border:1px solid transparent; }
+  .side-item + .side-item{ border-top:1px solid rgba(255,255,255,0.06); border-top-left-radius:0; border-top-right-radius:0; }
   .side-item:hover{ background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.10); }
+  .side-link{ display:flex; align-items:center; gap:10px; min-width:0; text-decoration:none; color:inherit; }
+  .side-actions{ margin-left:auto; display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .side-follow-btn{ position:relative; height:28px; padding:0 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); color:transparent; font-weight:900; font-size:12px; cursor:pointer; transition:.15s; white-space:nowrap; }
+  .side-follow-btn::after{ content:"Following"; color:#fff; }
+  .side-follow-btn:hover{ background:rgba(255,70,90,0.12); border-color:rgba(255,70,90,0.35); }
+  .side-follow-btn:hover::after{ content:"Unfollow"; color:#ff98a2; }
   .side-name{ min-width:0; font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:6px; }
   .side-user{ min-width:0; font-size:12px; color:rgba(255,255,255,0.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
@@ -723,6 +734,7 @@
   };
   const VERIFIED_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z"/></svg>';
   const VFY_TOOLTIP = 'Verified — awarded at 100 followers. Helps ranking in Feed.';
+  const LS_FOLLOW = "lf_follow_cache_v1";
 
   // feed state
   let sort = "trending";
@@ -788,6 +800,24 @@
 
   function safe(s){ return String(s || ""); }
 
+  function getFollowCache(){
+    try { return JSON.parse(localStorage.getItem(LS_FOLLOW) || "{}"); } catch(e){ return {}; }
+  }
+  function setFollowCache(m){ localStorage.setItem(LS_FOLLOW, JSON.stringify(m)); }
+  function cacheSet(userId, val){
+    const m = getFollowCache();
+    m[String(userId)] = !!val;
+    setFollowCache(m);
+  }
+  function cacheGet(userId){
+    const m = getFollowCache();
+    return m[String(userId)] === true;
+  }
+  function cacheHas(userId){
+    const m = getFollowCache();
+    return Object.prototype.hasOwnProperty.call(m, String(userId));
+  }
+
   function fmtDate(ts){
     const s = safe(ts);
     return s ? s.replace("T"," ").slice(0,16) : "";
@@ -826,9 +856,43 @@
       const uname = it.username || "user";
       const dname = it.display_name || uname;
       const av = it.avatar_url ? `<img src="${it.avatar_url}" />` : "";
-      return `<a class="side-item" href="/artist?username=${encodeURIComponent(uname)}"><div class="avatar">${av}</div><div style="min-width:0"><div class="side-name">${safe(dname)} ${verifiedBadgeHTML(it.verified === true)}</div><div class="side-user">@${safe(uname)}</div></div></a>`;
+      return `
+        <div class="side-item" data-following-id="${safe(it.user_id)}">
+          <a class="side-link" href="/artist?username=${encodeURIComponent(uname)}">
+            <div class="avatar">${av}</div>
+            <div style="min-width:0">
+              <div class="side-name">${safe(dname)} ${verifiedBadgeHTML(it.verified === true)}</div>
+              <div class="side-user">@${safe(uname)}</div>
+            </div>
+          </a>
+          <div class="side-actions">
+            <button class="side-follow-btn" type="button" data-unfollow="${safe(it.user_id)}">Following</button>
+          </div>
+        </div>`;
     }).join("");
     bindVerifiedTooltip($sideList);
+    $sideList.querySelectorAll("[data-unfollow]").forEach((btn)=>{
+      btn.onclick = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const token = await getSessionToken();
+        if(!token){ toast("Login required"); return; }
+        const followingId = btn.getAttribute("data-unfollow");
+        try{
+          btn.disabled = true;
+          btn.textContent = "…";
+          await api("/api/social/unfollow", { method:"POST", body: JSON.stringify({ following_id: followingId }) });
+          cacheSet(followingId, false);
+          const row = btn.closest(".side-item");
+          if(row) row.remove();
+          if(sort === "following") await fetchPage(true);
+        }catch(err){
+          toast(err.message || "Unfollow failed");
+          btn.disabled = false;
+          btn.textContent = "Following";
+        }
+      };
+    });
   }
 
   async function loadFollowingSidebar(){
@@ -838,7 +902,7 @@
       return;
     }
     try{
-      const j = await api("/api/social/following?limit=12", { method:"GET" });
+      const j = await api("/api/social/following?limit=16", { method:"GET" });
       renderFollowingSidebar(Array.isArray(j.items) ? j.items : []);
     }catch(e){
       $sideList.innerHTML = `<div class="lf-empty" style="padding:14px;color:var(--danger)">${safe(e.message)}</div>`;
@@ -999,6 +1063,8 @@
         }
       }
 
+      await hydrateFollowStates(page);
+
       offset = json.nextOffset ?? (offset + page.length);
       hasMore = !!json.hasMore;
 
@@ -1010,6 +1076,27 @@
       loading = false;
       showLoader(false);
     }
+  }
+
+  async function hydrateFollowStates(page){
+    const token = await getSessionToken();
+    if(!token) return;
+    const ids = Array.from(new Set((page || []).map((x)=> x.user_id).filter(Boolean)));
+    if(!ids.length) return;
+    try{
+      const j = await api(`/api/social/state_many?user_ids=${encodeURIComponent(ids.join(","))}`, { method:"GET" });
+      const map = j?.map || {};
+      items = items.map((it)=>{
+        const id = String(it.user_id);
+        if(Object.prototype.hasOwnProperty.call(map, id)){
+          const following = map[id] === true;
+          cacheSet(id, following);
+          return Object.assign({}, it, { following });
+        }
+        if(cacheHas(id)) return Object.assign({}, it, { following: cacheGet(id) });
+        return it;
+      });
+    }catch(e){}
   }
 
   // MODAL
@@ -1084,13 +1171,22 @@
 
     $btnDl.innerHTML = ICONS.dl;
     if(!myUserId) myUserId = await getMyUserId();
+    followState = !!current.following;
+    $btnFollow.textContent = followState ? "Following" : "Follow";
+    $btnFollow.classList.toggle('on', followState);
     if(myUserId && String(current.user_id) === String(myUserId)){
       $btnFollow.style.display = "none";
     }else{
       $btnFollow.style.display = "inline-flex";
+      if(current.user_id && cacheHas(current.user_id)){
+        followState = cacheGet(current.user_id);
+        $btnFollow.textContent = followState ? "Following" : "Follow";
+        $btnFollow.classList.toggle('on', followState);
+      }
       try{
         const st = await api(`/api/social/state?user_id=${encodeURIComponent(current.user_id)}`, { method:"GET" });
         followState = !!st.following;
+        cacheSet(current.user_id, followState);
       }catch(e){ followState = false; }
       $btnFollow.textContent = followState ? "Following" : "Follow";
       $btnFollow.classList.toggle('on', followState);
@@ -1265,10 +1361,15 @@
     if(!token) return;
     try{
       const path = followState ? "/api/social/unfollow" : "/api/social/follow";
-      const j = await api(path, { method:"POST", body: JSON.stringify({ user_id: current.user_id }) });
+      const payload = followState ? { following_id: current.user_id } : { user_id: current.user_id };
+      const j = await api(path, { method:"POST", body: JSON.stringify(payload) });
       followState = !followState;
+      current.following = followState;
+      cacheSet(current.user_id, followState);
       $btnFollow.textContent = followState ? "Following" : "Follow";
       $btnFollow.classList.toggle('on', followState);
+      items = items.map((x)=> String(x.user_id) === String(current.user_id) ? Object.assign({}, x, { following: followState }) : x);
+      renderGrid();
       if(j && typeof j.follower_count !== 'undefined'){
         current.follower_count = j.follower_count;
         current.verified = !!j.verified;
