@@ -317,8 +317,7 @@
   const PAGE_SIZE = 24;
   const VERIFIED_SVG = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z\"/></svg>";
   const VFY_TOOLTIP = "Verified — awarded at 100 followers. Helps ranking in Feed.";
-  const LS_FOLLOW_BASE = "lf_follow_cache_v1";
-  let LS_FOLLOW = LS_FOLLOW_BASE;
+  const LS_FOLLOW = "lf_follow_cache_v1";
 
   const $grid = document.getElementById("grid");
   const $loader = document.getElementById("loader");
@@ -392,10 +391,6 @@
     setTimeout(()=> $toast.classList.remove("show"), 1600);
   }
   function fmtDate(ts){ return safe(ts).replace("T"," ").slice(0,16); }
-  async function initFollowCacheKey(){
-    const meId = await getCurrentUserId();
-    LS_FOLLOW = `${LS_FOLLOW_BASE}:${meId || "guest"}`;
-  }
   function getFollowCache(){
     try { return JSON.parse(localStorage.getItem(LS_FOLLOW) || "{}"); } catch(e){ return {}; }
   }
@@ -861,23 +856,13 @@
   $titleCancel.onclick = () => { $titleEdit.style.display = "none"; };
   $titleSave.onclick = async () => { try{ await saveTitle(); }catch(e){ toast(e.message || "Save failed"); } };
 
-  async function init(){
-    username = (qs("username") || "").trim();
-    if(!username){
-      $pName.textContent = "No username";
-      $pUser.textContent = "Add ?username=...";
-      $grid.innerHTML = `<div class="empty">Open like: /artist?username=username</div>`;
-      return;
-    }
-    await initFollowCacheKey();
-    if(window.sb){
-      window.sb.auth.onAuthStateChange(async ()=>{
-        await initFollowCacheKey();
-        await loadPage(true);
-      });
-    }
-    await loadPage(true);
+  username = (qs("username") || "").trim();
+  if(!username){
+    $pName.textContent = "No username";
+    $pUser.textContent = "Add ?username=...";
+    $grid.innerHTML = `<div class="empty">Open like: /artist?username=username</div>`;
+    return;
   }
-  init();
+  loadPage(true);
 })();
 </script>
