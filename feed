@@ -965,6 +965,7 @@
     try { json = await res.json(); } catch(e) { json = null; }
     if (!res.ok) {
       const msg = json?.error || json?.details || ("HTTP " + res.status);
+      console.error("API FAIL:", path, { status: res.status, body: json });
       throw new Error(msg);
     }
     return json;
@@ -1195,6 +1196,11 @@
         $btnFollow.classList.toggle("on", followState);
         $btnFollow.classList.toggle("follow", true);
       };
+      if (current.user_id && cacheHas(current.user_id)) {
+        const v = cacheGet(current.user_id);
+        $btnFollow.textContent = v ? "Following" : "Follow";
+        $btnFollow.classList.toggle("on", v);
+      }
       await syncFollowState(current.user_id, setFollowBtn);
     }
 
@@ -1387,7 +1393,10 @@
         bindVerifiedTooltip($mUserlink.parentElement);
       }
       await loadFollowingSidebar();
-    }catch(e){ toast(e.message); }
+    }catch(e){
+      console.error("FOLLOW/UNFOLLOW ERROR:", e);
+      alert(e?.message || String(e));
+    }
   }
 
   async function doLikeToggle(){
