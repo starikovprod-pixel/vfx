@@ -226,7 +226,6 @@
           <span>Plans</span>
           </div>
 
-        <div class="item" id="lfhdr-popup-lib"><span>Library</span></div>
         <div class="item" id="lfhdr-promo"><span>Promo code</span></div>
 
         <div class="divider"></div>
@@ -237,17 +236,6 @@
     </div>
   </header>
 
-  <div class="lfhdr-modal" id="lfhdr-libModal">
-    <div class="box">
-      <div class="head">
-        <div>Library</div>
-        <div style="cursor:pointer" id="lfhdr-libClose">✕</div>
-      </div>
-      <div class="body">
-        <div class="lfhdr-libgrid" id="lfhdr-libGrid"></div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -326,33 +314,6 @@
   $("lfhdr-avatar").addEventListener("click",(e)=>{ e.stopPropagation(); dd.classList.toggle("show"); });
   document.addEventListener("click", ()=>dd.classList.remove("show"));
 
-  // library popup
-  const libModal = $("lfhdr-libModal");
-  function openLib(){ libModal.style.display="flex"; }
-  function closeLib(){ libModal.style.display="none"; }
-
-  $("lfhdr-popup-lib").addEventListener("click", ()=>{ dd.classList.remove("show"); openLib(); });
-  $("lfhdr-libClose").addEventListener("click", closeLib);
-  libModal.addEventListener("click",(e)=>{ if(e.target===libModal) closeLib(); });
-
-  function renderLibrary(list){
-    const el = $("lfhdr-libGrid");
-    if (!Array.isArray(list) || list.length===0){
-      el.innerHTML = "<div style='color:var(--text-sec)'>Пока пусто.</div>";
-      return;
-    }
-    el.innerHTML = list.map(g=>{
-      const url = g.output_url;
-      if (!url) return "";
-      const u = url.toLowerCase();
-      const isVideo = u.includes(".mp4") || u.includes(".webm") || u.includes(".mov") || u.includes("fal.media");
-      const media = isVideo
-        ? `<video src="${url}" muted playsinline loop onmouseover="this.play()" onmouseout="this.pause()"></video>`
-        : `<img src="${url}" />`;
-      return `<div class="lfhdr-libitem" onclick="window.open('${url}','_blank')">${media}</div>`;
-    }).join("");
-  }
-
   async function refreshMeAndUI(){
     try{
       const { data } = await sb.auth.getSession();
@@ -368,7 +329,6 @@
 
       if (r.ok && me && me.ok !== false) {
         $("lfhdr-credits").textContent = me.credits ?? 0;
-        renderLibrary(me.generations || []);
       }
       return me;
     } catch(e){
@@ -388,7 +348,6 @@
       const $avatar = $("lfhdr-avatar");
       const $credits = $("lfhdr-credits");
 
-      const $popupLib = $("lfhdr-popup-lib");
       const $logout = $("lfhdr-logout");
       const $login = $("lfhdr-login");
       const $promo = $("lfhdr-promo");
@@ -398,7 +357,6 @@
         $avatar.textContent = "?";
         $credits.textContent = "—";
 
-        $popupLib.style.display = "none";
         $promo.style.display = "none";
         $logout.style.display = "none";
 
@@ -407,7 +365,6 @@
         return;
       }
 
-      $popupLib.style.display = "flex";
       $promo.style.display = "flex";
       $logout.style.display = "flex";
       $login.style.display = "none";
