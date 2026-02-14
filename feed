@@ -182,6 +182,12 @@
     object-fit:cover;
     display:block;
   }
+  .lf-media video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
 
   /* Top-left badges */
   .badge{
@@ -1047,11 +1053,20 @@
     return `
       <div class="lf-card" data-id="${it.id}">
         <div class="lf-media">
-          <img class="lf-thumb"
-               src="${it.thumb_url || it.media_url}"
-               data-id="${it.id}"
-               loading="lazy"
-               decoding="async" />
+          ${video
+            ? `<video class="lf-thumb lf-video"
+                     poster="${escapeHtml(it.thumb_url || "")}"
+                     preload="none"
+                     muted
+                     playsinline
+                     loop>
+                <source src="${escapeHtml(it.media_url || "")}" type="video/mp4">
+              </video>`
+            : `<img class="lf-thumb"
+                   src="${escapeHtml(it.thumb_url || it.media_url || "")}"
+                   loading="lazy"
+                   decoding="async" />`
+          }
           <div class="badge"><span class="dot ${video ? "video":"image"}"></span> ${video ? "VIDEO":"IMAGE"}</div>
 
           <div class="card-bottom">
@@ -1096,6 +1111,28 @@
         if(it) openModal(it);
       });
     });
+
+    attachHoverPreviews();
+  }
+
+  function wireHoverPreview(card){
+    const video = card.querySelector("video.lf-video");
+    if(!video) return;
+
+    card.addEventListener("mouseenter", async () => {
+      try{
+        await video.play();
+      }catch(e){}
+    });
+
+    card.addEventListener("mouseleave", () => {
+      video.pause();
+      video.currentTime = 0;
+    });
+  }
+
+  function attachHoverPreviews(){
+    document.querySelectorAll(".lf-card").forEach(wireHoverPreview);
   }
 
   async function fetchPage(reset=false){
