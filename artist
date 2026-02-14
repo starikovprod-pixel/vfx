@@ -356,6 +356,44 @@
   .pc-name{ font-weight:950; font-size:12px; color:#fff; text-decoration:none; display:flex; gap:6px; align-items:center; }
   .pc-time{ font-size:11px; color:rgba(255,255,255,0.55); transform: translateY(1px); }
   .pc-body{ font-size:13px; line-height:1.35; white-space:pre-wrap; }
+  .pc-mention{ color:#fff; font-weight:900; text-decoration:none; }
+  .pc-mention:hover{ text-decoration:underline; }
+  .pc-replyto{
+    font-size:12px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom:8px;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .pc-replyto-user{
+    color:#fff;
+    text-decoration:none;
+    font-weight:900;
+  }
+  .pc-replyto-user:hover{ text-decoration:underline; }
+  .pc-replyto-jump{
+    border:0;
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.10);
+    color:#fff;
+    border-radius:999px;
+    padding:6px 10px;
+    cursor:pointer;
+    font-weight:850;
+    max-width:360px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .pc-replyto-jump:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+  .c-flash{
+    outline: 2px solid rgba(110,168,255,0.55);
+    box-shadow: 0 0 0 6px rgba(110,168,255,0.10);
+    border-radius:18px;
+    transition:.2s;
+  }
   .pc-edit-ta{
     width:100%;
     min-height:90px;
@@ -491,6 +529,7 @@
     gap:8px;
     align-items:center;
   }
+  .cc-pill[data-csave]{ cursor:pointer; }
   .cc-pill svg{ width:14px; height:14px; fill: currentColor; }
 
   /* LIBRARY GRID (existing cards) */
@@ -1413,6 +1452,7 @@
   let pickResolve = null;
 
   const postCommentsMode = new Map();
+  const replyToByPost = new Map(); // post_id -> { comment_id, username }
   const ICONS = {
     like: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.6-9.5-9C.6 8.6 2.6 5 6.5 5c2.1 0 3.6 1.2 4.5 2.4C11.9 6.2 13.4 5 15.5 5 19.4 5 21.4 8.6 21.5 12c-2.5 4.4-9.5 9-9.5 9z"/></svg>',
     comm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
@@ -1484,6 +1524,12 @@
     return String(s||"")
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
       .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+  function linkifyMentions(text){
+    const safe = escapeHtml(text);
+    return safe.replace(/(^|\s)@([a-zA-Z0-9_\.]{2,32})/g, (m, p1, u)=> {
+      return `${p1}<a href="/artist?username=${encodeURIComponent(u)}" class="pc-mention">@${u}</a>`;
+    });
   }
   function toast(msg){
     $toast.textContent = String(msg || "");
@@ -1808,6 +1854,16 @@
         if(!seen.has(k)){ seen.add(k); collectionItems.push(it); }
       }
 
+      const token = await getSessionToken();
+      if(token){
+        for(const c of collectionItems){
+          try{
+            const st = await api(`/api/collections/state?collection_id=${encodeURIComponent(c.id)}`, { method:"GET" });
+            c._saved = !!st.saved;
+          }catch(e){}
+        }
+      }
+
       offset = j.nextOffset != null ? j.nextOffset : (offset + page.length);
       hasMore = !!j.hasMore;
 
@@ -2077,11 +2133,14 @@
         const canDelete = isMine || (isOwnProfile === true);
         const canEdit = isMine;
         return `
-          <div class="pc-item">
+          <div class="pc-item" id="c-${escapeHtml(c.id)}">
             <a href="/artist?username=${encodeURIComponent(c.username||"")}" class="pc-ava-link"><div class="avatar ${avEmoji ? "emoji" : ""}">${avHtml}</div></a>
             <div class="pc-bubble">
               <div class="pc-top">
-                <a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||"")}">${escapeHtml(c.display_name||c.username||"user")}${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}</a>
+                <a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||"")}">
+                  ${escapeHtml(c.display_name||c.username||"user")}
+                  ${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}
+                </a>
                 <div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div>
                 ${(canEdit || canDelete) ? `
                   <div style="margin-left:auto;display:flex;gap:8px;">
@@ -2091,7 +2150,19 @@
                   </div>
                 ` : ""}
               </div>
-              <div class="pc-body" data-body="${c.id}">${escapeHtml(c.body)}</div>
+              ${c.reply_to_comment_id ? `
+                <div class="pc-replyto">
+                  Reply to
+                  <a href="/artist?username=${encodeURIComponent(c.reply_to_username||"")}" class="pc-replyto-user">
+                    ${escapeHtml(c.reply_to_display_name||c.reply_to_username||"")}
+                  </a>
+                  ·
+                  <button class="pc-replyto-jump" data-jump="${escapeHtml(c.reply_to_comment_id)}">
+                    “${escapeHtml(c.reply_to_excerpt||"")}”
+                  </button>
+                </div>
+              ` : ``}
+              <div class="pc-body" data-body="${c.id}">${linkifyMentions(c.body||"")}</div>
               <div class="pc-edit" data-editbox="${c.id}" style="display:none; margin-top:10px;">
                 <textarea class="pc-edit-ta" data-ta="${c.id}"></textarea>
                 <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:8px;">
@@ -2106,6 +2177,17 @@
       }).join("");
 
       bindVerifiedTooltip(listEl);
+
+      listEl.querySelectorAll("[data-jump]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const targetId = btn.getAttribute("data-jump");
+          const el = document.getElementById("c-" + targetId);
+          if(!el) return;
+          el.scrollIntoView({ behavior:"smooth", block:"center" });
+          el.classList.add("c-flash");
+          setTimeout(()=> el.classList.remove("c-flash"), 1000);
+        };
+      });
 
       listEl.querySelectorAll("[data-c-del]").forEach(btn=>{
         btn.onclick = async ()=>{
@@ -2177,7 +2259,9 @@
 
       listEl.querySelectorAll("[data-c-reply]").forEach(btn=>{
         btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-c-reply");
           const uname = btn.getAttribute("data-u") || "";
+          replyToByPost.set(post_id, { comment_id: cid, username: uname });
           const inp = document.getElementById("pc-in-" + post_id);
           if(!inp) return;
           inp.value = (inp.value||"") + `@${uname} `;
@@ -2207,7 +2291,16 @@
       const text = (inp.value||"").trim();
       if(!text) return;
       inp.disabled = true;
-      await api("/api/posts/comment", { method:"POST", body: JSON.stringify({ post_id, body:text }) });
+      const rt = replyToByPost.get(post_id);
+      await api("/api/posts/comment", {
+        method:"POST",
+        body: JSON.stringify({
+          post_id,
+          body:text,
+          reply_to_comment_id: rt?.comment_id || null
+        })
+      });
+      replyToByPost.delete(post_id);
       inp.value = "";
       await loadPostComments(post_id);
 
@@ -2217,6 +2310,7 @@
       const commentsBtn = $grid.querySelector(`[data-act="toggle-comments"][data-post="${CSS.escape(String(post_id))}"] span`);
       if(commentsBtn && p) commentsBtn.textContent = String(p.comment_count||0);
     }catch(e){
+      replyToByPost.delete(post_id);
       toast(e.message||"Failed");
     }finally{
       const inp = document.getElementById("pc-in-" + post_id);
@@ -2338,6 +2432,7 @@
                 <div class="cc-meta">
                   <div class="cc-pill">${ICONS.like} <b>${c.like_count||0}</b></div>
                   <div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div>
+                  <div class="cc-pill ${c._saved ? "mini on save" : ""}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div>
                 </div>
               </div>
             </div>
@@ -2348,6 +2443,31 @@
 
     document.querySelectorAll("[data-col]").forEach(el=>{
       el.onclick = () => openCollectionModal(el.getAttribute("data-col"));
+    });
+
+    document.querySelectorAll("[data-csave]").forEach(el=>{
+      el.onclick = async (e)=>{
+        e.stopPropagation();
+        const id = el.getAttribute("data-csave");
+        const col = collectionItems.find(x=> String(x.id)===String(id));
+        if(!col) return;
+
+        try{
+          await requireToken();
+          const endpoint = col._saved ? "/api/collections/unsave" : "/api/collections/save";
+          const j = await api(endpoint, { method:"POST", body: JSON.stringify({ collection_id: id }) });
+          col._saved = !col._saved;
+          if(j?.counts){
+            col.save_count = j.counts.save_count;
+            col.like_count = j.counts.like_count;
+            col.view_count = j.counts.view_count;
+          }
+          renderCollections();
+          startCollectionsSlideshows();
+        }catch(err){
+          toast(err.message || "Failed");
+        }
+      };
     });
 
     bindVerifiedTooltip($grid);
@@ -2394,6 +2514,7 @@
       $cmeta.innerHTML = `
         <div class="stat">${ICONS.like} ${col.like_count||0}</div>
         <div class="stat">${ICONS.view} ${col.view_count||0}</div>
+        <div class="stat">${ICONS.save} ${col.save_count||0}</div>
       `;
 
       // view count dedupe
