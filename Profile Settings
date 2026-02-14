@@ -117,7 +117,7 @@
         <div class="field">
           <div class="label">Username *</div>
           <input class="input" id="f-username" placeholder="3-24 chars: a-z 0-9 _ -" />
-          <div class="hint">This becomes your public URL: /u/username</div>
+          <div class="hint">Public URL: /u?username=yourname</div>
         </div>
 
         <div class="field">
@@ -155,7 +155,7 @@
 <script>
 (() => {
   const BACKEND = "https://api.lightfull.ai";
-  const ENDPOINT = "/api/profile_public"; // <-- если у тебя другое имя, поменяй здесь
+  const ENDPOINT = "/api/profile_public"; // твой API для профиля (Neon)
 
   const $status = document.getElementById("status");
   const $btnSave = document.getElementById("btn-save");
@@ -167,11 +167,12 @@
   const $b = document.getElementById("f-bio");
   const $yt = document.getElementById("f-yt");
   const $site = document.getElementById("f-site");
-  let avatarUrl = "";
 
   const $pvAvatar = document.getElementById("pv-avatar");
   const $pvName = document.getElementById("pv-name");
   const $pvUser = document.getElementById("pv-user");
+
+  let avatarUrl = "";
 
   function showStatus(msg, type){
     $status.style.display = "block";
@@ -179,14 +180,14 @@
     $status.textContent = msg;
   }
 
-  async function getToken(){
+  async function getAccessToken(){
     if(!window.sb) return null;
     const { data } = await window.sb.auth.getSession();
     return data?.session?.access_token || null;
   }
 
   async function api(method, body){
-    const token = await getToken();
+    const token = await getAccessToken();
     if(!token) throw new Error("Login required");
     const res = await fetch(BACKEND + ENDPOINT, {
       method,
@@ -213,33 +214,42 @@
   }
 
   async function uploadAvatar(){
-    if (!window.sb) throw new Error("Supabase not found");
-    const { data } = await window.sb.auth.getSession();
-    const userId = data?.session?.user?.id;
-    if (!userId) throw new Error("Login required");
+  if (!window.sb) throw new Error("Supabase not found");
 
-    const file = $avatarFile.files?.[0];
-    if (!file) return;
+  const { data } = await window.sb.auth.getSession();
+  const userId = data?.session?.user?.id;
+  if (!userId) throw new Error("Login required");
 
-    if (file.size > 5 * 1024 * 1024) throw new Error("Avatar too large (max 5MB)");
+  const file = $avatarFile.files?.[0];
+  if (!file) return;
 
-    const ext = (file.name.split(".").pop() || "png").toLowerCase();
-    const safeExt = ["png", "jpg", "jpeg", "webp"].includes(ext) ? ext : "png";
-    const path = `avatars/${userId}/avatar.${safeExt}`;
+  if (file.size > 5 * 1024 * 1024) throw new Error("Avatar too large (max 5MB)");
 
-    const up = await window.sb.storage
-      .from("avatars")
-      .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "png";
 
-    if (up.error) throw new Error(up.error.message);
+  const path = `${userId}/avatar.${safeExt}`;
 
-    const pub = window.sb.storage.from("avatars").getPublicUrl(path);
-    const url = pub?.data?.publicUrl;
-    if (!url) throw new Error("Could not get public URL");
+  const up = await window.sb.storage
+    .from("avatars")
+    .upload(path, file, {
+      upsert: true,
+      contentType: file.type,
+      cacheControl: "3600"
+    });
 
-    avatarUrl = url + `?v=${Date.now()}`;
-    updatePreview();
-  }
+  if (up.error) throw new Error(up.error.message);
+
+  const { data: pub } = window.sb.storage
+    .from("avatars")
+    .getPublicUrl(path);
+
+  if (!pub?.publicUrl) throw new Error("Could not get public URL");
+
+  avatarUrl = pub.publicUrl + "?v=" + Date.now();
+  updatePreview();
+}
+
 
   async function load(){
     try{
@@ -282,12 +292,12 @@
       const p = j?.profile;
 
       $u.value = p?.username || body.username;
+      avatarUrl = p?.avatar_url || avatarUrl;
       updatePreview();
 
       showStatus("Saved.", "ok");
       setTimeout(()=> $status.style.display="none", 900);
     }catch(e){
-      // 409 username taken
       if(String(e.message).toLowerCase().includes("taken")) showStatus("Username is already taken.", "err");
       else showStatus(e.message, "err");
     }finally{
@@ -302,8 +312,8 @@
     try {
       showStatus("Uploading avatar...", "");
       await uploadAvatar();
-      showStatus("Avatar uploaded.", "ok");
-      setTimeout(()=> $status.style.display="none", 900);
+      showStatus("Avatar uploaded. Click Save.", "ok");
+      setTimeout(()=> $status.style.display="none", 1100);
     } catch(e) {
       showStatus(e.message, "err");
     }
@@ -312,7 +322,7 @@
   $btnOpenPublic.onclick = () => {
     const username = ($u.value || "").trim();
     if(!username) return;
-    window.open("/u/" + username, "_blank");
+    window.open("/u?username=" + encodeURIComponent(username), "_blank");
   };
 
   load();
