@@ -126,9 +126,9 @@
         </div>
 
         <div class="field">
-          <div class="label">Avatar URL</div>
-          <input class="input" id="f-avatar" placeholder="https://...png" />
-          <div class="hint">Tip: use a square image.</div>
+          <div class="label">Avatar *</div>
+          <input class="input" type="file" id="f-avatar-file" accept="image/*" />
+          <div class="hint">Upload a square image. We’ll resize later.</div>
         </div>
 
         <div class="field">
@@ -139,11 +139,6 @@
         <div class="field">
           <div class="label">YouTube</div>
           <input class="input" id="f-yt" placeholder="https://youtube.com/..." />
-        </div>
-
-        <div class="field">
-          <div class="label">Instagram</div>
-          <input class="input" id="f-ig" placeholder="https://instagram.com/..." />
         </div>
 
         <div class="field">
@@ -168,11 +163,11 @@
 
   const $u = document.getElementById("f-username");
   const $d = document.getElementById("f-display");
-  const $a = document.getElementById("f-avatar");
+  const $avatarFile = document.getElementById("f-avatar-file");
   const $b = document.getElementById("f-bio");
   const $yt = document.getElementById("f-yt");
-  const $ig = document.getElementById("f-ig");
   const $site = document.getElementById("f-site");
+  let avatarUrl = "";
 
   const $pvAvatar = document.getElementById("pv-avatar");
   const $pvName = document.getElementById("pv-name");
@@ -209,12 +204,41 @@
   function updatePreview(){
     const username = ($u.value || "").trim();
     const display = ($d.value || "").trim();
-    const avatar = ($a.value || "").trim();
+    const avatar = (avatarUrl || "").trim();
 
     $pvName.textContent = display || "—";
     $pvUser.textContent = username ? ("@" + username) : "@—";
     $pvAvatar.innerHTML = avatar ? `<img src="${avatar}" />` : "";
     $btnOpenPublic.style.display = username ? "inline-flex" : "none";
+  }
+
+  async function uploadAvatar(){
+    if (!window.sb) throw new Error("Supabase not found");
+    const { data } = await window.sb.auth.getSession();
+    const userId = data?.session?.user?.id;
+    if (!userId) throw new Error("Login required");
+
+    const file = $avatarFile.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) throw new Error("Avatar too large (max 5MB)");
+
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const safeExt = ["png", "jpg", "jpeg", "webp"].includes(ext) ? ext : "png";
+    const path = `avatars/${userId}/avatar.${safeExt}`;
+
+    const up = await window.sb.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
+
+    if (up.error) throw new Error(up.error.message);
+
+    const pub = window.sb.storage.from("avatars").getPublicUrl(path);
+    const url = pub?.data?.publicUrl;
+    if (!url) throw new Error("Could not get public URL");
+
+    avatarUrl = url + `?v=${Date.now()}`;
+    updatePreview();
   }
 
   async function load(){
@@ -225,10 +249,9 @@
 
       $u.value = p?.username || "";
       $d.value = p?.display_name || "";
-      $a.value = p?.avatar_url || "";
+      avatarUrl = p?.avatar_url || "";
       $b.value = p?.bio || "";
       $yt.value = p?.links?.youtube || "";
-      $ig.value = p?.links?.instagram || "";
       $site.value = p?.links?.site || "";
 
       updatePreview();
@@ -247,11 +270,10 @@
       const body = {
         username: ($u.value || "").trim(),
         display_name: ($d.value || "").trim(),
-        avatar_url: ($a.value || "").trim(),
+        avatar_url: avatarUrl,
         bio: ($b.value || "").trim(),
         links: {
           youtube: ($yt.value || "").trim(),
-          instagram: ($ig.value || "").trim(),
           site: ($site.value || "").trim()
         }
       };
@@ -274,7 +296,18 @@
   }
 
   $btnSave.onclick = save;
-  [$u,$d,$a].forEach(el => el.addEventListener("input", updatePreview));
+  [$u,$d].forEach(el => el.addEventListener("input", updatePreview));
+
+  $avatarFile.addEventListener("change", async () => {
+    try {
+      showStatus("Uploading avatar...", "");
+      await uploadAvatar();
+      showStatus("Avatar uploaded.", "ok");
+      setTimeout(()=> $status.style.display="none", 900);
+    } catch(e) {
+      showStatus(e.message, "err");
+    }
+  });
 
   $btnOpenPublic.onclick = () => {
     const username = ($u.value || "").trim();
