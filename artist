@@ -203,7 +203,7 @@
   .embed-overlay{
     position:relative;
     padding:16px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: none;
     background: linear-gradient(to top, rgba(0,0,0,0.70), rgba(0,0,0,0.10));
   }
   .embed-title{ font-weight:950; font-size:14px; }
@@ -228,7 +228,8 @@
   .pslide{
     position:relative;
     width:100%;
-    aspect-ratio: 16 / 9;
+    height: 360px;
+    max-height: 42vh;
     background:#000;
   }
   .pslide img, .pslide video{
@@ -398,7 +399,7 @@
     justify-content:center;
     text-align:center;
     padding:20px;
-    backdrop-filter: blur(12px);
+    backdrop-filter: none;
     background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0.14));
   }
   .cc-title{
@@ -433,7 +434,7 @@
     border-radius:999px;
     background: rgba(0,0,0,0.40);
     border:1px solid rgba(255,255,255,0.14);
-    backdrop-filter: blur(8px);
+    backdrop-filter: none;
     font-weight:900;
     font-size:12px;
     color:#fff;
@@ -820,6 +821,34 @@
   }
   .lib-item.selected{ border-color: rgba(110,168,255,0.55); box-shadow: 0 0 0 2px rgba(110,168,255,0.18) inset; }
   .lib-item.selected .check{ background: rgba(110,168,255,0.25); border-color: rgba(110,168,255,0.55); }
+
+  .pick-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .pick-row{
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    border-radius:16px;
+    padding:12px;
+    cursor:pointer;
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .pick-row:hover{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.22); }
+  .pick-row.on{ border-color: rgba(110,168,255,0.55); box-shadow: 0 0 0 2px rgba(110,168,255,0.16) inset; }
+  .pick-thumb{
+    width:64px; height:64px; border-radius:14px; overflow:hidden;
+    background:#000; border:1px solid rgba(255,255,255,0.10); flex:0 0 auto;
+  }
+  .pick-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pick-main{ min-width:0; flex:1; }
+  .pick-name{ font-weight:950; }
+  .pick-sub{ color:rgba(255,255,255,0.65); font-size:12px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  #pickB{ z-index:14500; }
   .lib-item .kind{
     position:absolute; left:10px; top:10px;
     background: rgba(0,0,0,0.55);
@@ -842,7 +871,7 @@
     .lf-modal { flex-direction:column; height:92vh; }
     .m-sidebar { width:100%; height:46vh; border-left:none; border-top:1px solid var(--border); }
     .m-preview { height:46vh; }
-    .pslide{ aspect-ratio: 4/5; }
+    .pslide{ height: 260px; }
     .col-grid{ grid-template-columns: repeat(2, 1fr); }
   }
 </style>
@@ -1072,6 +1101,31 @@
     </div>
   </div>
 
+
+  <!-- Universal Picker Modal -->
+  <div class="sheet-backdrop" id="pickB">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-head">
+        <div class="sheet-title" id="pickTitle">Pick</div>
+        <button class="sheet-close" id="pickClose">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="pickbar">
+          <div class="search" id="pickSearchWrap">
+            <span style="opacity:.75;font-weight:900;">Search</span>
+            <input id="pickSearch" placeholder="Search…" />
+          </div>
+          <div class="muted" id="pickHint"></div>
+        </div>
+        <div id="pickList"></div>
+        <div class="sheet-actions">
+          <button class="btn-primary" id="pickOk">OK</button>
+          <button class="btn-ghost" id="pickCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1172,9 +1226,21 @@
   const $ksave = document.getElementById("ksave");
   const $kcancel = document.getElementById("kcancel");
 
+
+  // Universal picker
+  const $pickB = document.getElementById("pickB");
+  const $pickTitle = document.getElementById("pickTitle");
+  const $pickClose = document.getElementById("pickClose");
+  const $pickOk = document.getElementById("pickOk");
+  const $pickCancel = document.getElementById("pickCancel");
+  const $pickList = document.getElementById("pickList");
+  const $pickSearch = document.getElementById("pickSearch");
+  const $pickHint = document.getElementById("pickHint");
+
   // State
   let username = "";
   let profile = null;
+  let myProfile = null;
   let isOwnProfile = false;
   let followState = false;
 
@@ -1212,6 +1278,13 @@
   let mvItems = [];
   let mvIndex = 0;
   let mvOnChange = null;
+
+  let pickMode = null;
+  let pickSelectedId = null;
+  let pickSelectedSet = new Set();
+  let pickResolve = null;
+
+  const postCommentsMode = new Map();
 
   const ICONS = {
     like: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.6-9.5-9C.6 8.6 2.6 5 6.5 5c2.1 0 3.6 1.2 4.5 2.4C11.9 6.2 13.4 5 15.5 5 19.4 5 21.4 8.6 21.5 12c-2.5 4.4-9.5 9-9.5 9z"/></svg>',
@@ -1564,6 +1637,15 @@
     return parts;
   }
 
+
+  function myAvatarHTML(){
+    if(!myProfile) return `<div class="avatar"></div>`;
+    const em = myProfile.avatar_type === "emoji" && myProfile.avatar_emoji;
+    if(em) return `<div class="avatar emoji"><span>${escapeHtml(myProfile.avatar_emoji)}</span></div>`;
+    if(myProfile.avatar_url) return `<div class="avatar"><img src="${escapeHtml(myProfile.avatar_url)}"></div>`;
+    return `<div class="avatar"></div>`;
+  }
+
   function renderPosts(){
     if(!postItems.length){
       $grid.innerHTML = `<div class="empty">No posts yet.</div>`;
@@ -1629,10 +1711,11 @@
                 ` : ``}
               </div>
 
-              <div class="pc" data-comments="${escapeHtml(p.id)}" style="display:none;">
+              <div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0 ? "flex" : "none"};">
                 <div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="empty" style="padding:18px">Loading…</div></div>
+                <button class="btn-ghost" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button>
                 <div class="pc-form">
-                  <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
+                  ${myAvatarHTML()}
                   <input class="pc-input" id="pc-in-${escapeHtml(p.id)}" placeholder="Write a comment…" />
                   <button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button>
                 </div>
@@ -1713,6 +1796,23 @@
       btn.onclick = () => sendPostComment(btn.getAttribute("data-send"));
     });
 
+    $grid.querySelectorAll("[data-viewall]").forEach(b=>{
+      const pid = b.getAttribute("data-viewall");
+      const post = postItems.find(x=> String(x.id) === String(pid));
+      if(!post || (post.comment_count||0) <= 3) b.style.display = "none";
+      b.onclick = async ()=>{
+        postCommentsMode.set(pid, "all");
+        await loadPostComments(pid);
+        b.style.display = "none";
+      };
+    });
+
+    postItems.forEach(p=>{
+      if((p.comment_count||0) > 0){
+        loadPostComments(p.id);
+      }
+    });
+
     // count views once per post render (dedupe server-side)
     postItems.forEach(p=>{
       if(p._viewed) return;
@@ -1727,7 +1827,9 @@
     if(!listEl) return;
     listEl.innerHTML = `<div class="empty" style="padding:18px">Loading…</div>`;
     try{
-      const j = await api(`/api/posts/comments?post_id=${encodeURIComponent(post_id)}&limit=80&offset=0`, { method:"GET" });
+      const mode = postCommentsMode.get(post_id) || "preview";
+      const limit = mode === "all" ? 80 : 3;
+      const j = await api(`/api/posts/comments?post_id=${encodeURIComponent(post_id)}&limit=${limit}&offset=0`, { method:"GET" });
       const arr = Array.isArray(j.items) ? j.items : [];
       if(!arr.length){
         listEl.innerHTML = `<div class="empty" style="padding:18px">No comments yet.</div>`;
@@ -1749,6 +1851,13 @@
           </div>
         `;
       }).join("");
+      const post = postItems.find(x=> String(x.id) === String(post_id));
+      const viewAllBtn = $grid.querySelector(`[data-viewall="${CSS.escape(post_id)}"]`);
+      if(viewAllBtn){
+        if(mode === "all") viewAllBtn.style.display = "none";
+        else if(arr.length < 3 || (post?.comment_count||0) <= 3) viewAllBtn.style.display = "none";
+        else viewAllBtn.style.display = "inline-flex";
+      }
       listEl.scrollTop = listEl.scrollHeight;
     }catch(e){
       listEl.innerHTML = `<div class="empty" style="padding:18px;color:#ff98a2">Error: ${escapeHtml(e.message)}</div>`;
@@ -2189,6 +2298,7 @@
     mvIndex = Math.max(0, Math.min(startIndex, mvItems.length-1));
     mvOnChange = (typeof onChange === "function") ? onChange : null;
 
+    $mb.classList.remove("open");
     $mvb.classList.add("open");
     renderMediaViewer();
   }
@@ -2482,41 +2592,79 @@
     await loadLibrary(true);
   }
 
-  function renderPickerGrid(target, selectedArr, searchText=""){
-    const q = String(searchText||"").toLowerCase().trim();
-    const filtered = libraryItems.filter(it=>{
-      const t = String(it.title||"").toLowerCase();
-      return !q || t.includes(q);
-    });
-    const show = filtered.slice(0, 120);
+  function openPicker(mode, data){
+    pickMode = mode;
+    pickSelectedId = null;
+    pickSelectedSet = new Set();
+    $pickTitle.textContent = data.title || "Pick";
+    $pickHint.textContent = data.hint || "";
+    $pickSearch.value = "";
+    $pickList.innerHTML = `<div class="empty" style="padding:18px">Loading…</div>`;
+    $pickB.classList.add("open");
 
-    target.innerHTML = show.map(it=>{
-      const v = isVideoUrl(it.media_url || it.thumb_url);
-      const url = (it.media_url || it.thumb_url || "").trim();
-      const selected = selectedArr.includes(it.id);
-      return `
-        <div class="lib-item ${selected ? "selected" : ""}" data-id="${escapeHtml(it.id)}">
-          ${v
-            ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>`
-            : `<img src="${escapeHtml(it.thumb_url || it.media_url || "")}" loading="lazy" decoding="async" />`
-          }
-          <div class="kind"><span class="dot ${v?'video':'image'}"></span>${v?'VIDEO':'IMAGE'}</div>
-          <div class="check">${selected ? "✓" : ""}</div>
+    function renderList(filterText=""){
+      const q = (filterText||"").toLowerCase().trim();
+      const items = (data.items || []).filter(it=>{
+        if(!q) return true;
+        return String(it.title||"").toLowerCase().includes(q) || String(it.description||"").toLowerCase().includes(q);
+      });
+
+      $pickList.innerHTML = `
+        <div class="pick-list">
+          ${items.map(it=>{
+            const on = data.multi ? pickSelectedSet.has(it.id) : (pickSelectedId === it.id);
+            return `
+              <div class="pick-row ${on?'on':''}" data-pid="${it.id}">
+                <div class="pick-thumb">${it.thumb ? `<img src="${it.thumb}">` : ""}</div>
+                <div class="pick-main">
+                  <div class="pick-name">${escapeHtml(it.title||"Untitled")}</div>
+                  <div class="pick-sub">${escapeHtml(it.description||"")}</div>
+                </div>
+                <div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>
+              </div>
+            `;
+          }).join("")}
         </div>
       `;
-    }).join("");
 
-    target.querySelectorAll(".lib-item").forEach(el=>{
-      el.onclick = () => {
-        const id = el.getAttribute("data-id");
-        const idx = selectedArr.indexOf(id);
-        if(idx >= 0) selectedArr.splice(idx, 1);
-        else selectedArr.push(id);
-        el.classList.toggle("selected", idx < 0);
-        el.querySelector(".check").textContent = idx < 0 ? "✓" : "";
-        $pPickedInfo.textContent = `Selected: ${postDraftMedia.length}`;
+      $pickList.querySelectorAll("[data-pid]").forEach(row=>{
+        row.onclick = ()=>{
+          const id = row.getAttribute("data-pid");
+          if(data.multi){
+            if(pickSelectedSet.has(id)) pickSelectedSet.delete(id);
+            else pickSelectedSet.add(id);
+            renderList($pickSearch.value);
+          }else{
+            pickSelectedId = id;
+            renderList($pickSearch.value);
+          }
+        };
+      });
+    }
+
+    renderList("");
+
+    $pickSearch.oninput = ()=> renderList($pickSearch.value);
+
+    return new Promise((resolve)=>{
+      pickResolve = resolve;
+      $pickOk.onclick = ()=>{
+        const result = data.multi ? Array.from(pickSelectedSet) : pickSelectedId;
+        closePicker();
+        resolve(result);
       };
+      $pickCancel.onclick = ()=>{ closePicker(); resolve(data.multi ? [] : null); };
+      $pickClose.onclick = ()=>{ closePicker(); resolve(data.multi ? [] : null); };
+      $pickB.onclick = (e)=>{ if(e.target === $pickB){ closePicker(); resolve(data.multi ? [] : null); } };
     });
+  }
+
+  function closePicker(){
+    $pickB.classList.remove("open");
+    pickMode = null;
+    pickSelectedId = null;
+    pickSelectedSet = new Set();
+    pickResolve = null;
   }
 
   async function savePostDraft(){
@@ -2542,26 +2690,31 @@
   // Attach collection into post body via marker
   async function attachCollectionMarker(){
     try{
-      // pick from current loaded collections; if not loaded — load first page
       if(!collectionItems.length){
         const oldTab = tab;
         await loadCollections(true);
         tab = oldTab;
+        if(oldTab === "posts") renderPosts();
       }
       if(!collectionItems.length){ toast("No collections"); return; }
 
-      const id = prompt("Paste collection UUID or type number from list:\n" + collectionItems.slice(0,10).map((c,i)=> `${i+1}) ${c.title} — ${c.id}`).join("\n"));
-      if(!id) return;
+      const items = collectionItems.map(c=>{
+        const prev = Array.isArray(c.preview_items) ? c.preview_items : [];
+        const thumb = (prev[0]?.thumb_url || prev[0]?.media_url || "") || "";
+        return { id: c.id, title: c.title || "Untitled", description: c.description || "", thumb };
+      });
 
-      let colId = id.trim();
-      const asNum = Number(colId);
-      if(Number.isFinite(asNum) && asNum >= 1 && asNum <= Math.min(10, collectionItems.length)){
-        colId = collectionItems[asNum-1].id;
-      }
-      if(!/^[0-9a-fA-F-]{36}$/.test(colId)){ toast("Invalid UUID"); return; }
+      const picked = await openPicker("collection", {
+        title: "Attach collection",
+        hint: "Choose a collection to attach to the post",
+        items,
+        multi: false
+      });
 
-      const marker = `[[collection:${colId}]]`;
-      $ptext.value = ($ptext.value || "") + ( $ptext.value ? "\n\n" : "" ) + marker;
+      if(!picked) return;
+
+      const marker = `[[collection:${picked}]]`;
+      $ptext.value = ($ptext.value || "") + ($ptext.value ? "\n\n" : "") + marker;
       toast("Collection attached");
     }catch(e){
       toast("Failed");
@@ -2695,8 +2848,23 @@
 
   $pPickMedia.onclick = async () => {
     await ensureLibraryLoadedForPicker();
-    $pPickGrid.style.display = "grid";
-    renderPickerGrid($pPickGrid, postDraftMedia, "");
+
+    const items = libraryItems.slice(0, 200).map(it=>{
+      const thumb = (it.thumb_url || it.media_url || "") || "";
+      return { id: it.id, title: it.title || "Untitled", description: "", thumb };
+    });
+
+    const picked = await openPicker("library", {
+      title: "Add media from Library",
+      hint: "Select images/videos (multi-select). Upload from ПК disabled.",
+      items,
+      multi: true
+    });
+
+    if(Array.isArray(picked)){
+      postDraftMedia = picked;
+      $pPickedInfo.textContent = `Selected: ${postDraftMedia.length}`;
+    }
   };
 
   $pPickCollection.onclick = attachCollectionMarker;
@@ -2710,16 +2878,19 @@
 
   $kPickMedia.onclick = async () => {
     await ensureLibraryLoadedForPicker();
-    $kPickGrid.style.display = "grid";
-    // filter by search
-    const q = ($ksearch.value||"").trim();
-    renderPickerGrid($kPickGrid, colDraftMedia, q);
-    $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
-  };
-
-  $ksearch.oninput = () => {
-    if($kPickGrid.style.display === "none") return;
-    renderPickerGrid($kPickGrid, colDraftMedia, ($ksearch.value||"").trim());
+    const q = ($ksearch.value||"").trim().toLowerCase();
+    const filtered = libraryItems.filter(it => !q || String(it.title||"").toLowerCase().includes(q)).slice(0, 200);
+    const items = filtered.map(it=>({ id: it.id, title: it.title||"Untitled", description:"", thumb:(it.thumb_url||it.media_url||"") }));
+    const picked = await openPicker("library", {
+      title: "Add items to collection",
+      hint: "Select items (multi-select).",
+      items,
+      multi: true
+    });
+    if(Array.isArray(picked)){
+      colDraftMedia = picked;
+      $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
+    }
   };
 
   // Media Viewer events
@@ -2740,6 +2911,10 @@
     }
 
     await loadProfileHeaderOnce();
+    try{
+      const me = await api("/api/me", { method:"GET" });
+      myProfile = me?.profile || null;
+    }catch(e){ myProfile = null; }
     renderTabControls();
     await switchTab("posts");
   }
@@ -2750,4 +2925,3 @@
   });
 })();
 </script>
-
