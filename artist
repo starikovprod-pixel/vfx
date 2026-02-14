@@ -320,6 +320,40 @@
   .mini svg{ width:16px; height:16px; stroke: currentColor; fill:none; stroke-width:2; }
   .mini.danger{ color:#ffd3d8; border-color: rgba(255,70,90,0.35); }
 
+  .cic{
+    width:auto;
+    height:28px;
+    padding:0 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+    font-weight:900;
+    font-size:12px;
+  }
+  .cic svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
+  .cic.on{ color: var(--danger); border-color: rgba(255,70,90,0.45); background: rgba(255,70,90,0.14); }
+
+  .cact{
+    width:30px;
+    height:30px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .cact:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+  .cact svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; }
+  .cact.danger{ color:#ffd3d8; border-color: rgba(255,70,90,0.35); }
+  .cact.danger:hover{ border-color: rgba(255,70,90,0.55); }
+
   /* Comments block under post */
   .pc{
     border-top:1px solid rgba(255,255,255,0.10);
@@ -529,7 +563,7 @@
     gap:8px;
     align-items:center;
   }
-  .cc-pill[data-csave]{ cursor:pointer; }
+  .cc-pill[data-csave], .cc-pill[data-clike]{ cursor:pointer; }
   .cc-pill svg{ width:14px; height:14px; fill: currentColor; }
 
   /* LIBRARY GRID (existing cards) */
@@ -1859,6 +1893,7 @@
         for(const c of collectionItems){
           try{
             const st = await api(`/api/collections/state?collection_id=${encodeURIComponent(c.id)}`, { method:"GET" });
+            c._liked = !!st.liked;
             c._saved = !!st.saved;
           }catch(e){}
         }
@@ -2142,20 +2177,19 @@
                   ${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}
                 </a>
                 <div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div>
-                ${(canEdit || canDelete) ? `
-                  <div style="margin-left:auto;display:flex;gap:8px;">
-                    ${canEdit ? `<button class="mini" data-c-edit="${escapeHtml(c.id)}">Edit</button>` : ""}
-                    <button class="mini" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}">Reply</button>
-                    ${canDelete ? `<button class="mini danger" data-c-del="${escapeHtml(c.id)}">Delete</button>` : ""}
-                  </div>
-                ` : ""}
+                <div style="margin-left:auto;display:flex;gap:8px;">
+                  <button class="cic ${c.liked_by_me ? "on" : ""}" data-clike="${escapeHtml(c.id)}">${ICONS.like}<span>${c.like_count||0}</span></button>
+                  ${canEdit ? `<button class="cact" data-c-edit="${escapeHtml(c.id)}" title="Edit">${ICONS.edit}</button>` : ""}
+                  <button class="cact" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
+                  ${canDelete ? `<button class="cact danger" data-c-del="${escapeHtml(c.id)}" title="Delete">${ICONS.trash}</button>` : ""}
+                </div>
               </div>
               ${c.reply_to_comment_id ? `
                 <div class="pc-replyto">
                   Reply to
-                  <a href="/artist?username=${encodeURIComponent(c.reply_to_username||"")}" class="pc-replyto-user">
+                  <button class="pc-replyto-user pc-replyto-jump" data-jump="${escapeHtml(c.reply_to_comment_id)}" type="button">
                     ${escapeHtml(c.reply_to_display_name||c.reply_to_username||"")}
-                  </a>
+                  </button>
                   ·
                   <button class="pc-replyto-jump" data-jump="${escapeHtml(c.reply_to_comment_id)}">
                     “${escapeHtml(c.reply_to_excerpt||"")}”
@@ -2186,6 +2220,24 @@
           el.scrollIntoView({ behavior:"smooth", block:"center" });
           el.classList.add("c-flash");
           setTimeout(()=> el.classList.remove("c-flash"), 1000);
+        };
+      });
+
+      listEl.querySelectorAll("[data-clike]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-clike");
+          const row = arr.find(x=> String(x.id)===String(cid));
+          if(!row) return;
+          try{
+            await requireToken();
+            const endpoint = row.liked_by_me ? "/api/posts/comment_unlike" : "/api/posts/comment_like";
+            const r = await api(endpoint, { method:"POST", body: JSON.stringify({ comment_id: cid }) });
+            row.liked_by_me = !row.liked_by_me;
+            row.like_count = r.like_count ?? row.like_count;
+            await loadPostComments(post_id);
+          }catch(e){
+            toast(e.message||"Failed");
+          }
         };
       });
 
@@ -2430,7 +2482,7 @@
                   <div class="cc-desc">${escapeHtml(c.description || "")}</div>
                 </div>
                 <div class="cc-meta">
-                  <div class="cc-pill">${ICONS.like} <b>${c.like_count||0}</b></div>
+                  <div class="cc-pill" data-clike="${escapeHtml(c.id)}">${ICONS.like} <b>${c.like_count||0}</b></div>
                   <div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div>
                   <div class="cc-pill ${c._saved ? "mini on save" : ""}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div>
                 </div>
@@ -2441,11 +2493,35 @@
       </div>
     `;
 
-    document.querySelectorAll("[data-col]").forEach(el=>{
+    $grid.querySelectorAll("[data-col]").forEach(el=>{
       el.onclick = () => openCollectionModal(el.getAttribute("data-col"));
     });
 
-    document.querySelectorAll("[data-csave]").forEach(el=>{
+    $grid.querySelectorAll("[data-clike]").forEach(el=>{
+      el.onclick = async (e)=>{
+        e.stopPropagation();
+        const id = el.getAttribute("data-clike");
+        const col = collectionItems.find(x=> String(x.id)===String(id));
+        if(!col) return;
+        try{
+          await requireToken();
+          const endpoint = col._liked ? "/api/collections/unlike" : "/api/collections/like";
+          const j = await api(endpoint, { method:"POST", body: JSON.stringify({ collection_id:id }) });
+          col._liked = !col._liked;
+          if(j?.counts){
+            col.like_count = j.counts.like_count;
+            col.save_count = j.counts.save_count;
+            col.view_count = j.counts.view_count;
+          }
+          renderCollections();
+          startCollectionsSlideshows();
+        }catch(e){
+          toast(e.message||"Failed");
+        }
+      };
+    });
+
+    $grid.querySelectorAll("[data-csave]").forEach(el=>{
       el.onclick = async (e)=>{
         e.stopPropagation();
         const id = el.getAttribute("data-csave");
