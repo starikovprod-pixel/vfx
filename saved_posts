@@ -17,9 +17,9 @@
   }
 
   .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
-  #lf-feed * { box-sizing:border-box; outline:none; }
+  #lf-saved-posts * { box-sizing:border-box; outline:none; }
 
-  #lf-feed{
+  #lf-saved-posts{
     background:var(--bg-body);
     color:var(--text-main);
     font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -743,31 +743,31 @@
   }
 </style>
 
-<div id="lf-feed">
+<div id="lf-saved-posts">
   <div id="lf-main">
 
     <div class="lf-top">
       <div>
-        <h1 class="lf-h1">Feed</h1>
+        <h1 class="lf-h1">Saved Posts</h1>
         <div class="lf-sub">
-          <div class="seg" id="seg-sort">
+          <div class="seg" id="seg-sort" style="display:none;">
             <button class="active" data-sort="trending">Trending</button>
             <button data-sort="new">New</button>
             <button data-sort="following">Following</button>
           </div>
-          <button class="tab-btn" id="btn-video-only" type="button">Video only</button>
+          
           <span id="auth-hint" style="color:rgba(255,255,255,0.55)">Login to like / save / comment.</span>
         </div>
       </div>
 
       <div class="lf-controls">
         <div class="seg" id="seg-main-links">
-          <a class="nav-link active" href="/feed">Feed</a>
+          <a class="nav-link" href="/feed">Feed</a>
           <a class="nav-link" href="/posts">Posts</a>
           <a class="nav-link" href="/collections">Collections</a>
           <a class="nav-link" href="/saved_images">Saved Images</a>
           <a class="nav-link" href="/saved_videos">Saved Videos</a>
-          <a class="nav-link" href="/saved_posts">Saved Posts</a>
+          <a class="nav-link active" href="/saved_posts">Saved Posts</a>
           <a class="nav-link" href="/saved_collections">Saved Collections</a>
         </div>
         <button class="btn-refresh-icon" id="btn-refresh" title="Refresh">
@@ -903,8 +903,8 @@
   const LS_FOLLOW = "lf_follow_cache_v1";
 
   // feed state
-  const mainTab = "feed";
-  const savedType = "image";
+  const mainTab = "saved";
+  const savedType = "post";
   let sort = "trending";
   let offset = 0;
   let loading = false;
@@ -933,7 +933,7 @@
   const $loader = document.getElementById("loader");
   const $sideList = document.getElementById("side-list");
   const $segSort = document.getElementById("seg-sort");
-  const $btnVideoOnly = document.getElementById("btn-video-only");
+  const $btnVideoOnly = null;
   const $btnRefresh = document.getElementById("btn-refresh");
   const $authHint = document.getElementById("auth-hint");
 
@@ -1810,13 +1810,7 @@
   }
 
   function renderGrid(){
-    let list=onlyVideo ? items.filter(isVideoItem) : items;
-    $grid.className='lf-grid';
-    $grid.innerHTML = list.length ? list.map(renderCard).join('') : `<div class="lf-empty">No items yet.</div>`;
-    bindVerifiedTooltip($grid);
-    $grid.querySelectorAll('.lf-card').forEach(card=> card.onclick=()=>{ const id=card.getAttribute('data-id'); const it=items.find(x=>String(x.id)===String(id)); if(it) openModal(it); });
-    wireHoverVideos();
-    primePosterVideos();
+    renderPosts();
   }
 
   function wireHoverVideos(){
@@ -1854,8 +1848,7 @@
   }
 
   function getListPath(){
-    const q = `?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`;
-    return `/api/feed/list${q}`;
+    return `/api/saved/list?type=post&limit=${PAGE_SIZE}&offset=${offset}`;
   }
 
   async function fetchPage(reset=false){
@@ -1877,10 +1870,11 @@
         return;
       }
 
-      const needAuth = (sort === "following");
+      const needAuth = true;
       const json = await api(getListPath(), { method:"GET", auth: needAuth });
 
       let page = Array.isArray(json.items) ? json.items : [];
+      if(!(await getSessionToken())){ $grid.innerHTML = `<div class="lf-empty">Login to see saved items.</div>`; hasMore=false; return; }
       if(sort === "following"){
         if(followingIds.size === 0) await refreshFollowingIds();
         page = page.filter((it) => followingIds.has(String(it.user_id)));
@@ -2265,7 +2259,7 @@
       await fetchPage(true);
     };
   });
-  $btnVideoOnly.onclick = ()=>{ onlyVideo = !onlyVideo; $btnVideoOnly.classList.toggle("active", onlyVideo); renderGrid(); };
+  if($btnVideoOnly) $btnVideoOnly.onclick = ()=>{ onlyVideo = !onlyVideo; $btnVideoOnly.classList.toggle("active", onlyVideo); renderGrid(); };
   $btnRefresh.onclick = ()=> fetchPage(true);
   if($emoClose) $emoClose.onclick = closeEmojiPicker;
   if($emoB) $emoB.onclick = (e)=>{ if(e.target===$emoB) closeEmojiPicker(); };
