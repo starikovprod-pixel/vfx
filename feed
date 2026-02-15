@@ -711,6 +711,9 @@
     .m-sidebar { width: 100%; height: 46vh; border-left: none; border-top: 1px solid var(--border); }
     .m-preview { height: 46vh; }
   }
+
+  .seg button, .seg a{ color:#fff; }
+
 </style>
 
 <div id="lf-feed">
