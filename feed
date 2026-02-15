@@ -137,7 +137,11 @@
     padding-bottom: 60px;
   }
 
-  .feed-layout{ display:grid; grid-template-columns: minmax(0,1fr) 320px; gap:16px; }
+  .feed-layout{ display:grid; grid-template-columns: 200px minmax(0,1fr) 320px; gap:16px; }
+  .feed-nav{ background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:10px; display:flex; flex-direction:column; gap:8px; height:fit-content; position:sticky; top:18px; }
+  .feed-nav-btn{ border:1px solid transparent; background:transparent; color:rgba(255,255,255,0.75); border-radius:12px; padding:12px 10px; text-align:left; font-weight:800; cursor:pointer; }
+  .feed-nav-btn:hover{ background:rgba(255,255,255,0.06); color:#fff; }
+  .feed-nav-btn.active{ background:#fff; color:#000; }
   .feed-left{ min-width:0; }
   .feed-right{ position:relative; top:0; align-self:start; height:auto; }
   .side-card{ background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:12px; height:100%; display:flex; flex-direction:column; overflow:hidden; }
@@ -517,6 +521,13 @@
     display:flex;
     gap:8px;
   }
+  .c-reply{font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;}
+  .c-tools{display:flex;gap:6px;margin-left:auto;}
+  .c-meta{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.55);font-size:11px;margin-top:8px;}
+  .c-like{border:0;background:transparent;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:4px;cursor:pointer;padding:0;}
+  .c-like.on{color:#fff;}
+  .c-replybar{display:none;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.05);}
+  .c-emoji{border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#fff;border-radius:10px;padding:0 10px;cursor:pointer;}
   .c-input{
     flex:1;
     background: rgba(255,255,255,0.05);
@@ -632,13 +643,9 @@
     transform: translateY(0);
   }
 
-  #seg-main{ margin-right:8px; }
-  #seg-main button{ min-width:92px; }
-  #seg-saved button{ min-width:86px; }
-  .c-input{ min-height:44px; resize:vertical; }
-
   @media(max-width: 980px){
     .feed-layout{ grid-template-columns:1fr; }
+    .feed-nav{ position:relative; top:0; flex-direction:row; overflow:auto; }
     .feed-right{ position:relative; top:0; height:auto; }
     .lf-modal { flex-direction: column; height: 92vh; }
     .m-sidebar { width: 100%; height: 46vh; border-left: none; border-top: 1px solid var(--border); }
@@ -651,32 +658,20 @@
 
     <div class="lf-top">
       <div>
-        <h1 class="lf-h1" id="main-title">Feed</h1>
-        <div class="lf-sub" id="main-sub">
-          <span id="main-desc">Explore the best user generations.</span>
+        <h1 class="lf-h1" id="feed-title">Feed</h1>
+        <div class="lf-sub">
+          <span id="feed-subtitle">Explore the best user generations.</span>
           <span id="auth-hint" style="color:rgba(255,255,255,0.55)">Login to like / save / comment.</span>
         </div>
       </div>
 
       <div class="lf-controls">
-        <div class="seg" id="seg-main">
-          <button class="active" data-main="feed">Feed</button>
-          <button data-main="posts">Posts</button>
-          <button data-main="collections">Collections</button>
-          <button data-main="saved">Saved</button>
-        </div>
-
-        <div class="seg" id="seg-sort">
-          <button class="active" data-sort="trending">Trending</button>
-          <button data-sort="new">New</button>
-          <button data-sort="following">Following</button>
-        </div>
-
+        <div class="seg" id="seg-sort"></div>
         <div class="seg" id="seg-saved" style="display:none;">
-          <button class="active" data-saved="images">Images</button>
-          <button data-saved="videos">Videos</button>
-          <button data-saved="posts">Posts</button>
-          <button data-saved="collections">Collections</button>
+          <button class="active" data-saved="image">Images</button>
+          <button data-saved="video">Videos</button>
+          <button data-saved="post">Posts</button>
+          <button data-saved="collection">Collections</button>
         </div>
 
         <button class="tab-btn" id="btn-video-only" type="button">Video only</button>
@@ -688,6 +683,12 @@
     </div>
 
     <div class="feed-layout">
+      <aside class="feed-nav" id="feed-nav">
+        <button class="feed-nav-btn active" data-tab="feed">Feed</button>
+        <button class="feed-nav-btn" data-tab="posts">Posts</button>
+        <button class="feed-nav-btn" data-tab="collections">Collections</button>
+        <button class="feed-nav-btn" data-tab="saved">Saved</button>
+      </aside>
       <div class="feed-left">
         <div id="grid" class="lf-grid">Loading...</div>
         <div class="lf-loader" id="loader" style="display:none;">Loading more…</div>
@@ -744,14 +745,27 @@
             <div class="lf-empty" style="padding:18px;">Loading…</div>
           </div>
 
+          <div class="c-replybar" id="c-replybar">
+            <span id="c-replytext">Replying</span>
+            <button class="c-mini" id="c-reply-cancel">Cancel</button>
+          </div>
           <div class="c-form">
-            <button class="icon-btn" id="c-emoji" title="Emoji">😊</button>
-            <textarea class="c-input" id="c-input" placeholder="Write a comment…"></textarea>
+            <input class="c-input" id="c-input" placeholder="Write a comment…" />
+            <button class="c-emoji" id="c-emoji" type="button">Emoji</button>
             <button class="c-send" id="c-send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
           </div>
         </div>
 
       </div>
+    </div>
+  </div>
+
+  <div class="lf-modal-backdrop" id="emoji-backdrop" style="display:none;z-index:71;">
+    <div class="side-card" style="width:min(520px,92vw);max-height:70vh;overflow:auto;margin:auto;">
+      <div class="side-title">Emoji</div>
+      <input id="emoji-search" class="c-input" placeholder="Search emoji" style="margin-bottom:10px;" />
+      <div id="emoji-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;"></div>
+      <button class="tab-btn" id="emoji-close" type="button" style="margin-top:10px;">Close</button>
     </div>
   </div>
 
@@ -773,13 +787,22 @@
     dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>'
   };
   const VERIFIED_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z"/></svg>';
+  const EMOJIS = "😀 😁 😂 🤩 😍 😎 🤖 ✨ 🔥 👍 👏 🙌 ❤️ 💙 💚 🎉 🚀".split(" ");
   const VFY_TOOLTIP = 'Verified — awarded at 100 followers. Helps ranking in Feed.';
   const LS_FOLLOW = "lf_follow_cache_v1";
 
+  const TAB_META = {
+    feed:{ title:"Feed", subtitle:"Explore the best user generations." },
+    posts:{ title:"Posts", subtitle:"See posts with Artist mechanics." },
+    collections:{ title:"Collections", subtitle:"Browse user collections." },
+    saved:{ title:"Saved", subtitle:"Your saved images, videos, posts and collections." }
+  };
+  const SORTS = ["trending","new","following"];
+
   // feed state
-  let mainTab = "feed";
+  let activeTab = "feed";
+  let savedType = "image";
   let sort = "trending";
-  let savedTab = "images";
   let offset = 0;
   let loading = false;
   let hasMore = true;
@@ -794,6 +817,7 @@
   let saved = false;
   let editingCommentId = null;
   let deletingCommentId = null;
+  let replyingTo = null;
   let followState = false;
   let myUserId = null;
   let followingIds = new Set();
@@ -802,15 +826,14 @@
   const $grid = document.getElementById("grid");
   const $loader = document.getElementById("loader");
   const $sideList = document.getElementById("side-list");
-  const $segMain = document.getElementById("seg-main");
   const $segSort = document.getElementById("seg-sort");
   const $segSaved = document.getElementById("seg-saved");
+  const $feedTitle = document.getElementById("feed-title");
+  const $feedSubtitle = document.getElementById("feed-subtitle");
+  const $feedNav = document.getElementById("feed-nav");
   const $btnVideoOnly = document.getElementById("btn-video-only");
   const $btnRefresh = document.getElementById("btn-refresh");
   const $authHint = document.getElementById("auth-hint");
-  const $mainTitle = document.getElementById("main-title");
-  const $mainSub = document.getElementById("main-sub");
-  const $mainDesc = document.getElementById("main-desc");
 
   const $modal = document.getElementById("modal-backdrop");
   const $modalClose = document.getElementById("modal-close");
@@ -829,11 +852,18 @@
   const $cInput = document.getElementById("c-input");
   const $cSend = document.getElementById("c-send");
   const $cEmoji = document.getElementById("c-emoji");
+  const $cReplybar = document.getElementById("c-replybar");
+  const $cReplytext = document.getElementById("c-replytext");
+  const $cReplyCancel = document.getElementById("c-reply-cancel");
   const $btnReloadComments = document.getElementById("btn-reload-comments");
 
   const $toast = document.getElementById("toast");
   const $mFollowers = document.getElementById("m-followers");
   const $vfyTip = document.getElementById("vfyTip");
+  const $emojiBackdrop = document.getElementById("emoji-backdrop");
+  const $emojiGrid = document.getElementById("emoji-grid");
+  const $emojiSearch = document.getElementById("emoji-search");
+  const $emojiClose = document.getElementById("emoji-close");
 
   function toast(msg){
     $toast.textContent = msg;
@@ -1156,14 +1186,10 @@
   }
 
   function renderCard(it){
-    const sampleMedia = Array.isArray(it.media) && it.media[0] ? it.media[0] : null;
-    const thumb = it.thumb_url || it.cover_thumb_url || sampleMedia?.thumb_url || sampleMedia?.media_url || it.media_url || "";
-    const mediaSrc = it.media_url || it.cover_media_url || sampleMedia?.media_url || thumb;
-    const normalized = Object.assign({}, it, { thumb_url: thumb, media_url: mediaSrc });
-    const video = isVideoItem(normalized);
+    const video = isVideoItem(it);
     const username = it.username || "user";
     const display = it.display_name || username;
-    const title = it.title || it.body || "Untitled";
+    const title = it.title || "Untitled";
 
     const stats = `
       <div class="stat">${ICONS.like} ${it.like_count || 0}</div>
@@ -1177,7 +1203,7 @@
       ? `<span>${escapeHtml(it.avatar_emoji)}</span>`
       : (it.avatar_url ? `<img src="${escapeHtml(it.avatar_url)}" />` : "");
 
-    const media = mediaSrc;
+    const media = it.media_url || it.thumb_url || "";
     const mediaHtml = video
       ? `
         <video class="lf-poster-video"
@@ -1231,7 +1257,7 @@
   }
 
   function renderGrid(){
-    const list = (mainTab === "feed" && onlyVideo) ? items.filter(isVideoItem) : items;
+    const list = (activeTab === "feed" && onlyVideo) ? items.filter(isVideoItem) : items;
     if(list.length === 0){
       $grid.innerHTML = `<div class="lf-empty">No items yet.</div>`;
       return;
@@ -1244,10 +1270,7 @@
       card.addEventListener("click", ()=>{
         const id = card.getAttribute("data-id");
         const it = items.find(x=> String(x.id) === String(id));
-        if(!it) return;
-        const canOpenMedia = mainTab === "feed" || (mainTab === "saved" && (savedTab === "images" || savedTab === "videos"));
-        if(canOpenMedia) openModal(it);
-        else if(it.username) window.location.href = `/artist?username=${encodeURIComponent(it.username)}`;
+        if(it) openModal(it);
       });
     });
 
@@ -1289,27 +1312,23 @@
     });
   }
 
-  function setMainTabUI(){
-    const meta = {
-      feed: ["Feed", "Explore the best user generations."],
-      posts: ["Posts", "Community posts with comments, likes and saves."],
-      collections: ["Collections", "User collections sorted by activity and freshness."],
-      saved: ["Saved", "Everything you saved grouped by content type."]
-    };
-    const [title, desc] = meta[mainTab] || meta.feed;
-    $mainTitle.textContent = title;
-    if($mainDesc) $mainDesc.textContent = desc;
-    $segSort.style.display = mainTab === "saved" ? "none" : "flex";
-    $segSaved.style.display = mainTab === "saved" ? "flex" : "none";
-    $btnVideoOnly.style.display = mainTab === "feed" ? "inline-flex" : "none";
+  function renderSortSeg(){
+    $segSort.innerHTML = SORTS.map((name, i)=> `<button ${i===0?'class="active"':''} data-sort="${name}">${name[0].toUpperCase()+name.slice(1)}</button>`).join("");
+    $segSort.querySelectorAll("button").forEach(btn=>{
+      btn.onclick = async ()=>{
+        $segSort.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        sort = btn.dataset.sort;
+        await fetchPage(true);
+      };
+    });
   }
 
-  async function fetchFallback(paths){
-    let err = null;
-    for(const p of paths){
-      try{ return await api(p, { method:"GET" }); }catch(e){ err = e; }
-    }
-    throw err || new Error("Failed to load");
+  function endpointForList(){
+    if(activeTab === "posts") return "/api/posts/feed_list";
+    if(activeTab === "collections") return "/api/collections/feed_list";
+    if(activeTab === "saved") return "/api/saved/list";
+    return "/api/feed/list";
   }
 
   async function fetchPage(reset=false){
@@ -1325,47 +1344,36 @@
         $grid.innerHTML = "Loading...";
       }
 
-      if((sort === "following" || mainTab === "saved") && !(await getSessionToken())){
-        $grid.innerHTML = `<div class="lf-empty">Login required for this section.</div>`;
+      if((sort === "following" || activeTab === "saved") && !(await getSessionToken())){
+        $grid.innerHTML = `<div class="lf-empty">Login required for this tab.</div>`;
         hasMore = false;
         return;
       }
 
-      let json = null;
-      if(mainTab === "feed"){
-        json = await api(`/api/feed/list?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`, { method:"GET" });
-      } else if(mainTab === "posts"){
-        json = await fetchFallback([
-          `/api/posts/feed?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`,
-          `/api/posts/list?limit=${PAGE_SIZE}&offset=${offset}&sort=${encodeURIComponent(sort)}`
-        ]);
-      } else if(mainTab === "collections"){
-        json = await fetchFallback([
-          `/api/collections/feed?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}&preview_limit=6`,
-          `/api/collections/list?limit=${PAGE_SIZE}&offset=${offset}&sort=${encodeURIComponent(sort)}&preview_limit=6`
-        ]);
-      } else {
-        json = await fetchFallback([
-          `/api/saved/list?type=${encodeURIComponent(savedTab)}&limit=${PAGE_SIZE}&offset=${offset}`,
-          `/api/library/saved?type=${encodeURIComponent(savedTab)}&limit=${PAGE_SIZE}&offset=${offset}`
-        ]);
+      let json;
+      if(activeTab === "saved"){
+        const q = `?type=${encodeURIComponent(savedType)}&limit=${PAGE_SIZE}&offset=${offset}`;
+        json = await api(`${endpointForList()}${q}`, { method:"GET" });
+      }else{
+        const q = `?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`;
+        json = await api(`${endpointForList()}${q}`, { method:"GET" });
       }
 
       let page = Array.isArray(json.items) ? json.items : [];
-      if(sort === "following"){
-        if(followingIds.size === 0) await refreshFollowingIds();
-        page = page.filter((it) => !it.user_id || followingIds.has(String(it.user_id)));
-      }
-
-      const seen = new Set(items.map(x=> String(x.id)));
+      const seen = new Set(items.map(x=> `${activeTab}:${x.id}`));
       for(const it of page){
-        const k = String(it.id);
-        if(!seen.has(k)){ seen.add(k); items.push(it); }
+        const k = `${activeTab}:${it.id}`;
+        if(!seen.has(k)){
+          seen.add(k);
+          items.push(it);
+        }
       }
 
       await hydrateFollowStates(page);
+
       offset = json.nextOffset ?? (offset + page.length);
       hasMore = !!json.hasMore;
+
       renderGrid();
     }catch(e){
       $grid.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`;
@@ -1431,7 +1439,10 @@
     try {
       const t = await getSessionToken();
       if (t) {
-        const st = await api(`/api/feed/state?post_id=${encodeURIComponent(current.id)}`, { method:"GET" });
+        const tpe = resolveEntityType();
+        const stateBase = tpe === "collection" ? "/api/collections" : (tpe === "post" ? "/api/posts" : "/api/feed");
+        const stateKey = tpe === "collection" ? "collection_id" : "post_id";
+        const st = await api(`${stateBase}/state?${stateKey}=${encodeURIComponent(current.id)}`, { method:"GET" });
         liked = !!st.liked;
         saved = !!st.saved;
         $btnLike.classList.toggle("on", liked);
@@ -1508,11 +1519,13 @@
 
     try{
       const token = await getSessionToken();
-      const payload = { post_id: it.id, client_id: getClientId() };
+      const tpe = resolveEntityType();
+      const payload = tpe === "collection" ? { collection_id: it.id, client_id: getClientId() } : { post_id: it.id, client_id: getClientId() };
       const headers = {"Content-Type":"application/json"};
       if(token) headers.Authorization = "Bearer " + token;
 
-      const r = await fetch(BACKEND + "/api/feed/view", { method:"POST", headers, body: JSON.stringify(payload) });
+      const viewBase = tpe === "collection" ? "/api/collections/view" : (tpe === "post" ? "/api/posts/view" : "/api/feed/view");
+      const r = await fetch(BACKEND + viewBase, { method:"POST", headers, body: JSON.stringify(payload) });
       if(r.ok){
         const j = await r.json();
         if(j?.counts){
@@ -1544,14 +1557,47 @@
     return token;
   }
 
+  function resolveEntityType(){
+    const t = String(current?.type || current?.entity_type || "").toLowerCase();
+    if(t.includes("collection") || activeTab === "collections") return "collection";
+    if(t.includes("post") || activeTab === "posts") return "post";
+    return "feed";
+  }
+
+  function commentsApiBase(){
+    const t = resolveEntityType();
+    if(t === "post") return "/api/posts";
+    if(t === "collection") return "/api/collections";
+    return "/api/feed";
+  }
+
+  function commentParentPayload(){
+    const t = resolveEntityType();
+    if(t === "collection") return { collection_id: current.id };
+    return { post_id: current.id };
+  }
+
+  function updateReplyUI(){
+    if(!replyingTo){
+      $cReplybar.style.display = "none";
+      return;
+    }
+    $cReplybar.style.display = "flex";
+    $cReplytext.textContent = `Reply to @${replyingTo.username || "user"}`;
+  }
+
   async function loadComments(){
     if(!current) return;
     $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">Loading…</div>`;
     try{
-      const json = await api(`/api/feed/comments?post_id=${encodeURIComponent(current.id)}&limit=80&offset=0`, { method:"GET" });
+      const base = commentsApiBase();
+      const parent = commentParentPayload();
+      const key = Object.keys(parent)[0];
+      const json = await api(`${base}/comments?${key}=${encodeURIComponent(parent[key])}&limit=80&offset=0`, { method:"GET" });
       const arr = Array.isArray(json.items) ? json.items : [];
       const myId = await getMyUserId();
-      
+      const ownerId = String(current.user_id || "");
+
       const editIcon = `<svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
       const trashIcon = `<svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
 
@@ -1567,16 +1613,15 @@
         const name = c.display_name || c.username || "user";
         const when = (c.created_at || "").replace("T"," ").slice(0,16);
         const mine = myId && String(c.user_id) === String(myId);
-        const isAuthor = myId && String(current.user_id) === String(myId);
-        const canDelete = mine || isAuthor;
-        const canEdit = mine;
-        
-        const tools = (canEdit || canDelete) ? `
+        const canDelete = mine || (myId && ownerId && String(ownerId) === String(myId));
+
+        const tools = (mine || canDelete) ? `
           <div class="c-tools">
-            ${canEdit ? `<button class="icon-btn" data-edit="${c.id}">${editIcon}</button>` : ``}
-            ${canDelete ? `<button class="icon-btn danger" data-del="${c.id}">${trashIcon}</button>` : ``}
-          </div>` : "";
-          
+            ${mine ? `<button class="icon-btn" data-edit="${c.id}" title="Edit">${editIcon}</button>` : ""}
+            ${canDelete ? `<button class="icon-btn danger" data-del="${c.id}" title="Delete">${trashIcon}</button>` : ""}
+            <button class="icon-btn" data-reply="${c.id}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
+          </div>` : `<div class="c-tools"><button class="icon-btn" data-reply="${c.id}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button></div>`;
+
         const isEditing = String(editingCommentId) === String(c.id);
         const isDeleting = String(deletingCommentId) === String(c.id);
 
@@ -1589,6 +1634,7 @@
             </div>
           </div>
         ` : `
+          ${c.reply_to_username ? `<div class="c-reply">Reply to @${escapeHtml(c.reply_to_username)}</div>` : ""}
           <div class="c-body">${safe(c.body)}</div>
         `;
 
@@ -1599,17 +1645,20 @@
             <button class="c-mini danger" data-del-ok="${c.id}">Delete</button>
           </div>
         ` : "";
-        
+
         return `
           <div class="c-item">
             <div class="avatar ${avIsEmoji ? "emoji" : ""}">${av}</div>
             <div class="c-bubble">
               <div class="c-top">
-                <div class="c-name">${safe(name)} ${verifiedBadgeHTML(c.verified===true)}</div>
+                <div class="c-name">${safe(name)} ${verifiedBadgeHTML(c.verified === true)}</div>
                 <div class="c-time">${safe(when)}</div>
                 ${tools}
               </div>
               ${bodyHtml}
+              <div class="c-meta">
+                <button class="c-like ${c.liked_by_me ? "on" : ""}" data-clike="${c.id}" data-liked="${c.liked_by_me ? "1":"0"}">${ICONS.like}<span>${c.like_count || 0}</span></button>
+              </div>
               ${deleteHtml}
             </div>
           </div>
@@ -1617,6 +1666,8 @@
       }).join("");
       bindVerifiedTooltip($cList);
 
+      $cList.querySelectorAll("[data-clike]").forEach(b=>{ b.onclick = async ()=>{ try{ const cid=b.dataset.clike; const likedNow=b.dataset.liked==="1"; await api(`${commentsApiBase()}/comment_${likedNow?"unlike":"like"}`, { method:"POST", body: JSON.stringify({ comment_id: cid }) }); await loadComments(); }catch(e){ toast(e.message); } }; });
+      $cList.querySelectorAll("[data-reply]").forEach(b=>{ b.onclick = ()=>{ replyingTo = { comment_id:b.dataset.reply, username:b.dataset.u || "user" }; updateReplyUI(); $cInput.focus(); }; });
       $cList.querySelectorAll("[data-edit]").forEach(b=>{
         b.onclick = () => { editingCommentId = b.dataset.edit; deletingCommentId = null; loadComments(); };
       });
@@ -1630,7 +1681,7 @@
           const text = (ta?.value || "").trim();
           if(!text) return toast("Empty");
           try{
-            await api("/api/feed/comment_edit", { method:"POST", body: JSON.stringify({ comment_id: id, body: text }) });
+            await api(`${commentsApiBase()}/comment_edit`, { method:"POST", body: JSON.stringify({ comment_id: id, body: text }) });
             editingCommentId = null; await loadComments(); toast("Updated");
           }catch(e){ toast(e.message); }
         };
@@ -1645,7 +1696,7 @@
         b.onclick = async () => {
           const id = b.dataset.delOk;
           try{
-            await api("/api/feed/comment_delete", { method:"POST", body: JSON.stringify({ comment_id: id }) });
+            await api(`${commentsApiBase()}/comment_delete`, { method:"POST", body: JSON.stringify({ comment_id: id }) });
             deletingCommentId = null; await loadComments(); toast("Deleted");
           }catch(e){ toast(e.message); }
         };
@@ -1686,23 +1737,32 @@
     }
   }
 
+
+  function reactionPayload(){
+    const t = resolveEntityType();
+    if(t === "collection") return { collection_id: current.id };
+    return { post_id: current.id };
+  }
+
   async function doLikeToggle(){
     if(!current) return; const token = await requireLoginOrWarn(); if(!token) return;
     try{
-      const path = liked ? "/api/feed/unlike" : "/api/feed/like";
-      const json = await api(path, { method:"POST", body: JSON.stringify({ post_id: current.id }) });
+      const base = resolveEntityType() === "collection" ? "/api/collections" : (resolveEntityType() === "post" ? "/api/posts" : "/api/feed");
+      const path = liked ? `${base}/unlike` : `${base}/like`;
+      const json = await api(path, { method:"POST", body: JSON.stringify(reactionPayload()) });
       if(json?.counts){ Object.assign(current, json.counts); setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); scheduleRerender(); } }
-      liked = path === "/api/feed/like"; setActionButtons();
+      liked = !liked; setActionButtons();
     }catch(e){ toast(e.message); }
   }
 
   async function doSaveToggle(){
     if(!current) return; const token = await requireLoginOrWarn(); if(!token) return;
     try{
-      const path = saved ? "/api/feed/unsave" : "/api/feed/save";
-      const json = await api(path, { method:"POST", body: JSON.stringify({ post_id: current.id }) });
+      const base = resolveEntityType() === "collection" ? "/api/collections" : (resolveEntityType() === "post" ? "/api/posts" : "/api/feed");
+      const path = saved ? `${base}/unsave` : `${base}/save`;
+      const json = await api(path, { method:"POST", body: JSON.stringify(reactionPayload()) });
       if(json?.counts){ Object.assign(current, json.counts); setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx] = Object.assign({}, items[idx], current); scheduleRerender(); } }
-      saved = path === "/api/feed/save"; setActionButtons();
+      saved = !saved; setActionButtons();
     }catch(e){ toast(e.message); }
   }
 
@@ -1710,8 +1770,9 @@
     if(!current) return; const token = await requireLoginOrWarn(); if(!token) return;
     const text = ($cInput.value || "").trim(); if(!text) return; $cSend.disabled = true;
     try{
-      const json = await api("/api/feed/comment", { method:"POST", body: JSON.stringify({ post_id: current.id, body: text }) });
-      $cInput.value = ""; if(json?.counts){ current.comment_count = json.counts.comment_count; setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx].comment_count = json.counts.comment_count; scheduleRerender(); } }
+      const payload = Object.assign({}, commentParentPayload(), { body: text, reply_to_comment_id: replyingTo?.comment_id || null });
+      const json = await api(`${commentsApiBase()}/comment`, { method:"POST", body: JSON.stringify(payload) });
+      $cInput.value = ""; replyingTo = null; updateReplyUI(); if(json?.counts){ current.comment_count = json.counts.comment_count; setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx].comment_count = json.counts.comment_count; scheduleRerender(); } }
       await loadComments(); toast("Sent");
     }catch(e){ toast(e.message); }finally{ $cSend.disabled = false; }
   }
@@ -1722,46 +1783,71 @@
   $btnLike.onclick = doLikeToggle;
   $btnSave.onclick = doSaveToggle;
   $cSend.onclick = sendComment;
-  $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); sendComment(); } });
-  $cEmoji.onclick = ()=>{ $cInput.value += "😊"; $cInput.focus(); };
+  $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendComment(); } });
   $btnReloadComments.onclick = loadComments;
-  $segMain.querySelectorAll("button").forEach(btn=>{
-    btn.onclick = async ()=>{
-      $segMain.querySelectorAll("button").forEach(b=> b.classList.remove("active"));
-      btn.classList.add("active");
-      mainTab = btn.dataset.main;
-      onlyVideo = false;
-      $btnVideoOnly.classList.remove("active");
-      setMainTabUI();
-      await updateAuthHint();
-      await fetchPage(true);
-    };
-  });
-  $segSaved.querySelectorAll("button").forEach(btn=>{
-    btn.onclick = async ()=>{
-      $segSaved.querySelectorAll("button").forEach(b=> b.classList.remove("active"));
-      btn.classList.add("active");
-      savedTab = btn.dataset.saved;
-      await fetchPage(true);
-    };
-  });
-  $segSort.querySelectorAll("button").forEach(btn=>{
-    btn.onclick = async ()=>{ $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active")); btn.classList.add("active"); sort = btn.dataset.sort; await fetchPage(true); };
-  });
   $btnVideoOnly.onclick = ()=>{ onlyVideo = !onlyVideo; $btnVideoOnly.classList.toggle("active", onlyVideo); renderGrid(); };
   $btnRefresh.onclick = ()=> fetchPage(true);
+  $cReplyCancel.onclick = ()=>{ replyingTo = null; updateReplyUI(); };
+
+  function openEmojiPicker(inputEl){
+    $emojiBackdrop.style.display = "flex";
+    $emojiBackdrop.dataset.input = inputEl.id;
+    renderEmojiGrid("");
+  }
+  function closeEmojiPicker(){ $emojiBackdrop.style.display = "none"; }
+  function renderEmojiGrid(q){
+    const term = String(q||"").toLowerCase();
+    const list = EMOJIS.filter((e)=> !term || e.includes(term));
+    $emojiGrid.innerHTML = list.map((e)=> `<button class="icon-btn" data-emoji="${e}" style="font-size:22px;width:40px;height:40px;">${e}</button>`).join("");
+    $emojiGrid.querySelectorAll("[data-emoji]").forEach(b=> b.onclick = ()=>{ const el=document.getElementById($emojiBackdrop.dataset.input || "c-input"); if(el){ el.value += b.dataset.emoji; el.focus(); } closeEmojiPicker(); });
+  }
+  $cEmoji.onclick = ()=> openEmojiPicker($cInput);
+  $emojiClose.onclick = closeEmojiPicker;
+  $emojiBackdrop.onclick = (e)=>{ if(e.target === $emojiBackdrop) closeEmojiPicker(); };
+  $emojiSearch.oninput = ()=> renderEmojiGrid($emojiSearch.value);
+
+  async function setTab(tab){
+    activeTab = tab;
+    sort = "trending";
+    $segSort.querySelectorAll("button").forEach((b,i)=> b.classList.toggle("active", i===0));
+    items = [];
+    offset = 0;
+    hasMore = true;
+    onlyVideo = false;
+    $btnVideoOnly.classList.remove("active");
+    $feedNav.querySelectorAll(".feed-nav-btn").forEach((b)=> b.classList.toggle("active", b.dataset.tab === tab));
+    const meta = TAB_META[tab];
+    $feedTitle.textContent = meta.title;
+    $feedSubtitle.textContent = meta.subtitle;
+    $segSaved.style.display = tab === "saved" ? "flex" : "none";
+    $segSort.style.display = tab === "saved" ? "none" : "flex";
+    $btnVideoOnly.style.display = tab === "feed" ? "inline-flex" : "none";
+    await fetchPage(true);
+  }
+
+  $segSaved.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = async ()=>{
+      $segSaved.querySelectorAll("button").forEach((b)=> b.classList.remove("active"));
+      btn.classList.add("active");
+      savedType = btn.dataset.saved;
+      await fetchPage(true);
+    };
+  });
+  $feedNav.querySelectorAll(".feed-nav-btn").forEach(btn=> btn.onclick = ()=> setTab(btn.dataset.tab));
+
   window.onscroll = ()=>{ if(hasMore && !loading && (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900)) fetchPage(false); };
 
   async function updateAuthHint(){ const token = await getSessionToken(); $authHint.style.display = token ? "none" : "inline"; }
   async function init(){
-    setMainTabUI();
+    renderSortSeg();
     await updateAuthHint();
     try{ if(window.sb){ window.sb.auth.onAuthStateChange(()=> { updateAuthHint(); loadFollowingSidebar(); }); } }catch(e){}
     myUserId = await getMyUserId();
     await refreshFollowingIds();
     await loadFollowingSidebar();
-    await fetchPage(true);
+    await setTab("feed");
   }
   init();
 })();
 </script>
+
