@@ -580,7 +580,7 @@
   .cc-pill svg{ width:14px; height:14px; fill: currentColor; }
 
   /* LIBRARY GRID (existing cards) */
-  .lf-grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; padding-top:18px; }
+  .lf-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; padding-top:18px; }
   .lf-card{
     background:var(--bg-card); border:1px solid var(--border); border-radius:18px;
     overflow:hidden; display:flex; flex-direction:column; height:340px;
@@ -674,21 +674,9 @@
   .c-time{ color: rgba(255,255,255,0.55); font-size:11px; margin-left:6px; }
   .c-body{ color:#fff; font-size:13px; line-height:1.35; white-space:pre-wrap; }
   .c-form{ display:flex; gap:8px; }
-  .c-reply{font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;}
-  .c-tools{display:flex;gap:6px;margin-left:auto;align-items:center;}
-  .c-meta{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.55);font-size:11px;margin-top:8px;}
-  .c-like{border:0;background:transparent;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:4px;cursor:pointer;padding:0;}
-  .c-like.on{color:#fff;}
-  .c-replybar{display:none;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.05);}
-  .c-emoji{border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#fff;border-radius:10px;padding:0 10px;cursor:pointer;}
-  .c-input{ flex:1; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:14px; color:#fff; padding: 10px 12px; font-family:"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  .c-input{ flex:1; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:14px; color:#fff; padding: 10px 12px; }
   .c-send{ width:46px; border:0; border-radius:14px; background:#fff; color:#000; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .c-send svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.6; }
-  .c-editbox textarea{ width:100%; min-height:70px; resize:none; border-radius:12px; padding:10px 12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; font-size:13px; outline:none; font-family:"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
-  .c-edit-actions{ display:flex; gap:8px; margin-top:10px; justify-content:flex-end; }
-  .c-mini{ padding:8px 10px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); color:#fff; cursor:pointer; font-weight:900; font-size:12px; }
-  .c-mini.primary{ background:#fff; color:#000; border:none; }
-  .c-mini.danger{ border-color: rgba(255,70,90,0.35); color:#ff98a2; }
 
   /* Collection modal */
   .col-backdrop{ position:fixed; inset:0; z-index:10500; background:rgba(0,0,0,0.86); backdrop-filter: blur(5px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:.18s; }
@@ -1047,7 +1035,6 @@
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
   @media(max-width: 980px){
-    .lf-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
     .feed{ width:min(720px,100%); margin:0; }
     .pslide img, .pslide video{ max-height:300px; }
     .lf-modal { flex-direction:column; height:92vh; }
@@ -1055,8 +1042,6 @@
     .m-preview { height:46vh; }
     .col-grid{ grid-template-columns: repeat(2, 1fr); }
   }
-  @media(max-width: 760px){ .lf-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
-  @media(max-width: 520px){ .lf-grid{ grid-template-columns:1fr; } }
 </style>
 
 <div id="lf-u">
@@ -1160,13 +1145,8 @@
             </button>
           </div>
           <div class="c-list" id="clist"></div>
-          <div class="c-replybar" id="c-replybar">
-            <span id="c-replytext"></span>
-            <button class="icon-btn" id="c-reply-cancel" title="Cancel reply">✕</button>
-          </div>
           <div class="c-form">
             <input class="c-input" id="cinput" placeholder="Write a comment…" />
-            <button class="c-emoji" id="c-emoji" type="button">Emoji</button>
             <button class="c-send" id="csend"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
           </div>
         </div>
@@ -1392,10 +1372,6 @@
   const $dlBtn = document.getElementById("dlBtn");
   const $clist = document.getElementById("clist");
   const $cinput = document.getElementById("cinput");
-  const $cEmoji = document.getElementById("c-emoji");
-  const $cReplybar = document.getElementById("c-replybar");
-  const $cReplytext = document.getElementById("c-replytext");
-  const $cReplyCancel = document.getElementById("c-reply-cancel");
   const $csend = document.getElementById("csend");
   const $reloadComments = document.getElementById("reloadComments");
   const $titleEditBtn = document.getElementById("title-edit-btn");
@@ -1498,9 +1474,6 @@
   let currentWork = null;
   let liked = false;
   let saved = false;
-  let workReplyingTo = null;
-  let workEditingCommentId = null;
-  let workDeletingCommentId = null;
 
   // Collection modal state
   let currentCol = null;
@@ -3044,10 +3017,6 @@
     $mp.innerHTML = "";
     $clist.innerHTML = "";
     $cinput.value = "";
-    workReplyingTo = null;
-    workEditingCommentId = null;
-    workDeletingCommentId = null;
-    updateWorkReplyUI();
     $titleEdit.style.display = "none";
     $titleEditBtn.style.display = "none";
   }
@@ -3101,74 +3070,24 @@
     if(tab === "library") renderLibrary();
   }
 
-  function updateWorkReplyUI(){
-    if(!workReplyingTo){
-      $cReplybar.style.display = "none";
-      return;
-    }
-    $cReplybar.style.display = "flex";
-    $cReplytext.textContent = `Reply to @${workReplyingTo.username || "user"}`;
-  }
-
   async function loadWorkComments(){
     if(!currentWork) return;
     $clist.innerHTML = `<div class="empty" style="padding:18px">Loading…</div>`;
     try{
       const j = await api(`/api/feed/comments?post_id=${encodeURIComponent(currentWork.id)}&limit=80&offset=0`, { method:"GET" });
       const arr = Array.isArray(j.items) ? j.items : [];
-      const myId = myUserId ? String(myUserId) : "";
-      const ownerId = String(currentWork.user_id || "");
       if(!arr.length){ $clist.innerHTML = `<div class="empty" style="padding:18px">No comments yet.</div>`; return; }
-
-      $clist.innerHTML = arr.map(c=>{
-        const avIsEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
-        const avHtml = avIsEmoji ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
-        const mine = myId && String(c.user_id) === myId;
-        const canDelete = mine || (myId && ownerId && ownerId === myId);
-        const isEditing = String(workEditingCommentId) === String(c.id);
-        const isDeleting = String(workDeletingCommentId) === String(c.id);
-        return `
-          <div class="c-item">
-            <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avHtml}</div>
-            <div class="c-bubble">
-              <div class="c-top">
-                <div class="c-name">${escapeHtml(c.display_name||c.username||"user")} ${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}</div>
-                <div class="c-time">${escapeHtml(fmtDate(c.created_at))}</div>
-                <div class="c-tools">
-                  ${mine ? `<button class="icon-btn" data-edit="${escapeHtml(c.id)}" title="Edit">${ICONS.edit}</button>` : ""}
-                  ${canDelete ? `<button class="icon-btn" data-del="${escapeHtml(c.id)}" title="Delete">${ICONS.trash}</button>` : ""}
-                  <button class="icon-btn" data-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
-                </div>
-              </div>
-              ${isEditing ? `
-                <div class="c-editbox">
-                  <textarea data-edit-ta="${escapeHtml(c.id)}">${escapeHtml(c.body||"")}</textarea>
-                  <div class="c-edit-actions">
-                    <button class="c-mini" data-emo-edit="${escapeHtml(c.id)}">Emoji</button>
-                    <button class="c-mini" data-edit-cancel="${escapeHtml(c.id)}">Cancel</button>
-                    <button class="c-mini primary" data-edit-save="${escapeHtml(c.id)}">Save</button>
-                  </div>
-                </div>` : `
-                ${c.reply_to_username ? `<div class="c-reply">Reply to @${escapeHtml(c.reply_to_username)}</div>` : ""}
-                <div class="c-body">${linkifyMentions(c.body||"")}</div>`}
-              <div class="c-meta">
-                <button class="c-like ${c.liked_by_me ? "on" : ""}" data-clike="${escapeHtml(c.id)}" data-liked="${c.liked_by_me ? "1" : "0"}">${ICONS.like}<span>${c.like_count||0}</span></button>
-              </div>
-              ${isDeleting ? `<div class="c-edit-actions"><span style="color:rgba(255,255,255,0.6);font-size:12px;margin-right:auto;">Delete this comment?</span><button class="c-mini" data-del-cancel="${escapeHtml(c.id)}">Cancel</button><button class="c-mini danger" data-del-ok="${escapeHtml(c.id)}">Delete</button></div>` : ""}
-            </div>
-          </div>`;
-      }).join("");
-
-      bindVerifiedTooltip($clist);
-      $clist.querySelectorAll("[data-clike]").forEach(b=> b.onclick = async ()=>{ try{ await requireToken(); const cid=b.dataset.clike; const likedNow=b.dataset.liked==="1"; await api(`/api/feed/comment_${likedNow?"unlike":"like"}`, { method:"POST", body: JSON.stringify({ comment_id: cid }) }); await loadWorkComments(); }catch(e){ toast(e.message||"Failed"); } });
-      $clist.querySelectorAll("[data-reply]").forEach(b=> b.onclick = ()=>{ workReplyingTo = { comment_id:b.dataset.reply, username:b.dataset.u || "user" }; updateWorkReplyUI(); $cinput.value = ($cinput.value||"") + `@${workReplyingTo.username} `; $cinput.focus(); });
-      $clist.querySelectorAll("[data-edit]").forEach(b=> b.onclick = ()=>{ workEditingCommentId = b.dataset.edit; workDeletingCommentId = null; loadWorkComments(); });
-      $clist.querySelectorAll("[data-edit-cancel]").forEach(b=> b.onclick = ()=>{ workEditingCommentId = null; loadWorkComments(); });
-      $clist.querySelectorAll("[data-edit-save]").forEach(b=> b.onclick = async ()=>{ const id=b.dataset.editSave; const ta=$clist.querySelector(`[data-edit-ta="${CSS.escape(id)}"]`); const text=(ta?.value||"").trim(); if(!text) return toast("Empty"); try{ await requireToken(); await api("/api/feed/comment_edit", { method:"POST", body: JSON.stringify({ comment_id:id, body:text }) }); workEditingCommentId = null; await loadWorkComments(); toast("Updated"); }catch(e){ toast(e.message||"Failed"); } });
-      $clist.querySelectorAll("[data-emo-edit]").forEach(b=> b.onclick = ()=>{ const id=b.dataset.emoEdit; const ta=$clist.querySelector(`[data-edit-ta="${CSS.escape(id)}"]`); if(ta) openEmojiPicker(ta); });
-      $clist.querySelectorAll("[data-del]").forEach(b=> b.onclick = ()=>{ workDeletingCommentId = b.dataset.del; workEditingCommentId = null; loadWorkComments(); });
-      $clist.querySelectorAll("[data-del-cancel]").forEach(b=> b.onclick = ()=>{ workDeletingCommentId = null; loadWorkComments(); });
-      $clist.querySelectorAll("[data-del-ok]").forEach(b=> b.onclick = async ()=>{ const id=b.dataset.delOk; try{ await requireToken(); await api("/api/feed/comment_delete", { method:"POST", body: JSON.stringify({ comment_id:id }) }); workDeletingCommentId = null; await loadWorkComments(); if(currentWork){ currentWork.comment_count = Math.max((currentWork.comment_count||0)-1,0); setWorkModalStats(currentWork); } toast("Deleted"); }catch(e){ toast(e.message||"Failed"); } });
+      $clist.innerHTML = arr.map(c=>`
+        <div class="c-item">
+          <div class="avatar ${((c.avatar_type === "emoji" && c.avatar_emoji) ? "emoji" : "")}">
+            ${(c.avatar_type === "emoji" && c.avatar_emoji) ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "")}
+          </div>
+          <div class="c-bubble">
+            <div class="c-top"><div class="c-name">${escapeHtml(c.display_name||c.username||"user")}</div><div class="c-time">${escapeHtml(fmtDate(c.created_at))}</div></div>
+            <div class="c-body">${escapeHtml(c.body)}</div>
+          </div>
+        </div>
+      `).join("");
       $clist.scrollTop = $clist.scrollHeight;
     }catch(e){
       $clist.innerHTML = `<div class="empty" style="padding:18px;color:#ff98a2">Error: ${escapeHtml(e.message)}</div>`;
@@ -3218,14 +3137,8 @@
     if(!text) return;
     $csend.disabled = true;
     try{
-      const j = await api("/api/feed/comment", { method:"POST", body: JSON.stringify({ post_id: currentWork.id, body: text, reply_to_comment_id: workReplyingTo?.comment_id || null }) });
+      await api("/api/feed/comment", { method:"POST", body: JSON.stringify({ post_id: currentWork.id, body: text }) });
       $cinput.value = "";
-      workReplyingTo = null;
-      updateWorkReplyUI();
-      if(j?.counts){
-        currentWork.comment_count = j.counts.comment_count;
-        setWorkModalStats(currentWork);
-      }
       await loadWorkComments();
     } finally {
       $csend.disabled = false;
@@ -3463,9 +3376,6 @@
   $saveBtn.onclick = () => toggleWorkSave().catch(e=>toast(e.message||"Failed"));
   $reloadComments.onclick = loadWorkComments;
   $csend.onclick = sendWorkComment;
-  $cinput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendWorkComment().catch(err=>toast(err.message||"Failed")); } });
-  $cEmoji.onclick = ()=> openEmojiPicker($cinput);
-  $cReplyCancel.onclick = ()=>{ workReplyingTo = null; updateWorkReplyUI(); };
   $titleEditBtn.onclick = startTitleEdit;
   $titleCancel.onclick = () => { $titleEdit.style.display = "none"; };
   $titleSave.onclick = async () => { try{ await saveTitle(); }catch(e){ toast(e.message || "Save failed"); } };
