@@ -132,7 +132,7 @@
   /* Grid */
   .lf-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    grid-template-columns:repeat(4,minmax(0,1fr));
     gap:16px;
     padding-bottom: 60px;
   }
@@ -536,6 +536,7 @@
     padding: 10px 12px;
     color:#fff;
     font-size:13px;
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   }
   .c-send{
     width: 48px;
@@ -571,6 +572,7 @@
     color:#fff;
     font-size:13px;
     outline:none;
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   }
   .c-edit-actions{ display:flex; gap:8px; margin-top:10px; justify-content:flex-end; }
   .c-mini{
@@ -644,6 +646,7 @@
   }
 
   @media(max-width: 980px){
+    .lf-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
     .feed-layout{ grid-template-columns:1fr; }
     .feed-nav{ position:relative; top:0; flex-direction:row; overflow:auto; }
     .feed-right{ position:relative; top:0; height:auto; }
@@ -651,6 +654,8 @@
     .m-sidebar { width: 100%; height: 46vh; border-left: none; border-top: 1px solid var(--border); }
     .m-preview { height: 46vh; }
   }
+  @media(max-width: 760px){ .lf-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width: 520px){ .lf-grid{ grid-template-columns:1fr; } }
 </style>
 
 <div id="lf-feed">
