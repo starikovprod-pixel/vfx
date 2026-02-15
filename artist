@@ -1349,6 +1349,7 @@
 
 </div>
 
+<script src="/comment-thread"></script>
 <script>
 (() => {
   const BACKEND = "https://api.lightfull.ai";
@@ -1498,9 +1499,7 @@
   let currentWork = null;
   let liked = false;
   let saved = false;
-  let workReplyingTo = null;
-  let workEditingCommentId = null;
-  let workDeletingCommentId = null;
+  let workCommentThread = null;
 
   // Collection modal state
   let currentCol = null;
@@ -3035,7 +3034,7 @@
       });
     }catch(e){}
 
-    await loadWorkComments();
+    await mountWorkCommentThread();
   }
 
   function closeWorkModal(){
@@ -3044,10 +3043,8 @@
     $mp.innerHTML = "";
     $clist.innerHTML = "";
     $cinput.value = "";
-    workReplyingTo = null;
-    workEditingCommentId = null;
-    workDeletingCommentId = null;
-    updateWorkReplyUI();
+    if(workCommentThread?.cleanup) workCommentThread.cleanup();
+    workCommentThread = null;
     $titleEdit.style.display = "none";
     $titleEditBtn.style.display = "none";
   }
@@ -3101,79 +3098,40 @@
     if(tab === "library") renderLibrary();
   }
 
-  function updateWorkReplyUI(){
-    if(!workReplyingTo){
-      $cReplybar.style.display = "none";
-      return;
-    }
-    $cReplybar.style.display = "flex";
-    $cReplytext.textContent = `Reply to @${workReplyingTo.username || "user"}`;
-  }
-
-  async function loadWorkComments(){
+  async function mountWorkCommentThread(){
     if(!currentWork) return;
-    $clist.innerHTML = `<div class="empty" style="padding:18px">Loading…</div>`;
-    try{
-      const j = await api(`/api/feed/comments?post_id=${encodeURIComponent(currentWork.id)}&limit=80&offset=0`, { method:"GET" });
-      const arr = Array.isArray(j.items) ? j.items : [];
-      const myId = myUserId ? String(myUserId) : "";
-      const ownerId = String(currentWork.user_id || "");
-      if(!arr.length){ $clist.innerHTML = `<div class="empty" style="padding:18px">No comments yet.</div>`; return; }
-
-      $clist.innerHTML = arr.map(c=>{
-        const avIsEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
-        const avHtml = avIsEmoji ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
-        const mine = myId && String(c.user_id) === myId;
-        const canDelete = mine || (myId && ownerId && ownerId === myId);
-        const isEditing = String(workEditingCommentId) === String(c.id);
-        const isDeleting = String(workDeletingCommentId) === String(c.id);
-        return `
-          <div class="c-item">
-            <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avHtml}</div>
-            <div class="c-bubble">
-              <div class="c-top">
-                <div class="c-name">${escapeHtml(c.display_name||c.username||"user")} ${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}</div>
-                <div class="c-time">${escapeHtml(fmtDate(c.created_at))}</div>
-                <div class="c-tools">
-                  ${mine ? `<button class="icon-btn" data-edit="${escapeHtml(c.id)}" title="Edit">${ICONS.edit}</button>` : ""}
-                  ${canDelete ? `<button class="icon-btn" data-del="${escapeHtml(c.id)}" title="Delete">${ICONS.trash}</button>` : ""}
-                  <button class="icon-btn" data-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
-                </div>
-              </div>
-              ${isEditing ? `
-                <div class="c-editbox">
-                  <textarea data-edit-ta="${escapeHtml(c.id)}">${escapeHtml(c.body||"")}</textarea>
-                  <div class="c-edit-actions">
-                    <button class="c-mini" data-emo-edit="${escapeHtml(c.id)}">Emoji</button>
-                    <button class="c-mini" data-edit-cancel="${escapeHtml(c.id)}">Cancel</button>
-                    <button class="c-mini primary" data-edit-save="${escapeHtml(c.id)}">Save</button>
-                  </div>
-                </div>` : `
-                ${c.reply_to_username ? `<div class="c-reply">Reply to @${escapeHtml(c.reply_to_username)}</div>` : ""}
-                <div class="c-body">${linkifyMentions(c.body||"")}</div>`}
-              <div class="c-meta">
-                <button class="c-like ${c.liked_by_me ? "on" : ""}" data-clike="${escapeHtml(c.id)}" data-liked="${c.liked_by_me ? "1" : "0"}">${ICONS.like}<span>${c.like_count||0}</span></button>
-              </div>
-              ${isDeleting ? `<div class="c-edit-actions"><span style="color:rgba(255,255,255,0.6);font-size:12px;margin-right:auto;">Delete this comment?</span><button class="c-mini" data-del-cancel="${escapeHtml(c.id)}">Cancel</button><button class="c-mini danger" data-del-ok="${escapeHtml(c.id)}">Delete</button></div>` : ""}
-            </div>
-          </div>`;
-      }).join("");
-
-      bindVerifiedTooltip($clist);
-      $clist.querySelectorAll("[data-clike]").forEach(b=> b.onclick = async ()=>{ try{ await requireToken(); const cid=b.dataset.clike; const likedNow=b.dataset.liked==="1"; await api(`/api/feed/comment_${likedNow?"unlike":"like"}`, { method:"POST", body: JSON.stringify({ comment_id: cid }) }); await loadWorkComments(); }catch(e){ toast(e.message||"Failed"); } });
-      $clist.querySelectorAll("[data-reply]").forEach(b=> b.onclick = ()=>{ workReplyingTo = { comment_id:b.dataset.reply, username:b.dataset.u || "user" }; updateWorkReplyUI(); $cinput.value = ($cinput.value||"") + `@${workReplyingTo.username} `; $cinput.focus(); });
-      $clist.querySelectorAll("[data-edit]").forEach(b=> b.onclick = ()=>{ workEditingCommentId = b.dataset.edit; workDeletingCommentId = null; loadWorkComments(); });
-      $clist.querySelectorAll("[data-edit-cancel]").forEach(b=> b.onclick = ()=>{ workEditingCommentId = null; loadWorkComments(); });
-      $clist.querySelectorAll("[data-edit-save]").forEach(b=> b.onclick = async ()=>{ const id=b.dataset.editSave; const ta=$clist.querySelector(`[data-edit-ta="${CSS.escape(id)}"]`); const text=(ta?.value||"").trim(); if(!text) return toast("Empty"); try{ await requireToken(); await api("/api/feed/comment_edit", { method:"POST", body: JSON.stringify({ comment_id:id, body:text }) }); workEditingCommentId = null; await loadWorkComments(); toast("Updated"); }catch(e){ toast(e.message||"Failed"); } });
-      $clist.querySelectorAll("[data-emo-edit]").forEach(b=> b.onclick = ()=>{ const id=b.dataset.emoEdit; const ta=$clist.querySelector(`[data-edit-ta="${CSS.escape(id)}"]`); if(ta) openEmojiPicker(ta); });
-      $clist.querySelectorAll("[data-del]").forEach(b=> b.onclick = ()=>{ workDeletingCommentId = b.dataset.del; workEditingCommentId = null; loadWorkComments(); });
-      $clist.querySelectorAll("[data-del-cancel]").forEach(b=> b.onclick = ()=>{ workDeletingCommentId = null; loadWorkComments(); });
-      $clist.querySelectorAll("[data-del-ok]").forEach(b=> b.onclick = async ()=>{ const id=b.dataset.delOk; try{ await requireToken(); await api("/api/feed/comment_delete", { method:"POST", body: JSON.stringify({ comment_id:id }) }); workDeletingCommentId = null; await loadWorkComments(); if(currentWork){ currentWork.comment_count = Math.max((currentWork.comment_count||0)-1,0); setWorkModalStats(currentWork); } toast("Deleted"); }catch(e){ toast(e.message||"Failed"); } });
-      $clist.scrollTop = $clist.scrollHeight;
-    }catch(e){
-      $clist.innerHTML = `<div class="empty" style="padding:18px;color:#ff98a2">Error: ${escapeHtml(e.message)}</div>`;
-    }
+    if(workCommentThread?.cleanup) workCommentThread.cleanup();
+    workCommentThread = await window.CommentThreadMount({
+      hostListEl: $clist,
+      inputEl: $cinput,
+      sendBtnEl: $csend,
+      emojiBtnEl: $cEmoji,
+      replyBarEl: $cReplybar,
+      replyTextEl: $cReplytext,
+      replyCancelEl: $cReplyCancel,
+      reloadBtnEl: $reloadComments,
+      entityType: "feed",
+      parentId: currentWork.id,
+      ownerUserId: currentWork.user_id,
+      api,
+      requireLogin: requireToken,
+      getMyUserId,
+      verifiedBadgeHTML,
+      bindVerifiedTooltip,
+      escapeHtml,
+      safeHtml: escapeHtml,
+      icons: ICONS,
+      openEmojiPicker,
+      toast,
+      onCountUpdate: (_delta, count)=>{
+        if(!currentWork) return;
+        if(typeof count === "number") currentWork.comment_count = count;
+        else currentWork.comment_count = Math.max((currentWork.comment_count||0)-1,0);
+        setWorkModalStats(currentWork);
+      }
+    });
   }
+
 
   async function toggleWorkLike(){
     if(!currentWork) return;
@@ -3209,27 +3167,6 @@
     }
     saved = !saved;
     setWorkActionButtons();
-  }
-
-  async function sendWorkComment(){
-    if(!currentWork) return;
-    await requireToken();
-    const text = ($cinput.value||"").trim();
-    if(!text) return;
-    $csend.disabled = true;
-    try{
-      const j = await api("/api/feed/comment", { method:"POST", body: JSON.stringify({ post_id: currentWork.id, body: text, reply_to_comment_id: workReplyingTo?.comment_id || null }) });
-      $cinput.value = "";
-      workReplyingTo = null;
-      updateWorkReplyUI();
-      if(j?.counts){
-        currentWork.comment_count = j.counts.comment_count;
-        setWorkModalStats(currentWork);
-      }
-      await loadWorkComments();
-    } finally {
-      $csend.disabled = false;
-    }
   }
 
   // -------- Sheets: Post ----------
@@ -3461,11 +3398,6 @@
   $mb.onclick = (e) => { if(e.target === $mb) closeWorkModal(); };
   $likeBtn.onclick = () => toggleWorkLike().catch(e=>toast(e.message||"Failed"));
   $saveBtn.onclick = () => toggleWorkSave().catch(e=>toast(e.message||"Failed"));
-  $reloadComments.onclick = loadWorkComments;
-  $csend.onclick = sendWorkComment;
-  $cinput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendWorkComment().catch(err=>toast(err.message||"Failed")); } });
-  $cEmoji.onclick = ()=> openEmojiPicker($cinput);
-  $cReplyCancel.onclick = ()=>{ workReplyingTo = null; updateWorkReplyUI(); };
   $titleEditBtn.onclick = startTitleEdit;
   $titleCancel.onclick = () => { $titleEdit.style.display = "none"; };
   $titleSave.onclick = async () => { try{ await saveTitle(); }catch(e){ toast(e.message || "Save failed"); } };

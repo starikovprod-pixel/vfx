@@ -29,7 +29,7 @@
 
   #lf-main{
     padding:26px 18px 40px;
-    max-width:1400px;
+    max-width:1720px;
     margin:0 auto;
   }
 
@@ -137,7 +137,7 @@
     padding-bottom: 60px;
   }
 
-  .feed-layout{ display:grid; grid-template-columns: 200px minmax(0,1fr) 320px; gap:16px; }
+  .feed-layout{ display:grid; grid-template-columns: 220px minmax(980px,1fr) 320px; gap:16px; }
   .feed-nav{ background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:10px; display:flex; flex-direction:column; gap:8px; height:fit-content; position:sticky; top:18px; }
   .feed-nav-btn{ border:1px solid transparent; background:transparent; color:rgba(255,255,255,0.75); border-radius:12px; padding:12px 10px; text-align:left; font-weight:800; cursor:pointer; }
   .feed-nav-btn:hover{ background:rgba(255,255,255,0.06); color:#fff; }
@@ -164,7 +164,8 @@
     overflow:hidden;
     display:flex;
     flex-direction:column;
-    height: 340px;
+    height:auto;
+    aspect-ratio: 1 / 1;
     cursor: pointer;
     transition: transform 0.2s ease, border-color 0.2s ease;
     position: relative;
@@ -773,6 +774,7 @@
   <div class="vfy-tip" id="vfyTip">Verified — awarded at 100 followers. Helps ranking in Feed.</div>
 </div>
 
+<script src="/comment-thread"></script>
 <script>
 (() => {
   const BACKEND = "https://api.lightfull.ai"; 
@@ -815,9 +817,7 @@
   let current = null;
   let liked = false;
   let saved = false;
-  let editingCommentId = null;
-  let deletingCommentId = null;
-  let replyingTo = null;
+  let commentThread = null;
   let followState = false;
   let myUserId = null;
   let followingIds = new Set();
@@ -1325,8 +1325,8 @@
   }
 
   function endpointForList(){
-    if(activeTab === "posts") return "/api/posts/feed_list";
-    if(activeTab === "collections") return "/api/collections/feed_list";
+    if(activeTab === "posts") return "/api/posts/list_feed";
+    if(activeTab === "collections") return "/api/collections/list_feed";
     if(activeTab === "saved") return "/api/saved/list";
     return "/api/feed/list";
   }
@@ -1336,6 +1336,7 @@
     loading = true;
     showLoader(true);
 
+    let usedPath = "";
     try{
       if(reset){
         offset = 0;
@@ -1353,10 +1354,12 @@
       let json;
       if(activeTab === "saved"){
         const q = `?type=${encodeURIComponent(savedType)}&limit=${PAGE_SIZE}&offset=${offset}`;
-        json = await api(`${endpointForList()}${q}`, { method:"GET" });
+        usedPath = `${endpointForList()}${q}`;
+        json = await api(usedPath, { method:"GET" });
       }else{
         const q = `?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`;
-        json = await api(`${endpointForList()}${q}`, { method:"GET" });
+        usedPath = `${endpointForList()}${q}`;
+        json = await api(usedPath, { method:"GET" });
       }
 
       let page = Array.isArray(json.items) ? json.items : [];
@@ -1376,7 +1379,8 @@
 
       renderGrid();
     }catch(e){
-      $grid.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`;
+      console.error("FETCH FAIL", { tab:activeTab, url:(BACKEND + (usedPath || endpointForList())), err:e });
+      $grid.innerHTML = `<div class="lf-empty" style="color:var(--danger)">Failed to fetch: ${escapeHtml(String(e.message||e))}<br><small>${escapeHtml(usedPath || endpointForList())}</small></div>`;
       hasMore = false;
     }finally{
       loading = false;
@@ -1537,7 +1541,7 @@
       }
     }catch(e){}
 
-    await loadComments();
+    await mountCommentThread();
   }
 
   function closeModal(){
@@ -1546,6 +1550,8 @@
     $mView.innerHTML = "";
     $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">Loading…</div>`;
     $cInput.value = "";
+    if(commentThread?.cleanup) commentThread.cleanup();
+    commentThread = null;
   }
 
   async function requireLoginOrWarn(){
@@ -1564,145 +1570,39 @@
     return "feed";
   }
 
-  function commentsApiBase(){
-    const t = resolveEntityType();
-    if(t === "post") return "/api/posts";
-    if(t === "collection") return "/api/collections";
-    return "/api/feed";
-  }
-
-  function commentParentPayload(){
-    const t = resolveEntityType();
-    if(t === "collection") return { collection_id: current.id };
-    return { post_id: current.id };
-  }
-
-  function updateReplyUI(){
-    if(!replyingTo){
-      $cReplybar.style.display = "none";
-      return;
-    }
-    $cReplybar.style.display = "flex";
-    $cReplytext.textContent = `Reply to @${replyingTo.username || "user"}`;
-  }
-
-  async function loadComments(){
-    if(!current) return;
-    $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">Loading…</div>`;
-    try{
-      const base = commentsApiBase();
-      const parent = commentParentPayload();
-      const key = Object.keys(parent)[0];
-      const json = await api(`${base}/comments?${key}=${encodeURIComponent(parent[key])}&limit=80&offset=0`, { method:"GET" });
-      const arr = Array.isArray(json.items) ? json.items : [];
-      const myId = await getMyUserId();
-      const ownerId = String(current.user_id || "");
-
-      const editIcon = `<svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
-      const trashIcon = `<svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
-
-      if(arr.length === 0){
-        $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">No comments yet.</div>`;
-        return;
+  async function mountCommentThread(){
+    if(commentThread?.cleanup) commentThread.cleanup();
+    commentThread = await window.CommentThreadMount({
+      hostListEl: $cList,
+      inputEl: $cInput,
+      sendBtnEl: $cSend,
+      emojiBtnEl: $cEmoji,
+      replyBarEl: $cReplybar,
+      replyTextEl: $cReplytext,
+      replyCancelEl: $cReplyCancel,
+      reloadBtnEl: $btnReloadComments,
+      entityType: resolveEntityType(),
+      parentId: current.id,
+      ownerUserId: current.user_id,
+      api,
+      requireLogin: requireLoginOrWarn,
+      getMyUserId,
+      verifiedBadgeHTML,
+      bindVerifiedTooltip,
+      escapeHtml,
+      safeHtml: safe,
+      icons: ICONS,
+      openEmojiPicker,
+      toast,
+      onCountUpdate: (_delta, count)=>{
+        if(typeof count === "number"){
+          current.comment_count = count;
+          setStatsUI(current);
+          const idx = items.findIndex(x=> String(x.id)===String(current.id));
+          if(idx>=0){ items[idx].comment_count = count; scheduleRerender(); }
+        }
       }
-      $cList.innerHTML = arr.map(c=>{
-        const avIsEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
-        const av = avIsEmoji
-          ? `<span>${escapeHtml(c.avatar_emoji)}</span>`
-          : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
-        const name = c.display_name || c.username || "user";
-        const when = (c.created_at || "").replace("T"," ").slice(0,16);
-        const mine = myId && String(c.user_id) === String(myId);
-        const canDelete = mine || (myId && ownerId && String(ownerId) === String(myId));
-
-        const tools = (mine || canDelete) ? `
-          <div class="c-tools">
-            ${mine ? `<button class="icon-btn" data-edit="${c.id}" title="Edit">${editIcon}</button>` : ""}
-            ${canDelete ? `<button class="icon-btn danger" data-del="${c.id}" title="Delete">${trashIcon}</button>` : ""}
-            <button class="icon-btn" data-reply="${c.id}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
-          </div>` : `<div class="c-tools"><button class="icon-btn" data-reply="${c.id}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button></div>`;
-
-        const isEditing = String(editingCommentId) === String(c.id);
-        const isDeleting = String(deletingCommentId) === String(c.id);
-
-        const bodyHtml = isEditing ? `
-          <div class="c-editbox">
-            <textarea data-edit-ta="${c.id}">${safe(c.body)}</textarea>
-            <div class="c-edit-actions">
-              <button class="c-mini" data-edit-cancel="${c.id}">Cancel</button>
-              <button class="c-mini primary" data-edit-save="${c.id}">Save</button>
-            </div>
-          </div>
-        ` : `
-          ${c.reply_to_username ? `<div class="c-reply">Reply to @${escapeHtml(c.reply_to_username)}</div>` : ""}
-          <div class="c-body">${safe(c.body)}</div>
-        `;
-
-        const deleteHtml = isDeleting ? `
-          <div class="c-edit-actions" style="margin-top:10px; justify-content:flex-end;">
-            <span style="color:rgba(255,255,255,0.6); font-size:12px; margin-right:auto;">Delete this comment?</span>
-            <button class="c-mini" data-del-cancel="${c.id}">Cancel</button>
-            <button class="c-mini danger" data-del-ok="${c.id}">Delete</button>
-          </div>
-        ` : "";
-
-        return `
-          <div class="c-item">
-            <div class="avatar ${avIsEmoji ? "emoji" : ""}">${av}</div>
-            <div class="c-bubble">
-              <div class="c-top">
-                <div class="c-name">${safe(name)} ${verifiedBadgeHTML(c.verified === true)}</div>
-                <div class="c-time">${safe(when)}</div>
-                ${tools}
-              </div>
-              ${bodyHtml}
-              <div class="c-meta">
-                <button class="c-like ${c.liked_by_me ? "on" : ""}" data-clike="${c.id}" data-liked="${c.liked_by_me ? "1":"0"}">${ICONS.like}<span>${c.like_count || 0}</span></button>
-              </div>
-              ${deleteHtml}
-            </div>
-          </div>
-        `;
-      }).join("");
-      bindVerifiedTooltip($cList);
-
-      $cList.querySelectorAll("[data-clike]").forEach(b=>{ b.onclick = async ()=>{ try{ const cid=b.dataset.clike; const likedNow=b.dataset.liked==="1"; await api(`${commentsApiBase()}/comment_${likedNow?"unlike":"like"}`, { method:"POST", body: JSON.stringify({ comment_id: cid }) }); await loadComments(); }catch(e){ toast(e.message); } }; });
-      $cList.querySelectorAll("[data-reply]").forEach(b=>{ b.onclick = ()=>{ replyingTo = { comment_id:b.dataset.reply, username:b.dataset.u || "user" }; updateReplyUI(); $cInput.focus(); }; });
-      $cList.querySelectorAll("[data-edit]").forEach(b=>{
-        b.onclick = () => { editingCommentId = b.dataset.edit; deletingCommentId = null; loadComments(); };
-      });
-      $cList.querySelectorAll("[data-edit-cancel]").forEach(b=>{
-        b.onclick = () => { editingCommentId = null; loadComments(); };
-      });
-      $cList.querySelectorAll("[data-edit-save]").forEach(b=>{
-        b.onclick = async () => {
-          const id = b.dataset.editSave;
-          const ta = $cList.querySelector(`[data-edit-ta="${id}"]`);
-          const text = (ta?.value || "").trim();
-          if(!text) return toast("Empty");
-          try{
-            await api(`${commentsApiBase()}/comment_edit`, { method:"POST", body: JSON.stringify({ comment_id: id, body: text }) });
-            editingCommentId = null; await loadComments(); toast("Updated");
-          }catch(e){ toast(e.message); }
-        };
-      });
-      $cList.querySelectorAll("[data-del]").forEach(b=>{
-        b.onclick = () => { deletingCommentId = b.dataset.del; editingCommentId = null; loadComments(); };
-      });
-      $cList.querySelectorAll("[data-del-cancel]").forEach(b=>{
-        b.onclick = () => { deletingCommentId = null; loadComments(); };
-      });
-      $cList.querySelectorAll("[data-del-ok]").forEach(b=>{
-        b.onclick = async () => {
-          const id = b.dataset.delOk;
-          try{
-            await api(`${commentsApiBase()}/comment_delete`, { method:"POST", body: JSON.stringify({ comment_id: id }) });
-            deletingCommentId = null; await loadComments(); toast("Deleted");
-          }catch(e){ toast(e.message); }
-        };
-      });
-      $cList.scrollTop = $cList.scrollHeight;
-    }catch(e){ $cList.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`; }
+    });
   }
 
   async function doFollowToggle(){
@@ -1766,28 +1666,13 @@
     }catch(e){ toast(e.message); }
   }
 
-  async function sendComment(){
-    if(!current) return; const token = await requireLoginOrWarn(); if(!token) return;
-    const text = ($cInput.value || "").trim(); if(!text) return; $cSend.disabled = true;
-    try{
-      const payload = Object.assign({}, commentParentPayload(), { body: text, reply_to_comment_id: replyingTo?.comment_id || null });
-      const json = await api(`${commentsApiBase()}/comment`, { method:"POST", body: JSON.stringify(payload) });
-      $cInput.value = ""; replyingTo = null; updateReplyUI(); if(json?.counts){ current.comment_count = json.counts.comment_count; setStatsUI(current); const idx = items.findIndex(x=> String(x.id)===String(current.id)); if(idx>=0){ items[idx].comment_count = json.counts.comment_count; scheduleRerender(); } }
-      await loadComments(); toast("Sent");
-    }catch(e){ toast(e.message); }finally{ $cSend.disabled = false; }
-  }
-
   $modalClose.onclick = closeModal;
   $modal.onclick = (e)=>{ if(e.target === $modal) closeModal(); };
   $btnFollow.onclick = doFollowToggle;
   $btnLike.onclick = doLikeToggle;
   $btnSave.onclick = doSaveToggle;
-  $cSend.onclick = sendComment;
-  $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendComment(); } });
-  $btnReloadComments.onclick = loadComments;
   $btnVideoOnly.onclick = ()=>{ onlyVideo = !onlyVideo; $btnVideoOnly.classList.toggle("active", onlyVideo); renderGrid(); };
   $btnRefresh.onclick = ()=> fetchPage(true);
-  $cReplyCancel.onclick = ()=>{ replyingTo = null; updateReplyUI(); };
 
   function openEmojiPicker(inputEl){
     $emojiBackdrop.style.display = "flex";
