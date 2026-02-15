@@ -469,13 +469,8 @@
 
     <div class="lf-top">
       <div>
-        <h1 class="lf-h1">Saved Videos</h1>
+        <h1 class="lf-h1">Videos</h1>
         <div class="lf-sub">
-          <div class="seg" id="seg-sort">
-            <button class="active" data-sort="trending">Trending</button>
-            <button data-sort="new">New</button>
-            <button data-sort="following">Following</button>
-          </div>
           <button class="tab-btn" id="btn-video-only" type="button" style="display:none;">Video only</button>
           <span id="auth-hint" style="color:rgba(255,255,255,0.55)">Login to like / save / comment.</span>
         </div>
@@ -491,10 +486,10 @@
 
 
         <div class="seg" id="seg-saved" style="display:flex;">
-          <a href="https://lightfull.ai/saved_images">Saved Images</a>
-          <a class="active" href="https://lightfull.ai/saved_videos">Saved Videos</a>
-          <a href="https://lightfull.ai/saved_posts">Saved Posts</a>
-          <a href="https://lightfull.ai/saved_collections">Saved Collections</a>
+          <a href="https://lightfull.ai/saved_images">Images</a>
+          <a class="active" href="https://lightfull.ai/saved_videos">Videos</a>
+          <a href="https://lightfull.ai/saved_posts">Posts</a>
+          <a href="https://lightfull.ai/saved_collections">Collections</a>
         </div>
 
 
