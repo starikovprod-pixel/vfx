@@ -1608,17 +1608,10 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
       .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
-  function linkifyMentions(text, post_id, reply_to_comment_id, reply_to_username){
+  function linkifyMentions(text, post_id){
     const safeTxt = escapeHtml(text);
-    const rtUser = String(reply_to_username || "").trim().toLowerCase();
-    const rtId = String(reply_to_comment_id || "").trim();
-
     return safeTxt.replace(/(^|\s)@([a-zA-Z0-9_\.]{2,32})/g, (m, p1, u)=> {
-      const uLow = String(u||"").toLowerCase();
-      const jumpAttr = (rtId && rtUser && uLow === rtUser)
-        ? ` data-jump="${escapeHtml(rtId)}"`
-        : "";
-      return `${p1}<button type="button" class="pc-mention" data-mention="${escapeHtml(u)}" data-post="${escapeHtml(post_id||"")}"${jumpAttr}>@${u}</button>`;
+      return `${p1}<button type="button" class="pc-mention" data-mention="${escapeHtml(u)}" data-post="${escapeHtml(post_id||"")}">@${u}</button>`;
     });
   }
   function toast(msg){
@@ -2272,9 +2265,7 @@
                   </button>
                 </div>
               ` : ``}
-              <div class="pc-body" data-body="${c.id}">
-                ${linkifyMentions(c.body||"", post_id, c.reply_to_comment_id, c.reply_to_username)}
-              </div>
+              <div class="pc-body" data-body="${c.id}">${linkifyMentions(c.body||"", post_id)}</div>
               <div class="pc-edit" data-editbox="${c.id}" style="display:none; margin-top:10px;">
                 <textarea class="pc-edit-ta" data-ta="${c.id}"></textarea>
                 <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:8px;">
@@ -2299,30 +2290,35 @@
 
       bindVerifiedTooltip(listEl);
 
-      function jumpToComment(id){
-        const el = document.getElementById("c-" + id);
-        if(!el) return;
-        el.scrollIntoView({ behavior:"smooth", block:"center" });
-        el.classList.add("c-flash");
-        setTimeout(()=> el.classList.remove("c-flash"), 1000);
-      }
-
-      listEl.querySelectorAll(".pc-mention").forEach(b=>{
+      listEl.querySelectorAll("[data-mention]").forEach(b=>{
         b.onclick = ()=>{
-          const jump = b.getAttribute("data-jump") || "";
-          if(jump){
-            jumpToComment(jump);
-            return;
+          const mentionU = b.getAttribute("data-mention") || "";
+          const candidates = Array.from(listEl.querySelectorAll(".pc-item"));
+          for(const node of candidates){
+            const body = node.querySelector(".pc-body")?.textContent || "";
+            const rt = node.getAttribute("data-reply-to") || "";
+            if(rt && body.trim().toLowerCase().startsWith("@" + mentionU.toLowerCase())){
+              const target = document.getElementById("c-" + rt);
+              if(target){
+                target.scrollIntoView({ behavior:"smooth", block:"center" });
+                target.classList.add("c-flash");
+                setTimeout(()=> target.classList.remove("c-flash"), 1000);
+                return;
+              }
+            }
           }
-          // НЕ ведём на профиль, и НЕ показываем "No linked comment"
-          // просто ничего
+          toast("No linked comment");
         };
       });
 
       listEl.querySelectorAll("[data-jump]").forEach(btn=>{
         btn.onclick = ()=>{
           const targetId = btn.getAttribute("data-jump");
-          jumpToComment(targetId);
+          const el = document.getElementById("c-" + targetId);
+          if(!el) return;
+          el.scrollIntoView({ behavior:"smooth", block:"center" });
+          el.classList.add("c-flash");
+          setTimeout(()=> el.classList.remove("c-flash"), 1000);
         };
       });
 
@@ -3604,3 +3600,4 @@
   });
 })();
 </script>
+
