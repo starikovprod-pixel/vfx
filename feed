@@ -683,6 +683,22 @@
   .cc-desc{ margin-top:10px; font-size:13px; color:rgba(255,255,255,.75); }
   .cc-meta{ position:absolute; left:14px; right:14px; bottom:14px; display:flex; gap:8px; justify-content:center; }
   .cc-pill{ padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.35); font-size:12px; display:inline-flex; gap:6px; }
+  .pc-mention{ color:#7db4ff; text-decoration:none; font-weight:900; }
+  .pc-mention:hover{ text-decoration:underline; }
+  .pc-actions{ display:flex; gap:6px; align-items:center; }
+  .cic{ border:0; background:transparent; color:rgba(255,255,255,.7); display:inline-flex; align-items:center; gap:4px; cursor:pointer; padding:0; }
+  .cic.on{ color:var(--danger); }
+  .pc-edit-ta{ width:100%; min-height:74px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.14); border-radius:12px; color:#fff; padding:8px 10px; }
+  .pc-form-actions{ display:flex; gap:8px; }
+  .sheet-backdrop{ position:fixed; inset:0; z-index:14000; background:rgba(0,0,0,0.86); backdrop-filter: blur(5px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:.18s; }
+  .sheet-backdrop.open{ opacity:1; pointer-events:auto; }
+  .sheet{ width:92%; max-width:980px; height:88vh; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:24px; overflow:hidden; position:relative; display:flex; flex-direction:column; backdrop-filter: blur(14px);}
+  .sheet-head{ padding:16px 16px 12px; border-bottom:1px solid rgba(255,255,255,0.10); display:flex; justify-content:space-between; gap:10px; align-items:center; }
+  .sheet-title{ font-weight:950; font-size:16px; }
+  .sheet-close{ width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.45); color:#fff; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; }
+  .sheet-body{ padding:14px 16px 16px; overflow:auto; flex:1; display:flex; flex-direction:column; gap:12px; }
+  #emoGrid button{ height:44px; border-radius:14px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); cursor:pointer; font-size:22px; }
+
 
   @media(max-width: 980px){
     .feed-layout{ grid-template-columns:1fr; }
@@ -705,6 +721,7 @@
             <button data-sort="new">New</button>
             <button data-sort="following">Following</button>
           </div>
+          <button class="tab-btn" id="btn-video-only" type="button">Video only</button>
           <span id="auth-hint" style="color:rgba(255,255,255,0.55)">Login to like / save / comment.</span>
         </div>
       </div>
@@ -725,7 +742,6 @@
           <button data-type="collection">Collections</button>
         </div>
 
-        <button class="tab-btn" id="btn-video-only" type="button">Video only</button>
 
         <button class="btn-refresh-icon" id="btn-refresh" title="Refresh">
           <svg viewBox="0 0 24 24"><path d="M21 2v6h-6M3 22v-6h6M21 12c0 4.97-4.03 9-9 9-3.33 0-6.25-1.81-7.81-4.5M3 12c0-4.97 4.03-9 9-9 3.33 0 6.25 1.81 7.81 4.5"/></svg>
@@ -800,6 +816,22 @@
     </div>
   </div>
 
+  <div class="sheet-backdrop" id="emoB">
+    <div class="sheet" onclick="event.stopPropagation()" style="max-width:560px;height:auto;max-height:80vh;">
+      <div class="sheet-head">
+        <div class="sheet-title">Emoji</div>
+        <button class="sheet-close" id="emoClose">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="search" style="width:100%;">
+          <span style="opacity:.75;font-weight:900;">Search</span>
+          <input id="emoSearch" placeholder="smile, fire, cat..." />
+        </div>
+        <div id="emoGrid" style="display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin-top:12px;max-height:320px;overflow:auto;"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
   <div class="vfy-tip" id="vfyTip">Verified — awarded at 100 followers. Helps ranking in Feed.</div>
 </div>
@@ -815,7 +847,11 @@
     save: '<svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>',
     saveBtn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>',
     view: '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>',
-    dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>'
+    dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
+    send: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.6"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="2"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="currentColor" stroke-width="2"/></svg>',
+    reply: '<svg viewBox="0 0 24 24" fill="none"><path d="M10 9L5 14l5 5" stroke="currentColor" stroke-width="2"/><path d="M19 19v-2a4 4 0 0 0-4-4H5" stroke="currentColor" stroke-width="2"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18" stroke="currentColor" stroke-width="2"/><path d="M8 6V4h8v2" stroke="currentColor" stroke-width="2"/><path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="2"/></svg>'
   };
   const VERIFIED_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z"/></svg>';
   const VFY_TOOLTIP = 'Verified — awarded at 100 followers. Helps ranking in Feed.';
@@ -876,6 +912,10 @@
   const $toast = document.getElementById("toast");
   const $mFollowers = document.getElementById("m-followers");
   const $vfyTip = document.getElementById("vfyTip");
+  const $emoB = document.getElementById("emoB");
+  const $emoClose = document.getElementById("emoClose");
+  const $emoSearch = document.getElementById("emoSearch");
+  const $emoGrid = document.getElementById("emoGrid");
 
   function toast(msg){
     $toast.textContent = msg;
@@ -1291,11 +1331,25 @@
   }
 
   function autoGrow(ta){ if(!ta) return; ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,180)+'px'; }
-  function isVideoUrl(url){ return /\.(mp4|webm|mov)(\?|#|$)/i.test(String(url||'')); }
+  function isVideoUrl(url){ const u=String(url||'').toLowerCase(); return u.endsWith('.mp4')||u.endsWith('.webm')||u.endsWith('.mov')||u.includes('fal.media'); }
   const postCommentsMode = new Map();
   const replyToByPost = new Map();
+  const EMOJI_CPS = [0x1F600,0x1F604,0x1F60E,0x1F525,0x2728,0x1F9E0,0x1F47B,0x1F916,0x1F431,0x1F680,0x2764,0x1F49C];
+  const EMOJIS = EMOJI_CPS.map(cp => String.fromCodePoint(cp));
+  let emoTargetInput = null;
+  function openEmojiPicker(inputEl){ if(!$emoB||!$emoSearch||!$emoGrid) return; emoTargetInput=inputEl; $emoSearch.value=''; renderEmojiGrid(''); $emoB.classList.add('open'); setTimeout(()=> $emoSearch.focus(),0); }
+  function closeEmojiPicker(){ if(!$emoB) return; $emoB.classList.remove('open'); emoTargetInput=null; }
+  function renderEmojiGrid(q){ if(!$emoGrid) return; const query=(q||'').trim().toLowerCase(); const list=EMOJIS.filter(e=>!query||e.includes(query)); $emoGrid.innerHTML=list.map(e=>`<button type="button" data-em="${e}">${e}</button>`).join(''); $emoGrid.querySelectorAll('[data-em]').forEach(b=> b.onclick=()=>{ if(!emoTargetInput) return; emoTargetInput.value=(emoTargetInput.value||'')+b.getAttribute('data-em'); emoTargetInput.focus(); closeEmojiPicker(); }); }
+  function linkifyMentions(text){ const safeTxt=escapeHtml(text); return safeTxt.replace(/(^|\s)@([a-zA-Z0-9_\.]{2,32})/g,(m,p1,u)=> `${p1}<a class="pc-mention" href="/artist?username=${encodeURIComponent(u)}">@${u}</a>`); }
 
-  function myAvatarHTML(){ return `<div class="avatar"></div>`; }
+  function myAvatarHTML(){
+    const me = {}; // feed: unknown self profile in this context
+    const letter = ((me.display_name || me.username || 'U').trim().slice(0,1) || 'U').toUpperCase();
+    const em = me.avatar_type === 'emoji' && me.avatar_emoji;
+    if(em) return `<div class="avatar emoji"><span>${escapeHtml(me.avatar_emoji)}</span></div>`;
+    if(me.avatar_url) return `<div class="avatar"><img src="${escapeHtml(me.avatar_url)}"></div>`;
+    return `<div class="avatar" style="display:flex;align-items:center;justify-content:center;font-weight:950;color:#fff">${letter}</div>`;
+  }
 
   function renderPosts(){
     if(!items.length){ $grid.innerHTML = `<div class="lf-empty">No posts yet.</div>`; return; }
@@ -1306,7 +1360,7 @@
       const bodyHtml = parts.map(part=> part.type==='text' ? `<span>${escapeHtml(part.value)}</span>` : `<div class="embed-collection" data-embed-col="${escapeHtml(part.id)}"><div class="embed-bg" data-embed-bg="${escapeHtml(part.id)}"></div><div class="embed-overlay"><div class="embed-title">Collection</div><div class="embed-desc">Loading…</div></div></div>`).join('');
       const hasSlider = media.length > 0;
       const sliderId = `ps_${p.id.replaceAll('-', '')}`;
-      return `<div class="post" data-post="${escapeHtml(p.id)}"><div class="post-head"><div class="avatar"></div><div class="post-meta"><div class="post-name">${escapeHtml(p.display_name || p.username || 'user')} ${verifiedBadgeHTML(p.verified === true)}</div><div class="post-time">${escapeHtml(fmtDate(p.created_at))}</div></div></div><div class="post-body">${bodyHtml}</div>${hasSlider ? `<div class="pslider" data-slider="${sliderId}"><div class="pslide" data-slide></div>${media.length>1?`<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button><div class="pdots" data-dots></div>`:''}</div>`:''}<div class="post-actions"><button class="mini ${p._liked ? 'on like':''}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button><button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button><button class="mini ${p._saved ? 'on save':''}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button><div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div></div><div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0?'flex':'none'};"><div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="lf-empty" style="padding:18px">Loading…</div></div><button class="tab-btn" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button><div class="pc-form">${myAvatarHTML()}<textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea><button class="pc-send" data-send="${escapeHtml(p.id)}">↑</button></div></div>${idx < items.length-1 ? `<div class="feed-sep"></div>`:''}</div>`;
+      return `<div class="post" data-post="${escapeHtml(p.id)}"><div class="post-head"><a class="pc-ava-link" href="/artist?username=${encodeURIComponent(p.username||'')}"><div class="avatar ${(p.avatar_type==='emoji'&&p.avatar_emoji)?'emoji':''}">${(p.avatar_type==='emoji'&&p.avatar_emoji)?`<span>${escapeHtml(p.avatar_emoji)}</span>`:(p.avatar_url?`<img src="${escapeHtml(p.avatar_url)}" />`:"")}</div></a><div class="post-meta"><div class="post-name"><a class="pc-name" href="/artist?username=${encodeURIComponent(p.username||'')}">${escapeHtml(p.display_name || p.username || 'user')}</a>${verifiedBadgeHTML(p.verified === true)}</div><div class="post-time">${escapeHtml(fmtDate(p.created_at))}</div></div></div><div class="post-body">${bodyHtml}</div>${hasSlider ? `<div class="pslider" data-slider="${sliderId}"><div class="pslide" data-slide></div>${media.length>1?`<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button><div class="pdots" data-dots></div>`:''}</div>`:''}<div class="post-actions"><button class="mini ${p._liked ? 'on like':''}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button><button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button><button class="mini ${p._saved ? 'on save':''}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button><div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div></div><div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0?'flex':'none'};"><div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="lf-empty" style="padding:18px">Loading…</div></div><button class="tab-btn" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button><div class="pc-form">${myAvatarHTML()}<textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea><button class="mini" data-emo="${escapeHtml(p.id)}">Emoji</button><button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button></div></div>${idx < items.length-1 ? `<div class="feed-sep"></div>`:''}</div>`;
     }).join('')}</div>`;
 
     items.forEach(p=>{ const media=Array.isArray(p.media)?p.media:[]; if(media.length) initPostSlider(p.id, media); });
@@ -1316,6 +1370,7 @@
 
     $grid.querySelectorAll('[data-viewall]').forEach(btn=> btn.onclick = async ()=>{ const pid=btn.getAttribute('data-viewall'); postCommentsMode.set(pid,'all'); await loadPostComments(pid); btn.style.display='none'; });
     $grid.querySelectorAll('[data-send]').forEach(btn=> btn.onclick = ()=> sendPostComment(btn.getAttribute('data-send')));
+    $grid.querySelectorAll('[data-emo]').forEach(btn=> btn.onclick = ()=>{ const pid=btn.getAttribute('data-emo'); const inp=document.getElementById('pc-in-'+pid); if(inp) openEmojiPicker(inp); });
     $grid.querySelectorAll('.pc-ta').forEach(ta=>{ ta.addEventListener('input', ()=>autoGrow(ta)); ta.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); sendPostComment(ta.id.replace('pc-in-','')); }}); });
     items.forEach(p=>{ if((p.comment_count||0)>0) loadPostComments(p.id); });
   }
@@ -1331,7 +1386,7 @@
       if(!arr.length){ listEl.innerHTML=`<div class="lf-empty" style="padding:18px">No comments yet.</div>`; return; }
       const post=items.find(x=>String(x.id)===String(post_id));
       const myId=myUserId?String(myUserId):'';
-      listEl.innerHTML = arr.map(c=>{ const mine=myId && String(c.user_id)===myId; const canDelete=mine || (myId && post && String(post.user_id)===myId); return `<div class="pc-item"><div class="avatar"></div><div class="pc-bubble"><div class="pc-top"><a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||'')}">${escapeHtml(c.display_name||c.username||'user')}</a><button class="mini ${c.liked_by_me?'on like':''}" data-clike="${escapeHtml(c.id)}">${ICONS.like}<span>${c.like_count||0}</span></button></div><div class="pc-body" data-body="${escapeHtml(c.id)}">${escapeHtml(c.body||'')}</div><div class="pc-footer"><div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div><div>${mine?`<button class="mini" data-c-edit="${escapeHtml(c.id)}">Edit</button>`:''}<button class="mini" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||'')}">Reply</button>${canDelete?`<button class="mini" data-c-del="${escapeHtml(c.id)}">Delete</button>`:''}</div></div></div></div>`; }).join('');
+      listEl.innerHTML = arr.map(c=>{ const mine=myId && String(c.user_id)===myId; const canDelete=mine || (myId && post && String(post.user_id)===myId); return `<div class="pc-item"><a class="pc-ava-link" href="/artist?username=${encodeURIComponent(c.username||'')}"><div class="avatar ${(c.avatar_type==='emoji'&&c.avatar_emoji)?'emoji':''}">${(c.avatar_type==='emoji'&&c.avatar_emoji)?`<span>${escapeHtml(c.avatar_emoji)}</span>`:(c.avatar_url?`<img src="${escapeHtml(c.avatar_url)}" />`:"")}</div></a><div class="pc-bubble"><div class="pc-top"><a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||'')}">${escapeHtml(c.display_name||c.username||'user')}</a>${verifiedBadgeHTML(c.verified===true)}<button class="cic ${c.liked_by_me?'on':''}" data-clike="${escapeHtml(c.id)}">${ICONS.like}<span>${c.like_count||0}</span></button></div><div class="pc-body" data-body="${escapeHtml(c.id)}">${linkifyMentions(c.body||'')}</div><div class="pc-footer"><div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div><div class="pc-actions">${mine?`<button class="cic" data-c-edit="${escapeHtml(c.id)}">${ICONS.edit}</button>`:''}<button class="cic" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||'')}">${ICONS.reply}</button>${canDelete?`<button class="cic" data-c-del="${escapeHtml(c.id)}">${ICONS.trash}</button>`:''}</div></div></div></div>`; }).join('');
       listEl.querySelectorAll('[data-clike]').forEach(btn=>btn.onclick=async()=>{ const cid=btn.getAttribute('data-clike'); const row=arr.find(x=>String(x.id)===String(cid)); if(!row) return; const t=await requireLoginOrWarn(); if(!t) return; const ep=row.liked_by_me?'/api/posts/comment_unlike':'/api/posts/comment_like'; await api(ep,{method:'POST',body:JSON.stringify({comment_id:cid})}); await loadPostComments(post_id); });
       listEl.querySelectorAll('[data-c-del]').forEach(btn=>btn.onclick=async()=>{ const cid=btn.getAttribute('data-c-del'); const t=await requireLoginOrWarn(); if(!t) return; await api('/api/posts/comment_delete',{method:'POST',body:JSON.stringify({comment_id:cid})}); await loadPostComments(post_id); });
       listEl.querySelectorAll('[data-c-edit]').forEach(btn=>btn.onclick=async()=>{ const cid=btn.getAttribute('data-c-edit'); const body=listEl.querySelector(`[data-body="${CSS.escape(cid)}"]`); const text=prompt('Edit comment', body?.textContent||''); if(!text) return; const t=await requireLoginOrWarn(); if(!t) return; await api('/api/posts/comment_edit',{method:'POST',body:JSON.stringify({comment_id:cid, body:text})}); await loadPostComments(post_id); });
@@ -1889,6 +1944,9 @@ const json = await api(getListPath(), { method:"GET", auth: needAuth });
   });
   $btnVideoOnly.onclick = ()=>{ onlyVideo = !onlyVideo; $btnVideoOnly.classList.toggle("active", onlyVideo); renderGrid(); };
   $btnRefresh.onclick = ()=> fetchPage(true);
+  if($emoClose) $emoClose.onclick = closeEmojiPicker;
+  if($emoB) $emoB.onclick = (e)=>{ if(e.target===$emoB) closeEmojiPicker(); };
+  if($emoSearch) $emoSearch.oninput = ()=> renderEmojiGrid($emoSearch.value);
   window.onscroll = ()=>{ if(hasMore && !loading && (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900)) fetchPage(false); };
 
   async function updateAuthHint(){ const token = await getSessionToken(); $authHint.style.display = token ? "none" : "inline"; }
