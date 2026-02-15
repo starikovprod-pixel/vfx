@@ -713,6 +713,8 @@
   }
 
   .seg button, .seg a{ color:#fff; }
+  #seg-main a{ color:#fff; }
+  #seg-main a.active{ color:#fff; background:rgba(255,255,255,0.10); }
 
 </style>
 
