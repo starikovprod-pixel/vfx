@@ -427,11 +427,6 @@
     color:#fff;
     font-weight:900;
     text-decoration:none;
-    border:0;
-    background:transparent;
-    padding:0;
-    cursor:pointer;
-    font:inherit;
   }
   .pc-mention:hover{ text-decoration:underline; }
   .pc-edit-ta{
@@ -1577,6 +1572,12 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
       .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
+  function linkifyMentions(text){
+    const safeTxt = escapeHtml(text);
+    return safeTxt.replace(/(^|\s)@([a-zA-Z0-9_\.]{2,32})/g, (m, p1, u)=> {
+      return `${p1}<a class="pc-mention" href="/artist?username=${encodeURIComponent(u)}">@${u}</a>`;
+    });
+  }
   function toast(msg){
     $toast.textContent = String(msg || "");
     $toast.classList.add("show");
@@ -2216,10 +2217,7 @@
                   </button>
                 </div>
               </div>
-              <div class="pc-body" data-body="${c.id}">${escapeHtml(c.body || "").replace(
-                /(^|\s)@([a-zA-Z0-9_\.]{2,32})/g,
-                (m,p1,u)=> `${p1}<a href="/artist?username=${encodeURIComponent(u)}" class="pc-mention">@${u}</a>`
-              )}</div>
+              <div class="pc-body" data-body="${c.id}">${linkifyMentions(c.body||"")}</div>
               <div class="pc-edit" data-editbox="${c.id}" style="display:none; margin-top:10px;">
                 <textarea class="pc-edit-ta" data-ta="${c.id}"></textarea>
                 <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:8px;">
