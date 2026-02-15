@@ -632,6 +632,58 @@
     transform: translateY(0);
   }
 
+
+  /* artist-like posts/collections */
+  .feed{ width:min(860px,100%); margin:0; display:flex; flex-direction:column; gap:0; }
+  .feed-sep{ height:1px; background:rgba(255,255,255,0.10); margin:18px 0; }
+  .post{ width:100%; display:flex; flex-direction:column; gap:12px; }
+  .post-head{ display:flex; gap:10px; align-items:center; }
+  .post-meta{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .post-name{ font-weight:950; font-size:14px; display:flex; align-items:center; gap:6px; }
+  .post-time{ font-size:12px; color:rgba(255,255,255,0.6); }
+  .post-body{ font-size:15px; line-height:1.5; color:rgba(255,255,255,0.92); white-space:pre-wrap; word-break:break-word; }
+  .embed-collection{ margin-top:10px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); overflow:hidden; cursor:pointer; position:relative; }
+  .embed-bg{ position:absolute; inset:0; background:#000; }
+  .embed-bg img,.embed-bg video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .6s ease; }
+  .embed-bg img.on,.embed-bg video.on{ opacity:.85; }
+  .embed-overlay{ position:relative; padding:16px; background:linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.1)); }
+  .embed-title{ font-weight:950; font-size:14px; }
+  .embed-desc{ margin-top:6px; font-size:13px; color:rgba(255,255,255,.75); }
+  .pslider{ width:fit-content; max-width:100%; margin:0 auto; position:relative; }
+  .pslide img,.pslide video{ display:block; width:auto; height:auto; max-width:100%; max-height:420px; object-fit:contain; margin:0 auto; border-radius:22px; border:1px solid rgba(255,255,255,.10); }
+  .pnav{ position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.45); color:#fff; }
+  .pnav.prev{ left:10px; } .pnav.next{ right:10px; }
+  .pdots{ position:absolute; left:50%; transform:translateX(-50%); bottom:10px; display:flex; gap:6px; padding:7px 10px; border-radius:999px; background:rgba(0,0,0,.45); }
+  .pdots button{ width:7px; height:7px; border-radius:99px; border:0; background:rgba(255,255,255,.35); }
+  .pdots button.on{ background:#fff; }
+  .post-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .mini{ padding:8px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#fff; display:inline-flex; align-items:center; gap:8px; }
+  .mini.on.like{ color:var(--danger); border-color:rgba(255,70,90,.45); background:rgba(255,70,90,.14); }
+  .mini.on.save{ color:#2b6cff; border-color:rgba(43,108,255,.45); background:rgba(43,108,255,.18); }
+  .pc{ border-top:1px solid rgba(255,255,255,.10); padding-top:12px; margin-top:6px; display:flex; flex-direction:column; gap:10px; }
+  .pc-list{ display:flex; flex-direction:column; gap:10px; max-height:320px; overflow:auto; }
+  .pc-item{ display:flex; gap:10px; align-items:flex-start; }
+  .pc-bubble{ flex:1; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); padding:8px 12px; }
+  .pc-top{ display:flex; gap:8px; align-items:center; margin-bottom:4px; }
+  .pc-footer{ margin-top:6px; display:flex; align-items:center; justify-content:space-between; }
+  .pc-name{ font-weight:950; font-size:12px; color:#fff; text-decoration:none; }
+  .pc-time{ font-size:11px; color:rgba(255,255,255,.55); }
+  .pc-body{ font-size:13px; line-height:1.3; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .pc-form{ display:flex; gap:10px; align-items:flex-start; }
+  .pc-input{ flex:1; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:14px; color:#fff; padding:10px 12px; }
+  .pc-ta{ width:100%; resize:none; min-height:44px; max-height:180px; overflow:hidden; }
+  .pc-send{ width:44px; height:44px; border:0; border-radius:14px; background:#fff; color:#000; }
+  .cgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; padding-top:18px; }
+  .ccard{ position:relative; border-radius:22px; overflow:hidden; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); min-height:320px; }
+  .cc-bg{ position:absolute; inset:0; background:#000; }
+  .cc-bg img,.cc-bg video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .8s ease; }
+  .cc-bg img.on,.cc-bg video.on{ opacity:.85; }
+  .cc-glass{ position:relative; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:20px; background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.14)); }
+  .cc-title{ font-weight:1000; font-size:18px; }
+  .cc-desc{ margin-top:10px; font-size:13px; color:rgba(255,255,255,.75); }
+  .cc-meta{ position:absolute; left:14px; right:14px; bottom:14px; display:flex; gap:8px; justify-content:center; }
+  .cc-pill{ padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.35); font-size:12px; display:inline-flex; gap:6px; }
+
   @media(max-width: 980px){
     .feed-layout{ grid-template-columns:1fr; }
     .feed-right{ position:relative; top:0; height:auto; }
@@ -648,7 +700,11 @@
       <div>
         <h1 class="lf-h1">Feed</h1>
         <div class="lf-sub">
-          <span>Explore the best user generations.</span>
+          <div class="seg" id="seg-sort">
+            <button class="active" data-sort="trending">Trending</button>
+            <button data-sort="new">New</button>
+            <button data-sort="following">Following</button>
+          </div>
           <span id="auth-hint" style="color:rgba(255,255,255,0.55)">Login to like / save / comment.</span>
         </div>
       </div>
@@ -661,11 +717,6 @@
           <button data-main="saved">Saved</button>
         </div>
 
-        <div class="seg" id="seg-sort">
-          <button class="active" data-sort="trending">Trending</button>
-          <button data-sort="new">New</button>
-          <button data-sort="following">Following</button>
-        </div>
 
         <div class="seg" id="seg-saved" style="display:none;">
           <button class="active" data-type="image">Images</button>
@@ -802,6 +853,7 @@
   const $btnVideoOnly = document.getElementById("btn-video-only");
   const $btnRefresh = document.getElementById("btn-refresh");
   const $authHint = document.getElementById("auth-hint");
+  const $h1 = document.querySelector(".lf-h1");
 
   const $modal = document.getElementById("modal-backdrop");
   const $modalClose = document.getElementById("modal-close");
@@ -832,6 +884,11 @@
   }
 
   function showLoader(v){ $loader.style.display = v ? "flex" : "none"; }
+  function updateTitle(){
+    const m = { feed:"Feed", posts:"Posts", collections:"Collections", saved:"Saved" };
+    if($h1) $h1.textContent = m[mainTab] || "Feed";
+  }
+
 
   function isVideoItem(it){
   const kind = String(it.kind || it.media_type || "").toLowerCase();
@@ -1218,145 +1275,129 @@
     `;
   }
 
-  function renderPostCard(p){
-    const username = p.username || "user";
-    const display = p.display_name || username;
-    const title = p.title || "Post";
-
-    const cover = (p.thumb_url || p.media_url || "").trim();
-    const isVideo = isVideoItem({ media_url: p.media_url, thumb_url: p.thumb_url, media_type: p.media_type });
-
-    const stats = `
-      <div class="stat">${ICONS.like} ${p.like_count||0}</div>
-      <div class="stat">${ICONS.comm} ${p.comment_count||0}</div>
-      <div class="stat">${ICONS.save} ${p.save_count||0}</div>
-      <div class="stat">${ICONS.view} ${p.view_count||0}</div>
-    `;
-
-    const avIsEmoji = (p.avatar_type === "emoji" && p.avatar_emoji);
-    const avatarHtml = avIsEmoji ? `<span>${escapeHtml(p.avatar_emoji)}</span>` : (p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" />` : "");
-
-    const mediaHtml = cover
-      ? (isVideo
-        ? `<video class="lf-poster-video" muted playsinline preload="metadata" src="${escapeHtml(p.media_url || cover)}"></video>`
-        : `<img class="lf-thumb" src="${escapeHtml(cover)}" loading="lazy" decoding="async" />`
-      )
-      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-weight:900">POST</div>`;
-
-    return `
-      <div class="lf-card" data-kind="post" data-id="${escapeHtml(p.id)}">
-        <div class="lf-media">
-          ${mediaHtml}
-          <div class="badge"><span class="dot image"></span> POST</div>
-
-          <div class="card-bottom">
-            <div class="card-author">
-              <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
-              <a class="author-link" href="/artist?username=${encodeURIComponent(username)}" onclick="event.stopPropagation()">
-                <div class="author-name">${safe(display)} ${verifiedBadgeHTML(p.verified === true)}</div>
-                <div class="author-username">@${safe(username)}</div>
-              </a>
-            </div>
-
-            <div class="card-title">${escapeHtml(title)}</div>
-            <div class="card-stats">${stats}</div>
-          </div>
-        </div>
-      </div>
-    `;
+  function parseBodyWithEmbeds(text){
+    const s = String(text||"");
+    const re = /\[\[collection:([0-9a-fA-F-]{36})\]\]/g;
+    const parts = [];
+    let last = 0, m;
+    while((m = re.exec(s))){
+      const idx = m.index;
+      if(idx > last) parts.push({ type:"text", value:s.slice(last, idx) });
+      parts.push({ type:"collection", id:m[1] });
+      last = idx + m[0].length;
+    }
+    if(last < s.length) parts.push({ type:"text", value:s.slice(last) });
+    return parts;
   }
 
-  function renderCollectionCard(c){
-    const username = c.username || "user";
-    const display = c.display_name || username;
-    const title = c.title || "Collection";
-    const prev = Array.isArray(c.preview_items) ? c.preview_items : [];
-    const cover = (prev[0]?.thumb_url || prev[0]?.media_url || "").trim();
+  function autoGrow(ta){ if(!ta) return; ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,180)+'px'; }
+  function isVideoUrl(url){ return /\.(mp4|webm|mov)(\?|#|$)/i.test(String(url||'')); }
+  const postCommentsMode = new Map();
+  const replyToByPost = new Map();
 
-    const stats = `
-      <div class="stat">${ICONS.like} ${c.like_count||0}</div>
-      <div class="stat">${ICONS.save} ${c.save_count||0}</div>
-      <div class="stat">${ICONS.view} ${c.view_count||0}</div>
-    `;
+  function myAvatarHTML(){ return `<div class="avatar"></div>`; }
 
-    const avIsEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
-    const avatarHtml = avIsEmoji ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
+  function renderPosts(){
+    if(!items.length){ $grid.innerHTML = `<div class="lf-empty">No posts yet.</div>`; return; }
+    $grid.className = '';
+    $grid.innerHTML = `<div class="feed" id="feed">${items.map((p,idx)=>{
+      const media = Array.isArray(p.media) ? p.media : [];
+      const parts = parseBodyWithEmbeds(p.body || "");
+      const bodyHtml = parts.map(part=> part.type==='text' ? `<span>${escapeHtml(part.value)}</span>` : `<div class="embed-collection" data-embed-col="${escapeHtml(part.id)}"><div class="embed-bg" data-embed-bg="${escapeHtml(part.id)}"></div><div class="embed-overlay"><div class="embed-title">Collection</div><div class="embed-desc">Loading…</div></div></div>`).join('');
+      const hasSlider = media.length > 0;
+      const sliderId = `ps_${p.id.replaceAll('-', '')}`;
+      return `<div class="post" data-post="${escapeHtml(p.id)}"><div class="post-head"><div class="avatar"></div><div class="post-meta"><div class="post-name">${escapeHtml(p.display_name || p.username || 'user')} ${verifiedBadgeHTML(p.verified === true)}</div><div class="post-time">${escapeHtml(fmtDate(p.created_at))}</div></div></div><div class="post-body">${bodyHtml}</div>${hasSlider ? `<div class="pslider" data-slider="${sliderId}"><div class="pslide" data-slide></div>${media.length>1?`<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button><div class="pdots" data-dots></div>`:''}</div>`:''}<div class="post-actions"><button class="mini ${p._liked ? 'on like':''}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button><button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button><button class="mini ${p._saved ? 'on save':''}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button><div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div></div><div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0?'flex':'none'};"><div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="lf-empty" style="padding:18px">Loading…</div></div><button class="tab-btn" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button><div class="pc-form">${myAvatarHTML()}<textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea><button class="pc-send" data-send="${escapeHtml(p.id)}">↑</button></div></div>${idx < items.length-1 ? `<div class="feed-sep"></div>`:''}</div>`;
+    }).join('')}</div>`;
 
-    const mediaHtml = cover
-      ? `<img class="lf-thumb" src="${escapeHtml(cover)}" loading="lazy" decoding="async" />`
-      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-weight:900">COLLECTION</div>`;
+    items.forEach(p=>{ const media=Array.isArray(p.media)?p.media:[]; if(media.length) initPostSlider(p.id, media); });
+    hydrateCollectionEmbeds();
 
-    return `
-      <div class="lf-card" data-kind="collection" data-id="${escapeHtml(c.id)}">
-        <div class="lf-media">
-          ${mediaHtml}
-          <div class="badge"><span class="dot image"></span> COLLECTION</div>
+    $grid.querySelectorAll('[data-act]').forEach(btn=>{ btn.onclick = async ()=>{ const act=btn.getAttribute('data-act'); const pid=btn.getAttribute('data-post'); const post=items.find(x=>String(x.id)===String(pid)); if(!post) return; if(act==='toggle-comments'){ const box=$grid.querySelector(`[data-comments="${CSS.escape(pid)}"]`); if(!box) return; const isOpen=box.style.display!=='none'; box.style.display=isOpen?'none':'flex'; if(!isOpen) await loadPostComments(pid); return; } const token=await requireLoginOrWarn(); if(!token) return; try{ if(act==='like'){ const ep=post._liked?'/api/posts/unlike':'/api/posts/like'; const j=await api(ep,{method:'POST',body:JSON.stringify({post_id:pid})}); post._liked=!post._liked; if(j?.counts){ Object.assign(post,j.counts); } renderPosts(); } if(act==='save'){ const ep=post._saved?'/api/posts/unsave':'/api/posts/save'; const j=await api(ep,{method:'POST',body:JSON.stringify({post_id:pid})}); post._saved=!post._saved; if(j?.counts){ Object.assign(post,j.counts); } renderPosts(); }}catch(e){ toast(e.message||'Failed'); } }; });
 
-          <div class="card-bottom">
-            <div class="card-author">
-              <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
-              <a class="author-link" href="/artist?username=${encodeURIComponent(username)}" onclick="event.stopPropagation()">
-                <div class="author-name">${safe(display)} ${verifiedBadgeHTML(c.verified === true)}</div>
-                <div class="author-username">@${safe(username)}</div>
-              </a>
-            </div>
-
-            <div class="card-title">${escapeHtml(title)}</div>
-            <div class="card-stats">${stats}</div>
-          </div>
-        </div>
-      </div>
-    `;
+    $grid.querySelectorAll('[data-viewall]').forEach(btn=> btn.onclick = async ()=>{ const pid=btn.getAttribute('data-viewall'); postCommentsMode.set(pid,'all'); await loadPostComments(pid); btn.style.display='none'; });
+    $grid.querySelectorAll('[data-send]').forEach(btn=> btn.onclick = ()=> sendPostComment(btn.getAttribute('data-send')));
+    $grid.querySelectorAll('.pc-ta').forEach(ta=>{ ta.addEventListener('input', ()=>autoGrow(ta)); ta.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); sendPostComment(ta.id.replace('pc-in-','')); }}); });
+    items.forEach(p=>{ if((p.comment_count||0)>0) loadPostComments(p.id); });
   }
 
-  function scheduleRerender(){
-    clearTimeout(rerenderTimer);
-    rerenderTimer = setTimeout(renderGrid, 200);
+  async function loadPostComments(post_id){
+    const listEl=document.getElementById('pc-list-'+post_id); if(!listEl) return;
+    listEl.innerHTML = `<div class="lf-empty" style="padding:18px">Loading…</div>`;
+    try{
+      const mode=postCommentsMode.get(post_id)||'preview';
+      const limit=mode==='all'?80:3;
+      const j=await api(`/api/posts/comments?post_id=${encodeURIComponent(post_id)}&limit=${limit}&offset=0`,{method:'GET'});
+      const arr=Array.isArray(j.items)?j.items:[];
+      if(!arr.length){ listEl.innerHTML=`<div class="lf-empty" style="padding:18px">No comments yet.</div>`; return; }
+      const post=items.find(x=>String(x.id)===String(post_id));
+      const myId=myUserId?String(myUserId):'';
+      listEl.innerHTML = arr.map(c=>{ const mine=myId && String(c.user_id)===myId; const canDelete=mine || (myId && post && String(post.user_id)===myId); return `<div class="pc-item"><div class="avatar"></div><div class="pc-bubble"><div class="pc-top"><a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||'')}">${escapeHtml(c.display_name||c.username||'user')}</a><button class="mini ${c.liked_by_me?'on like':''}" data-clike="${escapeHtml(c.id)}">${ICONS.like}<span>${c.like_count||0}</span></button></div><div class="pc-body" data-body="${escapeHtml(c.id)}">${escapeHtml(c.body||'')}</div><div class="pc-footer"><div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div><div>${mine?`<button class="mini" data-c-edit="${escapeHtml(c.id)}">Edit</button>`:''}<button class="mini" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||'')}">Reply</button>${canDelete?`<button class="mini" data-c-del="${escapeHtml(c.id)}">Delete</button>`:''}</div></div></div></div>`; }).join('');
+      listEl.querySelectorAll('[data-clike]').forEach(btn=>btn.onclick=async()=>{ const cid=btn.getAttribute('data-clike'); const row=arr.find(x=>String(x.id)===String(cid)); if(!row) return; const t=await requireLoginOrWarn(); if(!t) return; const ep=row.liked_by_me?'/api/posts/comment_unlike':'/api/posts/comment_like'; await api(ep,{method:'POST',body:JSON.stringify({comment_id:cid})}); await loadPostComments(post_id); });
+      listEl.querySelectorAll('[data-c-del]').forEach(btn=>btn.onclick=async()=>{ const cid=btn.getAttribute('data-c-del'); const t=await requireLoginOrWarn(); if(!t) return; await api('/api/posts/comment_delete',{method:'POST',body:JSON.stringify({comment_id:cid})}); await loadPostComments(post_id); });
+      listEl.querySelectorAll('[data-c-edit]').forEach(btn=>btn.onclick=async()=>{ const cid=btn.getAttribute('data-c-edit'); const body=listEl.querySelector(`[data-body="${CSS.escape(cid)}"]`); const text=prompt('Edit comment', body?.textContent||''); if(!text) return; const t=await requireLoginOrWarn(); if(!t) return; await api('/api/posts/comment_edit',{method:'POST',body:JSON.stringify({comment_id:cid, body:text})}); await loadPostComments(post_id); });
+      listEl.querySelectorAll('[data-c-reply]').forEach(btn=>btn.onclick=()=>{ const cid=btn.getAttribute('data-c-reply'); const uname=btn.getAttribute('data-u')||''; replyToByPost.set(post_id,{comment_id:cid,username:uname}); const inp=document.getElementById('pc-in-'+post_id); if(inp){ inp.value+=(inp.value?' ':'')+`@${uname} `; inp.focus(); autoGrow(inp);} });
+    }catch(e){ listEl.innerHTML=`<div class="lf-empty" style="padding:18px;color:var(--danger)">${escapeHtml(e.message)}</div>`; }
+  }
+
+  async function sendPostComment(post_id){
+    const t=await requireLoginOrWarn(); if(!t) return;
+    const inp=document.getElementById('pc-in-'+post_id); if(!inp) return;
+    const text=(inp.value||'').trim(); if(!text) return;
+    const rt=replyToByPost.get(post_id);
+    await api('/api/posts/comment',{method:'POST',body:JSON.stringify({post_id, body:text, reply_to_comment_id: rt?.comment_id || null})});
+    replyToByPost.delete(post_id);
+    inp.value=''; autoGrow(inp);
+    await loadPostComments(post_id);
+  }
+
+  function initPostSlider(postId, mediaArr){
+    const sliderId = `ps_${postId.replaceAll('-','')}`;
+    const host = $grid.querySelector(`[data-slider="${CSS.escape(sliderId)}"]`);
+    if(!host) return;
+    let idx = 0;
+    const $slide = host.querySelector('[data-slide]');
+    const $prev = host.querySelector('[data-prev]');
+    const $next = host.querySelector('[data-next]');
+    const $dots = host.querySelector('[data-dots]');
+    const imgEl = document.createElement('img');
+    const vidEl = document.createElement('video'); vidEl.setAttribute('playsinline',''); vidEl.controls = true;
+    $slide.innerHTML=''; $slide.appendChild(imgEl); $slide.appendChild(vidEl);
+    function set(i){ idx=(i+mediaArr.length)%mediaArr.length; const item=mediaArr[idx]; const url=(item.media_url||item.thumb_url||'').trim(); const isV=isVideoUrl(url); if(isV){ imgEl.style.display='none'; vidEl.style.display='block'; if(vidEl.getAttribute('src')!==url){ vidEl.pause(); vidEl.setAttribute('src',url); vidEl.load(); } } else { vidEl.pause(); vidEl.style.display='none'; imgEl.style.display='block'; imgEl.setAttribute('src',(item.thumb_url||item.media_url||'').trim()); } if($dots){ $dots.innerHTML=mediaArr.map((_,k)=>`<button class="${k===idx?'on':''}" data-dot="${k}"></button>`).join(''); $dots.querySelectorAll('[data-dot]').forEach(b=>b.onclick=(e)=>{e.stopPropagation(); set(Number(b.getAttribute('data-dot')));}); } }
+    if($prev) $prev.onclick=(e)=>{e.stopPropagation(); set(idx-1);};
+    if($next) $next.onclick=(e)=>{e.stopPropagation(); set(idx+1);};
+    set(0);
+  }
+
+  function renderCollections(){
+    if(!items.length){ $grid.innerHTML = `<div class="lf-empty">No collections yet.</div>`; return; }
+    $grid.className='';
+    $grid.innerHTML = `<div class="cgrid" id="cgridRoot">${items.map(c=>{ const prev=Array.isArray(c.preview_items)?c.preview_items:[]; const media=prev.map(x=>(x.thumb_url||x.media_url||'').trim()).filter(Boolean).slice(0,10); return `<div class="ccard" data-col="${escapeHtml(c.id)}"><div class="cc-bg" data-ccbg="${escapeHtml(c.id)}">${media.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>` : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join('')}</div><div class="cc-glass"><div><div class="cc-title">${escapeHtml(c.title||'Untitled collection')}</div><div class="cc-desc">${escapeHtml(c.description||'')}</div></div><div class="cc-meta"><div class="cc-pill" data-clike="${escapeHtml(c.id)}">${ICONS.like} <b>${c.like_count||0}</b></div><div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div><div class="cc-pill ${c._saved ? 'mini on save' : ''}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div></div></div></div>`; }).join('')}</div>`;
+    $grid.querySelectorAll('[data-col]').forEach(el=> el.onclick=()=> openCollectionModal(el.getAttribute('data-col')));
+    $grid.querySelectorAll('[data-clike]').forEach(el=> el.onclick=async(e)=>{ e.stopPropagation(); const id=el.getAttribute('data-clike'); const col=items.find(x=>String(x.id)===String(id)); if(!col) return; const t=await requireLoginOrWarn(); if(!t) return; const ep=col._liked?'/api/collections/unlike':'/api/collections/like'; await api(ep,{method:'POST',body:JSON.stringify({collection_id:id})}); col._liked=!col._liked; renderCollections(); startCollectionsSlideshows(); });
+    $grid.querySelectorAll('[data-csave]').forEach(el=> el.onclick=async(e)=>{ e.stopPropagation(); const id=el.getAttribute('data-csave'); const col=items.find(x=>String(x.id)===String(id)); if(!col) return; const t=await requireLoginOrWarn(); if(!t) return; const ep=col._saved?'/api/collections/unsave':'/api/collections/save'; await api(ep,{method:'POST',body:JSON.stringify({collection_id:id})}); col._saved=!col._saved; renderCollections(); startCollectionsSlideshows(); });
+  }
+
+  function startCollectionsSlideshows(){
+    document.querySelectorAll('[data-ccbg]').forEach(bg=>{ if(bg.dataset.slBound==='1') return; bg.dataset.slBound='1'; const slides=Array.from(bg.querySelectorAll('img,video')); if(slides.length<=1) return; let i=0; setInterval(()=>{ const prev=slides[i]; prev.classList.remove('on'); if(prev.tagName==='VIDEO'){ try{ prev.pause(); prev.currentTime=0; }catch(e){} } i=(i+1)%slides.length; const cur=slides[i]; cur.classList.add('on'); if(cur.tagName==='VIDEO'){ try{ cur.play(); }catch(e){} } },1400); });
+  }
+
+  async function openCollectionModal(collection_id){
+    window.location.href = `/artist?collection=${encodeURIComponent(collection_id)}`;
+  }
+
+  async function hydrateCollectionEmbeds(){
+    const nodes = Array.from(document.querySelectorAll('[data-embed-col]'));
+    for(const el of nodes){
+      const id=el.getAttribute('data-embed-col'); if(!id || el.dataset.hydrated==='1') continue; el.dataset.hydrated='1';
+      try{ const j=await api(`/api/collections/get?id=${encodeURIComponent(id)}`,{method:'GET'}); const col=j.collection||{}; const arr=Array.isArray(j.items)?j.items:[]; el.querySelector('.embed-title').textContent=col.title||'Collection'; el.querySelector('.embed-desc').textContent=col.description||''; const bg=el.querySelector('[data-embed-bg]'); const thumbs=arr.map(x=>(x.thumb_url||x.media_url||'').trim()).filter(Boolean).slice(0,8); bg.innerHTML=thumbs.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>`:`<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join(''); if(thumbs.length>1){ const slides=Array.from(bg.querySelectorAll('img,video')); let i=0; setInterval(()=>{ const prev=slides[i]; prev.classList.remove('on'); if(prev.tagName==='VIDEO'){try{prev.pause();prev.currentTime=0;}catch(e){}} i=(i+1)%slides.length; const cur=slides[i]; cur.classList.add('on'); if(cur.tagName==='VIDEO'){try{cur.play();}catch(e){}} },1300);} el.onclick=()=>openCollectionModal(id); }catch(e){ el.querySelector('.embed-title').textContent='Collection'; el.querySelector('.embed-desc').textContent='Failed to load'; }
+    }
   }
 
   function renderGrid(){
-    let list = items;
-
-    if(mainTab === "feed"){
-      list = onlyVideo ? list.filter(isVideoItem) : list;
-      $grid.className = "lf-grid";
-      $grid.innerHTML = list.length ? list.map(renderCard).join("") : `<div class="lf-empty">No items yet.</div>`;
-    }
-    else if(mainTab === "posts" || (mainTab === "saved" && savedType === "post")){
-      $grid.className = "lf-grid";
-      $grid.innerHTML = list.length ? list.map(renderPostCard).join("") : `<div class="lf-empty">No posts yet.</div>`;
-    }
-    else if(mainTab === "collections" || (mainTab === "saved" && savedType === "collection")){
-      $grid.className = "lf-grid";
-      $grid.innerHTML = list.length ? list.map(renderCollectionCard).join("") : `<div class="lf-empty">No collections yet.</div>`;
-    }
-    else {
-      list = onlyVideo ? list.filter(isVideoItem) : list;
-      $grid.className = "lf-grid";
-      $grid.innerHTML = list.length ? list.map(renderCard).join("") : `<div class="lf-empty">No saved items yet.</div>`;
-    }
-
-    bindVerifiedTooltip($grid);
-
-    $grid.querySelectorAll(".lf-card").forEach(card=>{
-      card.onclick = ()=>{
-        const kind = card.getAttribute("data-kind");
-        const id = card.getAttribute("data-id");
-        const it = items.find(x=> String(x.id) === String(id));
-        if(!it) return;
-
-        if(kind === "video" || kind === "image" || mainTab === "feed" || (mainTab === "saved" && (savedType === "image" || savedType === "video"))){
-          openModal(it);
-          return;
-        }
-
-        const uname = it.username || "";
-        if(uname) window.location.href = `/artist?username=${encodeURIComponent(uname)}`;
-      };
-    });
-
-    wireHoverVideos();
-    primePosterVideos();
+    if(mainTab === 'feed'){ let list=onlyVideo ? items.filter(isVideoItem) : items; $grid.className='lf-grid'; $grid.innerHTML = list.length ? list.map(renderCard).join('') : `<div class="lf-empty">No items yet.</div>`; bindVerifiedTooltip($grid); $grid.querySelectorAll('.lf-card').forEach(card=> card.onclick=()=>{ const id=card.getAttribute('data-id'); const it=items.find(x=>String(x.id)===String(id)); if(it) openModal(it); }); wireHoverVideos(); primePosterVideos(); return; }
+    if(mainTab==='posts' || (mainTab==='saved' && savedType==='post')){ renderPosts(); return; }
+    if(mainTab==='collections' || (mainTab==='saved' && savedType==='collection')){ renderCollections(); startCollectionsSlideshows(); return; }
+    let list=onlyVideo ? items.filter(isVideoItem) : items; $grid.className='lf-grid'; $grid.innerHTML = list.length ? list.map(renderCard).join('') : `<div class="lf-empty">No saved items yet.</div>`; bindVerifiedTooltip($grid); $grid.querySelectorAll('.lf-card').forEach(card=> card.onclick=()=>{ const id=card.getAttribute('data-id'); const it=items.find(x=>String(x.id)===String(id)); if(it) openModal(it); }); wireHoverVideos(); primePosterVideos();
   }
 
   function wireHoverVideos(){
@@ -1815,6 +1856,7 @@ const json = await api(getListPath(), { method:"GET", auth: needAuth });
       btn.classList.add("active");
 
       mainTab = btn.dataset.main;
+      updateTitle();
 
       if(mainTab === "saved"){
         $segSort.style.display = "none";
@@ -1830,7 +1872,8 @@ const json = await api(getListPath(), { method:"GET", auth: needAuth });
         $segSort.querySelectorAll("button").forEach(b=> b.classList.toggle("active", b.dataset.sort === "trending"));
       }
 
-      await fetchPage(true);
+      updateTitle();
+    await fetchPage(true);
     };
   });
   $segSort.querySelectorAll("button").forEach(btn=>{
