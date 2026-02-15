@@ -632,6 +632,11 @@
     transform: translateY(0);
   }
 
+  #seg-main{ margin-right:8px; }
+  #seg-main button{ min-width:92px; }
+  #seg-saved button{ min-width:86px; }
+  .c-input{ min-height:44px; resize:vertical; }
+
   @media(max-width: 980px){
     .feed-layout{ grid-template-columns:1fr; }
     .feed-right{ position:relative; top:0; height:auto; }
@@ -646,19 +651,32 @@
 
     <div class="lf-top">
       <div>
-        <h1 class="lf-h1">Feed</h1>
-        <div class="lf-sub">
-          <span>Explore the best user generations.</span>
+        <h1 class="lf-h1" id="main-title">Feed</h1>
+        <div class="lf-sub" id="main-sub">
+          <span id="main-desc">Explore the best user generations.</span>
           <span id="auth-hint" style="color:rgba(255,255,255,0.55)">Login to like / save / comment.</span>
         </div>
       </div>
 
       <div class="lf-controls">
+        <div class="seg" id="seg-main">
+          <button class="active" data-main="feed">Feed</button>
+          <button data-main="posts">Posts</button>
+          <button data-main="collections">Collections</button>
+          <button data-main="saved">Saved</button>
+        </div>
+
         <div class="seg" id="seg-sort">
           <button class="active" data-sort="trending">Trending</button>
           <button data-sort="new">New</button>
-          <button data-sort="top">Top</button>
           <button data-sort="following">Following</button>
+        </div>
+
+        <div class="seg" id="seg-saved" style="display:none;">
+          <button class="active" data-saved="images">Images</button>
+          <button data-saved="videos">Videos</button>
+          <button data-saved="posts">Posts</button>
+          <button data-saved="collections">Collections</button>
         </div>
 
         <button class="tab-btn" id="btn-video-only" type="button">Video only</button>
@@ -727,7 +745,8 @@
           </div>
 
           <div class="c-form">
-            <input class="c-input" id="c-input" placeholder="Write a comment…" />
+            <button class="icon-btn" id="c-emoji" title="Emoji">😊</button>
+            <textarea class="c-input" id="c-input" placeholder="Write a comment…"></textarea>
             <button class="c-send" id="c-send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
           </div>
         </div>
@@ -758,7 +777,9 @@
   const LS_FOLLOW = "lf_follow_cache_v1";
 
   // feed state
+  let mainTab = "feed";
   let sort = "trending";
+  let savedTab = "images";
   let offset = 0;
   let loading = false;
   let hasMore = true;
@@ -781,10 +802,15 @@
   const $grid = document.getElementById("grid");
   const $loader = document.getElementById("loader");
   const $sideList = document.getElementById("side-list");
+  const $segMain = document.getElementById("seg-main");
   const $segSort = document.getElementById("seg-sort");
+  const $segSaved = document.getElementById("seg-saved");
   const $btnVideoOnly = document.getElementById("btn-video-only");
   const $btnRefresh = document.getElementById("btn-refresh");
   const $authHint = document.getElementById("auth-hint");
+  const $mainTitle = document.getElementById("main-title");
+  const $mainSub = document.getElementById("main-sub");
+  const $mainDesc = document.getElementById("main-desc");
 
   const $modal = document.getElementById("modal-backdrop");
   const $modalClose = document.getElementById("modal-close");
@@ -802,6 +828,7 @@
   const $cList = document.getElementById("c-list");
   const $cInput = document.getElementById("c-input");
   const $cSend = document.getElementById("c-send");
+  const $cEmoji = document.getElementById("c-emoji");
   const $btnReloadComments = document.getElementById("btn-reload-comments");
 
   const $toast = document.getElementById("toast");
@@ -1129,10 +1156,14 @@
   }
 
   function renderCard(it){
-    const video = isVideoItem(it);
+    const sampleMedia = Array.isArray(it.media) && it.media[0] ? it.media[0] : null;
+    const thumb = it.thumb_url || it.cover_thumb_url || sampleMedia?.thumb_url || sampleMedia?.media_url || it.media_url || "";
+    const mediaSrc = it.media_url || it.cover_media_url || sampleMedia?.media_url || thumb;
+    const normalized = Object.assign({}, it, { thumb_url: thumb, media_url: mediaSrc });
+    const video = isVideoItem(normalized);
     const username = it.username || "user";
     const display = it.display_name || username;
-    const title = it.title || "Untitled";
+    const title = it.title || it.body || "Untitled";
 
     const stats = `
       <div class="stat">${ICONS.like} ${it.like_count || 0}</div>
@@ -1146,7 +1177,7 @@
       ? `<span>${escapeHtml(it.avatar_emoji)}</span>`
       : (it.avatar_url ? `<img src="${escapeHtml(it.avatar_url)}" />` : "");
 
-    const media = it.media_url || it.thumb_url || "";
+    const media = mediaSrc;
     const mediaHtml = video
       ? `
         <video class="lf-poster-video"
@@ -1200,7 +1231,7 @@
   }
 
   function renderGrid(){
-    const list = onlyVideo ? items.filter(isVideoItem) : items;
+    const list = (mainTab === "feed" && onlyVideo) ? items.filter(isVideoItem) : items;
     if(list.length === 0){
       $grid.innerHTML = `<div class="lf-empty">No items yet.</div>`;
       return;
@@ -1213,7 +1244,10 @@
       card.addEventListener("click", ()=>{
         const id = card.getAttribute("data-id");
         const it = items.find(x=> String(x.id) === String(id));
-        if(it) openModal(it);
+        if(!it) return;
+        const canOpenMedia = mainTab === "feed" || (mainTab === "saved" && (savedTab === "images" || savedTab === "videos"));
+        if(canOpenMedia) openModal(it);
+        else if(it.username) window.location.href = `/artist?username=${encodeURIComponent(it.username)}`;
       });
     });
 
@@ -1255,6 +1289,29 @@
     });
   }
 
+  function setMainTabUI(){
+    const meta = {
+      feed: ["Feed", "Explore the best user generations."],
+      posts: ["Posts", "Community posts with comments, likes and saves."],
+      collections: ["Collections", "User collections sorted by activity and freshness."],
+      saved: ["Saved", "Everything you saved grouped by content type."]
+    };
+    const [title, desc] = meta[mainTab] || meta.feed;
+    $mainTitle.textContent = title;
+    if($mainDesc) $mainDesc.textContent = desc;
+    $segSort.style.display = mainTab === "saved" ? "none" : "flex";
+    $segSaved.style.display = mainTab === "saved" ? "flex" : "none";
+    $btnVideoOnly.style.display = mainTab === "feed" ? "inline-flex" : "none";
+  }
+
+  async function fetchFallback(paths){
+    let err = null;
+    for(const p of paths){
+      try{ return await api(p, { method:"GET" }); }catch(e){ err = e; }
+    }
+    throw err || new Error("Failed to load");
+  }
+
   async function fetchPage(reset=false){
     if(loading) return;
     loading = true;
@@ -1268,35 +1325,47 @@
         $grid.innerHTML = "Loading...";
       }
 
-      if(sort === "following" && !(await getSessionToken())){
-        $grid.innerHTML = `<div class="lf-empty">Login to see following feed.</div>`;
+      if((sort === "following" || mainTab === "saved") && !(await getSessionToken())){
+        $grid.innerHTML = `<div class="lf-empty">Login required for this section.</div>`;
         hasMore = false;
         return;
       }
 
-      const q = `?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`;
-      const json = await api(`/api/feed/list${q}`, { method:"GET" });
+      let json = null;
+      if(mainTab === "feed"){
+        json = await api(`/api/feed/list?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`, { method:"GET" });
+      } else if(mainTab === "posts"){
+        json = await fetchFallback([
+          `/api/posts/feed?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`,
+          `/api/posts/list?limit=${PAGE_SIZE}&offset=${offset}&sort=${encodeURIComponent(sort)}`
+        ]);
+      } else if(mainTab === "collections"){
+        json = await fetchFallback([
+          `/api/collections/feed?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}&preview_limit=6`,
+          `/api/collections/list?limit=${PAGE_SIZE}&offset=${offset}&sort=${encodeURIComponent(sort)}&preview_limit=6`
+        ]);
+      } else {
+        json = await fetchFallback([
+          `/api/saved/list?type=${encodeURIComponent(savedTab)}&limit=${PAGE_SIZE}&offset=${offset}`,
+          `/api/library/saved?type=${encodeURIComponent(savedTab)}&limit=${PAGE_SIZE}&offset=${offset}`
+        ]);
+      }
 
       let page = Array.isArray(json.items) ? json.items : [];
       if(sort === "following"){
         if(followingIds.size === 0) await refreshFollowingIds();
-        page = page.filter((it) => followingIds.has(String(it.user_id)));
-        if(myUserId) page = page.filter((it) => String(it.user_id) !== String(myUserId));
+        page = page.filter((it) => !it.user_id || followingIds.has(String(it.user_id)));
       }
+
       const seen = new Set(items.map(x=> String(x.id)));
       for(const it of page){
         const k = String(it.id);
-        if(!seen.has(k)){
-          seen.add(k);
-          items.push(it);
-        }
+        if(!seen.has(k)){ seen.add(k); items.push(it); }
       }
 
       await hydrateFollowStates(page);
-
       offset = json.nextOffset ?? (offset + page.length);
       hasMore = !!json.hasMore;
-
       renderGrid();
     }catch(e){
       $grid.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`;
@@ -1498,11 +1567,14 @@
         const name = c.display_name || c.username || "user";
         const when = (c.created_at || "").replace("T"," ").slice(0,16);
         const mine = myId && String(c.user_id) === String(myId);
+        const isAuthor = myId && String(current.user_id) === String(myId);
+        const canDelete = mine || isAuthor;
+        const canEdit = mine;
         
-        const tools = mine ? `
+        const tools = (canEdit || canDelete) ? `
           <div class="c-tools">
-            <button class="icon-btn" data-edit="${c.id}">${editIcon}</button>
-            <button class="icon-btn danger" data-del="${c.id}">${trashIcon}</button>
+            ${canEdit ? `<button class="icon-btn" data-edit="${c.id}">${editIcon}</button>` : ``}
+            ${canDelete ? `<button class="icon-btn danger" data-del="${c.id}">${trashIcon}</button>` : ``}
           </div>` : "";
           
         const isEditing = String(editingCommentId) === String(c.id);
@@ -1533,7 +1605,7 @@
             <div class="avatar ${avIsEmoji ? "emoji" : ""}">${av}</div>
             <div class="c-bubble">
               <div class="c-top">
-                <div class="c-name">${safe(name)}</div>
+                <div class="c-name">${safe(name)} ${verifiedBadgeHTML(c.verified===true)}</div>
                 <div class="c-time">${safe(when)}</div>
                 ${tools}
               </div>
@@ -1543,6 +1615,7 @@
           </div>
         `;
       }).join("");
+      bindVerifiedTooltip($cList);
 
       $cList.querySelectorAll("[data-edit]").forEach(b=>{
         b.onclick = () => { editingCommentId = b.dataset.edit; deletingCommentId = null; loadComments(); };
@@ -1649,8 +1722,29 @@
   $btnLike.onclick = doLikeToggle;
   $btnSave.onclick = doSaveToggle;
   $cSend.onclick = sendComment;
-  $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendComment(); } });
+  $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); sendComment(); } });
+  $cEmoji.onclick = ()=>{ $cInput.value += "😊"; $cInput.focus(); };
   $btnReloadComments.onclick = loadComments;
+  $segMain.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = async ()=>{
+      $segMain.querySelectorAll("button").forEach(b=> b.classList.remove("active"));
+      btn.classList.add("active");
+      mainTab = btn.dataset.main;
+      onlyVideo = false;
+      $btnVideoOnly.classList.remove("active");
+      setMainTabUI();
+      await updateAuthHint();
+      await fetchPage(true);
+    };
+  });
+  $segSaved.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = async ()=>{
+      $segSaved.querySelectorAll("button").forEach(b=> b.classList.remove("active"));
+      btn.classList.add("active");
+      savedTab = btn.dataset.saved;
+      await fetchPage(true);
+    };
+  });
   $segSort.querySelectorAll("button").forEach(btn=>{
     btn.onclick = async ()=>{ $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active")); btn.classList.add("active"); sort = btn.dataset.sort; await fetchPage(true); };
   });
@@ -1660,6 +1754,7 @@
 
   async function updateAuthHint(){ const token = await getSessionToken(); $authHint.style.display = token ? "none" : "inline"; }
   async function init(){
+    setMainTabUI();
     await updateAuthHint();
     try{ if(window.sb){ window.sb.auth.onAuthStateChange(()=> { updateAuthHint(); loadFollowingSidebar(); }); } }catch(e){}
     myUserId = await getMyUserId();
