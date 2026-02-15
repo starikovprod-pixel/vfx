@@ -834,14 +834,17 @@
   function showLoader(v){ $loader.style.display = v ? "flex" : "none"; }
 
   function isVideoItem(it){
-    const kind = String(it.kind || it.media_type || "").toLowerCase();
-    const url = String(it.media_url || it.thumb_url || "").toLowerCase();
-    return (
-      kind === "video" ||
-      url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".mov") ||
-      url.includes("fal.media")
-    );
-  }
+  const kind = String(it.kind || it.media_type || "").toLowerCase();
+  const url = String(it.media_url || it.thumb_url || "").toLowerCase();
+
+  if (kind === "video") return true;
+
+  return (
+    url.endsWith(".mp4") ||
+    url.endsWith(".webm") ||
+    url.endsWith(".mov")
+  );
+}
 
   function safe(s){ return String(s || ""); }
 
@@ -995,7 +998,8 @@
     const token = await getSessionToken();
     if(!token) return value;
     try{
-      const st = await api(`/api/social/state?user_id=${encodeURIComponent(userId)}`, { method:"GET" });
+      const st = await api(`/api/social/state?user_id=${encodeURIComponent(userId)}`, { method:"GET", auth:true });
+
       value = !!st.following;
       cacheSet(userId, value);
       if(typeof onState === "function") onState(value);
@@ -1066,7 +1070,7 @@
       return;
     }
     try{
-      const j = await api("/api/social/following?limit=200", { method:"GET" });
+      const j = await api("/api/social/following?limit=200", { method:"GET", auth:true });
       const arr = Array.isArray(j.items) ? j.items : [];
       followingIds = new Set(arr.map((x) => String(x.user_id)));
       arr.forEach((x)=> cacheSet(x.user_id, true));
@@ -1116,7 +1120,7 @@
       return;
     }
     try{
-      const j = await api("/api/social/following?limit=200", { method:"GET" });
+      const j = await api("/api/social/following?limit=200", { method:"GET", auth:true });
       const arr = Array.isArray(j.items) ? j.items : [];
       followingIds = new Set(arr.map((x) => String(x.user_id)));
     }catch(e){
@@ -1125,23 +1129,28 @@
   }
 
   async function api(path, opts = {}) {
-    const token = await getSessionToken();
+  const method = (opts.method || "GET").toUpperCase();
+  const token = await getSessionToken();
 
-    const headers = Object.assign({}, opts.headers || {});
-    if (opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
+  const headers = Object.assign({}, opts.headers || {});
+  if (opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
 
-    if (token) headers.Authorization = "Bearer " + token;
+  // ✅ По умолчанию: авторизация только для НЕ-GET
+  const needAuth = (typeof opts.auth === "boolean") ? opts.auth : (method !== "GET");
+  if (needAuth && token) headers.Authorization = "Bearer " + token;
 
-    const res = await fetch(BACKEND + path, Object.assign({}, opts, { headers }));
-    let json = null;
-    try { json = await res.json(); } catch(e) { json = null; }
-    if (!res.ok) {
-      const msg = json?.error || json?.details || ("HTTP " + res.status);
-      console.error("API FAIL:", path, { status: res.status, body: json });
-      throw new Error(msg);
-    }
-    return json;
+  const res = await fetch(BACKEND + path, Object.assign({}, opts, { headers }));
+  let json = null;
+  try { json = await res.json(); } catch (e) { json = null; }
+
+  if (!res.ok) {
+    const msg = json?.error || json?.details || ("HTTP " + res.status);
+    console.error("API FAIL:", path, { status: res.status, body: json });
+    throw new Error(msg);
   }
+  return json;
+}
+
 
   function renderCard(it){
     const video = isVideoItem(it);
@@ -1423,7 +1432,8 @@
         return;
       }
 
-      const json = await api(getListPath(), { method:"GET" });
+      const needAuth = (mainTab === "saved") || (sort === "following");
+const json = await api(getListPath(), { method:"GET", auth: needAuth });
 
       let page = Array.isArray(json.items) ? json.items : [];
       if(mainTab !== "saved" && sort === "following"){
@@ -1461,7 +1471,7 @@
     const ids = Array.from(new Set((page || []).map((x)=> x.user_id).filter(Boolean)));
     if(!ids.length) return;
     try{
-      const j = await api(`/api/social/state_many?user_ids=${encodeURIComponent(ids.join(","))}`, { method:"GET" });
+      const j = await api(`/api/social/state_many?user_ids=${encodeURIComponent(ids.join(","))}`, { method:"GET", auth:true });
       const map = j?.map || {};
       items = items.map((it)=>{
         const id = String(it.user_id);
@@ -1510,7 +1520,7 @@
     try {
       const t = await getSessionToken();
       if (t) {
-        const st = await api(`/api/feed/state?post_id=${encodeURIComponent(current.id)}`, { method:"GET" });
+        const st = await api(`/api/feed/state?post_id=${encodeURIComponent(current.id)}`, { method:"GET", auth:true });
         liked = !!st.liked;
         saved = !!st.saved;
         $btnLike.classList.toggle("on", liked);
