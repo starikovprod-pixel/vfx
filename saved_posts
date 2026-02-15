@@ -460,8 +460,30 @@
     opacity:1;
     transform: translateY(0);
   }#lf-saved-posts /* artist-like posts/collections */
-  .feed{ width:min(860px,100%); margin:0; display:flex; flex-direction:column; gap:0; }#lf-saved-posts .feed-sep{ height:1px; background:rgba(255,255,255,0.10); margin:18px 0; }#lf-saved-posts .post{ width:100%; display:flex; flex-direction:column; gap:12px; }#lf-saved-posts .post-head{ display:flex; gap:10px; align-items:center; }#lf-saved-posts .post-meta{ min-width:0; display:flex; flex-direction:column; gap:2px; }#lf-saved-posts .post-name{ font-weight:950; font-size:14px; display:flex; align-items:center; gap:6px; }#lf-saved-posts .post-time{ font-size:12px; color:rgba(255,255,255,0.6); }#lf-saved-posts .post-body{ font-size:15px; line-height:1.5; color:rgba(255,255,255,0.92); white-space:pre-wrap; word-break:break-word; }#lf-saved-posts .embed-collection{ margin-top:10px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); overflow:hidden; cursor:pointer; position:relative; }#lf-saved-posts .embed-bg{ position:absolute; inset:0; background:#000; }#lf-saved-posts .embed-bg img, #lf-saved-posts .embed-bg video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .6s ease; }#lf-saved-posts .embed-bg img.on, #lf-saved-posts .embed-bg video.on{ opacity:.85; }#lf-saved-posts .embed-overlay{ position:relative; padding:16px; background:linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.1)); }#lf-saved-posts .embed-title{ font-weight:950; font-size:14px; }#lf-saved-posts .embed-desc{ margin-top:6px; font-size:13px; color:rgba(255,255,255,.75); }#lf-saved-posts .pslider{ width:fit-content; max-width:100%; margin:0 auto; position:relative; }#lf-saved-posts .pslide img, #lf-saved-posts .pslide video{ display:block; width:auto; height:auto; max-width:100%; max-height:420px; object-fit:contain; margin:0 auto; border-radius:22px; border:1px solid rgba(255,255,255,.10); }#lf-saved-posts .pnav{ position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.45); color:#fff; }#lf-saved-posts .pnav.prev{ left:10px; }#lf-saved-posts .pnav.next{ right:10px; }#lf-saved-posts .pdots{ position:absolute; left:50%; transform:translateX(-50%); bottom:10px; display:flex; gap:6px; padding:7px 10px; border-radius:999px; background:rgba(0,0,0,.45); }#lf-saved-posts .pdots button{ width:7px; height:7px; border-radius:99px; border:0; background:rgba(255,255,255,.35); }#lf-saved-posts .pdots button.on{ background:#fff; }#lf-saved-posts .post-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }#lf-saved-posts .mini{ padding:8px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#fff; display:inline-flex; align-items:center; gap:8px; }#lf-saved-posts .mini.on.like{ color:var(--danger); border-color:rgba(255,70,90,.45); background:rgba(255,70,90,.14); }#lf-saved-posts .mini.on.save{ color:#2b6cff; border-color:rgba(43,108,255,.45); background:rgba(43,108,255,.18); }#lf-saved-posts .pc{ border-top:1px solid rgba(255,255,255,.10); padding-top:12px; margin-top:6px; display:flex; flex-direction:column; gap:10px; }#lf-saved-posts .pc-list{ display:flex; flex-direction:column; gap:10px; max-height:320px; overflow:auto; }#lf-saved-posts .pc-item{ display:flex; gap:10px; align-items:flex-start; }#lf-saved-posts .pc-bubble{ flex:1; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); padding:8px 12px; }#lf-saved-posts .pc-top{ display:flex; gap:8px; align-items:center; margin-bottom:4px; }#lf-saved-posts .pc-footer{ margin-top:6px; display:flex; align-items:center; justify-content:space-between; }#lf-saved-posts .pc-name{ font-weight:950; font-size:12px; color:#fff; text-decoration:none; }#lf-saved-posts .pc-time{ font-size:11px; color:rgba(255,255,255,.55); }#lf-saved-posts .pc-body{ font-size:13px; line-height:1.3; white-space:pre-wrap; overflow-wrap:anywhere; }#lf-saved-posts .pc-form{ display:flex; gap:10px; align-items:flex-start; }#lf-saved-posts .pc-input{ flex:1; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:14px; color:#fff; padding:10px 12px; }#lf-saved-posts .pc-ta{ width:100%; resize:none; min-height:44px; max-height:180px; overflow:hidden; }#lf-saved-posts .pc-send{ width:44px; height:44px; border:0; border-radius:14px; background:#fff; color:#000; }#lf-saved-posts .cgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; padding-top:18px; }#lf-saved-posts .ccard{ position:relative; border-radius:22px; overflow:hidden; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); min-height:320px; }#lf-saved-posts .cc-bg{ position:absolute; inset:0; background:#000; }#lf-saved-posts .cc-bg img, #lf-saved-posts .cc-bg video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .8s ease; }#lf-saved-posts .cc-bg img.on, #lf-saved-posts .cc-bg video.on{ opacity:.85; }#lf-saved-posts .cc-glass{ position:relative; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:20px; background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.14)); }#lf-saved-posts .cc-title{ font-weight:1000; font-size:18px; }#lf-saved-posts .cc-desc{ margin-top:10px; font-size:13px; color:rgba(255,255,255,.75); }#lf-saved-posts .cc-meta{ position:absolute; left:14px; right:14px; bottom:14px; display:flex; gap:8px; justify-content:center; }#lf-saved-posts .cc-pill{ padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.35); font-size:12px; display:inline-flex; gap:6px; }#lf-saved-posts .pc-mention{ color:#7db4ff; text-decoration:none; font-weight:900; }#lf-saved-posts .pc-mention:hover{ text-decoration:underline; }#lf-saved-posts .pc-actions{ display:flex; gap:6px; align-items:center; }#lf-saved-posts .cic{ border:0; background:transparent; color:rgba(255,255,255,.7); display:inline-flex; align-items:center; gap:4px; cursor:pointer; padding:0; }#lf-saved-posts .cic.on{ color:var(--danger); }#lf-saved-posts .pc-edit-ta{ width:100%; min-height:74px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.14); border-radius:12px; color:#fff; padding:8px 10px; }#lf-saved-posts .pc-form-actions{ display:flex; gap:8px; }#lf-saved-posts .sheet-backdrop{ position:fixed; inset:0; z-index:14000; background:rgba(0,0,0,0.86); backdrop-filter: blur(5px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:.18s; }#lf-saved-posts .sheet-backdrop.open{ opacity:1; pointer-events:auto; }#lf-saved-posts .sheet{ width:92%; max-width:980px; height:88vh; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:24px; overflow:hidden; position:relative; display:flex; flex-direction:column; backdrop-filter: blur(14px);}#lf-saved-posts .sheet-head{ padding:16px 16px 12px; border-bottom:1px solid rgba(255,255,255,0.10); display:flex; justify-content:space-between; gap:10px; align-items:center; }#lf-saved-posts .sheet-title{ font-weight:950; font-size:16px; }#lf-saved-posts .sheet-close{ width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.45); color:#fff; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; }#lf-saved-posts .sheet-body{ padding:14px 16px 16px; overflow:auto; flex:1; display:flex; flex-direction:column; gap:12px; }#lf-saved-posts #emoGrid button{ height:44px; border-radius:14px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); cursor:pointer; font-size:22px; }#lf-saved-posts @media(max-width: 980px){#lf-saved-posts .feed-layout{ grid-template-columns:1fr; }#lf-saved-posts .feed-right{ position:relative; top:0; height:auto; }#lf-saved-posts .lf-modal{ flex-direction: column; height: 92vh; }#lf-saved-posts .m-sidebar{ width: 100%; height: 46vh; border-left: none; border-top: 1px solid var(--border); }#lf-saved-posts .m-preview{ height: 46vh; }
+  .feed{ width:min(860px,100%); margin:0; display:flex; flex-direction:column; gap:0; }#lf-saved-posts .feed-sep{ height:1px; background:rgba(255,255,255,0.10); margin:18px 0; }#lf-saved-posts .post{ width:100%; display:flex; flex-direction:column; gap:12px; }#lf-saved-posts .post-head{ display:flex; gap:10px; align-items:center; }#lf-saved-posts .post-meta{ min-width:0; display:flex; flex-direction:column; gap:2px; }#lf-saved-posts .post-name{ font-weight:950; font-size:14px; display:flex; align-items:center; gap:6px; }#lf-saved-posts .post-author-link{ color:#fff; text-decoration:none; font:inherit; }#lf-saved-posts .post-author-link:hover{ text-decoration:underline; }#lf-saved-posts .post-time{ font-size:12px; color:rgba(255,255,255,0.6); }#lf-saved-posts .post-body{ font-size:15px; line-height:1.5; color:rgba(255,255,255,0.92); white-space:pre-wrap; word-break:break-word; }#lf-saved-posts .embed-collection{ margin-top:10px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); overflow:hidden; cursor:pointer; position:relative; }#lf-saved-posts .embed-bg{ position:absolute; inset:0; background:#000; }#lf-saved-posts .embed-bg img, #lf-saved-posts .embed-bg video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .6s ease; }#lf-saved-posts .embed-bg img.on, #lf-saved-posts .embed-bg video.on{ opacity:.85; }#lf-saved-posts .embed-overlay{ position:relative; padding:16px; background:linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.1)); }#lf-saved-posts .embed-title{ font-weight:950; font-size:14px; }#lf-saved-posts .embed-desc{ margin-top:6px; font-size:13px; color:rgba(255,255,255,.75); }#lf-saved-posts .pslider{ width:fit-content; max-width:100%; margin:0 auto; position:relative; }#lf-saved-posts .pslide img, #lf-saved-posts .pslide video{ display:block; width:auto; height:auto; max-width:100%; max-height:420px; object-fit:contain; margin:0 auto; border-radius:22px; border:1px solid rgba(255,255,255,.10); }#lf-saved-posts .pnav{ position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.45); color:#fff; }#lf-saved-posts .pnav.prev{ left:10px; }#lf-saved-posts .pnav.next{ right:10px; }#lf-saved-posts .pdots{ position:absolute; left:50%; transform:translateX(-50%); bottom:10px; display:flex; gap:6px; padding:7px 10px; border-radius:999px; background:rgba(0,0,0,.45); }#lf-saved-posts .pdots button{ width:7px; height:7px; border-radius:99px; border:0; background:rgba(255,255,255,.35); }#lf-saved-posts .pdots button.on{ background:#fff; }#lf-saved-posts .post-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }#lf-saved-posts .mini{ padding:8px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#fff; display:inline-flex; align-items:center; gap:8px; }#lf-saved-posts .mini.on.like{ color:var(--danger); border-color:rgba(255,70,90,.45); background:rgba(255,70,90,.14); }#lf-saved-posts .mini.on.save{ color:#2b6cff; border-color:rgba(43,108,255,.45); background:rgba(43,108,255,.18); }#lf-saved-posts .pc{ border-top:1px solid rgba(255,255,255,.10); padding-top:12px; margin-top:6px; display:flex; flex-direction:column; gap:10px; }#lf-saved-posts .pc-list{ display:flex; flex-direction:column; gap:10px; max-height:320px; overflow:auto; }#lf-saved-posts .pc-item{ display:flex; gap:10px; align-items:flex-start; }#lf-saved-posts .pc-bubble{ flex:1; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); padding:8px 12px; }#lf-saved-posts .pc-top{ display:flex; gap:8px; align-items:center; margin-bottom:4px; }#lf-saved-posts .pc-footer{ margin-top:6px; display:flex; align-items:center; justify-content:space-between; }#lf-saved-posts .pc-name{ font-weight:950; font-size:12px; color:#fff; text-decoration:none; }#lf-saved-posts .pc-time{ font-size:11px; color:rgba(255,255,255,.55); }#lf-saved-posts .pc-body{ font-size:13px; line-height:1.3; white-space:pre-wrap; overflow-wrap:anywhere; }#lf-saved-posts .pc-form{ display:flex; gap:10px; align-items:flex-start; }#lf-saved-posts .pc-input{ flex:1; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:14px; color:#fff; padding:10px 12px; }#lf-saved-posts .pc-ta{ width:100%; resize:none; min-height:44px; max-height:180px; overflow:hidden; }#lf-saved-posts .pc-send{ width:44px; height:44px; border:0; border-radius:14px; background:#fff; color:#000; }#lf-saved-posts .cgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; padding-top:18px; }#lf-saved-posts .ccard{ position:relative; border-radius:22px; overflow:hidden; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); min-height:320px; }#lf-saved-posts .cc-bg{ position:absolute; inset:0; background:#000; }#lf-saved-posts .cc-bg img, #lf-saved-posts .cc-bg video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .8s ease; }#lf-saved-posts .cc-bg img.on, #lf-saved-posts .cc-bg video.on{ opacity:.85; }#lf-saved-posts .cc-glass{ position:relative; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:20px; background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.14)); }#lf-saved-posts .cc-title{ font-weight:1000; font-size:18px; }#lf-saved-posts .cc-desc{ margin-top:10px; font-size:13px; color:rgba(255,255,255,.75); }#lf-saved-posts .cc-meta{ position:absolute; left:14px; right:14px; bottom:14px; display:flex; gap:8px; justify-content:center; }#lf-saved-posts .cc-pill{ padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.35); font-size:12px; display:inline-flex; gap:6px; }#lf-saved-posts .pc-mention{ color:#7db4ff; text-decoration:none; font-weight:900; }#lf-saved-posts .pc-mention:hover{ text-decoration:underline; }#lf-saved-posts .pc-actions{ display:flex; gap:6px; align-items:center; }#lf-saved-posts .cic{ border:0; background:transparent; color:rgba(255,255,255,.7); display:inline-flex; align-items:center; gap:4px; cursor:pointer; padding:0; }#lf-saved-posts .cic.on{ color:var(--danger); }#lf-saved-posts .pc-edit-ta{ width:100%; min-height:74px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.14); border-radius:12px; color:#fff; padding:8px 10px; }#lf-saved-posts .pc-form-actions{ display:flex; gap:8px; }#lf-saved-posts .sheet-backdrop{ position:fixed; inset:0; z-index:14000; background:rgba(0,0,0,0.86); backdrop-filter: blur(5px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:.18s; }#lf-saved-posts .sheet-backdrop.open{ opacity:1; pointer-events:auto; }#lf-saved-posts .sheet{ width:92%; max-width:980px; height:88vh; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:24px; overflow:hidden; position:relative; display:flex; flex-direction:column; backdrop-filter: blur(14px);}#lf-saved-posts .sheet-head{ padding:16px 16px 12px; border-bottom:1px solid rgba(255,255,255,0.10); display:flex; justify-content:space-between; gap:10px; align-items:center; }#lf-saved-posts .sheet-title{ font-weight:950; font-size:16px; }#lf-saved-posts .sheet-close{ width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.45); color:#fff; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; }#lf-saved-posts .sheet-body{ padding:14px 16px 16px; overflow:auto; flex:1; display:flex; flex-direction:column; gap:12px; }#lf-saved-posts #emoGrid button{ height:44px; border-radius:14px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); cursor:pointer; font-size:22px; }#lf-saved-posts @media(max-width: 980px){#lf-saved-posts .feed-layout{ grid-template-columns:1fr; }#lf-saved-posts .feed-right{ position:relative; top:0; height:auto; }#lf-saved-posts .lf-modal{ flex-direction: column; height: 92vh; }#lf-saved-posts .m-sidebar{ width: 100%; height: 46vh; border-left: none; border-top: 1px solid var(--border); }#lf-saved-posts .m-preview{ height: 46vh; }
   }
+
+  /* parity overrides: artist post/comment controls */
+  #lf-saved-posts .seg button, #lf-saved-posts .seg a{ color:#fff; }
+  #lf-saved-posts #seg-main a{ color:#fff; }
+  #lf-saved-posts #seg-main a.active{ color:#fff; background:rgba(255,255,255,0.10); }
+  #lf-saved-posts .mini{ cursor:pointer; font-weight:900; font-size:12px; transition:.15s; }
+  #lf-saved-posts .mini:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+  #lf-saved-posts .mini svg{ width:16px; height:16px; stroke: currentColor; fill:none; stroke-width:2; }
+  #lf-saved-posts .pc-ta{ min-width:0; line-height:1.35; }
+  #lf-saved-posts .pc-ta:focus{ min-height:96px; }
+  #lf-saved-posts .search{ display:flex; gap:8px; align-items:center; padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color:#fff; }
+  #lf-saved-posts .search input{ border:0; outline:none; background:transparent; color:#fff; font-weight:850; min-width:220px; }
+  #lf-saved-posts .cic{ width:auto; height:28px; padding:0 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.06); color:#fff; display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-weight:900; font-size:12px; }
+  #lf-saved-posts .cic svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
+  #lf-saved-posts .cic.on{ color: var(--danger); border-color: rgba(255,70,90,0.45); background: rgba(255,70,90,0.14); }
+  #lf-saved-posts .cact{ width:30px; height:30px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; }
+  #lf-saved-posts .cact:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+  #lf-saved-posts .cact svg{ width:16px; height:16px; stroke:#fff; fill:none; stroke-width:2; }
+  #lf-saved-posts .cact.danger{ color:#ffd3d8; border-color: rgba(255,70,90,0.35); }
+  #lf-saved-posts .cact.danger svg{ stroke:#ffd3d8; }
+  #lf-saved-posts .cact.danger:hover{ border-color: rgba(255,70,90,0.55); }
+
 </style>
 
 <div id="lf-saved-posts">
@@ -471,6 +493,11 @@
       <div>
         <h1 class="lf-h1">Posts</h1>
         <div class="lf-sub">
+          <div class="seg" id="seg-sort">
+            <button class="active" data-sort="trending">Trending</button>
+            <button data-sort="new">New</button>
+            <button data-sort="following">Following</button>
+          </div>
           <button class="tab-btn" id="btn-video-only" type="button" style="display:none;">Video only</button>
           <span id="auth-hint" style="color:rgba(255,255,255,0.55)">Login to like / save / comment.</span>
         </div>
@@ -484,14 +511,12 @@
           <a class="active" href="https://lightfull.ai/saved_images">Saved</a>
         </div>
 
-
         <div class="seg" id="seg-saved" style="display:flex;">
           <a href="https://lightfull.ai/saved_images">Images</a>
           <a href="https://lightfull.ai/saved_videos">Videos</a>
           <a class="active" href="https://lightfull.ai/saved_posts">Posts</a>
           <a href="https://lightfull.ai/saved_collections">Collections</a>
         </div>
-
 
         <button class="btn-refresh-icon" id="btn-refresh" title="Refresh">
           <svg viewBox="0 0 24 24"><path d="M21 2v6h-6M3 22v-6h6M21 12c0 4.97-4.03 9-9 9-3.33 0-6.25-1.81-7.81-4.5M3 12c0-4.97 4.03-9 9-9 3.33 0 6.25 1.81 7.81 4.5"/></svg>
@@ -627,6 +652,7 @@
   let deletingCommentId = null;
   let followState = false;
   let myUserId = null;
+  let myProfile = null;
   let followingIds = new Set();
 
   // elements
@@ -861,6 +887,10 @@
     return s ? s.replace("T"," ").slice(0,16) : "";
   }
 
+  function getPostDate(post){
+    return post?.created_at || post?.published_at || post?.posted_at || post?.inserted_at || post?.updated_at || "";
+  }
+
   function verifiedBadgeHTML(v){
     return v ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : "";
   }
@@ -958,6 +988,20 @@
       const { data } = await window.sb.auth.getUser();
       return data?.user?.id || null;
     }catch(e){ return null; }
+  }
+
+  async function fetchMyPublicProfile(accessToken){
+    try{
+      const r = await fetch("https://api.lightfull.ai/api/profile_public", {
+        method:"GET",
+        headers:{ Authorization: "Bearer " + accessToken }
+      });
+      const j = await r.json().catch(()=> ({}));
+      if(!r.ok) return null;
+      return j?.profile || null;
+    }catch(e){
+      return null;
+    }
   }
 
   async function refreshFollowingIds(){
@@ -1084,7 +1128,13 @@
   function isVideoUrl(url){ const u=String(url||'').toLowerCase(); return u.endsWith('.mp4')||u.endsWith('.webm')||u.endsWith('.mov')||u.includes('fal.media'); }
   const postCommentsMode = new Map();
   const replyToByPost = new Map();
-  const EMOJI_CPS = [0x1F600,0x1F604,0x1F60E,0x1F525,0x2728,0x1F9E0,0x1F47B,0x1F916,0x1F431,0x1F680,0x2764,0x1F49C];
+  const EMOJI_CPS = [
+    0x1F600,0x1F604,0x1F601,0x1F60E,0x1F913,0x1F978,0x1F607,0x1F642,0x1F609,0x1F60D,0x1F618,0x1F929,0x1F624,0x1F608,0x1F47B,0x1F916,
+    0x1F525,0x26A1,0x1F48E,0x2728,0x1F319,0x2B50,0x2600,0x1F308,0x2601,0x2744,0x1F480,0x1F9E0,0x1F441,0x1F3AC,0x1F3A5,0x1F39E,
+    0x1F3AE,0x1F579,0x1F3A8,0x1F58C,0x1F9E9,0x1F3A7,0x1F3B5,0x1F977,0x1F98A,0x1F431,0x1F436,0x1F43C,0x1F984,0x1F438,0x1F435,0x1F989,
+    0x1F33F,0x2618,0x1F344,0x1F30A,0x1F3DD,0x1F3D4,0x1F3D9,0x1F680,0x1F6F8,0x1F6F0,0x1F9EA,0x2699,0x1F9F0,0x1F527,0x1F52E,0x1F4CC,
+    0x2764,0x1F5A4,0x1F499,0x1F49C,0x1F90D,0x1F49B,0x1F49A,0x1F4A5,0x1F4AB,0x1FAE7,0x1F9FF,0x1F3C6,0x1F4BC,0x1F4F7,0x1F4A1,0x1F9CA
+  ];
   const EMOJIS = EMOJI_CPS.map(cp => String.fromCodePoint(cp));
   let emoTargetInput = null;
   function openEmojiPicker(inputEl){ if(!$emoB||!$emoSearch||!$emoGrid) return; emoTargetInput=inputEl; $emoSearch.value=''; renderEmojiGrid(''); $emoB.classList.add('open'); setTimeout(()=> $emoSearch.focus(),0); }
@@ -1093,11 +1143,13 @@
   function linkifyMentions(text){ const safeTxt=escapeHtml(text); return safeTxt.replace(/(^|\s)@([a-zA-Z0-9_\.]{2,32})/g,(m,p1,u)=> `${p1}<a class="pc-mention" href="/artist?username=${encodeURIComponent(u)}">@${u}</a>`); }
 
   function myAvatarHTML(){
-    const me = {}; // feed: unknown self profile in this context
-    const letter = ((me.display_name || me.username || 'U').trim().slice(0,1) || 'U').toUpperCase();
-    const em = me.avatar_type === 'emoji' && me.avatar_emoji;
-    if(em) return `<div class="avatar emoji"><span>${escapeHtml(me.avatar_emoji)}</span></div>`;
-    if(me.avatar_url) return `<div class="avatar"><img src="${escapeHtml(me.avatar_url)}"></div>`;
+    const letter = ((myProfile?.display_name || myProfile?.username || "U").trim().slice(0,1) || "U").toUpperCase();
+    if(!myProfile){
+      return `<div class="avatar" style="display:flex;align-items:center;justify-content:center;font-weight:950;color:#fff">${letter}</div>`;
+    }
+    const em = myProfile.avatar_type === "emoji" && myProfile.avatar_emoji;
+    if(em) return `<div class="avatar emoji"><span>${escapeHtml(myProfile.avatar_emoji)}</span></div>`;
+    if(myProfile.avatar_url) return `<div class="avatar"><img src="${escapeHtml(myProfile.avatar_url)}"></div>`;
     return `<div class="avatar" style="display:flex;align-items:center;justify-content:center;font-weight:950;color:#fff">${letter}</div>`;
   }
 
@@ -1110,7 +1162,7 @@
       const bodyHtml = parts.map(part=> part.type==='text' ? `<span>${escapeHtml(part.value)}</span>` : `<div class="embed-collection" data-embed-col="${escapeHtml(part.id)}"><div class="embed-bg" data-embed-bg="${escapeHtml(part.id)}"></div><div class="embed-overlay"><div class="embed-title">Collection</div><div class="embed-desc">Loading…</div></div></div>`).join('');
       const hasSlider = media.length > 0;
       const sliderId = `ps_${p.id.replaceAll('-', '')}`;
-      return `<div class="post" data-post="${escapeHtml(p.id)}"><div class="post-head"><a class="pc-ava-link" href="/artist?username=${encodeURIComponent(p.username||'')}"><div class="avatar ${(p.avatar_type==='emoji'&&p.avatar_emoji)?'emoji':''}">${(p.avatar_type==='emoji'&&p.avatar_emoji)?`<span>${escapeHtml(p.avatar_emoji)}</span>`:(p.avatar_url?`<img src="${escapeHtml(p.avatar_url)}" />`:"")}</div></a><div class="post-meta"><div class="post-name"><a class="pc-name" href="/artist?username=${encodeURIComponent(p.username||'')}">${escapeHtml(p.display_name || p.username || 'user')}</a>${verifiedBadgeHTML(p.verified === true)}</div><div class="post-time">${escapeHtml(fmtDate(p.created_at))}</div></div></div><div class="post-body">${bodyHtml}</div>${hasSlider ? `<div class="pslider" data-slider="${sliderId}"><div class="pslide" data-slide></div>${media.length>1?`<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button><div class="pdots" data-dots></div>`:''}</div>`:''}<div class="post-actions"><button class="mini ${p._liked ? 'on like':''}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button><button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button><button class="mini ${p._saved ? 'on save':''}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button><div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div></div><div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0?'flex':'none'};"><div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="lf-empty" style="padding:18px">Loading…</div></div><button class="tab-btn" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button><div class="pc-form">${myAvatarHTML()}<textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea><button class="mini" data-emo="${escapeHtml(p.id)}">Emoji</button><button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button></div></div>${idx < items.length-1 ? `<div class="feed-sep"></div>`:''}</div>`;
+      return `<div class="post" data-post="${escapeHtml(p.id)}"><div class="post-head"><a class="pc-ava-link" href="/artist?username=${encodeURIComponent(p.username||'')}"><div class="avatar ${(p.avatar_type==='emoji'&&p.avatar_emoji)?'emoji':''}">${(p.avatar_type==='emoji'&&p.avatar_emoji)?`<span>${escapeHtml(p.avatar_emoji)}</span>`:(p.avatar_url?`<img src="${escapeHtml(p.avatar_url)}" />`:"")}</div></a><div class="post-meta"><div class="post-name"><a class="post-author-link" href="/artist?username=${encodeURIComponent(p.username||'')}">${escapeHtml(p.display_name || p.username || 'user')}</a>${verifiedBadgeHTML(p.verified === true)}</div><div class="post-time">${escapeHtml(fmtDate(getPostDate(p)))}</div></div></div><div class="post-body">${bodyHtml}</div>${hasSlider ? `<div class="pslider" data-slider="${sliderId}"><div class="pslide" data-slide></div>${media.length>1?`<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button><div class="pdots" data-dots></div>`:''}</div>`:''}<div class="post-actions"><button class="mini ${p._liked ? 'on like':''}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button><button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button><button class="mini ${p._saved ? 'on save':''}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button><div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div></div><div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0?'flex':'none'};"><div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="lf-empty" style="padding:18px">Loading…</div></div><button class="tab-btn" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button><div class="pc-form">${myAvatarHTML()}<textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea><button class="mini" type="button" data-emo="${escapeHtml(p.id)}">Emoji</button><button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button></div></div>${idx < items.length-1 ? `<div class="feed-sep"></div>`:''}</div>`;
     }).join('')}</div>`;
 
     items.forEach(p=>{ const media=Array.isArray(p.media)?p.media:[]; if(media.length) initPostSlider(p.id, media); });
@@ -1121,38 +1173,211 @@
     $grid.querySelectorAll('[data-viewall]').forEach(btn=> btn.onclick = async ()=>{ const pid=btn.getAttribute('data-viewall'); postCommentsMode.set(pid,'all'); await loadPostComments(pid); btn.style.display='none'; });
     $grid.querySelectorAll('[data-send]').forEach(btn=> btn.onclick = ()=> sendPostComment(btn.getAttribute('data-send')));
     $grid.querySelectorAll('[data-emo]').forEach(btn=> btn.onclick = ()=>{ const pid=btn.getAttribute('data-emo'); const inp=document.getElementById('pc-in-'+pid); if(inp) openEmojiPicker(inp); });
-    $grid.querySelectorAll('.pc-ta').forEach(ta=>{ ta.addEventListener('input', ()=>autoGrow(ta)); ta.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); sendPostComment(ta.id.replace('pc-in-','')); }}); });
+    $grid.querySelectorAll('.pc-ta').forEach(ta=>{ ta.addEventListener('focus', ()=>autoGrow(ta)); ta.addEventListener('input', ()=>autoGrow(ta)); ta.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); sendPostComment(ta.id.replace('pc-in-','')); }}); });
     items.forEach(p=>{ if((p.comment_count||0)>0) loadPostComments(p.id); });
   }
 
   async function loadPostComments(post_id){
-    const listEl=document.getElementById('pc-list-'+post_id); if(!listEl) return;
+    const listEl = document.getElementById("pc-list-" + post_id);
+    if(!listEl) return;
     listEl.innerHTML = `<div class="lf-empty" style="padding:18px">Loading…</div>`;
     try{
-      const mode=postCommentsMode.get(post_id)||'preview';
-      const limit=mode==='all'?80:3;
-      const j=await api(`/api/posts/comments?post_id=${encodeURIComponent(post_id)}&limit=${limit}&offset=0`,{method:'GET'});
-      const arr=Array.isArray(j.items)?j.items:[];
-      if(!arr.length){ listEl.innerHTML=`<div class="lf-empty" style="padding:18px">No comments yet.</div>`; return; }
-      const post=items.find(x=>String(x.id)===String(post_id));
-      const myId=myUserId?String(myUserId):'';
-      listEl.innerHTML = arr.map(c=>{ const mine=myId && String(c.user_id)===myId; const canDelete=mine || (myId && post && String(post.user_id)===myId); return `<div class="pc-item"><a class="pc-ava-link" href="/artist?username=${encodeURIComponent(c.username||'')}"><div class="avatar ${(c.avatar_type==='emoji'&&c.avatar_emoji)?'emoji':''}">${(c.avatar_type==='emoji'&&c.avatar_emoji)?`<span>${escapeHtml(c.avatar_emoji)}</span>`:(c.avatar_url?`<img src="${escapeHtml(c.avatar_url)}" />`:"")}</div></a><div class="pc-bubble"><div class="pc-top"><a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||'')}">${escapeHtml(c.display_name||c.username||'user')}</a>${verifiedBadgeHTML(c.verified===true)}<button class="cic ${c.liked_by_me?'on':''}" data-clike="${escapeHtml(c.id)}">${ICONS.like}<span>${c.like_count||0}</span></button></div><div class="pc-body" data-body="${escapeHtml(c.id)}">${linkifyMentions(c.body||'')}</div><div class="pc-footer"><div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div><div class="pc-actions">${mine?`<button class="cic" data-c-edit="${escapeHtml(c.id)}">${ICONS.edit}</button>`:''}<button class="cic" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||'')}">${ICONS.reply}</button>${canDelete?`<button class="cic" data-c-del="${escapeHtml(c.id)}">${ICONS.trash}</button>`:''}</div></div></div></div>`; }).join('');
-      listEl.querySelectorAll('[data-clike]').forEach(btn=>btn.onclick=async()=>{ const cid=btn.getAttribute('data-clike'); const row=arr.find(x=>String(x.id)===String(cid)); if(!row) return; const t=await requireLoginOrWarn(); if(!t) return; const ep=row.liked_by_me?'/api/posts/comment_unlike':'/api/posts/comment_like'; await api(ep,{method:'POST',body:JSON.stringify({comment_id:cid})}); await loadPostComments(post_id); });
-      listEl.querySelectorAll('[data-c-del]').forEach(btn=>btn.onclick=async()=>{ const cid=btn.getAttribute('data-c-del'); const t=await requireLoginOrWarn(); if(!t) return; await api('/api/posts/comment_delete',{method:'POST',body:JSON.stringify({comment_id:cid})}); await loadPostComments(post_id); });
-      listEl.querySelectorAll('[data-c-edit]').forEach(btn=>btn.onclick=async()=>{ const cid=btn.getAttribute('data-c-edit'); const body=listEl.querySelector(`[data-body="${CSS.escape(cid)}"]`); const text=prompt('Edit comment', body?.textContent||''); if(!text) return; const t=await requireLoginOrWarn(); if(!t) return; await api('/api/posts/comment_edit',{method:'POST',body:JSON.stringify({comment_id:cid, body:text})}); await loadPostComments(post_id); });
-      listEl.querySelectorAll('[data-c-reply]').forEach(btn=>btn.onclick=()=>{ const cid=btn.getAttribute('data-c-reply'); const uname=btn.getAttribute('data-u')||''; replyToByPost.set(post_id,{comment_id:cid,username:uname}); const inp=document.getElementById('pc-in-'+post_id); if(inp){ inp.value+=(inp.value?' ':'')+`@${uname} `; inp.focus(); autoGrow(inp);} });
-    }catch(e){ listEl.innerHTML=`<div class="lf-empty" style="padding:18px;color:var(--danger)">${escapeHtml(e.message)}</div>`; }
+      const mode = postCommentsMode.get(post_id) || "preview";
+      const limit = mode === "all" ? 80 : 3;
+      const j = await api(`/api/posts/comments?post_id=${encodeURIComponent(post_id)}&limit=${limit}&offset=0`, { method:"GET" });
+      const arr = Array.isArray(j.items) ? j.items : [];
+      if(!arr.length){
+        listEl.innerHTML = `<div class="lf-empty" style="padding:18px">No comments yet.</div>`;
+        return;
+      }
+
+      const post = items.find(x=> String(x.id)===String(post_id));
+      const myId = myUserId ? String(myUserId) : "";
+      listEl.innerHTML = arr.map(c=>{
+        const avEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
+        const avHtml = avEmoji ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
+        const isMine = myId && String(c.user_id) === myId;
+        const isPostOwner = !!(myId && post && String(post.user_id) === myId);
+        const canDelete = isMine || isPostOwner;
+        const canEdit = isMine;
+        return `
+          <div class="pc-item" id="c-${escapeHtml(c.id)}" data-reply-to="${escapeHtml(c.reply_to_comment_id || "")}">
+            <a href="/artist?username=${encodeURIComponent(c.username||"")}" class="pc-ava-link"><div class="avatar ${avEmoji ? "emoji" : ""}">${avHtml}</div></a>
+            <div class="pc-bubble">
+              <div class="pc-top">
+                <a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||"")}">
+                  ${escapeHtml(c.display_name||c.username||"user")}
+                  ${verifiedBadgeHTML(c.verified === true)}
+                </a>
+                <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+                  <button class="cic ${c.liked_by_me ? "on" : ""}" data-clike="${escapeHtml(c.id)}" title="Like">
+                    ${ICONS.like}<span>${c.like_count||0}</span>
+                  </button>
+                </div>
+              </div>
+              <div class="pc-body" data-body="${escapeHtml(c.id)}">${linkifyMentions(c.body||"")}</div>
+              <div class="pc-edit" data-editbox="${escapeHtml(c.id)}" style="display:none; margin-top:10px;">
+                <textarea class="pc-edit-ta" data-ta="${escapeHtml(c.id)}"></textarea>
+                <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:8px;">
+                  <button class="mini" data-emo-edit="${escapeHtml(c.id)}">Emoji</button>
+                  <button class="mini" data-c-cancel="${escapeHtml(c.id)}">Cancel</button>
+                  <button class="mini on save" data-c-save="${escapeHtml(c.id)}">Save</button>
+                </div>
+              </div>
+              <div class="pc-footer">
+                <div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div>
+                <div class="pc-actions">
+                  ${canEdit ? `<button class="cact" data-c-edit="${escapeHtml(c.id)}" title="Edit">${ICONS.edit}</button>` : ""}
+                  <button class="cact" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
+                  ${canDelete ? `<button class="cact danger" data-c-del="${escapeHtml(c.id)}" title="Delete">${ICONS.trash}</button>` : ""}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      bindVerifiedTooltip(listEl);
+
+      listEl.querySelectorAll("[data-clike]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-clike");
+          const row = arr.find(x=> String(x.id)===String(cid));
+          if(!row) return;
+          const token = await requireLoginOrWarn();
+          if(!token) return;
+          try{
+            const endpoint = row.liked_by_me ? "/api/posts/comment_unlike" : "/api/posts/comment_like";
+            await api(endpoint, { method:"POST", body: JSON.stringify({ comment_id: cid }) });
+            await loadPostComments(post_id);
+          }catch(e){ toast(e.message||"Failed"); }
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-del]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-c-del");
+          if(!confirm("Delete comment?")) return;
+          const token = await requireLoginOrWarn();
+          if(!token) return;
+          try{
+            await api("/api/posts/comment_delete", { method:"POST", body: JSON.stringify({ comment_id: cid }) });
+            const p = items.find(x=> String(x.id)===String(post_id));
+            if(p) p.comment_count = Math.max((p.comment_count||0) - 1, 0);
+            const commentsBtn = $grid.querySelector(`[data-act="toggle-comments"][data-post="${CSS.escape(String(post_id))}"] span`);
+            if(commentsBtn && p) commentsBtn.textContent = String(p.comment_count||0);
+            await loadPostComments(post_id);
+            toast("Deleted");
+          }catch(e){ toast(e.message||"Failed"); }
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-edit]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-c-edit");
+          const bodyEl = listEl.querySelector(`[data-body="${CSS.escape(cid)}"]`);
+          const boxEl = listEl.querySelector(`[data-editbox="${CSS.escape(cid)}"]`);
+          const ta = listEl.querySelector(`[data-ta="${CSS.escape(cid)}"]`);
+          if(!bodyEl || !boxEl || !ta) return;
+          ta.value = bodyEl.textContent || "";
+          boxEl.style.display = "block";
+          ta.focus();
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-cancel]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-c-cancel");
+          const boxEl = listEl.querySelector(`[data-editbox="${CSS.escape(cid)}"]`);
+          if(boxEl) boxEl.style.display = "none";
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-save]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-c-save");
+          const ta = listEl.querySelector(`[data-ta="${CSS.escape(cid)}"]`);
+          if(!ta) return;
+          const text = (ta.value||"").trim();
+          if(!text) return toast("Empty");
+          const token = await requireLoginOrWarn();
+          if(!token) return;
+          try{
+            await api("/api/posts/comment_edit", { method:"POST", body: JSON.stringify({ comment_id: cid, body: text }) });
+            await loadPostComments(post_id);
+            toast("Updated");
+          }catch(e){ toast(e.message||"Failed"); }
+        };
+      });
+
+      listEl.querySelectorAll("[data-emo-edit]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-emo-edit");
+          const ta = listEl.querySelector(`[data-ta="${CSS.escape(cid)}"]`);
+          if(ta) openEmojiPicker(ta);
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-reply]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-c-reply");
+          const uname = btn.getAttribute("data-u") || "";
+          replyToByPost.set(post_id, { comment_id: cid, username: uname });
+          const inp = document.getElementById("pc-in-" + post_id);
+          if(!inp) return;
+          inp.value = (inp.value||"") + `@${uname} `;
+          inp.focus();
+          autoGrow(inp);
+        };
+      });
+
+      const viewAllBtn = $grid.querySelector(`[data-viewall="${CSS.escape(post_id)}"]`);
+      if(viewAllBtn){
+        if(mode === "all") viewAllBtn.style.display = "none";
+        else if(arr.length < 3 || (post?.comment_count||0) <= 3) viewAllBtn.style.display = "none";
+        else viewAllBtn.style.display = "inline-flex";
+      }
+      listEl.scrollTop = listEl.scrollHeight;
+    }catch(e){
+      listEl.innerHTML = `<div class="lf-empty" style="padding:18px;color:#ff98a2">Error: ${escapeHtml(e.message)}</div>`;
+    }
   }
 
+
   async function sendPostComment(post_id){
-    const t=await requireLoginOrWarn(); if(!t) return;
-    const inp=document.getElementById('pc-in-'+post_id); if(!inp) return;
-    const text=(inp.value||'').trim(); if(!text) return;
-    const rt=replyToByPost.get(post_id);
-    await api('/api/posts/comment',{method:'POST',body:JSON.stringify({post_id, body:text, reply_to_comment_id: rt?.comment_id || null})});
-    replyToByPost.delete(post_id);
-    inp.value=''; autoGrow(inp);
-    await loadPostComments(post_id);
+    try{
+      const token = await requireLoginOrWarn();
+      if(!token) return;
+      const inp = document.getElementById("pc-in-" + post_id);
+      if(!inp) return;
+      const text = (inp.value||"").trim();
+      if(!text) return;
+      inp.disabled = true;
+      const rt = replyToByPost.get(post_id);
+      await api("/api/posts/comment", {
+        method:"POST",
+        body: JSON.stringify({
+          post_id,
+          body:text,
+          reply_to_comment_id: rt?.comment_id || null
+        })
+      });
+      replyToByPost.delete(post_id);
+      inp.value = "";
+      autoGrow(inp);
+      await loadPostComments(post_id);
+
+      const p = items.find(x=> String(x.id)===String(post_id));
+      if(p) p.comment_count = (p.comment_count||0) + 1;
+      const commentsBtn = $grid.querySelector(`[data-act="toggle-comments"][data-post="${CSS.escape(String(post_id))}"] span`);
+      if(commentsBtn && p) commentsBtn.textContent = String(p.comment_count||0);
+    }catch(e){
+      replyToByPost.delete(post_id);
+      toast(e.message||"Failed");
+    }finally{
+      const inp = document.getElementById("pc-in-" + post_id);
+      if(inp) inp.disabled = false;
+    }
   }
 
   function initPostSlider(postId, mediaArr){
@@ -1389,7 +1614,7 @@ const json = await api(getListPath(), { method:"GET", auth: needAuth });
     bindVerifiedTooltip($mUserlink.parentElement);
     $mUserlink.href = "/artist?username=" + encodeURIComponent(uname);
     $mUserlink.onclick = (e) => { e.stopPropagation(); };
-    $mDate.textContent = fmtDate(it.published_at);
+    $mDate.textContent = fmtDate(it.created_at || it.published_at);
     $mTitle.textContent = it.title || "Untitled";
 
     const fc = it.follower_count ?? 0;
@@ -1655,6 +1880,14 @@ const json = await api(getListPath(), { method:"GET", auth: needAuth });
   $cSend.onclick = sendComment;
   $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendComment(); } });
   $btnReloadComments.onclick = loadComments;
+  $segSort?.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = async ()=>{
+      $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active"));
+      btn.classList.add("active");
+      sort = btn.dataset.sort;
+      await fetchPage(true);
+    };
+  });
   $btnVideoOnly.onclick = ()=>{ onlyVideo = !onlyVideo; $btnVideoOnly.classList.toggle("active", onlyVideo); renderGrid(); };
   $btnRefresh.onclick = ()=> fetchPage(true);
   if($emoClose) $emoClose.onclick = closeEmojiPicker;
@@ -1667,6 +1900,13 @@ const json = await api(getListPath(), { method:"GET", auth: needAuth });
     await updateAuthHint();
     try{ if(window.sb){ window.sb.auth.onAuthStateChange(()=> { updateAuthHint(); loadFollowingSidebar(); }); } }catch(e){}
     myUserId = await getMyUserId();
+    const token = await getSessionToken();
+    if(token){
+      myProfile = await fetchMyPublicProfile(token);
+    }
+    if(!myProfile){
+      myProfile = { display_name:"User", username:"", avatar_type:"image", avatar_url:"", avatar_emoji:"" };
+    }
     await refreshFollowingIds();
     await loadFollowingSidebar();
     await fetchPage(true);
