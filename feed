@@ -654,11 +654,24 @@
       </div>
 
       <div class="lf-controls">
+        <div class="seg" id="seg-main">
+          <button class="active" data-main="feed">Feed</button>
+          <button data-main="posts">Posts</button>
+          <button data-main="collections">Collections</button>
+          <button data-main="saved">Saved</button>
+        </div>
+
         <div class="seg" id="seg-sort">
           <button class="active" data-sort="trending">Trending</button>
           <button data-sort="new">New</button>
-          <button data-sort="top">Top</button>
           <button data-sort="following">Following</button>
+        </div>
+
+        <div class="seg" id="seg-saved" style="display:none;">
+          <button class="active" data-type="image">Images</button>
+          <button data-type="video">Videos</button>
+          <button data-type="post">Posts</button>
+          <button data-type="collection">Collections</button>
         </div>
 
         <button class="tab-btn" id="btn-video-only" type="button">Video only</button>
@@ -758,6 +771,8 @@
   const LS_FOLLOW = "lf_follow_cache_v1";
 
   // feed state
+  let mainTab = "feed";
+  let savedType = "image";
   let sort = "trending";
   let offset = 0;
   let loading = false;
@@ -781,7 +796,9 @@
   const $grid = document.getElementById("grid");
   const $loader = document.getElementById("loader");
   const $sideList = document.getElementById("side-list");
+  const $segMain = document.getElementById("seg-main");
   const $segSort = document.getElementById("seg-sort");
+  const $segSaved = document.getElementById("seg-saved");
   const $btnVideoOnly = document.getElementById("btn-video-only");
   const $btnRefresh = document.getElementById("btn-refresh");
   const $authHint = document.getElementById("auth-hint");
@@ -1108,14 +1125,12 @@
   }
 
   async function api(path, opts = {}) {
-    const method = (opts.method || "GET").toUpperCase();
     const token = await getSessionToken();
 
     const headers = Object.assign({}, opts.headers || {});
     if (opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
 
-    const isPublicGet = method === "GET" && path.startsWith("/api/feed/list");
-    if (token && !isPublicGet) headers.Authorization = "Bearer " + token;
+    if (token) headers.Authorization = "Bearer " + token;
 
     const res = await fetch(BACKEND + path, Object.assign({}, opts, { headers }));
     let json = null;
@@ -1194,27 +1209,141 @@
     `;
   }
 
+  function renderPostCard(p){
+    const username = p.username || "user";
+    const display = p.display_name || username;
+    const title = p.title || "Post";
+
+    const cover = (p.thumb_url || p.media_url || "").trim();
+    const isVideo = isVideoItem({ media_url: p.media_url, thumb_url: p.thumb_url, media_type: p.media_type });
+
+    const stats = `
+      <div class="stat">${ICONS.like} ${p.like_count||0}</div>
+      <div class="stat">${ICONS.comm} ${p.comment_count||0}</div>
+      <div class="stat">${ICONS.save} ${p.save_count||0}</div>
+      <div class="stat">${ICONS.view} ${p.view_count||0}</div>
+    `;
+
+    const avIsEmoji = (p.avatar_type === "emoji" && p.avatar_emoji);
+    const avatarHtml = avIsEmoji ? `<span>${escapeHtml(p.avatar_emoji)}</span>` : (p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" />` : "");
+
+    const mediaHtml = cover
+      ? (isVideo
+        ? `<video class="lf-poster-video" muted playsinline preload="metadata" src="${escapeHtml(p.media_url || cover)}"></video>`
+        : `<img class="lf-thumb" src="${escapeHtml(cover)}" loading="lazy" decoding="async" />`
+      )
+      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-weight:900">POST</div>`;
+
+    return `
+      <div class="lf-card" data-kind="post" data-id="${escapeHtml(p.id)}">
+        <div class="lf-media">
+          ${mediaHtml}
+          <div class="badge"><span class="dot image"></span> POST</div>
+
+          <div class="card-bottom">
+            <div class="card-author">
+              <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
+              <a class="author-link" href="/artist?username=${encodeURIComponent(username)}" onclick="event.stopPropagation()">
+                <div class="author-name">${safe(display)} ${verifiedBadgeHTML(p.verified === true)}</div>
+                <div class="author-username">@${safe(username)}</div>
+              </a>
+            </div>
+
+            <div class="card-title">${escapeHtml(title)}</div>
+            <div class="card-stats">${stats}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderCollectionCard(c){
+    const username = c.username || "user";
+    const display = c.display_name || username;
+    const title = c.title || "Collection";
+    const prev = Array.isArray(c.preview_items) ? c.preview_items : [];
+    const cover = (prev[0]?.thumb_url || prev[0]?.media_url || "").trim();
+
+    const stats = `
+      <div class="stat">${ICONS.like} ${c.like_count||0}</div>
+      <div class="stat">${ICONS.save} ${c.save_count||0}</div>
+      <div class="stat">${ICONS.view} ${c.view_count||0}</div>
+    `;
+
+    const avIsEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
+    const avatarHtml = avIsEmoji ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
+
+    const mediaHtml = cover
+      ? `<img class="lf-thumb" src="${escapeHtml(cover)}" loading="lazy" decoding="async" />`
+      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-weight:900">COLLECTION</div>`;
+
+    return `
+      <div class="lf-card" data-kind="collection" data-id="${escapeHtml(c.id)}">
+        <div class="lf-media">
+          ${mediaHtml}
+          <div class="badge"><span class="dot image"></span> COLLECTION</div>
+
+          <div class="card-bottom">
+            <div class="card-author">
+              <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
+              <a class="author-link" href="/artist?username=${encodeURIComponent(username)}" onclick="event.stopPropagation()">
+                <div class="author-name">${safe(display)} ${verifiedBadgeHTML(c.verified === true)}</div>
+                <div class="author-username">@${safe(username)}</div>
+              </a>
+            </div>
+
+            <div class="card-title">${escapeHtml(title)}</div>
+            <div class="card-stats">${stats}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function scheduleRerender(){
     clearTimeout(rerenderTimer);
     rerenderTimer = setTimeout(renderGrid, 200);
   }
 
   function renderGrid(){
-    const list = onlyVideo ? items.filter(isVideoItem) : items;
-    if(list.length === 0){
-      $grid.innerHTML = `<div class="lf-empty">No items yet.</div>`;
-      return;
+    let list = items;
+
+    if(mainTab === "feed"){
+      list = onlyVideo ? list.filter(isVideoItem) : list;
+      $grid.className = "lf-grid";
+      $grid.innerHTML = list.length ? list.map(renderCard).join("") : `<div class="lf-empty">No items yet.</div>`;
     }
-    $grid.innerHTML = list.map(renderCard).join("");
+    else if(mainTab === "posts" || (mainTab === "saved" && savedType === "post")){
+      $grid.className = "lf-grid";
+      $grid.innerHTML = list.length ? list.map(renderPostCard).join("") : `<div class="lf-empty">No posts yet.</div>`;
+    }
+    else if(mainTab === "collections" || (mainTab === "saved" && savedType === "collection")){
+      $grid.className = "lf-grid";
+      $grid.innerHTML = list.length ? list.map(renderCollectionCard).join("") : `<div class="lf-empty">No collections yet.</div>`;
+    }
+    else {
+      list = onlyVideo ? list.filter(isVideoItem) : list;
+      $grid.className = "lf-grid";
+      $grid.innerHTML = list.length ? list.map(renderCard).join("") : `<div class="lf-empty">No saved items yet.</div>`;
+    }
+
     bindVerifiedTooltip($grid);
 
-    // click handlers
     $grid.querySelectorAll(".lf-card").forEach(card=>{
-      card.addEventListener("click", ()=>{
+      card.onclick = ()=>{
+        const kind = card.getAttribute("data-kind");
         const id = card.getAttribute("data-id");
         const it = items.find(x=> String(x.id) === String(id));
-        if(it) openModal(it);
-      });
+        if(!it) return;
+
+        if(kind === "video" || kind === "image" || mainTab === "feed" || (mainTab === "saved" && (savedType === "image" || savedType === "video"))){
+          openModal(it);
+          return;
+        }
+
+        const uname = it.username || "";
+        if(uname) window.location.href = `/artist?username=${encodeURIComponent(uname)}`;
+      };
     });
 
     wireHoverVideos();
@@ -1255,6 +1384,20 @@
     });
   }
 
+  function getListPath(){
+    if(mainTab === "saved"){
+      return `/api/saved/list?type=${encodeURIComponent(savedType)}&limit=${PAGE_SIZE}&offset=${offset}`;
+    }
+
+    const q = `?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`;
+
+    if(mainTab === "feed") return `/api/feed/list${q}`;
+    if(mainTab === "posts") return `/api/posts/list_feed${q}`;
+    if(mainTab === "collections") return `/api/collections/list_feed${q}`;
+
+    return `/api/feed/list${q}`;
+  }
+
   async function fetchPage(reset=false){
     if(loading) return;
     loading = true;
@@ -1268,17 +1411,22 @@
         $grid.innerHTML = "Loading...";
       }
 
-      if(sort === "following" && !(await getSessionToken())){
+      if(mainTab !== "saved" && sort === "following" && !(await getSessionToken())){
         $grid.innerHTML = `<div class="lf-empty">Login to see following feed.</div>`;
         hasMore = false;
         return;
       }
 
-      const q = `?sort=${encodeURIComponent(sort)}&limit=${PAGE_SIZE}&offset=${offset}`;
-      const json = await api(`/api/feed/list${q}`, { method:"GET" });
+      if(mainTab === "saved" && !(await getSessionToken())){
+        $grid.innerHTML = `<div class="lf-empty">Login to see saved items.</div>`;
+        hasMore = false;
+        return;
+      }
+
+      const json = await api(getListPath(), { method:"GET" });
 
       let page = Array.isArray(json.items) ? json.items : [];
-      if(sort === "following"){
+      if(mainTab !== "saved" && sort === "following"){
         if(followingIds.size === 0) await refreshFollowingIds();
         page = page.filter((it) => followingIds.has(String(it.user_id)));
         if(myUserId) page = page.filter((it) => String(it.user_id) !== String(myUserId));
@@ -1651,8 +1799,40 @@
   $cSend.onclick = sendComment;
   $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendComment(); } });
   $btnReloadComments.onclick = loadComments;
+  $segMain.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = async ()=>{
+      $segMain.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+
+      mainTab = btn.dataset.main;
+
+      if(mainTab === "saved"){
+        $segSort.style.display = "none";
+        $segSaved.style.display = "flex";
+        $btnVideoOnly.style.display = "none";
+        savedType = "image";
+        $segSaved.querySelectorAll("button").forEach(b=> b.classList.toggle("active", b.dataset.type === "image"));
+      } else {
+        $segSaved.style.display = "none";
+        $segSort.style.display = "flex";
+        $btnVideoOnly.style.display = (mainTab === "feed") ? "inline-flex" : "none";
+        sort = "trending";
+        $segSort.querySelectorAll("button").forEach(b=> b.classList.toggle("active", b.dataset.sort === "trending"));
+      }
+
+      await fetchPage(true);
+    };
+  });
   $segSort.querySelectorAll("button").forEach(btn=>{
     btn.onclick = async ()=>{ $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active")); btn.classList.add("active"); sort = btn.dataset.sort; await fetchPage(true); };
+  });
+  $segSaved.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = async ()=>{
+      $segSaved.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      savedType = btn.dataset.type;
+      await fetchPage(true);
+    };
   });
   $btnVideoOnly.onclick = ()=>{ onlyVideo = !onlyVideo; $btnVideoOnly.classList.toggle("active", onlyVideo); renderGrid(); };
   $btnRefresh.onclick = ()=> fetchPage(true);
