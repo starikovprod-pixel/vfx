@@ -218,14 +218,16 @@
     position:absolute; inset:0;
     background:#000;
   }
-  .embed-bg img{
+  .embed-bg img,
+  .embed-bg video{
     position:absolute; inset:0;
     width:100%; height:100%;
     object-fit:cover;
     opacity:0;
     transition: opacity .6s ease;
   }
-  .embed-bg img.on{ opacity:0.85; }
+  .embed-bg img.on,
+  .embed-bg video.on{ opacity:0.85; }
   .embed-overlay{
     position:relative;
     padding:16px;
@@ -516,7 +518,8 @@
     position:absolute; inset:0;
     background:#000;
   }
-  .cc-bg img{
+  .cc-bg img,
+  .cc-bg video{
     position:absolute; inset:0;
     width:100%; height:100%;
     object-fit:cover;
@@ -524,7 +527,8 @@
     transition: opacity .8s ease;
     filter: saturate(1.05) contrast(1.05);
   }
-  .cc-bg img.on{ opacity:0.85; }
+  .cc-bg img.on,
+  .cc-bg video.on{ opacity:0.85; }
   .cc-glass{
     position:relative;
     height:100%;
@@ -2495,7 +2499,7 @@
           return `
             <div class="ccard" data-col="${escapeHtml(c.id)}">
               <div class="cc-bg" data-ccbg="${escapeHtml(c.id)}">
-                ${imgs.map((u,i)=> `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("")}
+                ${imgs.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>` : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("")}
               </div>
               <div class="cc-glass">
                 <div>
@@ -2574,14 +2578,18 @@
     document.querySelectorAll("[data-ccbg]").forEach(bg=>{
       if(bg.dataset.slBound === "1") return;
       bg.dataset.slBound = "1";
-      const imgs = Array.from(bg.querySelectorAll("img"));
-      if(imgs.length <= 1) return;
+      const slides = Array.from(bg.querySelectorAll("img,video"));
+      if(slides.length <= 1) return;
 
       let i = 0;
       setInterval(()=>{
-        imgs[i].classList.remove("on");
-        i = (i+1) % imgs.length;
-        imgs[i].classList.add("on");
+        const prev = slides[i];
+        prev.classList.remove("on");
+        if(prev.tagName === "VIDEO"){ try{ prev.pause(); prev.currentTime = 0; }catch(e){} }
+        i = (i+1) % slides.length;
+        const cur = slides[i];
+        cur.classList.add("on");
+        if(cur.tagName === "VIDEO"){ try{ cur.play(); }catch(e){} }
       }, 1400);
     });
   }
@@ -2851,14 +2859,20 @@
           .filter(Boolean)
           .slice(0, 8);
 
-        bg.innerHTML = thumbs.map((u,i)=> `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("");
+        bg.innerHTML = thumbs.map((u,i)=> isVideoUrl(u)
+          ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>`
+          : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("");
         if(thumbs.length > 1){
-          const imgs = Array.from(bg.querySelectorAll("img"));
+          const slides = Array.from(bg.querySelectorAll("img,video"));
           let i = 0;
           setInterval(()=>{
-            imgs[i].classList.remove("on");
-            i = (i+1) % imgs.length;
-            imgs[i].classList.add("on");
+            const prev = slides[i];
+            prev.classList.remove("on");
+            if(prev.tagName === "VIDEO"){ try{ prev.pause(); prev.currentTime = 0; }catch(e){} }
+            i = (i+1) % slides.length;
+            const cur = slides[i];
+            cur.classList.add("on");
+            if(cur.tagName === "VIDEO"){ try{ cur.play(); }catch(e){} }
           }, 1300);
         }
 
