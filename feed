@@ -739,13 +739,6 @@
         </div>
 
 
-        <div class="seg" id="seg-saved">
-          <a href="https://lightfull.ai/saved_images">Saved Images</a>
-          <a href="https://lightfull.ai/saved_videos">Saved Videos</a>
-          <a href="https://lightfull.ai/saved_posts">Saved Posts</a>
-          <a href="https://lightfull.ai/saved_collections">Saved Collections</a>
-        </div>
-
 
         <button class="btn-refresh-icon" id="btn-refresh" title="Refresh">
           <svg viewBox="0 0 24 24"><path d="M21 2v6h-6M3 22v-6h6M21 12c0 4.97-4.03 9-9 9-3.33 0-6.25-1.81-7.81-4.5M3 12c0-4.97 4.03-9 9-9 3.33 0 6.25 1.81 7.81 4.5"/></svg>
@@ -1909,6 +1902,14 @@ const json = await api(getListPath(), { method:"GET", auth: needAuth });
   $cSend.onclick = sendComment;
   $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendComment(); } });
   $btnReloadComments.onclick = loadComments;
+  $segSort?.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = async ()=>{
+      $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active"));
+      btn.classList.add("active");
+      sort = btn.dataset.sort;
+      await fetchPage(true);
+    };
+  });
   $btnVideoOnly.onclick = ()=>{ onlyVideo = !onlyVideo; $btnVideoOnly.classList.toggle("active", onlyVideo); renderGrid(); };
   $btnRefresh.onclick = ()=> fetchPage(true);
   if($emoClose) $emoClose.onclick = closeEmojiPicker;
