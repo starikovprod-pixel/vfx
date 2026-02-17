@@ -239,6 +239,60 @@
   .m-val { font-size: 14px; color: #fff; word-break: break-all; }
   .m-val.mono { font-family: monospace; color: rgba(255,255,255,0.5); font-size: 12px; }
 
+  /* Dark info boxes */
+  .m-box{
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.35);
+    border-radius: 14px;
+    padding: 10px 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .m-model-pill{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .m-model-chip{
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+  }
+
+  .m-prompt-box{
+    white-space: pre-wrap;
+    max-height: 210px;
+    overflow: auto;
+    line-height: 1.35;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: rgba(255,255,255,0.86);
+    padding-right: 6px;
+  }
+
+  /* Dark scrollbar for prompt */
+  .m-prompt-box::-webkit-scrollbar{ width:10px; }
+  .m-prompt-box::-webkit-scrollbar-track{
+    background: rgba(255,255,255,0.04);
+    border-radius: 999px;
+  }
+  .m-prompt-box::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,0.18);
+    border-radius: 999px;
+    border: 2px solid rgba(0,0,0,0.35);
+  }
+  .m-prompt-box::-webkit-scrollbar-thumb:hover{
+    background: rgba(255,255,255,0.26);
+  }
+
   .m-actions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
 
   .btn {
@@ -260,6 +314,12 @@
   .btn.primary:hover { background: #ddd; }
   .btn.danger { color: var(--danger); border-color: rgba(255, 70, 90, 0.3); }
   .btn.danger:hover { background: rgba(255, 70, 90, 0.1); border-color: var(--danger); }
+
+  /* Copy button feedback */
+  .btn.ok{
+    border-color: rgba(57,255,20,0.35);
+    background: rgba(57,255,20,0.08);
+  }
 
   .pub-pop {
     position:absolute; inset:0;
@@ -348,12 +408,17 @@
         </div>
         <div class="m-info-row">
           <div class="m-label">Model</div>
-          <div class="m-val" id="m-model">—</div>
+          <div class="m-box m-model-pill">
+            <div class="m-val" id="m-model">—</div>
+            <div class="m-model-chip" id="m-model-chip">AI</div>
+          </div>
         </div>
 
         <div class="m-info-row">
-          <div class="m-label">Prompt</div>
-          <div class="m-val" id="m-prompt" style="white-space:pre-wrap; max-height:180px; overflow:auto;"></div>
+          <div class="m-label" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>Prompt</span>
+          </div>
+          <div class="m-box m-prompt-box" id="m-prompt">—</div>
         </div>
         <div class="m-info-row">
           <div class="m-label">Feed</div>
@@ -418,6 +483,7 @@
   const $mDate = document.getElementById("m-date");
   const $mId = document.getElementById("m-id");
   const $mModel = document.getElementById("m-model");
+  const $mModelChip = document.getElementById("m-model-chip");
   const $mPrompt = document.getElementById("m-prompt");
   const $btnDown = document.getElementById("btn-download");
   const $btnCopy = document.getElementById("btn-copy-link");
@@ -482,6 +548,29 @@
     if (["failed","error","canceled"].includes(v)) return { text:"Failed", dot:"bad", type:"done" };
     if (["starting","processing","running","in_progress"].includes(v)) return { text:"Processing", dot:"warn", type:"process" };
     return { text: v, dot:"", type:"done" };
+  }
+
+  function prettyModelName(raw){
+    const s = String(raw || "").toLowerCase();
+
+    if (s.includes("nano-banana")) return "Nano Banana";
+    if (s.includes("kling") && s.includes("v2.6")) return "Kling 2.6";
+    if (s.includes("kling") && s.includes("v2.5")) return "Kling 2.5";
+    if (s.includes("veo")) return "Veo";
+    if (s.startsWith("runway:")) return "Runway";
+    if (s.startsWith("freepik:")) return "Freepik";
+
+    const parts = String(raw || "").split("/");
+    return parts[parts.length - 1] || "Model";
+  }
+
+  function modelChip(raw){
+    const s = String(raw || "").toLowerCase();
+    if (s.startsWith("runway:")) return "RUNWAY";
+    if (s.startsWith("freepik:")) return "FREEPIK";
+    if (s.includes("replicate")) return "REPLICATE";
+    if (s.includes("fal")) return "FAL";
+    return "AI";
   }
 
   function uniqAppend(prev, next) {
@@ -683,17 +772,28 @@
     $mDate.textContent = item.created_at || "";
     $mId.textContent = item.id;
 
-    const modelName = item.model_display || item.model_key || "—";
+    const rawModel = item.model_display || item.model_key || item.model || "—";
+    const modelName = prettyModelName(rawModel);
     const prompt = item.prompt_text || item.prompt || "";
 
     $mModel.textContent = modelName;
+    if($mModelChip) $mModelChip.textContent = modelChip(rawModel);
     $mPrompt.textContent = prompt || "—";
 
-    $btnCopyPrompt.onclick = () => {
+    $btnCopyPrompt.onclick = async () => {
       if(!prompt) return;
-      navigator.clipboard.writeText(prompt);
-      $btnCopyPrompt.textContent = "Copied!";
-      setTimeout(() => $btnCopyPrompt.textContent = "Copy Prompt", 900);
+      try{
+        await navigator.clipboard.writeText(prompt);
+        $btnCopyPrompt.classList.add("ok");
+        const prev = $btnCopyPrompt.textContent;
+        $btnCopyPrompt.textContent = "Copied ✓";
+        setTimeout(() => {
+          $btnCopyPrompt.textContent = prev || "Copy Prompt";
+          $btnCopyPrompt.classList.remove("ok");
+        }, 900);
+      } catch(e){
+        alert("Copy failed");
+      }
     };
 
     if(url) {
