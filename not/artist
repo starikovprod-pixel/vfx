@@ -3548,4 +3548,23 @@
     $grid.innerHTML = `<div class="empty" style="color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(e.message)}</div>`;
   });
 })();
+
+(function(){
+  const tab = (new URLSearchParams(location.search).get("tab") || "").toLowerCase();
+  if(!tab) return;
+
+  const btn = document.querySelector(`[data-tab="${tab}"]`);
+  if(btn){ btn.click(); return; }
+
+  const map = { posts: "posts", collections: "collections", library: "library" };
+  const any = map[tab];
+  if(!any) return;
+
+  const btn2 =
+    document.getElementById("tab-" + any) ||
+    document.querySelector(`.tab-${any}`) ||
+    document.querySelector(`[data-section="${any}"]`);
+
+  if(btn2) btn2.click();
+})();
 </script>
