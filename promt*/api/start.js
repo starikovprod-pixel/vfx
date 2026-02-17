@@ -472,7 +472,14 @@ export default async function handler(req, res) {
            lab,
            kind)
         values
-          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,null,null)
+          ($1,$2,$3,$4,$4,$4,$5,$5,
+           jsonb_build_object(
+             'duration', to_jsonb($7::int),
+             'aspect_ratio', to_jsonb($8::text),
+             'generate_audio', to_jsonb($9::boolean),
+             'presetId', to_jsonb($2::text)
+           ),
+           $6,$7,$8,$9,$10,null,null)
         `,
         [
           userId,
@@ -587,7 +594,14 @@ if (!imageUrl) {
            lab,
            kind)
         values
-          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,$11,$12)
+          ($1,$2,$3,$4,$4,$4,$5,$5,
+           jsonb_build_object(
+             'duration', to_jsonb($7::int),
+             'aspect_ratio', to_jsonb($8::text),
+             'generate_audio', to_jsonb($9::boolean),
+             'presetId', to_jsonb($2::text)
+           ),
+           $6,$7,$8,$9,$10,$11,$12)
         `,
         [userId, presetId, prediction.id, preset.model, promptStored, prediction.status, duration, aspectRatio, generateAudio, cost, lab, kind]
       );
@@ -693,7 +707,14 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
        lab,
        kind)
     values
-      ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,$11,$12)
+      ($1,$2,$3,$4,$4,$4,$5,$5,
+       jsonb_build_object(
+         'duration', to_jsonb($7::int),
+         'aspect_ratio', to_jsonb($8::text),
+         'generate_audio', to_jsonb($9::boolean),
+         'presetId', to_jsonb($2::text)
+       ),
+       $6,$7,$8,$9,$10,$11,$12)
     `,
     [userId, presetId, prediction.id, preset.model, promptStored, prediction.status, duration, aspectRatio, null, cost, lab, kind]
   );
@@ -823,7 +844,14 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
            lab,
            kind)
         values
-          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,$11,$12)
+          ($1,$2,$3,$4,$4,$4,$5,$5,
+           jsonb_build_object(
+             'duration', to_jsonb($7::int),
+             'aspect_ratio', to_jsonb($8::text),
+             'generate_audio', to_jsonb($9::boolean),
+             'presetId', to_jsonb($2::text)
+           ),
+           $6,$7,$8,$9,$10,$11,$12)
         `,
         [
           userId,                         // $1
@@ -947,7 +975,14 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
            lab,
            kind)
         values
-          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,$11,$12)
+          ($1,$2,$3,$4,$4,$4,$5,$5,
+           jsonb_build_object(
+             'duration', to_jsonb($7::int),
+             'aspect_ratio', to_jsonb($8::text),
+             'generate_audio', to_jsonb($9::boolean),
+             'presetId', to_jsonb($2::text)
+           ),
+           $6,$7,$8,$9,$10,$11,$12)
         `,
         [userId, presetId, prediction.id, preset.model, prompt, prediction.status, duration, aspect_ratio, generate_audio, cost, lab, kind]
       );
@@ -1066,7 +1101,7 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
              lab,
              kind)
           values
-            ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',null,'generate_audio',null,'presetId',$2),$6,null,null,null,$7,null,null)
+            ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',null,'generate_audio',null,'presetId',to_jsonb($2::text)),$6,null,null,null,$7,null,null)
           `,
           [
             userId,
@@ -1251,7 +1286,9 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
            lab,
            kind)
         values
-          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',$7,'generate_audio',null,'presetId',$2),$6,null,$7,null,$8,null,null)
+          ($1,$2,$3,$4,$4,$4,$5,$5,
+           jsonb_build_object('duration',null,'aspect_ratio',to_jsonb($7::text),'generate_audio',null,'presetId',to_jsonb($2::text)),
+           $6,null,$7,null,$8,null,null)
         `,
         [userId, presetId, prediction.id, preset.model, prompt, prediction.status, aspect_ratio || null, cost]
       );
@@ -1340,7 +1377,9 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
            lab,
            kind)
         values
-          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',$7,'generate_audio',null,'presetId',$2),$6,null,$7,null,$8,$9,$10)
+          ($1,$2,$3,$4,$4,$4,$5,$5,
+           jsonb_build_object('duration',null,'aspect_ratio',to_jsonb($7::text),'generate_audio',null,'presetId',to_jsonb($2::text)),
+           $6,null,$7,null,$8,$9,$10)
         `,
         [userId, presetId, prediction.id, preset.model, prompt, prediction.status, aspect_ratio, cost, lab, kind]
       );
@@ -1522,7 +1561,9 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
            lab,
            kind)
         values
-          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',$7,'generate_audio',null,'presetId',$2),$6,null,$7,null,$8,null,null)
+          ($1,$2,$3,$4,$4,$4,$5,$5,
+           jsonb_build_object('duration',null,'aspect_ratio',to_jsonb($7::text),'generate_audio',null,'presetId',to_jsonb($2::text)),
+           $6,null,$7,null,$8,null,null)
         `,
         [userId, presetId, taskId, `freepik:${mode}`, prompt, status, null, cost]
       );
