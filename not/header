@@ -691,28 +691,36 @@
   }
 
   function notifTargetUrl(n){
-    const a = n.actor || {};
-    const base = absUrl(
-      n.target_url ||
-      (a.username ? ("/artist?username=" + encodeURIComponent(a.username)) : "/feed")
-    );
+  const a = n.actor || {};
+  const base = absUrl(
+    n.target_url ||
+    (a.username ? ("/artist?username=" + encodeURIComponent(a.username)) : "/feed")
+  );
 
-    try{
-      const u = new URL(base, location.origin);
+  try{
+    const u = new URL(base, location.origin);
 
-      // если уже есть tab=... — не трогаем
-      if(u.searchParams.get("tab")) return u.toString();
+    // Определяем вкладку: сначала по entity_kind (самое надежное)
+    const ek = String(n.entity_kind || "").toLowerCase();
+    let tab = "";
+    if(ek === "collection") tab = "collections";
+    else if(ek === "post") tab = "posts";
+    else if(ek === "work") tab = "library";
 
-      const tab = (n.ntype === "new_post") ? "posts"
-               : (n.ntype === "new_collection") ? "collections"
-               : "library"; // new_work -> library
-
-      u.searchParams.set("tab", tab);
-      return u.toString();
-    }catch(e){
-      return base;
+    // fallback по ntype
+    if(!tab){
+      tab = (n.ntype === "new_post") ? "posts"
+          : (n.ntype === "new_collection") ? "collections"
+          : "library";
     }
+
+    u.searchParams.set("tab", tab);
+    return u.toString();
+  }catch(e){
+    return base;
   }
+}
+
 
   function renderNotifRow(n){
     const a = n.actor || {};
