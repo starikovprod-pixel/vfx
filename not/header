@@ -1,0 +1,905 @@
+<style>
+  :root{
+    --bg-body:#050505;
+    --bg-panel:#111111;
+    --bg-card:#181818;
+    --bg-input:#222222;
+    --border:#2b2b2b;
+    --accent:#2b6cff;
+    --accent-hover:#1a5cff;
+    --text-main:#ffffff;
+    --text-sec:#a0a0a0;
+    --header-h:74px;
+
+    --danger:#ff465a;
+  }
+
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+
+  #lfhdr * { box-sizing:border-box; }
+  #lfhdr{
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    color:var(--text-main);
+  }
+
+  #lfhdr header{
+    height:var(--header-h);
+    padding:0 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:rgba(5,5,5,.92);
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:1000;
+    backdrop-filter: blur(10px);
+  }
+
+  .lfhdr-brand{
+    display:flex; align-items:center; gap:10px;
+    font-weight:1000; letter-spacing:-.4px; font-size:20px;
+    cursor:pointer;
+    user-select:none;
+  }
+
+  .lfhdr-switch{
+    background:var(--bg-input);
+    padding:5px;
+    border-radius:999px;
+    display:flex; gap:5px;
+    border:1px solid var(--border);
+    align-items:center;
+  }
+  .lfhdr-switch button{
+    border:0; background:transparent;
+    color:var(--text-sec);
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:900;
+    font-size:14px;
+    white-space:nowrap;
+    display:flex; align-items:center; gap:8px;
+    transition: .15s;
+  }
+  .lfhdr-switch button:hover{ color:#fff; background:rgba(255,255,255,0.05); }
+  .lfhdr-switch button.active{
+    background:var(--bg-body);
+    color:var(--text-main);
+    box-shadow:0 6px 16px rgba(0,0,0,.35);
+  }
+
+  /* ChatGPT tab */
+  .lfhdr-switch .lfhdr-tab-chatgpt{
+    margin-left:8px;
+    padding-left:18px;
+    padding-right:18px;
+    color:rgba(255,255,255,.95);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.05);
+    position:relative;
+  }
+  .lfhdr-switch .lfhdr-tab-chatgpt::before{
+    content:"";
+    width:1px;
+    height:18px;
+    background:rgba(255,255,255,.10);
+    display:inline-block;
+    margin-right:12px;
+    transform: translateY(2px);
+  }
+  .lfhdr-switch .lfhdr-tab-chatgpt.active{
+    background:rgba(255,255,255,.08);
+    border-color:rgba(255,255,255,.20);
+    box-shadow:0 10px 26px rgba(0,0,0,.45);
+  }
+
+  /* Right controls */
+  .lfhdr-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  /* ???? Notifications bell */
+  .lfhdr-bell{
+    position:relative;
+  }
+  .lfhdr-bellbtn{
+    width:42px; height:42px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.03);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:.15s;
+    user-select:none;
+  }
+  .lfhdr-bellbtn:hover{
+    background:rgba(255,255,255,.06);
+    border-color:rgba(255,255,255,.14);
+  }
+  .lfhdr-bellbtn svg{
+    width:20px; height:20px;
+    stroke:#fff; fill:none; stroke-width:2.2;
+    opacity:.92;
+  }
+  .lfhdr-badge{
+    position:absolute;
+    top:-4px;
+    right:-4px;
+    min-width:18px;
+    height:18px;
+    padding:0 6px;
+    border-radius:999px;
+    background:var(--danger);
+    color:#fff;
+    font-weight:1000;
+    font-size:11px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    border:2px solid rgba(5,5,5,.92);
+    box-shadow:0 10px 24px rgba(0,0,0,.45);
+  }
+  .lfhdr-badge.show{ display:inline-flex; }
+
+  .lfhdr-ndd{
+    position:absolute;
+    top:52px; right:0;
+    width:360px;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:10px;
+    box-shadow:0 18px 70px rgba(0,0,0,.7);
+    display:none;
+    z-index:2200;
+  }
+  .lfhdr-ndd.show{ display:block; }
+
+  .lfhdr-ndd-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:8px 8px 10px;
+  }
+  .lfhdr-ndd-title{
+    font-weight:1000;
+    letter-spacing:-.2px;
+    font-size:14px;
+  }
+  .lfhdr-ndd-act{
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.05);
+    color:#fff;
+    border-radius:999px;
+    padding:7px 10px;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .lfhdr-ndd-act:hover{
+    background:rgba(255,255,255,.08);
+    border-color:rgba(255,255,255,.18);
+  }
+
+  .lfhdr-ndd-list{
+    border-top:1px solid rgba(255,255,255,.08);
+    margin-top:6px;
+    max-height:520px;
+    overflow:auto;
+    padding-right:6px;
+  }
+  .lfhdr-ndd-empty{
+    padding:14px 10px;
+    color:rgba(255,255,255,.60);
+    font-size:13px;
+  }
+
+  .lfhdr-nitem{
+    display:flex;
+    gap:10px;
+    padding:10px 8px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:.12s;
+    border:1px solid rgba(255,255,255,0);
+  }
+  .lfhdr-nitem + .lfhdr-nitem{
+    border-top:1px solid rgba(255,255,255,.06);
+    border-top-left-radius:0;
+    border-top-right-radius:0;
+  }
+  .lfhdr-nitem:hover{
+    background:rgba(255,255,255,.04);
+    border-color:rgba(255,255,255,.10);
+  }
+  .lfhdr-nava{
+    width:34px; height:34px;
+    border-radius:999px;
+    overflow:hidden;
+    background:linear-gradient(135deg,#2b2b2b,#4a4a4a);
+    border:1px solid rgba(255,255,255,.10);
+    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:1000;
+  }
+  .lfhdr-nava img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .lfhdr-nava.emoji{
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",sans-serif;
+    font-size:18px;
+    line-height:1;
+  }
+
+  .lfhdr-ntxt{ min-width:0; flex:1; }
+  .lfhdr-nline{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    min-width:0;
+  }
+  .lfhdr-nname{
+    font-weight:1000;
+    font-size:13px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .lfhdr-vfy{
+    width:14px; height:14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#6ea8ff;
+    flex:0 0 auto;
+  }
+  .lfhdr-vfy svg{ width:14px; height:14px; fill:currentColor; display:block; }
+  .lfhdr-ntime{
+    margin-left:auto;
+    font-size:11px;
+    color:rgba(255,255,255,.55);
+    white-space:nowrap;
+    flex:0 0 auto;
+  }
+  .lfhdr-nmsg{
+    margin-top:4px;
+    font-size:12px;
+    color:rgba(255,255,255,.70);
+    line-height:1.35;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .lfhdr-nitem.unread .lfhdr-nmsg,
+  .lfhdr-nitem.unread .lfhdr-nname{
+    color:#fff;
+  }
+  .lfhdr-dot{
+    width:7px; height:7px;
+    border-radius:99px;
+    background:var(--danger);
+    margin-left:6px;
+    flex:0 0 auto;
+    display:none;
+  }
+  .lfhdr-nitem.unread .lfhdr-dot{ display:inline-block; }
+
+  /* Profile dropdown */
+  .lfhdr-profile{ position:relative; }
+  .lfhdr-avatar{
+    width:42px; height:42px;
+    border-radius:999px;
+    background:linear-gradient(135deg,#2b2b2b,#4a4a4a);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:1000;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,.08);
+    user-select:none;
+    overflow:hidden;
+  }
+  .lfhdr-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .lfhdr-avatar.emoji,
+  .lfhdr-dd-ava.emoji{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+    user-select:none;
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",sans-serif;
+    font-size:22px;
+  }
+
+  .lfhdr-dd{
+    position:absolute;
+    top:52px; right:0;
+    width:300px;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:10px;
+    box-shadow:0 18px 70px rgba(0,0,0,.7);
+    display:none;
+    z-index:2000;
+  }
+  .lfhdr-dd.show{ display:block; }
+
+  .lfhdr-usercard{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.03);
+    cursor:pointer;
+    transition:.15s;
+  }
+  .lfhdr-usercard:hover{
+    background:rgba(255,255,255,.06);
+    border-color:rgba(255,255,255,.16);
+  }
+  .lfhdr-dd-ava{
+    width:44px; height:44px;
+    border-radius:999px;
+    overflow:hidden;
+    background:linear-gradient(135deg,#2b2b2b,#4a4a4a);
+    border:1px solid rgba(255,255,255,.10);
+    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:1000;
+  }
+  .lfhdr-dd-ava img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .lfhdr-udata{ min-width:0; }
+  .lfhdr-uname{
+    font-weight:1000;
+    letter-spacing:-.2px;
+    font-size:14px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    color:#fff;
+  }
+  .lfhdr-uuser{
+    margin-top:2px;
+    font-weight:900;
+    font-size:12px;
+    color:rgba(255,255,255,.65);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .lfhdr-uemail{
+    margin-top:6px;
+    font-size:12px;
+    color:rgba(255,255,255,.55);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  .lfhdr-dd .item{
+    padding:12px 12px;
+    border-radius:10px;
+    color:var(--text-sec);
+    display:flex; justify-content:space-between; gap:10px;
+    cursor:pointer;
+    font-weight:800;
+    font-size:14px;
+  }
+  .lfhdr-dd .item:hover{ background:rgba(255,255,255,.04); color:var(--text-main); }
+  .lfhdr-dd .divider{ height:1px; background:var(--border); margin:10px 0; }
+
+  .lfhdr-dd .item.primary {
+    color:#fff;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.03);
+  }
+  .lfhdr-dd .item.primary:hover{
+    border-color:rgba(255,255,255,.18);
+    background:rgba(255,255,255,.06);
+  }
+</style>
+
+<div id="lfhdr">
+  <header>
+    <div class="lfhdr-brand" id="lfhdr-brand">Lightfull</div>
+
+    <div class="lfhdr-switch">
+      <button type="button" data-tab="flow">Flow</button>
+      <button type="button" data-tab="video">Video</button>
+      <button type="button" data-tab="image">Image</button>
+
+      <button type="button" data-tab="cinema_lab">Cinema Lab</button>
+      <button type="button" data-tab="node_studio">Node Studio</button>
+      <button type="button" data-tab="product">Product Creation</button>
+
+      <button type="button" data-tab="editor">Editor</button>
+
+      <!-- ✅ rename label but keep data-tab -->
+      <button type="button" data-tab="feed" id="lfhdr-feedbtn">Feed</button>
+
+      <button type="button" data-tab="library">Library</button>
+
+      <button type="button" data-tab="chatgpt" class="lfhdr-tab-chatgpt">ChatGPT</button>
+    </div>
+
+    <div class="lfhdr-right">
+      <!-- ???? notifications -->
+      <div class="lfhdr-bell" id="lfhdr-bell">
+        <div class="lfhdr-bellbtn" id="lfhdr-bellbtn" title="Notifications">
+          <svg viewBox="0 0 24 24">
+            <path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
+            <path d="M13.73 21a2 2 0 01-3.46 0"></path>
+          </svg>
+        </div>
+        <div class="lfhdr-badge" id="lfhdr-badge">0</div>
+
+        <div class="lfhdr-ndd" id="lfhdr-ndd">
+          <div class="lfhdr-ndd-head">
+            <div class="lfhdr-ndd-title">Notifications</div>
+            <button class="lfhdr-ndd-act" id="lfhdr-markall">Mark all read</button>
+          </div>
+          <div class="lfhdr-ndd-list" id="lfhdr-nlist">
+            <div class="lfhdr-ndd-empty">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- profile -->
+      <div class="lfhdr-profile">
+        <div class="lfhdr-avatar" id="lfhdr-avatar">U</div>
+
+        <div class="lfhdr-dd" id="lfhdr-dd">
+          <div class="lfhdr-usercard" id="lfhdr-usercard" style="display:none;">
+            <div class="lfhdr-dd-ava" id="lfhdr-dd-ava">U</div>
+            <div class="lfhdr-udata">
+              <div class="lfhdr-uname" id="lfhdr-name">—</div>
+              <div class="lfhdr-uuser" id="lfhdr-username">@—</div>
+              <div class="lfhdr-uemail" id="lfhdr-email">—</div>
+            </div>
+          </div>
+
+          <div class="divider" id="lfhdr-userdiv" style="display:none;"></div>
+
+          <div class="item" style="cursor:default">
+            <span>Credits</span>
+            <strong id="lfhdr-credits" style="color:#fff">—</strong>
+          </div>
+
+          <div class="item" id="lfhdr-plans" style="color:var(--text-sec); cursor:default;">
+            <span>Plans</span>
+          </div>
+
+          <div class="item" id="lfhdr-profile-link"><span>Profile</span></div>
+          <div class="item" id="lfhdr-promo"><span>Promo code</span></div>
+
+          <div class="divider"></div>
+
+          <div class="item primary" id="lfhdr-login" style="display:none"><span>Login</span></div>
+          <div class="item" id="lfhdr-logout" style="color:#ff465a"><span>Logout</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  const BASE = location.origin;
+
+  const EDITOR_URL  = "https://lightfull.ai/lf-editor";
+  const FEED_URL    = "https://lightfull.ai/feed";
+
+  // ✅ new pages (separate pages)
+  const POSTS_URL = "https://lightfull.ai/posts";
+  const COLLECTIONS_URL = "https://lightfull.ai/collections";
+  const SAVED_IMAGES_URL = "https://lightfull.ai/saved_images";
+  const SAVED_VIDEOS_URL = "https://lightfull.ai/saved_videos";
+  const SAVED_POSTS_URL = "https://lightfull.ai/saved_posts";
+  const SAVED_COLLECTIONS_URL = "https://lightfull.ai/saved_collections";
+
+  const PROFILE_URL = "https://lightfull.ai/profile"; // profile editor
+  const ARTIST_URL  = (uname) => "https://lightfull.ai/artist?username=" + encodeURIComponent(uname || "");
+
+  const SUPABASE_URL = "https://vqnmzstiaosqeoltcwbq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbm16c3RpYW9zcWVvbHRjd2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwMDA1MzcsImV4cCI6MjA4MzU3NjUzN30.12MycLBd_SpBwFz52alQFtIuWiguAunqh4AX7TbIkkk";
+  const BACKEND_BASE = "https://api.lightfull.ai";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+  });
+  window.sb = sb;
+
+  const $ = (id)=>document.getElementById(id);
+  const btns = Array.from(document.querySelectorAll('[data-tab]'));
+
+  function mark(tab){
+    btns.forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  }
+
+  // ✅ IMPORTANT: treat these pages as "feed area"
+  const FEED_AREA_PATHS = [
+    "/feed",
+    "/posts",
+    "/collections",
+    "/saved_images",
+    "/saved_videos",
+    "/saved_posts",
+    "/saved_collections"
+  ];
+
+  function setActiveByUrl(){
+    const href = location.href.toLowerCase();
+    const p = location.pathname.toLowerCase();
+
+    if (href.includes("/lf-editor")) return mark("editor");
+
+    // ✅ all "feed area" pages highlight feed tab ("Лента")
+    if (FEED_AREA_PATHS.some(x => p === x || p.startsWith(x + "/"))) return mark("feed");
+
+    if (p.includes("node_studio")) return mark("node_studio");
+
+    if (p.includes("cinema_lab") ||
+        p.includes("cinema_animation") ||
+        p.includes("cinema_shot") ||
+        p.includes("cinema_character")) {
+      return mark("cinema_lab");
+    }
+
+    if (p.includes("product_creation")) return mark("product");
+    if (p.includes("chatgpt")) return mark("chatgpt");
+    if (p.includes("library")) return mark("library");
+
+    if (p.includes("/video")) return mark("video");
+    if (p.includes("/image")) return mark("image");
+
+    if (p.includes("nano")) return mark("image");
+    if (p.includes("kling")) return mark("video");
+
+    if (p === "/" || p.includes("flow")) return mark("flow");
+    return mark("flow");
+  }
+
+  function go(tab){
+    if (tab === "video")       return location.href = "https://lightfull.ai/video";
+    if (tab === "image")       return location.href = "https://lightfull.ai/image";
+    if (tab === "cinema_lab")  return location.href = "https://lightfull.ai/cinema_lab";
+    if (tab === "node_studio") return location.href = "https://lightfull.ai/node_studio";
+    if (tab === "flow")        return location.href = BASE + "/flow";
+    if (tab === "product")     return location.href = "https://lightfull.ai/product_creation";
+    if (tab === "editor")      return location.href = EDITOR_URL;
+
+    // ✅ feed tab goes to main feed
+    if (tab === "feed")        return location.href = FEED_URL;
+
+    if (tab === "library")     return location.href = BASE + "/library";
+    if (tab === "chatgpt")     return location.href = BASE + "/chatgpt";
+  }
+
+  $("lfhdr-brand").addEventListener("click", ()=>go("flow"));
+  btns.forEach(b => b.addEventListener("click", ()=>go(b.dataset.tab)));
+
+  // dropdown profile
+  const dd = $("lfhdr-dd");
+  $("lfhdr-avatar").addEventListener("click",(e)=>{ e.stopPropagation(); dd.classList.toggle("show"); ndd.classList.remove("show"); });
+  document.addEventListener("click", ()=>{ dd.classList.remove("show"); ndd.classList.remove("show"); });
+
+  // profile editor link
+  $("lfhdr-profile-link").addEventListener("click", () => {
+    dd.classList.remove("show");
+    location.href = PROFILE_URL;
+  });
+
+  async function refreshMeAndUI(){
+    try{
+      const { data } = await sb.auth.getSession();
+      const s = data?.session;
+      if (!s?.user?.id || !s?.access_token) return null;
+
+      const r = await fetch(BACKEND_BASE + "/api/me", {
+        headers: { Authorization: "Bearer " + s.access_token }
+      });
+      const me = await r.json().catch(()=>({}));
+
+      if (r.ok && me && me.ok !== false) {
+        $("lfhdr-credits").textContent = me.credits ?? 0;
+      }
+      return me;
+    } catch(e){
+      return null;
+    }
+  }
+
+  async function fetchMyPublicProfile(accessToken){
+    try{
+      const r = await fetch(BACKEND_BASE + "/api/profile_public", {
+        method: "GET",
+        headers: { Authorization: "Bearer " + accessToken }
+      });
+      const j = await r.json().catch(()=> ({}));
+      if(!r.ok) return null;
+      return j?.profile || null;
+    }catch(e){
+      return null;
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s||"")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  function renderAvatarInto(el, avatar_type, avatar_url, avatar_emoji, fallbackLetter){
+    const t = String(avatar_type || "image").toLowerCase();
+    const em = (avatar_emoji || "").trim();
+    const url = (avatar_url || "").trim();
+
+    el.classList.remove("emoji");
+    el.innerHTML = "";
+
+    if(t === "emoji" && em){
+      el.classList.add("emoji");
+      el.innerHTML = `<span aria-label="avatar emoji">${escapeHtml(em)}</span>`;
+      return;
+    }
+    if(url){
+      el.innerHTML = `<img src="${escapeHtml(url)}" alt="" />`;
+      return;
+    }
+    if(fallbackLetter){
+      el.textContent = String(fallbackLetter).slice(0,1).toUpperCase();
+    }
+  }
+
+  // logout
+  $("lfhdr-logout").addEventListener("click", async ()=>{
+    try{ await sb.auth.signOut(); }catch(e){}
+    location.href = BASE + "/login";
+  });
+
+  // =========================
+  // ???? Notifications logic
+  // =========================
+  const ndd = $("lfhdr-ndd");
+  const nbtn = $("lfhdr-bellbtn");
+  const nbadge = $("lfhdr-badge");
+  const nlist = $("lfhdr-nlist");
+  const nmark = $("lfhdr-markall");
+
+  const VERIFIED_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z"/></svg>';
+
+  function relTime(ts){
+    const t = new Date(ts).getTime();
+    if(!Number.isFinite(t)) return "";
+    const d = Date.now() - t;
+    const m = Math.floor(d/60000);
+    if(m < 1) return "now";
+    if(m < 60) return m + "m";
+    const h = Math.floor(m/60);
+    if(h < 24) return h + "h";
+    const days = Math.floor(h/24);
+    return days + "d";
+  }
+
+  function notifTargetUrl(n){
+    // n.target_type: "post" | "collection" | "work_image" | "work_video"
+    const uname = n.from_username || "";
+    if(!uname) return FEED_URL;
+
+    // artist tabs are posts/collections/library :contentReference[oaicite:1]{index=1}
+    if(n.target_type === "post") return ARTIST_URL(uname) + "&tab=posts";
+    if(n.target_type === "collection") return ARTIST_URL(uname) + "&tab=collections";
+    return ARTIST_URL(uname) + "&tab=library";
+  }
+
+  function renderNotifRow(n){
+    const avType = (n.from_avatar_type || "image");
+    const avEmoji = (n.from_avatar_emoji || "").trim();
+    const avUrl = (n.from_avatar_url || "").trim();
+    const letter = ((n.from_display_name || n.from_username || "U").trim().slice(0,1) || "U").toUpperCase();
+
+    let avaHtml = letter;
+    let avaClass = "lfhdr-nava";
+    if(avType === "emoji" && avEmoji){
+      avaHtml = `<span>${escapeHtml(avEmoji)}</span>`;
+      avaClass += " emoji";
+    } else if(avUrl){
+      avaHtml = `<img src="${escapeHtml(avUrl)}" alt="">`;
+    }
+
+    const vfy = n.from_verified ? `<span class="lfhdr-vfy" title="Verified">${VERIFIED_SVG}</span>` : "";
+    const t = relTime(n.created_at);
+    const msg = n.text || "New update";
+
+    return `
+      <div class="lfhdr-nitem ${n.read_at ? "" : "unread"}" data-nid="${escapeHtml(n.id)}" data-url="${escapeHtml(notifTargetUrl(n))}">
+        <div class="${avaClass}">${avaHtml}</div>
+        <div class="lfhdr-ntxt">
+          <div class="lfhdr-nline">
+            <div class="lfhdr-nname">${escapeHtml(n.from_display_name || n.from_username || "User")}</div>
+            ${vfy}
+            <span class="lfhdr-dot"></span>
+            <div class="lfhdr-ntime">${escapeHtml(t)}</div>
+          </div>
+          <div class="lfhdr-nmsg">${escapeHtml(msg)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function getToken(){
+    try{
+      const { data } = await sb.auth.getSession();
+      return data?.session?.access_token || null;
+    }catch(e){ return null; }
+  }
+
+  async function apiAuth(path, opts={}){
+    const token = await getToken();
+    if(!token) throw new Error("Login required");
+    const headers = Object.assign({}, opts.headers || {}, { Authorization: "Bearer " + token });
+    if(opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
+    const r = await fetch(BACKEND_BASE + path, Object.assign({}, opts, { headers }));
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j?.error || j?.details || ("HTTP " + r.status));
+    return j;
+  }
+
+  // ✅ expects backend endpoints:
+  // GET  /api/notifications/list?limit=30
+  // POST /api/notifications/mark_read   { ids: [...] }
+  // POST /api/notifications/mark_all_read
+  async function loadNotifications(){
+    const token = await getToken();
+    if(!token){
+      nbadge.classList.remove("show");
+      nlist.innerHTML = `<div class="lfhdr-ndd-empty">Login to see notifications.</div>`;
+      return;
+    }
+
+    nlist.innerHTML = `<div class="lfhdr-ndd-empty">Loading…</div>`;
+    try{
+      const j = await apiAuth("/api/notifications/list?limit=30", { method:"GET" });
+      const items = Array.isArray(j.items) ? j.items : [];
+      const unread = Number(j.unread_count || items.filter(x=>!x.read_at).length || 0);
+
+      if(unread > 0){
+        nbadge.textContent = String(Math.min(unread, 99));
+        nbadge.classList.add("show");
+      }else{
+        nbadge.classList.remove("show");
+      }
+
+      if(!items.length){
+        nlist.innerHTML = `<div class="lfhdr-ndd-empty">No notifications yet.</div>`;
+        return;
+      }
+
+      nlist.innerHTML = items.map(renderNotifRow).join("");
+
+      // click notif => mark read + go
+      nlist.querySelectorAll(".lfhdr-nitem").forEach(row=>{
+        row.addEventListener("click", async ()=>{
+          const id = row.getAttribute("data-nid");
+          const url = row.getAttribute("data-url");
+          try{
+            await apiAuth("/api/notifications/mark_read", {
+              method:"POST",
+              body: JSON.stringify({ ids: [id] })
+            });
+          }catch(e){}
+          location.href = url;
+        });
+      });
+    }catch(e){
+      nlist.innerHTML = `<div class="lfhdr-ndd-empty" style="color:rgba(255,255,255,.75)">Notifications API missing.</div>`;
+      nbadge.classList.remove("show");
+    }
+  }
+
+  nbtn.addEventListener("click", async (e)=>{
+    e.stopPropagation();
+    dd.classList.remove("show");
+    ndd.classList.toggle("show");
+    if(ndd.classList.contains("show")) await loadNotifications();
+  });
+
+  nmark.addEventListener("click", async (e)=>{
+    e.stopPropagation();
+    try{
+      await apiAuth("/api/notifications/mark_all_read", { method:"POST" });
+      await loadNotifications();
+    }catch(err){}
+  });
+
+  // =========================
+  // Profile init
+  // =========================
+  async function initProfile(){
+    const $avatarBtn = $("lfhdr-avatar");
+    const $userCard = $("lfhdr-usercard");
+    const $userDiv = $("lfhdr-userdiv");
+
+    const $name = $("lfhdr-name");
+    const $uname = $("lfhdr-username");
+    const $email = $("lfhdr-email");
+
+    const $ddAva = $("lfhdr-dd-ava");
+
+    const $credits = $("lfhdr-credits");
+    const $logout = $("lfhdr-logout");
+    const $login = $("lfhdr-login");
+    const $promo = $("lfhdr-promo");
+    const $profileLink = $("lfhdr-profile-link");
+
+    try{
+      const { data } = await sb.auth.getSession();
+      const s = data?.session;
+
+      if (!s?.user || !s?.access_token) {
+        // Guest
+        renderAvatarInto($avatarBtn, "image", "", "", "?");
+        $credits.textContent = "—";
+
+        $userCard.style.display = "none";
+        $userDiv.style.display = "none";
+
+        $promo.style.display = "none";
+        $profileLink.style.display = "none";
+        $logout.style.display = "none";
+
+        $login.style.display = "flex";
+        $login.onclick = ()=>location.href = BASE + "/login";
+
+        // notifications for guest
+        nbadge.classList.remove("show");
+        return;
+      }
+
+      $promo.style.display = "flex";
+      $profileLink.style.display = "flex";
+      $logout.style.display = "flex";
+      $login.style.display = "none";
+
+      const email = s.user.email || "—";
+      $email.textContent = email;
+
+      await refreshMeAndUI();
+
+      const p = await fetchMyPublicProfile(s.access_token);
+
+      const displayName = (p?.display_name || "").trim() || "User";
+      const username = (p?.username || "").trim();
+      const avatarType = p?.avatar_type || "image";
+      const avatarUrl  = (p?.avatar_url || "").trim();
+      const avatarEmoji = (p?.avatar_emoji || "").trim();
+
+      $name.textContent = displayName;
+      $uname.textContent = username ? ("@" + username) : "@—";
+
+      renderAvatarInto($avatarBtn, avatarType, avatarUrl, avatarEmoji, email.slice(0,1));
+      renderAvatarInto($ddAva, avatarType, avatarUrl, avatarEmoji, email.slice(0,1));
+
+      $userCard.style.display = "flex";
+      $userDiv.style.display = "block";
+
+      const publicUrl = username ? ARTIST_URL(username) : PROFILE_URL;
+      $userCard.onclick = () => { dd.classList.remove("show"); location.href = publicUrl; };
+
+      // load notifications badge quietly
+      loadNotifications().catch(()=>{});
+    } catch(e){
+      console.warn("initProfile failed:", e);
+    }
+  }
+
+  sb.auth.onAuthStateChange(() => { initProfile(); });
+
+  // init
+  setActiveByUrl();
+  initProfile();
+  window.addEventListener("hashchange", setActiveByUrl);
+
+})();
+</script>
