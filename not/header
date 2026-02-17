@@ -691,8 +691,27 @@
   }
 
   function notifTargetUrl(n){
-    // ✅ backend уже отдает готовый target_url
-    return absUrl(n.target_url);
+    const a = n.actor || {};
+    const base = absUrl(
+      n.target_url ||
+      (a.username ? ("/artist?username=" + encodeURIComponent(a.username)) : "/feed")
+    );
+
+    try{
+      const u = new URL(base, location.origin);
+
+      // если уже есть tab=... — не трогаем
+      if(u.searchParams.get("tab")) return u.toString();
+
+      const tab = (n.ntype === "new_post") ? "posts"
+               : (n.ntype === "new_collection") ? "collections"
+               : "library"; // new_work -> library
+
+      u.searchParams.set("tab", tab);
+      return u.toString();
+    }catch(e){
+      return base;
+    }
   }
 
   function renderNotifRow(n){
@@ -709,7 +728,7 @@
       avaHtml = `<span>${escapeHtml(avEmoji)}</span>`;
       avaClass += " emoji";
     } else if(avUrl){
-      avaHtml = `<img src="${escapeHtml(avUrl)}" alt="" onerror="this.remove()">`;
+      avaHtml = `<img src="${escapeHtml(avUrl)}" alt="" onerror="this.onerror=null; this.remove();">`;
     }
 
     const vfy = (a.verified === true)
@@ -718,17 +737,14 @@
 
     const t = relTime(n.created_at);
 
-    // ✅ что сделал
     const action = ({
-      new_post: "posted",
-      new_collection: "created a collection",
-      new_work: "published new work"
-    })[n.ntype] || "updated";
+      new_post: "New post",
+      new_collection: "New collection",
+      new_work: "New work"
+    })[n.ntype] || "Update";
 
-    // ✅ текст уведомления (если title пустой)
-    const msg = (n.title && String(n.title).trim())
-      ? String(n.title)
-      : action;
+    const rawTitle = (n.title || "").trim();
+    const msg = (rawTitle && rawTitle.toLowerCase() !== "updated") ? rawTitle : action;
 
     const who = a.display_name || a.username || "User";
 
@@ -838,6 +854,7 @@
     try{
       await apiAuth("/api/notifications/mark_all_read", { method:"POST" });
       await loadNotifications();
+      nlist.querySelectorAll(".lfhdr-nitem.unread").forEach(el => el.classList.remove("unread"));
       nbadge.classList.remove("show");
     }catch(err){}
   });
