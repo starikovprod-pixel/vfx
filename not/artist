@@ -1803,6 +1803,34 @@
     return loadLibrary(true);
   }
 
+  function getQS(name){
+    try { return new URLSearchParams(location.search).get(name); }
+    catch(e){ return null; }
+  }
+
+  async function applyTabFromUrl(){
+    const tabFromUrl = (getQS("tab") || "").toLowerCase();
+    const wanted = (tabFromUrl === "collections" || tabFromUrl === "library" || tabFromUrl === "posts")
+      ? tabFromUrl
+      : "posts";
+
+    const btn =
+      document.querySelector(`[data-tab="${wanted}"]`) ||
+      document.getElementById("tab-" + wanted) ||
+      document.querySelector(`.tab-${wanted}`);
+
+    if(btn) btn.click();
+    else await switchTab(wanted);
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    applyTabFromUrl().catch(e => console.error(e));
+  });
+
+  window.addEventListener("popstate", () => {
+    applyTabFromUrl().catch(e => console.error(e));
+  });
+
   // -------- Data loaders ----------
   async function loadLibrary(reset=false){
     if(loading) return;
@@ -3533,38 +3561,12 @@
       await switchTab(targetTab);
     };
 
-    const p = new URLSearchParams(location.search);
-    const tabParam = (p.get("tab") || "").toLowerCase();
-    if(tabParam){
-      await window.setArtistTab(tabParam);
-      return;
-    }
-
-    await window.setArtistTab("posts");
+    await applyTabFromUrl();
   }
 
   init().catch(e=>{
     console.error(e);
     $grid.innerHTML = `<div class="empty" style="color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(e.message)}</div>`;
   });
-})();
-
-(function(){
-  const tab = (new URLSearchParams(location.search).get("tab") || "").toLowerCase();
-  if(!tab) return;
-
-  const btn = document.querySelector(`[data-tab="${tab}"]`);
-  if(btn){ btn.click(); return; }
-
-  const map = { posts: "posts", collections: "collections", library: "library" };
-  const any = map[tab];
-  if(!any) return;
-
-  const btn2 =
-    document.getElementById("tab-" + any) ||
-    document.querySelector(`.tab-${any}`) ||
-    document.querySelector(`[data-section="${any}"]`);
-
-  if(btn2) btn2.click();
 })();
 </script>
