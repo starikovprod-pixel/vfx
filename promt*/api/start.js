@@ -213,6 +213,85 @@ function getMotionControlCredits({ mode, durationSec }) {
   return { usd, credits, rate, usd_per_credit: per };
 }
 
+async function insertGeneration({
+  db = pool,
+  userId,
+  presetId,
+  jobId,
+  model,
+  prompt,
+  status,
+  duration = null,
+  aspectRatio = null,
+  generateAudio = null,
+  cost = 0,
+  lab = null,
+  kind = null,
+  extraParams = {},
+}) {
+  const params = {
+    duration,
+    aspect_ratio: aspectRatio,
+    generate_audio: generateAudio,
+    presetId,
+    ...extraParams,
+  };
+
+  await db.query(
+    `
+    insert into public.generations
+      (user_id,
+       preset_id,
+       replicate_prediction_id,
+       model,
+       model_key,
+       model_display,
+       prompt,
+       prompt_text,
+       params,
+       status,
+       duration,
+       aspect_ratio,
+       generate_audio,
+       cost,
+       lab,
+       kind)
+    values
+      ($1::uuid,
+       $2::text,
+       $3::text,
+       $4::text,
+       $4::text,
+       $4::text,
+       $5::text,
+       $5::text,
+       $6::jsonb,
+       $7::text,
+       $8::int,
+       $9::text,
+       $10::boolean,
+       $11::int,
+       $12::text,
+       $13::text)
+    `,
+    [
+      userId,
+      presetId,
+      String(jobId),
+      model,
+      prompt,
+      JSON.stringify(params),
+      status,
+      duration,
+      aspectRatio,
+      generateAudio,
+      cost,
+      lab,
+      kind,
+    ]
+  );
+}
+
 function runwayHeaders() {
   return {
     Authorization: `Bearer ${RUNWAY_API_KEY}`,
@@ -452,48 +531,18 @@ export default async function handler(req, res) {
         return res.status(500).json({ ok: false, error: "No task id from Runway", details: data });
       }
 
-      await pool.query(
-        `
-        insert into public.generations
-          (user_id,
-           preset_id,
-           replicate_prediction_id,
-           model,
-           model_key,
-           model_display,
-           prompt,
-           prompt_text,
-           params,
-           status,
-           duration,
-           aspect_ratio,
-           generate_audio,
-           cost,
-           lab,
-           kind)
-        values
-          ($1,$2,$3,$4,$4,$4,$5,$5,
-           jsonb_build_object(
-             'duration', to_jsonb($7::int),
-             'aspect_ratio', to_jsonb($8::text),
-             'generate_audio', to_jsonb($9::boolean),
-             'presetId', to_jsonb($2::text)
-           ),
-           $6,$7,$8,$9,$10,null,null)
-        `,
-        [
-          userId,
-          presetId,
-          taskId,
-          `runway:${preset.model}`,
-          prompt,
-          "processing",
-          Math.round(video_duration_sec),
-          preset.model === "gen4_aleph" ? String(payload.ratio || "16:9") : null,
-          false,
-          cost,
-        ]
-      );
+      await insertGeneration({
+        userId,
+        presetId,
+        jobId: taskId,
+        model: `runway:${preset.model}`,
+        prompt,
+        status: "processing",
+        duration: Math.round(video_duration_sec),
+        aspectRatio: preset.model === "gen4_aleph" ? String(payload.ratio || "16:9") : null,
+        generateAudio: false,
+        cost,
+      });
 
       return res.status(200).json({
         ok: true,
@@ -574,37 +623,20 @@ if (!imageUrl) {
       const promptStored = prompt + metaTag;
 
       // 🔥 INSERT: сохраняем promptStored, model оставляем preset.model
-      await pool.query(
-        `
-        insert into public.generations
-          (user_id,
-           preset_id,
-           replicate_prediction_id,
-           model,
-           model_key,
-           model_display,
-           prompt,
-           prompt_text,
-           params,
-           status,
-           duration,
-           aspect_ratio,
-           generate_audio,
-           cost,
-           lab,
-           kind)
-        values
-          ($1,$2,$3,$4,$4,$4,$5,$5,
-           jsonb_build_object(
-             'duration', to_jsonb($7::int),
-             'aspect_ratio', to_jsonb($8::text),
-             'generate_audio', to_jsonb($9::boolean),
-             'presetId', to_jsonb($2::text)
-           ),
-           $6,$7,$8,$9,$10,$11,$12)
-        `,
-        [userId, presetId, prediction.id, preset.model, promptStored, prediction.status, duration, aspectRatio, generateAudio, cost, lab, kind]
-      );
+      await insertGeneration({
+        userId,
+        presetId,
+        jobId: prediction.id,
+        model: preset.model,
+        prompt: promptStored,
+        status: prediction.status,
+        duration,
+        aspectRatio,
+        generateAudio,
+        cost,
+        lab,
+        kind,
+      });
 
       return res.status(200).json({
         ok: true,
@@ -687,37 +719,20 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
   const metaTag = enhance ? `\n\n[LF_META:UPSCALER=${REPLICATE_UPSCALE_MODEL}]` : "";
   const promptStored = prompt + metaTag;
 
-  await pool.query(
-    `
-    insert into public.generations
-      (user_id,
-       preset_id,
-       replicate_prediction_id,
-       model,
-       model_key,
-       model_display,
-       prompt,
-       prompt_text,
-       params,
-       status,
-       duration,
-       aspect_ratio,
-       generate_audio,
-       cost,
-       lab,
-       kind)
-    values
-      ($1,$2,$3,$4,$4,$4,$5,$5,
-       jsonb_build_object(
-         'duration', to_jsonb($7::int),
-         'aspect_ratio', to_jsonb($8::text),
-         'generate_audio', to_jsonb($9::boolean),
-         'presetId', to_jsonb($2::text)
-       ),
-       $6,$7,$8,$9,$10,$11,$12)
-    `,
-    [userId, presetId, prediction.id, preset.model, promptStored, prediction.status, duration, aspectRatio, null, cost, lab, kind]
-  );
+  await insertGeneration({
+    userId,
+    presetId,
+    jobId: prediction.id,
+    model: preset.model,
+    prompt: promptStored,
+    status: prediction.status,
+    duration,
+    aspectRatio,
+    generateAudio: null,
+    cost,
+    lab,
+    kind,
+  });
 
   return res.status(200).json({
     ok: true,
@@ -824,50 +839,20 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
       const promptStored = prompt + metaTag;
 
       // 🔥 INSERT: строго по порядку $1..$12, generate_audio=null
-      await pool.query(
-        `
-        insert into public.generations
-          (user_id,
-           preset_id,
-           replicate_prediction_id,
-           model,
-           model_key,
-           model_display,
-           prompt,
-           prompt_text,
-           params,
-           status,
-           duration,
-           aspect_ratio,
-           generate_audio,
-           cost,
-           lab,
-           kind)
-        values
-          ($1,$2,$3,$4,$4,$4,$5,$5,
-           jsonb_build_object(
-             'duration', to_jsonb($7::int),
-             'aspect_ratio', to_jsonb($8::text),
-             'generate_audio', to_jsonb($9::boolean),
-             'presetId', to_jsonb($2::text)
-           ),
-           $6,$7,$8,$9,$10,$11,$12)
-        `,
-        [
-          userId,                         // $1
-          presetId,                       // $2
-          prediction.id,                  // $3
-          preset.model,                   // $4
-          promptStored,                   // $5
-          prediction.status,              // $6
-          Math.round(video_duration_sec), // $7
-          null,                           // $8 (aspect_ratio)
-          null,                           // $9 (generate_audio - чистый NULL)
-          cost,                           // $10
-          lab,                            // $11
-          kind                            // $12
-        ]
-      );
+      await insertGeneration({
+        userId,
+        presetId,
+        jobId: prediction.id,
+        model: preset.model,
+        prompt: promptStored,
+        status: prediction.status,
+        duration: Math.round(video_duration_sec),
+        aspectRatio: null,
+        generateAudio: null,
+        cost,
+        lab,
+        kind,
+      });
 
       return res.status(200).json({
         ok: true,
@@ -955,37 +940,20 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
         input,
       });
 
-      await pool.query(
-        `
-        insert into public.generations
-          (user_id,
-           preset_id,
-           replicate_prediction_id,
-           model,
-           model_key,
-           model_display,
-           prompt,
-           prompt_text,
-           params,
-           status,
-           duration,
-           aspect_ratio,
-           generate_audio,
-           cost,
-           lab,
-           kind)
-        values
-          ($1,$2,$3,$4,$4,$4,$5,$5,
-           jsonb_build_object(
-             'duration', to_jsonb($7::int),
-             'aspect_ratio', to_jsonb($8::text),
-             'generate_audio', to_jsonb($9::boolean),
-             'presetId', to_jsonb($2::text)
-           ),
-           $6,$7,$8,$9,$10,$11,$12)
-        `,
-        [userId, presetId, prediction.id, preset.model, prompt, prediction.status, duration, aspect_ratio, generate_audio, cost, lab, kind]
-      );
+      await insertGeneration({
+        userId,
+        presetId,
+        jobId: prediction.id,
+        model: preset.model,
+        prompt,
+        status: prediction.status,
+        duration,
+        aspectRatio: aspect_ratio,
+        generateAudio: generate_audio,
+        cost,
+        lab,
+        kind,
+      });
 
       return res.status(200).json({
         ok: true,
@@ -1081,38 +1049,16 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
           },
         });
 
-        await client.query(
-          `
-          insert into public.generations
-            (user_id,
-             preset_id,
-             replicate_prediction_id,
-             model,
-             model_key,
-             model_display,
-             prompt,
-             prompt_text,
-             params,
-             status,
-             duration,
-             aspect_ratio,
-             generate_audio,
-             cost,
-             lab,
-             kind)
-          values
-            ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',null,'generate_audio',null,'presetId',to_jsonb($2::text)),$6,null,null,null,$7,null,null)
-          `,
-          [
-            userId,
-            presetId,
-            prediction.id,
-            preset.model,
-            prompt,
-            prediction.status,
-            cost,
-          ]
-        );
+        await insertGeneration({
+          db: client,
+          userId,
+          presetId,
+          jobId: prediction.id,
+          model: preset.model,
+          prompt,
+          status: prediction.status,
+          cost,
+        });
 
         await client.query("COMMIT");
 
@@ -1266,32 +1212,17 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
         input,
       });
 
-      await pool.query(
-        `
-        insert into public.generations
-          (user_id,
-           preset_id,
-           replicate_prediction_id,
-           model,
-           model_key,
-           model_display,
-           prompt,
-           prompt_text,
-           params,
-           status,
-           duration,
-           aspect_ratio,
-           generate_audio,
-           cost,
-           lab,
-           kind)
-        values
-          ($1,$2,$3,$4,$4,$4,$5,$5,
-           jsonb_build_object('duration',null,'aspect_ratio',to_jsonb($7::text),'generate_audio',null,'presetId',to_jsonb($2::text)),
-           $6,null,$7,null,$8,null,null)
-        `,
-        [userId, presetId, prediction.id, preset.model, prompt, prediction.status, aspect_ratio || null, cost]
-      );
+      await insertGeneration({
+        userId,
+        presetId,
+        jobId: prediction.id,
+        model: preset.model,
+        prompt,
+        status: prediction.status,
+        aspectRatio: aspect_ratio || null,
+        generateAudio: null,
+        cost,
+      });
 
       return res.status(200).json({
         ok: true,
@@ -1357,32 +1288,19 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
         },
       });
 
-      await pool.query(
-        `
-        insert into public.generations
-          (user_id,
-           preset_id,
-           replicate_prediction_id,
-           model,
-           model_key,
-           model_display,
-           prompt,
-           prompt_text,
-           params,
-           status,
-           duration,
-           aspect_ratio,
-           generate_audio,
-           cost,
-           lab,
-           kind)
-        values
-          ($1,$2,$3,$4,$4,$4,$5,$5,
-           jsonb_build_object('duration',null,'aspect_ratio',to_jsonb($7::text),'generate_audio',null,'presetId',to_jsonb($2::text)),
-           $6,null,$7,null,$8,$9,$10)
-        `,
-        [userId, presetId, prediction.id, preset.model, prompt, prediction.status, aspect_ratio, cost, lab, kind]
-      );
+      await insertGeneration({
+        userId,
+        presetId,
+        jobId: prediction.id,
+        model: preset.model,
+        prompt,
+        status: prediction.status,
+        aspectRatio: aspect_ratio,
+        generateAudio: null,
+        cost,
+        lab,
+        kind,
+      });
 
       return res.status(200).json({
         ok: true,
@@ -1541,32 +1459,17 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
         return res.status(500).json({ ok: false, error: "No task_id from Freepik", details: data });
       }
 
-      await pool.query(
-        `
-        insert into public.generations
-          (user_id,
-           preset_id,
-           replicate_prediction_id,
-           model,
-           model_key,
-           model_display,
-           prompt,
-           prompt_text,
-           params,
-           status,
-           duration,
-           aspect_ratio,
-           generate_audio,
-           cost,
-           lab,
-           kind)
-        values
-          ($1,$2,$3,$4,$4,$4,$5,$5,
-           jsonb_build_object('duration',null,'aspect_ratio',to_jsonb($7::text),'generate_audio',null,'presetId',to_jsonb($2::text)),
-           $6,null,$7,null,$8,null,null)
-        `,
-        [userId, presetId, taskId, `freepik:${mode}`, prompt, status, null, cost]
-      );
+      await insertGeneration({
+        userId,
+        presetId,
+        jobId: taskId,
+        model: `freepik:${mode}`,
+        prompt,
+        status,
+        aspectRatio: null,
+        generateAudio: null,
+        cost,
+      });
 
       return res.status(200).json({
         ok: true,
