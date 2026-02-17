@@ -455,9 +455,24 @@ export default async function handler(req, res) {
       await pool.query(
         `
         insert into public.generations
-          (user_id, preset_id, replicate_prediction_id, model, prompt, status, duration, aspect_ratio, generate_audio, cost)
+          (user_id,
+           preset_id,
+           replicate_prediction_id,
+           model,
+           model_key,
+           model_display,
+           prompt,
+           prompt_text,
+           params,
+           status,
+           duration,
+           aspect_ratio,
+           generate_audio,
+           cost,
+           lab,
+           kind)
         values
-          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,null,null)
         `,
         [
           userId,
@@ -555,9 +570,24 @@ if (!imageUrl) {
       await pool.query(
         `
         insert into public.generations
-          (user_id, preset_id, replicate_prediction_id, model, prompt, status, duration, aspect_ratio, generate_audio, cost, lab, kind)
+          (user_id,
+           preset_id,
+           replicate_prediction_id,
+           model,
+           model_key,
+           model_display,
+           prompt,
+           prompt_text,
+           params,
+           status,
+           duration,
+           aspect_ratio,
+           generate_audio,
+           cost,
+           lab,
+           kind)
         values
-          ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,$11,$12)
         `,
         [userId, presetId, prediction.id, preset.model, promptStored, prediction.status, duration, aspectRatio, generateAudio, cost, lab, kind]
       );
@@ -646,9 +676,24 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
   await pool.query(
     `
     insert into public.generations
-      (user_id, preset_id, replicate_prediction_id, model, prompt, status, duration, aspect_ratio, generate_audio, cost, lab, kind)
+      (user_id,
+       preset_id,
+       replicate_prediction_id,
+       model,
+       model_key,
+       model_display,
+       prompt,
+       prompt_text,
+       params,
+       status,
+       duration,
+       aspect_ratio,
+       generate_audio,
+       cost,
+       lab,
+       kind)
     values
-      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,$11,$12)
     `,
     [userId, presetId, prediction.id, preset.model, promptStored, prediction.status, duration, aspectRatio, null, cost, lab, kind]
   );
@@ -761,9 +806,24 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
       await pool.query(
         `
         insert into public.generations
-          (user_id, preset_id, replicate_prediction_id, model, prompt, status, duration, aspect_ratio, generate_audio, cost, lab, kind)
+          (user_id,
+           preset_id,
+           replicate_prediction_id,
+           model,
+           model_key,
+           model_display,
+           prompt,
+           prompt_text,
+           params,
+           status,
+           duration,
+           aspect_ratio,
+           generate_audio,
+           cost,
+           lab,
+           kind)
         values
-          ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,$11,$12)
         `,
         [
           userId,                         // $1
@@ -870,9 +930,24 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
       await pool.query(
         `
         insert into public.generations
-          (user_id, preset_id, replicate_prediction_id, model, prompt, status, duration, aspect_ratio, generate_audio, cost, lab, kind)
+          (user_id,
+           preset_id,
+           replicate_prediction_id,
+           model,
+           model_key,
+           model_display,
+           prompt,
+           prompt_text,
+           params,
+           status,
+           duration,
+           aspect_ratio,
+           generate_audio,
+           cost,
+           lab,
+           kind)
         values
-          ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',$7,'aspect_ratio',$8,'generate_audio',$9,'presetId',$2),$6,$7,$8,$9,$10,$11,$12)
         `,
         [userId, presetId, prediction.id, preset.model, prompt, prediction.status, duration, aspect_ratio, generate_audio, cost, lab, kind]
       );
@@ -974,9 +1049,24 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
         await client.query(
           `
           insert into public.generations
-            (user_id, preset_id, replicate_prediction_id, model, prompt, status, cost)
+            (user_id,
+             preset_id,
+             replicate_prediction_id,
+             model,
+             model_key,
+             model_display,
+             prompt,
+             prompt_text,
+             params,
+             status,
+             duration,
+             aspect_ratio,
+             generate_audio,
+             cost,
+             lab,
+             kind)
           values
-            ($1,$2,$3,$4,$5,$6,$7)
+            ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',null,'generate_audio',null,'presetId',$2),$6,null,null,null,$7,null,null)
           `,
           [
             userId,
@@ -1144,9 +1234,24 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
       await pool.query(
         `
         insert into public.generations
-          (user_id, preset_id, replicate_prediction_id, model, prompt, status, aspect_ratio, cost)
+          (user_id,
+           preset_id,
+           replicate_prediction_id,
+           model,
+           model_key,
+           model_display,
+           prompt,
+           prompt_text,
+           params,
+           status,
+           duration,
+           aspect_ratio,
+           generate_audio,
+           cost,
+           lab,
+           kind)
         values
-          ($1,$2,$3,$4,$5,$6,$7,$8)
+          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',$7,'generate_audio',null,'presetId',$2),$6,null,$7,null,$8,null,null)
         `,
         [userId, presetId, prediction.id, preset.model, prompt, prediction.status, aspect_ratio || null, cost]
       );
@@ -1218,9 +1323,24 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
       await pool.query(
         `
         insert into public.generations
-          (user_id, preset_id, replicate_prediction_id, model, prompt, status, aspect_ratio, cost, lab, kind)
+          (user_id,
+           preset_id,
+           replicate_prediction_id,
+           model,
+           model_key,
+           model_display,
+           prompt,
+           prompt_text,
+           params,
+           status,
+           duration,
+           aspect_ratio,
+           generate_audio,
+           cost,
+           lab,
+           kind)
         values
-          ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',$7,'generate_audio',null,'presetId',$2),$6,null,$7,null,$8,$9,$10)
         `,
         [userId, presetId, prediction.id, preset.model, prompt, prediction.status, aspect_ratio, cost, lab, kind]
       );
@@ -1385,9 +1505,24 @@ if (preset.provider === "kling" && preset.model === "kwaivgi/kling-v2.5-turbo-pr
       await pool.query(
         `
         insert into public.generations
-          (user_id, preset_id, replicate_prediction_id, model, prompt, status, aspect_ratio, cost)
+          (user_id,
+           preset_id,
+           replicate_prediction_id,
+           model,
+           model_key,
+           model_display,
+           prompt,
+           prompt_text,
+           params,
+           status,
+           duration,
+           aspect_ratio,
+           generate_audio,
+           cost,
+           lab,
+           kind)
         values
-          ($1,$2,$3,$4,$5,$6,$7,$8)
+          ($1,$2,$3,$4,$4,$4,$5,$5,jsonb_build_object('duration',null,'aspect_ratio',$7,'generate_audio',null,'presetId',$2),$6,null,$7,null,$8,null,null)
         `,
         [userId, presetId, taskId, `freepik:${mode}`, prompt, status, null, cost]
       );

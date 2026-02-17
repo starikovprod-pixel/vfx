@@ -347,6 +347,15 @@
           <div class="m-val mono" id="m-id">123-123</div>
         </div>
         <div class="m-info-row">
+          <div class="m-label">Model</div>
+          <div class="m-val" id="m-model">—</div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">Prompt</div>
+          <div class="m-val" id="m-prompt" style="white-space:pre-wrap; max-height:180px; overflow:auto;"></div>
+        </div>
+        <div class="m-info-row">
           <div class="m-label">Feed</div>
           <div class="m-val" id="m-feed-state">Not published</div>
         </div>
@@ -356,6 +365,7 @@
           <button class="btn danger" id="btn-unpublish" style="display:none;">Unpublish from Feed</button>
           <button class="btn primary" id="btn-download">Download File</button>
           <button class="btn" id="btn-copy-link">Copy URL</button>
+          <button class="btn" id="btn-copy-prompt">Copy Prompt</button>
           <button class="btn danger" id="btn-toggle-hide">Remove</button>
         </div>
       </div>
@@ -407,8 +417,11 @@
   const $mStatus = document.getElementById("m-status-text");
   const $mDate = document.getElementById("m-date");
   const $mId = document.getElementById("m-id");
+  const $mModel = document.getElementById("m-model");
+  const $mPrompt = document.getElementById("m-prompt");
   const $btnDown = document.getElementById("btn-download");
   const $btnCopy = document.getElementById("btn-copy-link");
+  const $btnCopyPrompt = document.getElementById("btn-copy-prompt");
   const $btnHide = document.getElementById("btn-toggle-hide");
   const $btnPublish = document.getElementById("btn-publish");
   const $btnUnpublish = document.getElementById("btn-unpublish");
@@ -669,6 +682,19 @@
     $mStatus.innerHTML = `<span class="dot ${st.dot}" style="display:inline-block;margin-right:6px"></span> ${st.text}`;
     $mDate.textContent = item.created_at || "";
     $mId.textContent = item.id;
+
+    const modelName = item.model_display || item.model_key || "—";
+    const prompt = item.prompt_text || item.prompt || "";
+
+    $mModel.textContent = modelName;
+    $mPrompt.textContent = prompt || "—";
+
+    $btnCopyPrompt.onclick = () => {
+      if(!prompt) return;
+      navigator.clipboard.writeText(prompt);
+      $btnCopyPrompt.textContent = "Copied!";
+      setTimeout(() => $btnCopyPrompt.textContent = "Copy Prompt", 900);
+    };
 
     if(url) {
       $btnDown.style.display = "flex";

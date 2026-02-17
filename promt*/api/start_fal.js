@@ -229,11 +229,48 @@ export default async function handler(req, res) {
     await pool.query(
       `
       insert into public.generations
-        (user_id, preset_id, replicate_prediction_id, model, prompt, status, duration)
+        (user_id,
+         preset_id,
+         replicate_prediction_id,
+         model,
+         model_key,
+         model_display,
+         prompt,
+         prompt_text,
+         params,
+         status,
+         duration,
+         aspect_ratio,
+         generate_audio,
+         cost,
+         lab,
+         kind)
       values
-        ($1, $2, $3, $4, $5, $6, $7)
+        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
       `,
-      [userId, presetId, requestId, preset.model, prompt, "starting", Math.round(durationSec)]
+      [
+        userId,
+        presetId,
+        requestId,
+        preset.model,
+        preset.model,
+        preset.name || preset.model,
+        prompt,
+        prompt,
+        JSON.stringify({
+          duration: Math.round(durationSec),
+          aspect_ratio: null,
+          generate_audio: keep_original_sound,
+          presetId,
+        }),
+        "starting",
+        Math.round(durationSec) || null,
+        null,
+        keep_original_sound ?? null,
+        cost,
+        null,
+        null,
+      ]
     );
 
     return res.status(200).json({
