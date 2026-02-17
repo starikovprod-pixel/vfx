@@ -682,22 +682,26 @@
     return days + "d";
   }
 
-  function notifTargetUrl(n){
-    // n.target_type: "post" | "collection" | "work_image" | "work_video"
-    const uname = n.from_username || "";
-    if(!uname) return FEED_URL;
+  function absUrl(u){
+    const s = String(u || "").trim();
+    if(!s) return FEED_URL;
+    if(/^https?:\/\//i.test(s)) return s;
+    if(s.startsWith("/")) return location.origin + s;
+    return location.origin + "/" + s;
+  }
 
-    // artist tabs are posts/collections/library :contentReference[oaicite:1]{index=1}
-    if(n.target_type === "post") return ARTIST_URL(uname) + "&tab=posts";
-    if(n.target_type === "collection") return ARTIST_URL(uname) + "&tab=collections";
-    return ARTIST_URL(uname) + "&tab=library";
+  function notifTargetUrl(n){
+    // ✅ backend уже отдает готовый target_url
+    return absUrl(n.target_url);
   }
 
   function renderNotifRow(n){
-    const avType = (n.from_avatar_type || "image");
-    const avEmoji = (n.from_avatar_emoji || "").trim();
-    const avUrl = (n.from_avatar_url || "").trim();
-    const letter = ((n.from_display_name || n.from_username || "U").trim().slice(0,1) || "U").toUpperCase();
+    const a = n.actor || {};
+
+    const avType  = (a.avatar_type || "image");
+    const avEmoji = (a.avatar_emoji || "").trim();
+    const avUrl   = (a.avatar_url || "").trim();
+    const letter  = ((a.display_name || a.username || "U").trim().slice(0,1) || "U").toUpperCase();
 
     let avaHtml = letter;
     let avaClass = "lfhdr-nava";
@@ -705,19 +709,37 @@
       avaHtml = `<span>${escapeHtml(avEmoji)}</span>`;
       avaClass += " emoji";
     } else if(avUrl){
-      avaHtml = `<img src="${escapeHtml(avUrl)}" alt="">`;
+      avaHtml = `<img src="${escapeHtml(avUrl)}" alt="" onerror="this.remove()">`;
     }
 
-    const vfy = n.from_verified ? `<span class="lfhdr-vfy" title="Verified">${VERIFIED_SVG}</span>` : "";
+    const vfy = (a.verified === true)
+      ? `<span class="lfhdr-vfy" title="Verified">${VERIFIED_SVG}</span>`
+      : "";
+
     const t = relTime(n.created_at);
-    const msg = n.text || "New update";
+
+    // ✅ что сделал
+    const action = ({
+      new_post: "posted",
+      new_collection: "created a collection",
+      new_work: "published new work"
+    })[n.ntype] || "updated";
+
+    // ✅ текст уведомления (если title пустой)
+    const msg = (n.title && String(n.title).trim())
+      ? String(n.title)
+      : action;
+
+    const who = a.display_name || a.username || "User";
 
     return `
-      <div class="lfhdr-nitem ${n.read_at ? "" : "unread"}" data-nid="${escapeHtml(n.id)}" data-url="${escapeHtml(notifTargetUrl(n))}">
+      <div class="lfhdr-nitem ${n.read_at ? "" : "unread"}"
+           data-nid="${escapeHtml(n.id)}"
+           data-url="${escapeHtml(notifTargetUrl(n))}">
         <div class="${avaClass}">${avaHtml}</div>
         <div class="lfhdr-ntxt">
           <div class="lfhdr-nline">
-            <div class="lfhdr-nname">${escapeHtml(n.from_display_name || n.from_username || "User")}</div>
+            <div class="lfhdr-nname">${escapeHtml(who)}</div>
             ${vfy}
             <span class="lfhdr-dot"></span>
             <div class="lfhdr-ntime">${escapeHtml(t)}</div>
@@ -748,7 +770,7 @@
 
   // ✅ expects backend endpoints:
   // GET  /api/notifications/list?limit=30
-  // POST /api/notifications/mark_read   { ids: [...] }
+  // POST /api/notifications/mark_read   { notification_id }
   // POST /api/notifications/mark_all_read
   async function loadNotifications(){
     const token = await getToken();
@@ -786,8 +808,14 @@
           try{
             await apiAuth("/api/notifications/mark_read", {
               method:"POST",
-              body: JSON.stringify({ ids: [id] })
+              body: JSON.stringify({ notification_id: id })
             });
+            row.classList.remove("unread");
+
+            const cur = parseInt(nbadge.textContent || "0", 10) || 0;
+            const next = Math.max(0, cur - 1);
+            if(next > 0){ nbadge.textContent = String(next); nbadge.classList.add("show"); }
+            else { nbadge.classList.remove("show"); }
           }catch(e){}
           location.href = url;
         });
@@ -810,6 +838,7 @@
     try{
       await apiAuth("/api/notifications/mark_all_read", { method:"POST" });
       await loadNotifications();
+      nbadge.classList.remove("show");
     }catch(err){}
   });
 
