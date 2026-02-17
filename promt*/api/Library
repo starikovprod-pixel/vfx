@@ -774,7 +774,7 @@
 
     const rawModel = item.model_display || item.model_key || item.model || "—";
     const modelName = prettyModelName(rawModel);
-    const prompt = item.prompt_text || item.prompt || "";
+    const prompt = item.prompt_user || item.user_prompt || "";
 
     $mModel.textContent = modelName;
     if($mModelChip) $mModelChip.textContent = modelChip(rawModel);
