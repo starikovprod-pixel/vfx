@@ -3525,7 +3525,22 @@
       myProfile = { display_name:"User", username:"", avatar_type:"image", avatar_url:"", avatar_emoji:"" };
     }
     renderTabControls();
-    await switchTab("posts");
+
+    window.setArtistTab = async (nextTab) => {
+      const allowed = new Set(["posts", "collections", "library"]);
+      const normalized = String(nextTab || "").toLowerCase();
+      const targetTab = allowed.has(normalized) ? normalized : "posts";
+      await switchTab(targetTab);
+    };
+
+    const p = new URLSearchParams(location.search);
+    const tabParam = (p.get("tab") || "").toLowerCase();
+    if(tabParam){
+      await window.setArtistTab(tabParam);
+      return;
+    }
+
+    await window.setArtistTab("posts");
   }
 
   init().catch(e=>{
