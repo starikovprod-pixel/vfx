@@ -39,31 +39,34 @@
     border:2px solid #0b0b0b;
   }
 
-  #lf-main{ padding:26px 18px 40px; max-width:1860px; margin:0 auto; }
+  #lf-main{ padding:24px 18px 38px; max-width:1980px; margin:0 auto; }
 
   #lf-workspace{
     display:grid;
-    grid-template-columns:440px minmax(520px, 1fr) 420px;
+    grid-template-columns:minmax(380px,440px) minmax(740px,1fr) minmax(420px,520px);
     gap:0;
-    border:1px solid var(--border);
-    border-radius:22px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:24px;
     overflow:hidden;
-    background:var(--bg-panel);
+    background:linear-gradient(180deg,#0f0f10,#0a0a0b);
     min-height:calc(100vh - 74px - 52px);
+    box-shadow:0 24px 64px rgba(0,0,0,.45);
   }
 
   .lf-side,
   .lf-panel{
-    padding:20px;
+    padding:22px;
     display:flex;
     flex-direction:column;
-    gap:16px;
+    gap:14px;
     max-height:calc(100vh - 74px - 52px);
     overflow:auto;
   }
 
-  .lf-side{ border-right:1px solid var(--border); }
-  .lf-panel{ border-left:1px solid var(--border); background:rgba(0,0,0,.2); }
+  .lf-side{ border-right:1px solid rgba(255,255,255,.08); background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01)); }
+  .lf-panel{ border-left:1px solid rgba(255,255,255,.08); background:linear-gradient(180deg,rgba(255,255,255,.015),rgba(0,0,0,.3)); }
+  .lf-panelLabel{ font-size:11px; text-transform:uppercase; letter-spacing:.18em; color:rgba(255,255,255,.52); font-weight:900; margin-bottom:2px; }
+  .lf-sideCard{ border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; background:rgba(255,255,255,.02); }
 
   .lf-center{
     background:#0a0a0a;
@@ -287,7 +290,7 @@
   }
   .lf-thumbbox:hover .x{ opacity:1; transform:scale(1); }
 
-  .lf-actions{ margin-top:auto; display:flex; flex-direction:column; gap:10px; }
+  .lf-actions{ margin-top:auto; display:flex; flex-direction:column; gap:10px; position:sticky; bottom:0; padding-top:12px; background:linear-gradient(180deg,rgba(10,10,10,0),rgba(10,10,10,.92) 35%); }
 
   .lf-chk{
     display:flex; align-items:center; gap:10px;
@@ -409,8 +412,8 @@
 
   /* Center viewport */
   .lf-viewportCard{
-    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-    border-bottom:1px solid var(--border);
+    background:radial-gradient(circle at 50% -20%, rgba(43,108,255,.22), transparent 46%), linear-gradient(180deg, #0f1013, #070708 62%);
+    border-bottom:1px solid rgba(255,255,255,.08);
     position:relative;
     display:flex;
     flex-direction:column;
@@ -419,15 +422,15 @@
   }
 
   .lf-topbar{
-    height:56px;
+    min-height:62px;
     display:grid;
     grid-template-columns:auto 1fr auto;
     align-items:center;
-    gap:12px;
-    padding:10px 14px;
+    gap:16px;
+    padding:12px 16px;
     border-bottom:1px solid rgba(255,255,255,.08);
-    background:rgba(0,0,0,.35);
-    backdrop-filter: blur(4px);
+    background:linear-gradient(180deg,rgba(0,0,0,.56),rgba(0,0,0,.36));
+    backdrop-filter: blur(6px);
   }
 
   .lf-topbar .left{
@@ -505,24 +508,33 @@
   .lf-stageWrap{
     flex:1;
     position:relative;
-    background:#000;
+    background:radial-gradient(circle at center, rgba(255,255,255,.06), rgba(0,0,0,.88) 72%);
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:14px;
+    padding:18px;
   }
 
   .lf-frame{
     position:relative;
-    width:min(1400px, 100%);
+    width:min(1440px, 100%);
     aspect-ratio: var(--frame-aspect, 16 / 9);
-    border-radius:18px;
+    border-radius:20px;
     overflow:hidden;
-    border:1px solid rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 24px 60px rgba(0,0,0,.65), inset 0 0 0 2px rgba(255,255,255,.05), inset 0 0 0 14px rgba(0,0,0,.26);
     background:
-      radial-gradient(circle at 30% 20%, rgba(43,108,255,.10), transparent 45%),
-      radial-gradient(circle at 80% 80%, rgba(175,82,222,.08), transparent 42%),
-      #060606;
+      radial-gradient(circle at 30% 20%, rgba(43,108,255,.12), transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(175,82,222,.09), transparent 42%),
+      #040404;
+  }
+  .lf-frame::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:radial-gradient(circle at center, transparent 58%, rgba(0,0,0,.34) 100%);
+    z-index:9;
   }
 
   #lf-nano canvas{
@@ -598,8 +610,16 @@
   }
 
   /* Right panel controls */
-  .lf-section{ padding:14px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,.02); }
+  .lf-section{ padding:14px; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.02); }
   .lf-section .lf-h2{ margin-bottom:10px; }
+  .lf-accordion{ border:1px solid rgba(255,255,255,.1); border-radius:14px; background:rgba(10,10,10,.52); overflow:hidden; }
+  .lf-accordion + .lf-accordion{ margin-top:8px; }
+  .lf-accordion summary{ list-style:none; cursor:pointer; font-size:13px; font-weight:900; padding:12px 14px; letter-spacing:.02em; display:flex; align-items:center; justify-content:space-between; }
+  .lf-accordion summary::-webkit-details-marker{ display:none; }
+  .lf-accordion summary::after{ content:"▾"; color:var(--text-sec); font-size:12px; transition:.18s; }
+  .lf-accordion[open] summary{ color:#fff; background:rgba(43,108,255,.12); }
+  .lf-accordion[open] summary::after{ transform:rotate(180deg); color:#c8d8ff; }
+  .lf-accordion .lf-section{ border:0; border-top:1px solid rgba(255,255,255,.08); border-radius:0; background:transparent; }
   .lf-field .range{ width:100%; }
 
   .lf-row{
@@ -874,7 +894,6 @@
     color:var(--text-sec);
     font-size:12px;
   }
-  #aspectBtnBadge{ display:none !important; }
   .lf-dropdown-menu{
     position:absolute;
     left:0;
@@ -1012,13 +1031,13 @@
   .lf-topbar .center{justify-content:flex-start;flex-wrap:wrap}
   .lf-topbar .right{justify-content:flex-start;flex-wrap:wrap;max-width:100%;overflow:visible;white-space:normal}
 }
-}
 </style>
 
 <div id="lf-nano">
   <div id="lf-main">
     <div id="lf-workspace">
       <div class="lf-side">
+        <div class="lf-panelLabel">Director Panel</div>
         <div class="lf-navStack">
           <div class="lf-labTitle">Cinema Shot</div>
           <div class="lf-navPills">
@@ -1029,162 +1048,128 @@
         </div>
         <div class="lf-h2">Nano Banana Pro (Image) + Cinema Viewport</div>
 
-        <div class="lf-field">
-          <label>Prompt</label>
-          <div class="lf-input-wrap">
-            <textarea id="scene" rows="5" placeholder="Describe what you want..."></textarea>
-            <div class="lf-prompt-loader" id="promptLoader">
-              <div class="lf-prompt-text">
-                <span>✨ Генерация промта...</span>
+        <div class="lf-sideCard">
+          <div class="lf-field">
+            <label>Prompt</label>
+            <div class="lf-input-wrap">
+              <textarea id="scene" rows="5" placeholder="Describe what you want..."></textarea>
+              <div class="lf-prompt-loader" id="promptLoader">
+                <div class="lf-prompt-text">
+                  <span>✨ Генерация промта...</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="lf-field">
-          <label>Reference Images</label>
-          <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
-          <div class="lf-row" style="margin-bottom:10px;">
-            <button class="lf-btnSmall" id="uploadImagesBtn" type="button">Upload images</button>
-            <button class="lf-btnSmall lf-gradBtn" id="myCharsGlobal" type="button">My Characters</button>
-          </div>
-          <div class="lf-drop" id="drop">
-            <div class="big" id="dropTitle">Upload images</div>
-            <div class="sub" id="dropSub">Click or drag&drop • up to 14 images</div>
-            <div class="lf-thumbs" id="thumbs"></div>
-          </div>
-        </div>
-
-        <div class="lf-field">
-          <label>Resolution</label>
-          <div class="lf-dropdown" id="resDropdown">
-            <button class="lf-dropdown-btn" id="resBtn" type="button">2K</button>
-            <div class="lf-dropdown-menu" id="resMenu">
-              <div class="lf-dropdown-item" data-value="1K">1K</div>
-              <div class="lf-dropdown-item active" data-value="2K">2K</div>
-              <div class="lf-dropdown-item" data-value="4K">4K</div>
+        <div class="lf-sideCard">
+          <div class="lf-field">
+            <label>Reference Images</label>
+            <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+            <div class="lf-row" style="margin-bottom:10px;">
+              <button class="lf-btnSmall" id="uploadImagesBtn" type="button">Upload images</button>
+              <button class="lf-btnSmall lf-gradBtn" id="myCharsGlobal" type="button">My Characters</button>
+            </div>
+            <div class="lf-drop" id="drop">
+              <div class="big" id="dropTitle">Upload images</div>
+              <div class="sub" id="dropSub">Click or drag&drop • up to 14 images</div>
+              <div class="lf-thumbs" id="thumbs"></div>
             </div>
           </div>
         </div>
 
-        <div class="lf-field">
-          <label>Aspect ratio</label>
-          <div class="lf-dropdown" id="aspectDropdown">
-            <button class="lf-dropdown-btn" id="aspectBtn" type="button">
-              <span id="aspectBtnLabel">16:9</span>
-              <span class="lf-badge" id="aspectBtnBadge">Cinematic</span>
-            </button>
-            <div class="lf-dropdown-menu" id="aspectMenu">
-              <div class="lf-dropdown-item active" data-aspect="16:9">
-                <span>16:9</span>
-                <span class="lf-badge">Cinematic</span>
-              </div>
-              <div class="lf-dropdown-item" data-aspect="21:9">
-                <span>21:9</span>
-                <span class="lf-badge">Cinematic</span>
-              </div>
-              <div class="lf-dropdown-item" data-aspect="9:16">
-                <span>9:16</span>
-              </div>
-              <div class="lf-dropdown-item" data-aspect="1:1">
-                <span>1:1</span>
-              </div>
-              <div class="lf-dropdown-item" data-aspect="4:3">
-                <span>4:3</span>
-              </div>
-              <div class="lf-dropdown-item" data-aspect="3:2">
-                <span>3:2</span>
-              </div>
-              <div class="lf-dropdown-item" data-aspect="2:3">
-                <span>2:3</span>
+        <div class="lf-sideCard">
+          <div class="lf-h2" style="font-size:13px;margin-bottom:8px;">Quick Specs</div>
+          <div class="lf-field">
+            <label>Resolution</label>
+            <div class="lf-dropdown" id="resDropdown">
+              <button class="lf-dropdown-btn" id="resBtn" type="button">2K</button>
+              <div class="lf-dropdown-menu" id="resMenu">
+                <div class="lf-dropdown-item" data-value="1K">1K</div>
+                <div class="lf-dropdown-item active" data-value="2K">2K</div>
+                <div class="lf-dropdown-item" data-value="4K">4K</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="lf-field">
-          <label>Cinematic Studio</label>
-          <select id="camPreset" class="lf-select"></select>
-        </div>
+          <div class="lf-field">
+            <label>Aspect ratio</label>
+            <div class="lf-dropdown" id="aspectDropdown">
+              <button class="lf-dropdown-btn" id="aspectBtn" type="button">
+                <span id="aspectBtnLabel">16:9</span>
+                <span class="lf-badge" id="aspectBtnBadge">Cinematic</span>
+              </button>
+              <div class="lf-dropdown-menu" id="aspectMenu">
+                <div class="lf-dropdown-item active" data-aspect="16:9">
+                  <span>16:9</span>
+                  <span class="lf-badge">Cinematic</span>
+                </div>
+                <div class="lf-dropdown-item" data-aspect="21:9">
+                  <span>21:9</span>
+                  <span class="lf-badge">Cinematic</span>
+                </div>
+                <div class="lf-dropdown-item" data-aspect="9:16"><span>9:16</span></div>
+                <div class="lf-dropdown-item" data-aspect="1:1"><span>1:1</span></div>
+                <div class="lf-dropdown-item" data-aspect="4:3"><span>4:3</span></div>
+                <div class="lf-dropdown-item" data-aspect="3:2"><span>3:2</span></div>
+                <div class="lf-dropdown-item" data-aspect="2:3"><span>2:3</span></div>
+              </div>
+            </div>
+          </div>
 
-        <div class="lf-row2">
           <div class="lf-field">
-            <label>Focal length (mm)</label>
-            <select id="focal" class="lf-select">
-              <option value="18">18</option>
-              <option value="24">24</option>
-              <option value="35" selected>35</option>
-              <option value="50">50</option>
-              <option value="85">85</option>
-              <option value="135">135</option>
-            </select>
-          </div>
-          <div class="lf-field">
-            <label>Aperture</label>
-            <select id="aperture" class="lf-select">
-              <option>f/1.4</option>
-              <option>f/1.8</option>
-              <option selected>f/2.0</option>
-              <option>f/2.8</option>
-              <option>f/4.0</option>
-              <option>f/5.6</option>
-              <option>f/8</option>
-              <option>f/11</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="lf-row2">
-          <div class="lf-field">
-            <label>Grain</label>
-            <select id="grain" class="lf-select">
-              <option value="off">Off</option>
-              <option value="subtle" selected>Subtle</option>
-              <option value="medium">Medium</option>
-            </select>
-          </div>
-          <div class="lf-field">
-            <label>Exposure</label>
-            <select id="exposure" class="lf-select">
-              <option value="natural" selected>Natural</option>
-              <option value="lowkey">Low-key</option>
-              <option value="highkey">High-key</option>
-            </select>
+            <label>Cinematic Studio</label>
+            <select id="camPreset" class="lf-select"></select>
           </div>
         </div>
 
-        <div class="lf-row2">
-          <div class="lf-field">
-            <label>Flare</label>
-            <select id="flare" class="lf-select">
-              <option value="off">Off</option>
-              <option value="subtle" selected>Subtle</option>
-              <option value="strong">Strong</option>
-            </select>
+        <div class="lf-sideCard">
+          <div class="lf-h2" style="font-size:13px;margin-bottom:8px;">Lens Pack</div>
+          <div class="lf-row2">
+            <div class="lf-field">
+              <label>Focal length (mm)</label>
+              <select id="focal" class="lf-select">
+                <option value="18">18</option><option value="24">24</option><option value="35" selected>35</option><option value="50">50</option><option value="85">85</option><option value="135">135</option>
+              </select>
+            </div>
+            <div class="lf-field">
+              <label>Aperture</label>
+              <select id="aperture" class="lf-select">
+                <option>f/1.4</option><option>f/1.8</option><option selected>f/2.0</option><option>f/2.8</option><option>f/4.0</option><option>f/5.6</option><option>f/8</option><option>f/11</option>
+              </select>
+            </div>
           </div>
-          <div class="lf-field">
-            <label>Bloom</label>
-            <select id="bloom" class="lf-select">
-              <option value="off">Off</option>
-              <option value="subtle" selected>Subtle</option>
-              <option value="strong">Strong</option>
-            </select>
-          </div>
-        </div>
 
-        <label class="lf-chk"><input id="styleOnly" type="checkbox" /> Style-only transform</label>
+          <div class="lf-row2">
+            <div class="lf-field">
+              <label>Grain</label>
+              <select id="grain" class="lf-select"><option value="off">Off</option><option value="subtle" selected>Subtle</option><option value="medium">Medium</option></select>
+            </div>
+            <div class="lf-field">
+              <label>Exposure</label>
+              <select id="exposure" class="lf-select"><option value="natural" selected>Natural</option><option value="lowkey">Low-key</option><option value="highkey">High-key</option></select>
+            </div>
+          </div>
+
+          <div class="lf-row2">
+            <div class="lf-field">
+              <label>Flare</label>
+              <select id="flare" class="lf-select"><option value="off">Off</option><option value="subtle" selected>Subtle</option><option value="strong">Strong</option></select>
+            </div>
+            <div class="lf-field">
+              <label>Bloom</label>
+              <select id="bloom" class="lf-select"><option value="off">Off</option><option value="subtle" selected>Subtle</option><option value="strong">Strong</option></select>
+            </div>
+          </div>
+
+          <label class="lf-chk"><input id="styleOnly" type="checkbox" /> Style-only transform</label>
+        </div>
 
         <div class="lf-actions">
           <button class="lf-btn secondary" id="gptPrompt" type="button">GPT → Build Prompt</button>
-
           <button class="lf-btn secondary" id="previewInput" type="button">Preview Input Plate</button>
-
-          <button class="lf-btn" id="run" type="button">
-            Generate <span class="lf-cost" id="cost">—</span>
-          </button>
-
+          <button class="lf-btn" id="run" type="button">Generate <span class="lf-cost" id="cost">—</span></button>
           <button class="lf-btn secondary" id="stop" type="button" style="display:none;">Stop</button>
-
           <div class="lf-status" id="statusText"></div>
         </div>
       </div>
@@ -1192,7 +1177,7 @@
       <div class="lf-center">
         <div class="lf-viewportCard">
           <div class="lf-topbar">
-            <div class="left"></div>
+            <div class="left"><div class="lf-pill" id="stateText">Cinema</div></div>
             <div class="center">
               <div class="lf-topgroup">
                 <button class="lf-btnIcon" id="btnDraw" type="button">Draw</button>
@@ -1230,137 +1215,71 @@
       </div>
 
       <div class="lf-panel">
-        <div class="lf-section">
-          <div class="lf-h2">Background</div>
+        <div class="lf-panelLabel">Studio Tools</div>
+
+        <details class="lf-accordion" open>
+          <summary>Background</summary>
+          <div class="lf-section">
           <input type="file" id="bgFile" accept="image/png,image/jpeg,image/webp" hidden />
           <div class="lf-drop" id="bgDrop">
             <div class="big" id="bgTitle">Upload background</div>
             <div class="sub" id="bgSub">Click or drag&drop</div>
           </div>
           <button class="lf-btn secondary" id="bgClear" type="button" style="margin-top:8px;">Remove background</button>
-        </div>
+          </div>
+        </details>
 
-        <div class="lf-section">
-          <div class="lf-h2">Draw</div>
-          <div class="lf-field">
-            <label>Palette</label>
-            <div class="lf-palette" id="palette"></div>
+        <details class="lf-accordion" open>
+          <summary>Draw</summary>
+          <div class="lf-section">
+          <div class="lf-field"><label>Palette</label><div class="lf-palette" id="palette"></div></div>
+          <div class="lf-field"><label>Brush size</label><input type="range" id="brushSize" class="range" min="4" max="60" value="18" /></div>
+          <div class="lf-field"><label>Opacity</label><input type="range" id="brushOpacity" class="range" min="0.1" max="1" step="0.05" value="0.9" /></div>
+          <div class="lf-row"><button class="lf-btnSmall" id="btnEraser" type="button">Eraser</button><button class="lf-btnSmall" id="btnClearDraw" type="button">Clear</button></div>
           </div>
-          <div class="lf-field">
-            <label>Brush size</label>
-            <input type="range" id="brushSize" class="range" min="4" max="60" value="18" />
-          </div>
-          <div class="lf-field">
-            <label>Opacity</label>
-            <input type="range" id="brushOpacity" class="range" min="0.1" max="1" step="0.05" value="0.9" />
-          </div>
-          <div class="lf-row">
-            <button class="lf-btnSmall" id="btnEraser" type="button">Eraser</button>
-            <button class="lf-btnSmall" id="btnClearDraw" type="button">Clear</button>
-          </div>
-        </div>
+        </details>
 
-        <div class="lf-section">
-          <div class="lf-h2">Characters</div>
+        <details class="lf-accordion" open>
+          <summary>Characters</summary>
+          <div class="lf-section">
           <div class="lf-character" id="char1Card">
-            <div class="lf-char-header">
-              <div class="lf-row">
-                <span class="lf-char-badge" style="background:#ff3b30;"></span>
-                <div class="lf-char-title">Character 1</div>
-              </div>
-              <div class="lf-switch" id="char1Toggle"></div>
-            </div>
+            <div class="lf-char-header"><div class="lf-row"><span class="lf-char-badge" style="background:#ff3b30;"></span><div class="lf-char-title">Character 1</div></div><div class="lf-switch" id="char1Toggle"></div></div>
             <input type="file" id="char1PhotoFile" accept="image/png,image/jpeg,image/webp" hidden />
-            <div class="lf-row" style="gap:12px;align-items:center;">
-              <div class="lf-photoDrop" id="char1PhotoDrop">
-                <div class="lf-photoPlaceholder">Drag & drop<br/>or click</div>
-                <img id="char1PhotoPreview" class="hidden" alt="Character 1 photo preview" />
-              </div>
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
-                  Photo upload
-                </div>
-                <button class="lf-btnSmall lf-gradBtn" id="char1Library" type="button">My Characters</button>
-              </div>
-            </div>
-            <button class="lf-btnSmall" id="char1Default" type="button">Add default rigged character</button>
-            <button class="lf-btnSmall" id="char1PhotoClear" type="button">Remove photo</button>
-            <button class="lf-btnSmall" id="char1Remove" type="button">Remove</button>
+            <div class="lf-row" style="gap:12px;align-items:center;"><div class="lf-photoDrop" id="char1PhotoDrop"><div class="lf-photoPlaceholder">Drag & drop<br/>or click</div><img id="char1PhotoPreview" class="hidden" alt="Character 1 photo preview" /></div><div style="display:flex;flex-direction:column;gap:8px;"><div style="font-size:11px;color:var(--text-sec);line-height:1.4;">Photo upload</div><button class="lf-btnSmall lf-gradBtn" id="char1Library" type="button">My Characters</button></div></div>
+            <button class="lf-btnSmall" id="char1Default" type="button">Add default rigged character</button><button class="lf-btnSmall" id="char1PhotoClear" type="button">Remove photo</button><button class="lf-btnSmall" id="char1Remove" type="button">Remove</button>
           </div>
-
           <div class="lf-character" id="char2Card">
-            <div class="lf-char-header">
-              <div class="lf-row">
-                <span class="lf-char-badge" style="background:#2b6cff;"></span>
-                <div class="lf-char-title">Character 2</div>
-              </div>
-              <div class="lf-switch" id="char2Toggle"></div>
-            </div>
+            <div class="lf-char-header"><div class="lf-row"><span class="lf-char-badge" style="background:#2b6cff;"></span><div class="lf-char-title">Character 2</div></div><div class="lf-switch" id="char2Toggle"></div></div>
             <input type="file" id="char2PhotoFile" accept="image/png,image/jpeg,image/webp" hidden />
-            <div class="lf-row" style="gap:12px;align-items:center;">
-              <div class="lf-photoDrop" id="char2PhotoDrop">
-                <div class="lf-photoPlaceholder">Drag & drop<br/>or click</div>
-                <img id="char2PhotoPreview" class="hidden" alt="Character 2 photo preview" />
-              </div>
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <div style="font-size:11px;color:var(--text-sec);line-height:1.4;">
-                  Photo upload
-                </div>
-                <button class="lf-btnSmall lf-gradBtn" id="char2Library" type="button">My Characters</button>
-              </div>
-            </div>
-            <button class="lf-btnSmall" id="char2Default" type="button">Add default rigged character</button>
-            <button class="lf-btnSmall" id="char2PhotoClear" type="button">Remove photo</button>
-            <button class="lf-btnSmall" id="char2Remove" type="button">Remove</button>
+            <div class="lf-row" style="gap:12px;align-items:center;"><div class="lf-photoDrop" id="char2PhotoDrop"><div class="lf-photoPlaceholder">Drag & drop<br/>or click</div><img id="char2PhotoPreview" class="hidden" alt="Character 2 photo preview" /></div><div style="display:flex;flex-direction:column;gap:8px;"><div style="font-size:11px;color:var(--text-sec);line-height:1.4;">Photo upload</div><button class="lf-btnSmall lf-gradBtn" id="char2Library" type="button">My Characters</button></div></div>
+            <button class="lf-btnSmall" id="char2Default" type="button">Add default rigged character</button><button class="lf-btnSmall" id="char2PhotoClear" type="button">Remove photo</button><button class="lf-btnSmall" id="char2Remove" type="button">Remove</button>
           </div>
-        </div>
+          </div>
+        </details>
 
-        <div class="lf-section">
-          <div class="lf-h2">Layers</div>
-          <div class="lf-layerlist" id="layersList"></div>
-        </div>
+        <details class="lf-accordion" open>
+          <summary>Layers</summary>
+          <div class="lf-section"><div class="lf-layerlist" id="layersList"></div></div>
+        </details>
 
-        <div class="lf-section">
-          <div class="lf-h2">Add Objects</div>
-          <div class="lf-field">
-            <label>Primitive type</label>
-            <select id="primType" class="lf-select">
-              <option value="box">Box</option>
-              <option value="cylinder">Cylinder</option>
-              <option value="plane">Plane</option>
-            </select>
+        <details class="lf-accordion" open>
+          <summary>Add Objects</summary>
+          <div class="lf-section">
+          <div class="lf-field"><label>Primitive type</label><select id="primType" class="lf-select"><option value="box">Box</option><option value="cylinder">Cylinder</option><option value="plane">Plane</option></select></div>
+          <div class="lf-field"><label>Proxy opacity</label><input type="range" id="primOpacity" class="range" min="0.2" max="0.9" step="0.05" value="0.6" /></div>
+          <div class="lf-row"><button class="lf-btnSmall" id="btnAddPrimitive" type="button">Add primitive</button><input type="file" id="modelFile" accept=".glb" hidden /><button class="lf-btnSmall" id="btnAddModel" type="button">Add model (.glb)</button></div>
           </div>
-          <div class="lf-field">
-            <label>Proxy opacity</label>
-            <input type="range" id="primOpacity" class="range" min="0.2" max="0.9" step="0.05" value="0.6" />
-          </div>
-          <div class="lf-row">
-            <button class="lf-btnSmall" id="btnAddPrimitive" type="button">Add primitive</button>
-            <input type="file" id="modelFile" accept=".glb" hidden />
-            <button class="lf-btnSmall" id="btnAddModel" type="button">Add model (.glb)</button>
-          </div>
-        </div>
+        </details>
 
-        <div class="lf-section" id="poseSection" style="display:none;">
-          <div class="lf-h2">Pose mode</div>
-          <div class="lf-row" style="margin-bottom:10px;">
-            <div class="lf-switch" id="poseToggle"></div>
-            <span style="font-size:12px;color:var(--text-sec);">Rotate bones</span>
-          </div>
-          <div class="lf-field">
-            <label>Transform</label>
-            <div class="lf-row lf-transformRow">
-              <button class="lf-btnSmall active" id="tMove" type="button">Move</button>
-              <button class="lf-btnSmall" id="tRot" type="button">Rotate</button>
-              <button class="lf-btnSmall" id="tScale" type="button">Scale</button>
-            </div>
-          </div>
-          <div class="lf-field">
-            <label>Bone</label>
-            <select id="boneSelect" class="lf-select"></select>
-          </div>
+        <details class="lf-accordion" open>
+          <summary>Pose mode</summary>
+          <div class="lf-section" id="poseSection" style="display:none;">
+          <div class="lf-row" style="margin-bottom:10px;"><div class="lf-switch" id="poseToggle"></div><span style="font-size:12px;color:var(--text-sec);">Rotate bones</span></div>
+          <div class="lf-field"><label>Transform</label><div class="lf-row lf-transformRow"><button class="lf-btnSmall active" id="tMove" type="button">Move</button><button class="lf-btnSmall" id="tRot" type="button">Rotate</button><button class="lf-btnSmall" id="tScale" type="button">Scale</button></div></div>
+          <div class="lf-field"><label>Bone</label><select id="boneSelect" class="lf-select"></select></div>
           <button class="lf-btnSmall" id="resetPose" type="button">Reset pose</button>
-        </div>
+          </div>
+        </details>
 
       </div>
     </div>
@@ -1975,6 +1894,13 @@ ${camBlock}
   let charLibraryContext = "global";
   let charLibraryItems = [];
   let shotModalItem = null;
+  function openShotPreviewModal(item, imgUrl, title, meta){
+    shotModalItem = item || null;
+    if (shotModalTitle) shotModalTitle.textContent = title || getGenerationTitle(item, "Cinema Shot");
+    if (shotModalMeta) shotModalMeta.textContent = meta || "";
+    if (shotModalImg) shotModalImg.src = imgUrl || getGenerationUrl(item) || "";
+    openModal(shotModal);
+  }
   let currentProjectId = null;
   let currentProjectTitle = "";
 
@@ -4696,7 +4622,7 @@ Keep it compact but unambiguous.
       if (!card) return;
       const assetId = card.dataset.id;
       const actBtn=e.target.closest("button");
-if(!actBtn){const a=libAssets.find(x=>String(x.id)===String(assetId));if(a){shotModalImg.src=a.url||a.thumb_url||"";openModal(shotModal);}return;}
+if(!actBtn){const a=libAssets.find(x=>String(x.id)===String(assetId));if(a){openShotPreviewModal(a,a.url||a.thumb_url||"",a.title||"Library Asset",`Asset #${a.id||"—"}`);}return;}
 
 
       const act = actBtn.dataset.act;
@@ -4758,7 +4684,7 @@ if(!actBtn){const a=libAssets.find(x=>String(x.id)===String(assetId));if(a){shot
     libGenGrid.addEventListener("click", async (e)=>{
       const card = e.target.closest(".lf-assetCard");
       const btn=e.target.closest("button");
-if(!btn&&e.target.tagName==="IMG"){shotModalImg.src=e.target.src;openModal(shotModal);return;}
+if(!btn&&e.target.tagName==="IMG"){const card=e.target.closest(".lf-assetCard");const genId=card?.dataset?.genId;const g=libGenerations.find(x=>String(x.id)===String(genId));openShotPreviewModal(g,e.target.src,getGenerationTitle(g,"Generation"),`Generation #${g?.id||"—"}`);return;}
       if (btn.dataset.act !== "add-gen") return;
 
       if (!libSelectedScene) return alert("Select a scene first");
