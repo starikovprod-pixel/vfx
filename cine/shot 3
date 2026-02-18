@@ -1,0 +1,5245 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg-body:#030304;
+    --bg-panel:#0c0c0e;
+    --bg-card:#111114;
+    --bg-input:#17171b;
+    --border:rgba(255,255,255,.07);
+    --border-hover:rgba(255,255,255,.14);
+    --accent:#3d7aff;
+    --accent-hover:#2d6aff;
+    --accent-glow:rgba(61,122,255,.15);
+    --accent-soft:rgba(61,122,255,.08);
+    --amber:#f5a623;
+    --amber-glow:rgba(245,166,35,.12);
+    --text-main:#e8e8ec;
+    --text-sec:#6b6b78;
+    --text-dim:#44444f;
+    --radius:14px;
+    --font:'Sora',system-ui,-apple-system,sans-serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+  #lf-nano * { box-sizing:border-box; }
+
+  #lf-nano{
+    background:var(--bg-body);
+    color:var(--text-main);
+    font-family:var(--font);
+    min-height:calc(100vh - 74px);
+    position:relative;
+  }
+
+  /* Subtle film grain overlay */
+  #lf-nano::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:0;
+    opacity:.6;
+  }
+
+  #lf-nano *{
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.08) transparent;
+  }
+  #lf-nano *::-webkit-scrollbar{
+    width:6px;
+    height:6px;
+  }
+  #lf-nano *::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  #lf-nano *::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.1);
+    border-radius:10px;
+  }
+  #lf-nano *::-webkit-scrollbar-thumb:hover{
+    background:rgba(255,255,255,.18);
+  }
+
+  #lf-main{ padding:12px; max-width:1920px; margin:0 auto; position:relative; z-index:1; }
+
+  #lf-workspace{
+    display:grid;
+    grid-template-columns:380px minmax(520px, 1fr) 360px;
+    gap:0;
+    border:1px solid var(--border);
+    border-radius:20px;
+    overflow:hidden;
+    background:var(--bg-panel);
+    min-height:calc(100vh - 74px - 24px);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.03),
+      0 40px 80px -20px rgba(0,0,0,.6),
+      0 0 120px -40px rgba(61,122,255,.06);
+  }
+
+  .lf-side,
+  .lf-panel{
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    max-height:calc(100vh - 74px - 24px);
+    overflow:auto;
+  }
+
+  .lf-side{
+    border-right:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(61,122,255,.02) 0%, transparent 30%);
+  }
+  .lf-panel{
+    border-left:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.05) 100%);
+  }
+
+  .lf-center{
+    background:#050507;
+    display:flex;
+    flex-direction:column;
+    min-height:100%;
+    position:relative;
+  }
+
+  /* Navigation */
+  .lf-back{
+    background:transparent;
+    border:0;
+    color:var(--text-sec);
+    font-weight:600;
+    cursor:pointer;
+    padding:0;
+    font-size:12px;
+    font-family:var(--font);
+    letter-spacing:.3px;
+    transition:color .15s;
+  }
+  .lf-back:hover{ color:var(--text-main); }
+
+  .lf-navStack{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:2px;
+  }
+  .lf-labTitle{
+    font-size:20px;
+    font-weight:800;
+    letter-spacing:-.3px;
+    color:#fff;
+    margin-bottom:0;
+    background:linear-gradient(135deg, #fff 60%, rgba(61,122,255,.6));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .lf-navPills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .lf-btnSmall.lf-link{
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--text-sec) !important;
+    text-transform:uppercase !important;
+    letter-spacing:.8px;
+    font-size:10px;
+    font-weight:600;
+    padding:6px 10px;
+    border-radius:8px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    font-family:var(--font);
+    transition:all .15s;
+  }
+  .lf-btnSmall.lf-link:visited{
+    color:var(--text-sec) !important;
+  }
+  .lf-btnSmall.lf-link span{
+    color:inherit !important;
+  }
+  .lf-btnSmall.lf-link:hover{
+    background:var(--accent-soft);
+    border-color:rgba(61,122,255,.3);
+    color:var(--accent) !important;
+  }
+
+  .lf-h2{
+    font-size:13px;
+    font-weight:700;
+    margin:0;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    color:var(--text-sec);
+  }
+
+  .lf-field label{
+    display:block;
+    font-size:10px;
+    font-weight:600;
+    color:var(--text-dim);
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    font-family:var(--font);
+  }
+
+  .lf-input-wrap {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .lf-field textarea,
+  .lf-field select,
+  .lf-field input[type="text"]{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:13px;
+    font-family:var(--font);
+    display:block;
+    transition:border-color .15s, box-shadow .15s;
+    outline:none;
+  }
+  .lf-field textarea:focus,
+  .lf-field select:focus,
+  .lf-field input[type="text"]:focus{
+    border-color:rgba(61,122,255,.4);
+    box-shadow:0 0 0 3px rgba(61,122,255,.08);
+  }
+
+  .lf-select{
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236b6b78' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-position:calc(100% - 12px) center;
+    background-size:10px 6px;
+    background-repeat:no-repeat;
+    padding-right:32px;
+    cursor:pointer;
+  }
+
+  .lf-input-wrap textarea {
+    border: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+
+  .lf-prompt-loader {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(5, 5, 7, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius:10px;
+  }
+
+  .lf-prompt-loader::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg, 
+      transparent 0%, 
+      rgba(61, 122, 255, 0.08) 40%, 
+      rgba(61, 122, 255, 0.2) 50%, 
+      rgba(61, 122, 255, 0.08) 60%, 
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shine 2s infinite linear;
+    pointer-events: none;
+    border-radius:10px;
+  }
+
+  @keyframes shine {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .lf-prompt-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing:.3px;
+  }
+
+  .lf-prompt-text span {
+    animation: pulseOp 1.5s infinite ease-in-out;
+  }
+  @keyframes pulseOp { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  .lf-row2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  .lf-drop{
+    border:1px dashed rgba(255,255,255,.1);
+    border-radius:12px;
+    padding:14px 12px;
+    cursor:pointer;
+    background:rgba(255,255,255,.015);
+    transition:all .2s;
+    text-align:center;
+  }
+  .lf-drop:hover{
+    border-color:rgba(61,122,255,.4);
+    background:rgba(61,122,255,.04);
+    box-shadow:0 0 20px -8px rgba(61,122,255,.15);
+  }
+
+  .lf-drop .big{ font-weight:700; font-size:13px; }
+  .lf-drop .sub{ font-size:11px; color:var(--text-dim); margin-top:4px; }
+
+  .lf-thumbs{
+    display:none;
+    margin-top:10px;
+    gap:6px;
+    flex-wrap:wrap;
+    justify-content:flex-start;
+  }
+  .lf-thumbbox{
+    width:52px; height:52px;
+    border-radius:8px;
+    overflow:hidden;
+    position:relative;
+    border:1px solid rgba(255,255,255,.08);
+    background:#000;
+    flex:0 0 auto;
+  }
+  .lf-thumbbox img{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .lf-thumbbox .x{
+    position:absolute;
+    top:3px; right:3px;
+    width:16px; height:16px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.1);
+    background:rgba(0,0,0,.7);
+    backdrop-filter:blur(4px);
+    color:#fff;
+    font-weight:700;
+    font-size:10px;
+    line-height:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    user-select:none;
+    opacity:0;
+    transform:scale(.9);
+    transition:.12s;
+  }
+  .lf-thumbbox:hover .x{ opacity:1; transform:scale(1); }
+
+  .lf-actions{ margin-top:auto; display:flex; flex-direction:column; gap:8px; padding-top:12px; }
+
+  .lf-chk{
+    display:flex; align-items:center; gap:8px;
+    cursor:pointer; user-select:none;
+    font-size:12px; font-weight:600; color:var(--text-sec);
+    padding:4px 0;
+    transition:color .15s;
+  }
+  .lf-chk input{
+    width:16px; height:16px; margin:0;
+    accent-color:var(--accent); cursor:pointer;
+    border-radius:4px;
+  }
+  .lf-chk:hover{ color:var(--text-main); }
+
+  .lf-btn{
+    width:100%;
+    padding:12px 14px;
+    border-radius:12px;
+    border:0;
+    background:var(--accent);
+    color:#fff;
+    font-weight:700;
+    font-family:var(--font);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    font-size:13px;
+    letter-spacing:.2px;
+    transition:all .15s;
+    position:relative;
+    overflow:hidden;
+  }
+  .lf-btn::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(135deg, rgba(255,255,255,.1) 0%, transparent 50%);
+    pointer-events:none;
+  }
+  .lf-btn:hover{
+    background:var(--accent-hover);
+    box-shadow:0 8px 24px -4px rgba(61,122,255,.35);
+    transform:translateY(-1px);
+  }
+  .lf-btn:active{ transform:translateY(0); }
+  .lf-btn.secondary{
+    background:rgba(255,255,255,.05);
+    color:var(--text-sec);
+    border:1px solid var(--border);
+  }
+  .lf-btn.secondary::before{ display:none; }
+  .lf-btn.secondary:hover{
+    background:rgba(255,255,255,.08);
+    color:var(--text-main);
+    border-color:var(--border-hover);
+    box-shadow:none;
+    transform:none;
+  }
+
+  .lf-cost{
+    font-size:11px;
+    padding:2px 8px;
+    border-radius:999px;
+    background:rgba(0,0,0,.3);
+    border:1px solid rgba(255,255,255,.08);
+    font-family:var(--mono);
+    font-weight:500;
+  }
+
+  .lf-status{
+    text-align:center;
+    font-size:11px;
+    color:var(--text-sec);
+    min-height:16px;
+    font-weight:500;
+  }
+  .lf-status.err{ color:#ff4d5e; font-weight:700; }
+  .lf-status.ok{ color:#4ade80; font-weight:700; }
+
+  .lf-loader{
+    position:fixed; inset:0;
+    background:rgba(3,3,4,.85);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    z-index:60;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .lf-spin{
+    width:40px;height:40px;
+    border-radius:999px;
+    border:3px solid rgba(255,255,255,.06);
+    border-top-color:var(--accent);
+    animation:lfspin 1s linear infinite;
+  }
+  @keyframes lfspin{ to{ transform:rotate(360deg); } }
+
+  .lf-wait{ font-weight:700; font-size:14px; letter-spacing:.3px; }
+  .lf-time{ color:var(--text-sec); font-size:12px; font-family:var(--mono); }
+
+  /* Aspect ratio items */
+  .lf-aspectlist{ display:flex; flex-direction:column; gap:6px; }
+  .lf-aspectitem{
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:8px 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    transition:all .15s;
+    background:transparent;
+  }
+  .lf-aspectitem:hover{ border-color:rgba(61,122,255,.35); background:rgba(61,122,255,.04); }
+  .lf-aspectitem.active{ border-color:rgba(61,122,255,.6); background:rgba(61,122,255,.08); }
+  .lf-aspectleft{ display:flex; align-items:center; gap:8px; }
+  .lf-aspectbox{
+    width:14px;height:14px;
+    border-radius:50%;
+    border:1.5px solid rgba(255,255,255,.15);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+    transition:all .15s;
+  }
+  .lf-aspectitem.active .lf-aspectbox{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-glow);
+  }
+  .lf-aspectdot{
+    width:6px;height:6px;
+    border-radius:999px;
+    background:transparent;
+    transition:background .15s;
+  }
+  .lf-aspectitem.active .lf-aspectdot{
+    background:var(--accent);
+  }
+  .lf-aspectlabel{ font-weight:600; font-size:12px; color:var(--text-main); }
+  .lf-aspectright{ display:flex; align-items:center; gap:8px; }
+  .lf-badge{
+    font-size:9px;
+    font-weight:700;
+    padding:3px 8px;
+    border-radius:999px;
+    background:rgba(245,166,35,.1);
+    border:1px solid rgba(245,166,35,.2);
+    color:var(--amber);
+    text-transform:uppercase;
+    letter-spacing:.8px;
+  }
+  .lf-check{ font-weight:700; color:#4ade80; opacity:0; transition:opacity .15s; }
+  .lf-aspectitem.active .lf-check{ opacity:1; }
+
+  /* Center viewport */
+  .lf-viewportCard{
+    background:transparent;
+    border-bottom:1px solid var(--border);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    flex:1;
+    min-height:520px;
+  }
+
+  .lf-topbar{
+    height:48px;
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    align-items:center;
+    gap:10px;
+    padding:0 12px;
+    border-bottom:1px solid var(--border);
+    background:rgba(0,0,0,.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .lf-topbar .left{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+  .lf-pill{
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.04);
+    padding:5px 8px;
+    border-radius:6px;
+    color:var(--text-sec);
+    font-weight:600;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+  }
+  .lf-title{
+    font-weight:700;
+    font-size:12px;
+    color:var(--text-sec);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .lf-topbar .center{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:8px;
+    min-width:0;
+  }
+  .lf-topbar .right{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:6px;
+    flex-wrap:wrap;
+    min-width:0;
+    max-width:100%;
+    overflow:visible;
+    white-space:normal;
+  }
+  .lf-projectStatus{
+    min-width:0;
+    max-width:150px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    display:block;
+    font-size:11px;
+    color:var(--text-dim);
+    font-weight:500;
+  }
+  .lf-topgroup{ display:flex; gap:4px; align-items:center; }
+  .lf-vdiv{
+    width:1px;
+    height:22px;
+    background:var(--border);
+    margin:0 4px;
+    flex:0 0 auto;
+  }
+
+  .lf-btnIcon{
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--text-sec);
+    border-radius:8px;
+    padding:6px 10px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:11px;
+    user-select:none;
+    font-family:var(--font);
+    transition:all .15s;
+    letter-spacing:.3px;
+  }
+  .lf-btnIcon:hover{ border-color:rgba(61,122,255,.35); color:var(--text-main); background:rgba(61,122,255,.06); }
+  .lf-btnIcon.active{ border-color:rgba(61,122,255,.6); background:rgba(61,122,255,.12); color:#fff; }
+
+  .lf-stageWrap{
+    flex:1;
+    position:relative;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(61,122,255,.03) 0%, transparent 60%),
+      #020203;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px;
+  }
+
+  .lf-frame{
+    position:relative;
+    width:min(1400px, 100%);
+    aspect-ratio: var(--frame-aspect, 16 / 9);
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.06);
+    background:#050507;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.02),
+      0 20px 60px -15px rgba(0,0,0,.5),
+      inset 0 0 80px -30px rgba(61,122,255,.04);
+  }
+
+  #lf-nano canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  #bgCanvas{ z-index:1; }
+  #drawCanvas{ z-index:2; }
+  #glCanvas{ z-index:3; }
+
+  .lf-resultOverlay{
+    position:absolute;
+    inset:14px;
+    background:rgba(3,3,4,.92);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:40;
+    padding:18px;
+    backdrop-filter:blur(20px);
+  }
+
+  .lf-resultCard{
+    width:min(960px, 100%);
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.06);
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    background:var(--bg-card);
+  }
+
+  .lf-resultCard img, .lf-resultCard video{
+    width:100%;
+    display:block;
+    max-height:65vh;
+    object-fit:contain;
+    background:#000;
+  }
+
+  .lf-resbar{
+    padding:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    border-top:1px solid var(--border);
+    background:rgba(0,0,0,.3);
+  }
+
+  .lf-resbar a{
+    text-decoration:none;
+    background:var(--accent);
+    color:#fff;
+    padding:8px 14px;
+    border-radius:10px;
+    font-weight:700;
+    font-size:12px;
+    font-family:var(--font);
+    transition:all .15s;
+  }
+  .lf-resbar a:hover{
+    box-shadow:0 4px 16px rgba(61,122,255,.3);
+  }
+
+  .lf-close{
+    position:absolute;
+    top:14px; right:14px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:var(--text-sec);
+    border-radius:8px;
+    padding:6px 10px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:12px;
+    font-family:var(--font);
+    backdrop-filter:blur(8px);
+    transition:all .15s;
+  }
+  .lf-close:hover{ color:#fff; border-color:var(--border-hover); }
+
+  /* Right panel sections */
+  .lf-section{
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:rgba(255,255,255,.015);
+    transition:border-color .2s;
+  }
+  .lf-section:hover{ border-color:var(--border-hover); }
+  .lf-section .lf-h2{ margin-bottom:10px; }
+  .lf-field .range{
+    width:100%;
+    accent-color:var(--accent);
+    height:4px;
+  }
+
+  .lf-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+
+  .lf-transformRow{
+    flex-wrap:wrap;
+  }
+  .lf-transformRow .lf-btnSmall{
+    flex:1 1 80px;
+    text-align:center;
+  }
+
+  .lf-btnSmall{
+    padding:7px 10px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.03);
+    color:var(--text-sec);
+    font-weight:600;
+    cursor:pointer;
+    font-size:11px;
+    font-family:var(--font);
+    transition:all .15s;
+    letter-spacing:.2px;
+  }
+  .lf-btnSmall:hover{ border-color:rgba(61,122,255,.35); color:var(--text-main); background:rgba(61,122,255,.06); }
+  .lf-btnSmall.active{
+    border-color: rgba(61,122,255,.6) !important;
+    background: rgba(61,122,255,.12) !important;
+    color: #fff !important;
+  }
+  .lf-gradBtn{
+    border:1px solid rgba(61,122,255,.3) !important;
+    background: linear-gradient(135deg, rgba(61,122,255,.2), rgba(120,80,220,.15)) !important;
+    color:#9ab6ff !important;
+    transition:all .15s;
+  }
+  .lf-gradBtn:hover{
+    background: linear-gradient(135deg, rgba(61,122,255,.3), rgba(120,80,220,.25)) !important;
+    border-color:rgba(61,122,255,.5) !important;
+    color:#fff !important;
+    box-shadow: 0 4px 16px rgba(61,122,255,.15);
+  }
+
+  .lf-libraryList{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    max-height:360px;
+    overflow:auto;
+    padding-right:4px;
+  }
+  .lf-libraryCard{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px;
+    background:rgba(0,0,0,.2);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .lf-libraryCard:hover{ border-color:rgba(61,122,255,.3); background:rgba(61,122,255,.04); }
+  .lf-libraryCard.active{ border-color:rgba(61,122,255,.5); background:rgba(61,122,255,.08); }
+  .lf-libraryCard img{
+    width:56px;
+    height:56px;
+    object-fit:cover;
+    border-radius:8px;
+    border:1px solid var(--border);
+  }
+  .lf-libraryMeta{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:0;
+  }
+  .lf-libraryTitle{
+    font-weight:600;
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .lf-muted{
+    color:var(--text-dim);
+    font-size:10px;
+  }
+
+  .lf-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(3,3,4,.8);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:9999;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+  }
+  .lf-modalCard{
+    width:min(900px, 96vw);
+    max-height:90vh;
+    overflow:auto;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.03),
+      0 32px 64px rgba(0,0,0,.5);
+  }
+  .lf-modalHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .lf-modal input[type="text"]{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:13px;
+    font-family:var(--font);
+    outline:none;
+    transition:border-color .15s;
+  }
+  .lf-modal input[type="text"]:focus{
+    border-color:rgba(61,122,255,.4);
+  }
+  .lf-modalCard img{
+    width:100%;
+    max-height:420px;
+    object-fit:contain;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:#050507;
+  }
+  .lf-libraryGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(170px, 1fr));
+    gap:10px;
+  }
+  .lf-libraryGrid .lf-libraryCard{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .lf-libraryGrid .lf-libraryCard img{
+    width:100%;
+    height:130px;
+  }
+  .lf-assetCard{
+    position: relative;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(0,0,0,.2);
+    cursor: pointer;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    transition:all .15s;
+  }
+  .lf-assetCard:hover{ border-color:var(--border-hover); }
+  .lf-assetCard img{
+    width:100%;
+    height:130px;
+    object-fit:cover;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#050507;
+  }
+  .lf-assetActions{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .lf-chip{
+    font-size:9px;
+    font-weight:700;
+    padding:2px 6px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:var(--text-sec);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+  }
+
+  .lf-palette{ display:flex; gap:6px; flex-wrap:wrap; }
+  .lf-swatch{
+    width:22px;height:22px;border-radius:6px;
+    border:2px solid rgba(255,255,255,.08);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .lf-swatch:hover{ transform:scale(1.15); }
+  .lf-swatch.active{ border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-glow); }
+
+  .lf-switch{
+    width:38px; height:22px; border-radius:999px;
+    background:rgba(255,255,255,.06); border:1px solid var(--border);
+    position:relative; cursor:pointer; flex:0 0 auto;
+    transition:all .2s;
+  }
+  .lf-switch::after{
+    content:"";
+    width:16px; height:16px; border-radius:50%;
+    background:var(--text-dim); position:absolute; top:2px; left:2px; transition:.2s;
+  }
+  .lf-switch.on{ background:rgba(61,122,255,.25); border-color:rgba(61,122,255,.5); }
+  .lf-switch.on::after{ left:18px; background:#fff; }
+
+  .lf-character{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    background:rgba(0,0,0,.15);
+    transition:border-color .2s;
+  }
+  .lf-character:hover{ border-color:var(--border-hover); }
+  .lf-char-header{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .lf-char-title{ font-weight:700; font-size:12px; letter-spacing:.2px; }
+  .lf-char-badge{ width:8px; height:8px; border-radius:999px; }
+
+  .lf-layerlist{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:220px;
+    overflow:auto;
+    padding-right:4px;
+  }
+  .lf-layeritem{
+    display:grid;
+    grid-template-columns:auto auto auto 1fr;
+    gap:8px;
+    align-items:center;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:6px 8px;
+    background:rgba(255,255,255,.02);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .lf-layeritem:hover{ border-color:var(--border-hover); }
+  .lf-layeritem.active{ border-color:rgba(61,122,255,.5); background:rgba(61,122,255,.06); }
+  .lf-layer-badge{ width:8px; height:8px; border-radius:999px; }
+  .lf-layer-name{ font-size:11px; font-weight:600; color:var(--text-main); }
+  .lf-layeritem .lf-btnSmall{
+    padding:5px 8px;
+    min-width:36px;
+    justify-content:center;
+    font-size:10px;
+    border-radius:6px;
+  }
+
+  .lf-layer-label{
+    font-size:9px;
+    font-weight:700;
+    padding:2px 5px;
+    border-radius:999px;
+    background:rgba(255,255,255,.06);
+    border:1px solid var(--border);
+    color:var(--text-sec);
+    letter-spacing:.5px;
+  }
+
+  .lf-dropdown{
+    position:relative;
+    width:100%;
+  }
+  .lf-dropdown-btn{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text-main);
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    font-weight:600;
+    font-family:var(--font);
+    transition:border-color .15s;
+  }
+  .lf-dropdown-btn:hover{ border-color:var(--border-hover); }
+  .lf-dropdown-btn::after{
+    content:"▾";
+    color:var(--text-dim);
+    font-size:11px;
+  }
+  #aspectBtnBadge{ display:none !important; }
+  .lf-dropdown-menu{
+    position:absolute;
+    left:0;
+    right:0;
+    top:calc(100% + 4px);
+    background:var(--bg-card);
+    border:1px solid var(--border-hover);
+    border-radius:10px;
+    padding:4px;
+    display:none;
+    z-index:20;
+    box-shadow:0 16px 40px rgba(0,0,0,.5);
+  }
+  .lf-dropdown.open .lf-dropdown-menu{ display:block; }
+  .lf-dropdown-item{
+    padding:8px 10px;
+    border-radius:8px;
+    font-weight:600;
+    font-size:12px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    color:var(--text-sec);
+    transition:all .12s;
+  }
+  .lf-dropdown-item:hover{
+    background:rgba(61,122,255,.08);
+    color:var(--text-main);
+  }
+  .lf-dropdown-item.active{
+    background:rgba(61,122,255,.12);
+    color:#fff;
+    border:1px solid rgba(61,122,255,.25);
+  }
+
+  .lf-photoDrop{
+    width:80px;
+    height:80px;
+    border-radius:10px;
+    border:1px dashed rgba(255,255,255,.12);
+    background:rgba(255,255,255,.02);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    cursor:pointer;
+    overflow:hidden;
+    position:relative;
+    transition:all .2s;
+  }
+  .lf-photoDrop:hover{ border-color:rgba(61,122,255,.4); background:rgba(61,122,255,.04); }
+  .lf-photoDrop img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .lf-photoPlaceholder{
+    font-size:9px;
+    font-weight:600;
+    color:var(--text-dim);
+    padding:6px;
+    line-height:1.4;
+  }
+
+  .hidden{ display:none !important; }
+
+  .lf-previewOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(3,3,4,.8);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:9999;
+    backdrop-filter:blur(8px);
+  }
+  .lf-previewCard{
+    width:min(920px, 96vw);
+    max-height:90vh;
+    overflow:auto;
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    box-shadow:0 32px 64px rgba(0,0,0,.5);
+  }
+  .lf-previewCard img{
+    width:100%;
+    max-height:440px;
+    object-fit:contain;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:#050507;
+  }
+  .lf-previewList{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:11px;
+    font-family:var(--mono);
+  }
+  .lf-previewList a{
+    color:rgba(154,182,255,.8);
+    word-break:break-all;
+    text-decoration:none;
+  }
+  .lf-previewList a:hover{ text-decoration:underline; color:#9ab6ff; }
+
+  @media (max-width: 1280px){
+    .lf-topbar .right #projectStatus{ display:none; }
+  }
+
+  @media (max-width: 1100px){
+    .lf-topbar{
+      grid-template-columns:1fr;
+      height:auto;
+      row-gap:8px;
+      padding:8px 12px;
+    }
+    .lf-topbar .center{ justify-content:flex-start; flex-wrap:wrap; }
+    .lf-topbar .right{ justify-content:flex-start; flex-wrap:wrap; white-space:normal; }
+  }
+
+  #shotModal{position:fixed!important;z-index:10050!important}
+  #cinemaLibraryModal{z-index:9999!important}
+
+  #shotModal .lf-modalCard{
+    width:96vw;
+    max-width:1600px;
+  }
+  #shotModal img{
+    max-height:82vh;
+  }
+  @media (max-width:1400px){
+    .lf-topbar{grid-template-columns:1fr;height:auto;row-gap:8px;padding:8px 12px}
+    .lf-topbar .center{justify-content:flex-start;flex-wrap:wrap}
+    .lf-topbar .right{justify-content:flex-start;flex-wrap:wrap;max-width:100%;overflow:visible;white-space:normal}
+  }
+</style>
+
+<div id="lf-nano">
+  <div id="lf-main">
+    <div id="lf-workspace">
+      <div class="lf-side">
+        <div class="lf-navStack">
+          <button class="lf-back" id="btn-back" type="button">← Back to Cinema Lab</button>
+          <div class="lf-labTitle">Cinema Shot</div>
+          <div class="lf-navPills">
+            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_character" rel="noopener" target="_blank">Character</a>
+            <a class="lf-btnSmall lf-link" href="https://lightfull.ai/cinema_animation" rel="noopener" target="_blank">Animation</a>
+          </div>
+        </div>
+
+        <div class="lf-field">
+          <label>Prompt</label>
+          <div class="lf-input-wrap">
+            <textarea id="scene" rows="4" placeholder="Describe your cinematic vision…"></textarea>
+            <div class="lf-prompt-loader" id="promptLoader">
+              <div class="lf-prompt-text">
+                <span>✨ Генерация промта...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lf-field">
+          <label>Reference Images</label>
+          <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+          <div class="lf-row" style="margin-bottom:8px;">
+            <button class="lf-btnSmall" id="uploadImagesBtn" type="button">Upload</button>
+            <button class="lf-btnSmall lf-gradBtn" id="myCharsGlobal" type="button">My Characters</button>
+          </div>
+          <div class="lf-drop" id="drop">
+            <div class="big" id="dropTitle">Upload images</div>
+            <div class="sub" id="dropSub">Click or drag & drop · up to 14 images</div>
+            <div class="lf-thumbs" id="thumbs"></div>
+          </div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Resolution</label>
+            <div class="lf-dropdown" id="resDropdown">
+              <button class="lf-dropdown-btn" id="resBtn" type="button">2K</button>
+              <div class="lf-dropdown-menu" id="resMenu">
+                <div class="lf-dropdown-item" data-value="1K">1K</div>
+                <div class="lf-dropdown-item active" data-value="2K">2K</div>
+                <div class="lf-dropdown-item" data-value="4K">4K</div>
+              </div>
+            </div>
+          </div>
+          <div class="lf-field">
+            <label>Aspect Ratio</label>
+            <div class="lf-dropdown" id="aspectDropdown">
+              <button class="lf-dropdown-btn" id="aspectBtn" type="button">
+                <span id="aspectBtnLabel">16:9</span>
+                <span class="lf-badge" id="aspectBtnBadge">Cinematic</span>
+              </button>
+              <div class="lf-dropdown-menu" id="aspectMenu">
+                <div class="lf-dropdown-item active" data-aspect="16:9">
+                  <span>16:9</span>
+                  <span class="lf-badge">Cinema</span>
+                </div>
+                <div class="lf-dropdown-item" data-aspect="21:9">
+                  <span>21:9</span>
+                  <span class="lf-badge">Ultra</span>
+                </div>
+                <div class="lf-dropdown-item" data-aspect="9:16"><span>9:16</span></div>
+                <div class="lf-dropdown-item" data-aspect="1:1"><span>1:1</span></div>
+                <div class="lf-dropdown-item" data-aspect="4:3"><span>4:3</span></div>
+                <div class="lf-dropdown-item" data-aspect="3:2"><span>3:2</span></div>
+                <div class="lf-dropdown-item" data-aspect="2:3"><span>2:3</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lf-field">
+          <label>Cinematic Studio</label>
+          <select id="camPreset" class="lf-select"></select>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Focal Length</label>
+            <select id="focal" class="lf-select">
+              <option value="18">18mm</option>
+              <option value="24">24mm</option>
+              <option value="35" selected>35mm</option>
+              <option value="50">50mm</option>
+              <option value="85">85mm</option>
+              <option value="135">135mm</option>
+            </select>
+          </div>
+          <div class="lf-field">
+            <label>Aperture</label>
+            <select id="aperture" class="lf-select">
+              <option>f/1.4</option>
+              <option>f/1.8</option>
+              <option selected>f/2.0</option>
+              <option>f/2.8</option>
+              <option>f/4.0</option>
+              <option>f/5.6</option>
+              <option>f/8</option>
+              <option>f/11</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Grain</label>
+            <select id="grain" class="lf-select">
+              <option value="off">Off</option>
+              <option value="subtle" selected>Subtle</option>
+              <option value="medium">Medium</option>
+            </select>
+          </div>
+          <div class="lf-field">
+            <label>Exposure</label>
+            <select id="exposure" class="lf-select">
+              <option value="natural" selected>Natural</option>
+              <option value="lowkey">Low-key</option>
+              <option value="highkey">High-key</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Flare</label>
+            <select id="flare" class="lf-select">
+              <option value="off">Off</option>
+              <option value="subtle" selected>Subtle</option>
+              <option value="strong">Strong</option>
+            </select>
+          </div>
+          <div class="lf-field">
+            <label>Bloom</label>
+            <select id="bloom" class="lf-select">
+              <option value="off">Off</option>
+              <option value="subtle" selected>Subtle</option>
+              <option value="strong">Strong</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="lf-chk"><input id="styleOnly" type="checkbox" /> Style-only transform</label>
+
+        <div class="lf-actions">
+          <button class="lf-btn secondary" id="gptPrompt" type="button">GPT → Build Prompt</button>
+          <button class="lf-btn secondary" id="previewInput" type="button">Preview Input Plate</button>
+          <button class="lf-btn" id="run" type="button">
+            Generate <span class="lf-cost" id="cost">—</span>
+          </button>
+          <button class="lf-btn secondary" id="stop" type="button" style="display:none;">Stop</button>
+          <div class="lf-status" id="statusText"></div>
+        </div>
+      </div>
+
+      <div class="lf-center">
+        <div class="lf-viewportCard">
+          <div class="lf-topbar">
+            <div class="left"></div>
+            <div class="center">
+              <div class="lf-topgroup">
+                <button class="lf-btnIcon" id="btnDraw" type="button">Draw</button>
+                <button class="lf-btnIcon" id="btn3D" type="button">3D</button>
+              </div>
+            </div>
+            <div class="right">
+              <button class="lf-btnSmall" id="projectSave" type="button">Save</button>
+              <button class="lf-btnSmall" id="projectOpen" type="button">Open</button>
+              <button class="lf-btnSmall lf-gradBtn" id="openCinemaLibrary" type="button">Library</button>
+              <div class="lf-vdiv"></div>
+              <button class="lf-btnSmall" id="projectRename" type="button" title="Rename project">✎</button>
+              <div class="lf-projectStatus" id="projectStatus">Project: —</div>
+            </div>
+          </div>
+          <div class="lf-stageWrap">
+            <div class="lf-frame" id="frame">
+              <canvas id="bgCanvas"></canvas>
+              <canvas id="drawCanvas"></canvas>
+              <canvas id="glCanvas"></canvas>
+            </div>
+            <div class="lf-resultOverlay" id="resultOverlay">
+              <button class="lf-close" id="closeResult" type="button">Close</button>
+              <div class="lf-resultCard">
+                <video id="outVideo" controls playsinline class="hidden"></video>
+                <img id="outImg" class="hidden" alt="result" />
+                <div class="lf-resbar">
+                  <div style="color:var(--text-sec);font-size:11px;font-family:var(--mono)" id="meta">done</div>
+                  <a id="download" href="#" download>Download</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lf-panel">
+        <div class="lf-section">
+          <div class="lf-h2">Background</div>
+          <input type="file" id="bgFile" accept="image/png,image/jpeg,image/webp" hidden />
+          <div class="lf-drop" id="bgDrop">
+            <div class="big" id="bgTitle">Upload background</div>
+            <div class="sub" id="bgSub">Click or drag & drop</div>
+          </div>
+          <button class="lf-btnSmall" id="bgClear" type="button" style="margin-top:6px;width:100%;">Remove background</button>
+        </div>
+
+        <div class="lf-section">
+          <div class="lf-h2">Draw</div>
+          <div class="lf-field">
+            <label>Palette</label>
+            <div class="lf-palette" id="palette"></div>
+          </div>
+          <div class="lf-row2">
+            <div class="lf-field">
+              <label>Brush Size</label>
+              <input type="range" id="brushSize" class="range" min="4" max="60" value="18" />
+            </div>
+            <div class="lf-field">
+              <label>Opacity</label>
+              <input type="range" id="brushOpacity" class="range" min="0.1" max="1" step="0.05" value="0.9" />
+            </div>
+          </div>
+          <div class="lf-row">
+            <button class="lf-btnSmall" id="btnEraser" type="button">Eraser</button>
+            <button class="lf-btnSmall" id="btnClearDraw" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="lf-section">
+          <div class="lf-h2">Characters</div>
+          <div class="lf-character" id="char1Card">
+            <div class="lf-char-header">
+              <div class="lf-row">
+                <span class="lf-char-badge" style="background:#ff3b30;"></span>
+                <div class="lf-char-title">Character 1</div>
+              </div>
+              <div class="lf-switch" id="char1Toggle"></div>
+            </div>
+            <input type="file" id="char1PhotoFile" accept="image/png,image/jpeg,image/webp" hidden />
+            <div class="lf-row" style="gap:10px;align-items:center;">
+              <div class="lf-photoDrop" id="char1PhotoDrop">
+                <div class="lf-photoPlaceholder">Drag & drop<br/>or click</div>
+                <img id="char1PhotoPreview" class="hidden" alt="Character 1 photo preview" />
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="font-size:10px;color:var(--text-dim);line-height:1.3;">Photo upload</div>
+                <button class="lf-btnSmall lf-gradBtn" id="char1Library" type="button">My Characters</button>
+              </div>
+            </div>
+            <div class="lf-row" style="flex-wrap:wrap;">
+              <button class="lf-btnSmall" id="char1Default" type="button">Add default rig</button>
+              <button class="lf-btnSmall" id="char1PhotoClear" type="button">Clear photo</button>
+              <button class="lf-btnSmall" id="char1Remove" type="button">Remove</button>
+            </div>
+          </div>
+
+          <div class="lf-character" id="char2Card">
+            <div class="lf-char-header">
+              <div class="lf-row">
+                <span class="lf-char-badge" style="background:#3d7aff;"></span>
+                <div class="lf-char-title">Character 2</div>
+              </div>
+              <div class="lf-switch" id="char2Toggle"></div>
+            </div>
+            <input type="file" id="char2PhotoFile" accept="image/png,image/jpeg,image/webp" hidden />
+            <div class="lf-row" style="gap:10px;align-items:center;">
+              <div class="lf-photoDrop" id="char2PhotoDrop">
+                <div class="lf-photoPlaceholder">Drag & drop<br/>or click</div>
+                <img id="char2PhotoPreview" class="hidden" alt="Character 2 photo preview" />
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="font-size:10px;color:var(--text-dim);line-height:1.3;">Photo upload</div>
+                <button class="lf-btnSmall lf-gradBtn" id="char2Library" type="button">My Characters</button>
+              </div>
+            </div>
+            <div class="lf-row" style="flex-wrap:wrap;">
+              <button class="lf-btnSmall" id="char2Default" type="button">Add default rig</button>
+              <button class="lf-btnSmall" id="char2PhotoClear" type="button">Clear photo</button>
+              <button class="lf-btnSmall" id="char2Remove" type="button">Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lf-section">
+          <div class="lf-h2">Layers</div>
+          <div class="lf-layerlist" id="layersList"></div>
+        </div>
+
+        <div class="lf-section">
+          <div class="lf-h2">Objects</div>
+          <div class="lf-row2">
+            <div class="lf-field">
+              <label>Primitive</label>
+              <select id="primType" class="lf-select">
+                <option value="box">Box</option>
+                <option value="cylinder">Cylinder</option>
+                <option value="plane">Plane</option>
+              </select>
+            </div>
+            <div class="lf-field">
+              <label>Opacity</label>
+              <input type="range" id="primOpacity" class="range" min="0.2" max="0.9" step="0.05" value="0.6" />
+            </div>
+          </div>
+          <div class="lf-row">
+            <button class="lf-btnSmall" id="btnAddPrimitive" type="button">Add primitive</button>
+            <input type="file" id="modelFile" accept=".glb" hidden />
+            <button class="lf-btnSmall" id="btnAddModel" type="button">Add .glb</button>
+          </div>
+        </div>
+
+        <div class="lf-section" id="poseSection" style="display:none;">
+          <div class="lf-h2">Pose Mode</div>
+          <div class="lf-row" style="margin-bottom:8px;">
+            <div class="lf-switch" id="poseToggle"></div>
+            <span style="font-size:11px;color:var(--text-dim);">Rotate bones</span>
+          </div>
+          <div class="lf-field">
+            <label>Transform</label>
+            <div class="lf-row lf-transformRow">
+              <button class="lf-btnSmall active" id="tMove" type="button">Move</button>
+              <button class="lf-btnSmall" id="tRot" type="button">Rotate</button>
+              <button class="lf-btnSmall" id="tScale" type="button">Scale</button>
+            </div>
+          </div>
+          <div class="lf-field">
+            <label>Bone</label>
+            <select id="boneSelect" class="lf-select"></select>
+          </div>
+          <button class="lf-btnSmall" id="resetPose" type="button">Reset pose</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lf-previewOverlay" id="inputPreviewOverlay">
+    <div class="lf-previewCard">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div class="lf-h2">Preview Input Plate</div>
+        <button class="lf-btnSmall" id="previewClose" type="button">Close</button>
+      </div>
+      <img id="previewImg" alt="Input preview" />
+      <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono);" id="previewPrimary"></div>
+      <div class="lf-previewList" id="previewList"></div>
+    </div>
+  </div>
+
+  <div class="lf-modal" id="shotModal">
+    <div class="lf-modalCard">
+      <div class="lf-modalHeader">
+        <div>
+          <div class="lf-h2" id="shotModalTitle">Cinema Shot</div>
+          <div class="lf-muted" id="shotModalMeta"></div>
+        </div>
+        <button class="lf-btnSmall" id="shotModalClose" type="button">Close</button>
+      </div>
+      <img id="shotModalImg" alt="Cinema shot preview" />
+      <div class="lf-row" style="justify-content:flex-end;flex-wrap:wrap;">
+        <button class="lf-btnSmall" id="shotModalDownload" type="button">Download</button>
+        <button class="lf-btnSmall" id="shotModalCopy" type="button">Copy URL</button>
+        <button class="lf-btnSmall" id="shotModalRename" type="button">Rename</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="lf-modal" id="charLibraryModal">
+    <div class="lf-modalCard">
+      <div class="lf-modalHeader">
+        <div class="lf-h2">Character Library</div>
+        <button class="lf-btnSmall" id="charLibraryClose" type="button">Close</button>
+      </div>
+      <div class="lf-row" style="flex-wrap:wrap;">
+        <input id="charLibrarySearch" type="text" placeholder="Search characters..." />
+        <button class="lf-btnSmall" id="charLibraryRefresh" type="button">Refresh</button>
+      </div>
+      <div class="lf-libraryGrid" id="charLibraryList"></div>
+    </div>
+  </div>
+
+  <div class="lf-modal" id="cinemaLibraryModal">
+    <div class="lf-modalCard" style="width:min(1280px, 96vw);">
+      <div class="lf-modalHeader">
+        <div>
+          <div class="lf-h2">Cinema Library</div>
+          <div class="lf-muted" id="libBreadcrumb">—</div>
+        </div>
+        <button class="lf-btnSmall" id="cinemaLibraryClose" type="button">Close</button>
+      </div>
+
+      <div class="lf-row" style="justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div class="lf-row" style="gap:6px; flex-wrap:wrap;">
+          <button class="lf-btnSmall active" id="libTabManager" type="button">Library</button>
+          <button class="lf-btnSmall" id="libTabAdd" type="button">Add from Generations</button>
+        </div>
+        <div class="lf-row" style="gap:6px; flex-wrap:wrap;">
+          <button class="lf-btnSmall" id="libRefresh" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div id="libManagerView" style="display:grid; grid-template-columns: 280px 280px 1fr; gap:10px; min-height:520px;">
+        <div class="lf-section" style="height:100%; overflow:hidden;">
+          <div class="lf-row" style="justify-content:space-between;">
+            <div class="lf-h2">Projects</div>
+            <button class="lf-btnSmall" id="libNewProject" type="button">＋</button>
+          </div>
+          <input id="libProjectSearch" type="text" placeholder="Search projects..." style="margin-top:8px;" />
+          <div class="lf-libraryList" id="libProjectsList" style="margin-top:8px; max-height:420px;"></div>
+        </div>
+
+        <div class="lf-section" style="height:100%; overflow:hidden;">
+          <div class="lf-row" style="justify-content:space-between;">
+            <div class="lf-h2">Scenes</div>
+            <button class="lf-btnSmall" id="libNewScene" type="button">＋</button>
+          </div>
+          <input id="libSceneSearch" type="text" placeholder="Search scenes..." style="margin-top:8px;" />
+          <div class="lf-libraryList" id="libScenesList" style="margin-top:8px; max-height:420px;"></div>
+        </div>
+
+        <div class="lf-section" style="height:100%; overflow:hidden;">
+          <div class="lf-row" style="justify-content:space-between; align-items:flex-end;">
+            <div>
+              <div class="lf-h2">Assets</div>
+              <div class="lf-muted" id="libAssetsHint">Select a scene</div>
+            </div>
+            <div class="lf-row" style="gap:6px;">
+              <button class="lf-btnSmall" id="libAddSelectedGen" type="button" disabled>Add selected</button>
+            </div>
+          </div>
+          <div id="libAssetsGrid" class="lf-libraryGrid" style="margin-top:8px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); max-height:460px; overflow:auto;"></div>
+        </div>
+      </div>
+
+      <div id="libAddView" style="display:none;">
+        <div class="lf-section">
+          <div class="lf-row" style="justify-content:space-between;">
+            <div>
+              <div class="lf-h2">Add from Generations</div>
+              <div class="lf-muted">Pick items and add to the selected Scene.</div>
+            </div>
+            <div class="lf-row" style="gap:6px;">
+              <button class="lf-btnSmall" id="libGenRefresh" type="button">Refresh</button>
+            </div>
+          </div>
+
+          <div class="lf-row" style="gap:8px; margin-top:8px; flex-wrap:wrap;">
+            <input id="libGenSearch" type="text" placeholder="Search by title..." style="flex:1; min-width:260px;" />
+            <select id="libGenKind" class="lf-select" style="width:180px;">
+              <option value="">All kinds</option>
+              <option value="shot">shot</option>
+              <option value="character">character</option>
+              <option value="animation">animation</option>
+            </select>
+          </div>
+
+          <div id="libGenGrid" class="lf-libraryGrid" style="margin-top:10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); max-height:520px; overflow:auto;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="lf-modal" id="projectListModal">
+    <div class="lf-modalCard">
+      <div class="lf-modalHeader">
+        <div class="lf-h2">Open Project</div>
+        <button class="lf-btnSmall" id="projectListClose" type="button">Close</button>
+      </div>
+      <div class="lf-libraryList" id="projectList"></div>
+    </div>
+  </div>
+
+  <div class="lf-modal" id="projectSaveModal">
+    <div class="lf-modalCard">
+      <div class="lf-modalHeader">
+        <div class="lf-h2" id="projectSaveTitle">Save Project</div>
+        <button class="lf-btnSmall" id="projectSaveClose" type="button">Close</button>
+      </div>
+      <div class="lf-field">
+        <label>Project name</label>
+        <input type="text" id="projectNameInput" placeholder="Project name" />
+      </div>
+      <div class="lf-row" style="justify-content:flex-end;">
+        <button class="lf-btnSmall" id="projectSaveConfirm" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="lf-loader" id="loader">
+    <div class="lf-spin"></div>
+    <div class="lf-wait">Waiting…</div>
+    <div class="lf-time" id="loaderTime">01:00</div>
+    <div class="lf-time" id="loaderSub">Sending task…</div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/TransformControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+
+<script>
+(() => {
+  const BASE = location.origin;
+  const BACKEND_BASE = "https://api.lightfull.ai";
+
+  const ETA_SECONDS = 60;
+  const PRESET_ID = "nano_banana_pro";
+  const INPUTS_BUCKET = "inputs";
+  const MAX_IMAGES = 14;
+
+  const HUMAN_URL = "https://vqnmzstiaosqeoltcwbq.supabase.co/storage/v1/object/public/assets_models/human%203.glb";
+
+  const BONE_MAPPING = {
+    "mixamorig_Head_06": "Голова",
+    "mixamorig_Neck_05": "Шея",
+    "mixamorig_Spine1_03": "Грудь",
+    "mixamorig_Spine_02": "Спина (Низ)",
+    "mixamorig_Hips_01": "Таз",
+    "mixamorig_LeftShoulder_010": "Плечо (Левое)",
+    "mixamorig_RightShoulder_034": "Плечо (Правое)",
+    "mixamorig_LeftArm_011": "Рука Верх (Левая)",
+    "mixamorig_RightArm_035": "Рука Верх (Правая)",
+    "mixamorig_LeftForeArm_012": "Предплечье (Левое)",
+    "mixamorig_RightForeArm_036": "Предплечье (Правое)",
+    "mixamorig_LeftHand_013": "Кисть (Левая)",
+    "mixamorig_RightHand_037": "Кисть (Правая)",
+    "mixamorig_LeftUpLeg_062": "Бедро (Левое)",
+    "mixamorig_RightUpLeg_058": "Бедро (Правое)",
+    "mixamorig_LeftLeg_063": "Голень (Левая)",
+    "mixamorig_RightLeg_00": "Голень (Правая)",
+    "mixamorig_LeftFoot_064": "Стопа (Левая)",
+    "mixamorig_RightFoot_059": "Стопа (Правая)"
+  };
+
+  const ALLOWED_BONES = Object.keys(BONE_MAPPING);
+
+  const LF_ENGINE_PROMPT = `
+GLOBAL CONSTRAINT:
+- Generate a clean cinematic FRAME (a film still).
+- NEVER render any text, UI, logs, code, watermarks, subtitles, labels, typography.
+- No posters, no banners.
+
+CORE GOAL:
+- If an input image is provided: preserve the SAME SUBJECT identity.
+- Apply the user request as a photographed scene (not illustration).
+
+STRICT ORDER (execute in order):
+STEP 1 — CONTENT & COMPOSITION
+STEP 2 — GEOMETRY & OPTICS
+STEP 3 — TEXTURE PASS (grain only)
+
+ANTI-AI LOOK:
+- Avoid HDR, avoid over-sharpening, avoid plastic skin, avoid “AI glossy” look.
+- Keep natural film-like contrast and believable exposure.
+`.trim();
+
+  const LF_CAMERA_PRESETS = {
+    "IMAX_PANAVISION_ANAMORPHIC": {
+      label: "IMAX Film • Panavision Anamorphic",
+      camera: "IMAX 65mm film camera",
+      lens: "Panavision anamorphic (C-Series character)",
+      notes: "real anamorphic optics: blue horizontal streak flare, elliptical bokeh, subtle halation/bloom around highlights, gentle vignette, slight chromatic aberration, filmic contrast"
+    },
+    "ARRI_ALEXA_SPHERICAL": {
+      label: "ARRI Alexa • Modern Spherical",
+      camera: "ARRI Alexa-style digital cinema camera",
+      lens: "modern spherical prime lens",
+      notes: "neutral filmic digital, soft highlight roll-off, no HDR"
+    },
+    "VINTAGE_35_FILM": {
+      label: "Vintage 35mm Film • Classic Prime",
+      camera: "35mm film camera",
+      lens: "vintage prime lens",
+      notes: "gentle bloom, softer micro-contrast, organic texture"
+    },
+    "CONTROLLED_COMMERCIAL": {
+      label: "Controlled Commercial • Clean Studio",
+      camera: "high-end digital cinema camera",
+      lens: "sharp modern prime",
+      notes: "controlled speculars, clean detail (still filmic, not glossy)"
+    }
+  };
+
+  function exposureBlock(mode){
+    switch(String(mode||"natural")){
+      case "lowkey":
+        return "low-key exposure, deep shadows with detail, controlled highlights, cinematic contrast";
+      case "highkey":
+        return "high-key exposure, bright soft light, gentle contrast, preserved highlights";
+      default:
+        return "natural exposure, balanced contrast, preserved highlights, realistic shadows";
+    }
+  }
+
+  function grainBlock(level){
+    switch(String(level||"subtle")){
+      case "off": return "no film grain";
+      case "medium": return "medium film grain (LUMA ONLY), organic texture, no color noise";
+      default: return "subtle film grain (LUMA ONLY), organic texture, no color noise";
+    }
+  }
+
+  function flareBlock(level){
+    switch(String(level||"subtle")){
+      case "off":
+        return "no anamorphic streak flare";
+      case "strong":
+        return "strong but realistic anamorphic streak flare originating ONLY from the brightest highlights / brightest light source (specular/emissive), not a sci-fi laser line";
+      default:
+        return "subtle anamorphic streak flare originating ONLY from the brightest highlights / brightest light source (specular/emissive), not a sci-fi laser line";
+    }
+  }
+
+  function bloomBlock(level){
+    switch(String(level||"subtle")){
+      case "off":
+        return "no bloom, no halation";
+      case "strong":
+        return "strong but realistic halation/bloom ONLY around highlights, film-like glow, not dreamy haze";
+      default:
+        return "subtle halation/bloom ONLY around highlights, film-like glow";
+    }
+  }
+
+  function normalizeUserPrompt(p){
+    let s = String(p||"").trim();
+    s = s.replace(/^use the input image as a locked base reference\.\s*/i, "");
+    s = s.replace(/^use the input image as a locked base( reference)?\.\s*/i, "");
+    return s.trim();
+  }
+
+  function buildFinalPrompt({ userPrompt, hasImage, presetKey, focalMm, aperture, grain, exposure, aspect, res, styleOnly, flare, bloom, cinemaLock, identityMode, locksFirst = false }) {
+    const P = LF_CAMERA_PRESETS[presetKey] || LF_CAMERA_PRESETS.IMAX_PANAVISION_ANAMORPHIC;
+    const up = normalizeUserPrompt(userPrompt);
+
+    const identityWardrobeLock = hasImage ? (identityMode === "proxy_layout_plate" ? `
+IDENTITY + WARDROBE LOCK (ABSOLUTE):
+- Composite plate is a layout/pose/camera reference only. Character identity MUST come from Character photos.
+- Do NOT derive identity from the proxy color silhouette.
+- Preserve clothing/outfit type, layers, materials, and overall look based on the identity photos.
+- Preserve body proportions and silhouette.
+` : `
+IDENTITY + WARDROBE LOCK (ABSOLUTE):
+- Preserve the exact same person identity from the input image.
+- Keep face structure, facial features, eye shape, nose, mouth, beard, hairstyle consistent.
+- Preserve clothing/outfit type, layers, materials, and overall look.
+- Do NOT replace wardrobe with a different coat/jacket/armor unless explicitly requested by the user.
+- Preserve body proportions and silhouette.
+`) : `
+NO INPUT IMAGE:
+- Create a new scene from scratch according to USER_TEXT.
+`;
+
+    const styleOnlyBlock = styleOnly ? `
+STYLE-ONLY TRANSFORM (STRICT):
+- Do NOT change scene content, wardrobe, props, or add/remove objects.
+- Keep composition and background layout consistent.
+- Only adjust lighting, atmosphere, camera optics (lens/DOF), and texture/grain.
+` : `
+CONTENT TRANSFORM:
+- You may change environment/atmosphere and staging as requested, BUT keep identity locked if input image exists.
+- Preserve wardrobe unless user explicitly requests wardrobe change.
+`;
+
+    const cameraPhysical = `
+PHYSICAL CAMERA SIMULATION:
+- This is photographed live-action, not illustration.
+- Focal length affects perspective/compression realistically.
+- Aperture affects depth of field/bokeh realistically.
+`;
+
+    const isAnamorphic = presetKey === "IMAX_PANAVISION_ANAMORPHIC";
+    const useFlare = isAnamorphic && String(flare||"subtle") !== "off";
+    const anamorphicOpticsPack = useFlare ? `
+ANAMORPHIC OPTICS (CONTROLLED):
+- Create an anamorphic horizontal streak flare ONLY from the brightest highlights / brightest light source in the scene.
+- The flare must originate from real specular/emissive highlights (street lamps, headlights, neon, sun glints, reflections) — not random blue lines.
+- Keep it film-realistic (no sci-fi laser beam). If too strong, automatically reduce intensity.
+` : "";
+
+    const camBlock = `
+CINEMATIC CAMERA SETUP:
+- Camera: ${P.camera}
+- Lens: ${P.lens}
+- Focal length: ${focalMm}mm
+- Aperture: ${aperture}
+- Aspect ratio: ${aspect}
+- Output: ${res}
+- Exposure: ${exposureBlock(exposure)}
+- Texture: ${grainBlock(grain)}
+- Flare: ${flareBlock(flare)}
+- Halation/Bloom: ${bloomBlock(bloom)}
+- Notes: ${P.notes}
+`.trim();
+
+    const hardLocksBlock = cinemaLock ? `
+HARD LOCKS — MUST EXECUTE FIRST:
+${cinemaLock}
+` : "";
+
+    const styleBlock = `
+CINEMATIC STYLE / CAMERA (SECOND PRIORITY):
+${LF_ENGINE_PROMPT}
+${cameraPhysical.trim()}
+${anamorphicOpticsPack.trim()}
+
+CINEMATIC CAMERA SETUP:
+${camBlock}
+`.trim();
+
+    if (locksFirst && cinemaLock) {
+      return `
+${hardLocksBlock.trim()}
+
+IDENTITY RULES (SECOND PRIORITY):
+${identityWardrobeLock.trim()}
+
+${styleOnlyBlock.trim()}
+
+${styleBlock}
+
+USER_TEXT:
+${up || "No extra instructions."}
+`.trim();
+    }
+
+    return `
+${LF_ENGINE_PROMPT}
+
+${identityWardrobeLock.trim()}
+
+${styleOnlyBlock.trim()}
+
+${cameraPhysical.trim()}
+${anamorphicOpticsPack.trim()}
+
+${cinemaLock ? `CINEMA_LOCKS:\n${cinemaLock}` : ""}
+
+USER_TEXT:
+${up || "High-quality cinematic film still."}
+
+TECHNICAL_PARAMETERS:
+- CAMERA_PRESET: ${presetKey}
+- FOCAL_LENGTH_MM: ${focalMm}
+- APERTURE: ${aperture}
+- ASPECT_RATIO: ${aspect}
+- OUTPUT: ${res}
+
+CAMERA_PRESET_BLOCK:
+${camBlock}
+`.trim();
+  }
+
+  const $ = (id)=>document.getElementById(id);
+
+  const fileEl = $("file");
+  const drop = $("drop");
+  const thumbsEl = $("thumbs");
+  const dropTitle = $("dropTitle");
+  const dropSub = $("dropSub");
+
+  const sceneEl = $("scene");
+  const promptLoader = $("promptLoader");
+
+  const aspectDropdown = $("aspectDropdown");
+  const aspectBtn = $("aspectBtn");
+  const aspectMenu = $("aspectMenu");
+  const aspectBtnLabel = $("aspectBtnLabel");
+  const aspectBtnBadge = $("aspectBtnBadge");
+  let selectedAspect = "16:9";
+
+  const resDropdown = $("resDropdown");
+  const resBtn = $("resBtn");
+  const resMenu = $("resMenu");
+  let selectedRes = "2K";
+  const uploadImagesBtn = $("uploadImagesBtn");
+  const myCharsGlobal = $("myCharsGlobal");
+  const styleChk = $("styleOnly");
+  const projectSave = $("projectSave");
+  const projectOpen = $("projectOpen");
+  const projectRename = $("projectRename");
+  const projectStatus = $("projectStatus");
+
+  const camPresetEl = $("camPreset");
+  const focalEl = $("focal");
+  const apertureEl = $("aperture");
+  const grainEl = $("grain");
+  const exposureEl = $("exposure");
+  const flareEl = $("flare");
+  const bloomEl = $("bloom");
+
+  const runBtn = $("run");
+  const gptBtn = $("gptPrompt");
+  const previewBtn = $("previewInput");
+  const stopBtn = $("stop");
+  const statusText = $("statusText");
+
+  const loader = $("loader");
+  const loaderTime = $("loaderTime");
+  const loaderSub = $("loaderSub");
+
+  const stateText = $("stateText");
+  const btnDraw = $("btnDraw");
+  const btn3D = $("btn3D");
+
+  const shotModal = $("shotModal");
+  const shotModalTitle = $("shotModalTitle");
+  const shotModalMeta = $("shotModalMeta");
+  const shotModalImg = $("shotModalImg");
+  const shotModalClose = $("shotModalClose");
+  const shotModalDownload = $("shotModalDownload");
+  const shotModalCopy = $("shotModalCopy");
+  const shotModalRename = $("shotModalRename");
+
+  const charLibraryModal = $("charLibraryModal");
+  const charLibraryClose = $("charLibraryClose");
+  const charLibrarySearch = $("charLibrarySearch");
+  const charLibraryList = $("charLibraryList");
+  const charLibraryRefresh = $("charLibraryRefresh");
+
+  const projectListModal = $("projectListModal");
+  const projectListClose = $("projectListClose");
+  const projectList = $("projectList");
+  const projectSaveModal = $("projectSaveModal");
+  const projectSaveClose = $("projectSaveClose");
+  const projectSaveConfirm = $("projectSaveConfirm");
+  const projectSaveTitle = $("projectSaveTitle");
+  const projectNameInput = $("projectNameInput");
+
+  const openCinemaLibrary = $("openCinemaLibrary");
+  const cinemaLibraryModal = $("cinemaLibraryModal");
+  const cinemaLibraryClose = $("cinemaLibraryClose");
+  const libTabManager = $("libTabManager");
+  const libTabAdd = $("libTabAdd");
+  const libManagerView = $("libManagerView");
+  const libAddView = $("libAddView");
+  const libRefresh = $("libRefresh");
+  const libBreadcrumb = $("libBreadcrumb");
+
+  const libProjectsList = $("libProjectsList");
+  const libScenesList = $("libScenesList");
+  const libAssetsGrid = $("libAssetsGrid");
+  const libAssetsHint = $("libAssetsHint");
+
+  const libNewProject = $("libNewProject");
+  const libNewScene = $("libNewScene");
+  const libProjectSearch = $("libProjectSearch");
+  const libSceneSearch = $("libSceneSearch");
+
+  const libGenGrid = $("libGenGrid");
+  const libGenRefresh = $("libGenRefresh");
+  const libGenSearch = $("libGenSearch");
+  const libGenKind = $("libGenKind");
+
+  const frame = $("frame");
+  const bgCanvas = $("bgCanvas");
+  const drawCanvas = $("drawCanvas");
+  const glCanvas = $("glCanvas");
+  const bgCtx = bgCanvas.getContext("2d");
+  const dCtx = drawCanvas.getContext("2d");
+
+  const resultOverlay = $("resultOverlay");
+  const outVideo = $("outVideo");
+  const outImg = $("outImg");
+  const download = $("download");
+  const meta = $("meta");
+  const closeResult = $("closeResult");
+  const inputPreviewOverlay = $("inputPreviewOverlay");
+  const previewClose = $("previewClose");
+  const previewImg = $("previewImg");
+  const previewPrimary = $("previewPrimary");
+  const previewList = $("previewList");
+
+  const bgFile = $("bgFile");
+  const bgDrop = $("bgDrop");
+  const bgTitle = $("bgTitle");
+  const bgSub = $("bgSub");
+  const bgClear = $("bgClear");
+
+  const paletteEl = $("palette");
+  const brushSizeEl = $("brushSize");
+  const brushOpacityEl = $("brushOpacity");
+  const btnEraser = $("btnEraser");
+  const btnClearDraw = $("btnClearDraw");
+
+  const char1Toggle = $("char1Toggle");
+  const char1Default = $("char1Default");
+  const char1PhotoFile = $("char1PhotoFile");
+  const char1PhotoDrop = $("char1PhotoDrop");
+  const char1PhotoPreview = $("char1PhotoPreview");
+  const char1Library = $("char1Library");
+  const char1PhotoClear = $("char1PhotoClear");
+  const char1Remove = $("char1Remove");
+
+  const char2Toggle = $("char2Toggle");
+  const char2Default = $("char2Default");
+  const char2PhotoFile = $("char2PhotoFile");
+  const char2PhotoDrop = $("char2PhotoDrop");
+  const char2PhotoPreview = $("char2PhotoPreview");
+  const char2Library = $("char2Library");
+  const char2PhotoClear = $("char2PhotoClear");
+  const char2Remove = $("char2Remove");
+
+  const layersList = $("layersList");
+
+  const primTypeEl = $("primType");
+  const primOpacityEl = $("primOpacity");
+  const btnAddPrimitive = $("btnAddPrimitive");
+  const modelFile = $("modelFile");
+  const btnAddModel = $("btnAddModel");
+
+  const tMove = $("tMove");
+  const tRot = $("tRot");
+  const tScale = $("tScale");
+
+  const poseSection = $("poseSection");
+  const poseToggle = $("poseToggle");
+  const boneSelect = $("boneSelect");
+  const resetPoseBtn = $("resetPose");
+
+  let selectedFiles = [];
+  let selectedUrls = [];
+  let char1PhotoFileObj = null;
+  let char2PhotoFileObj = null;
+  let char1PhotoUrl = "";
+  let char2PhotoUrl = "";
+  let char1PhotoSignature = "";
+  let char2PhotoSignature = "";
+  let char1LibraryUrl = "";
+  let char2LibraryUrl = "";
+  let currentJobId = null;
+  let abortPoll = false;
+  let pollTimer = null;
+  let timer = null;
+  let timeLeft = ETA_SECONDS;
+
+  let cachedImageUrls = [];
+  let cachedSignature = "";
+  let currentOutputUrl = "";
+  let charLibraryContext = "global";
+  let charLibraryItems = [];
+  let shotModalItem = null;
+  let currentProjectId = null;
+  let currentProjectTitle = "";
+
+  let libProjects = [];
+  let libScenes = [];
+  let libAssets = [];
+  let libSelectedProject = null;
+  let libSelectedScene = null;
+  let libGenerations = [];
+
+  const palette = ["#ffffff", "#ff3b30", "#ff9500", "#ffd60a", "#34c759", "#2b6cff", "#af52de", "#00c7be", "#a0a0a0", "#000000"];
+
+  let mode = "view";
+  let eraser = false;
+  let brushColor = palette[0];
+  let drawing = false;
+  let lastX = 0;
+  let lastY = 0;
+  let drawDirty = false;
+
+  let bgImage = null;
+  let bgFileObj = null;
+  let bgPublicUrl = "";
+  let bgUploadSignature = "";
+  let drawPublicUrl = "";
+
+  const actors = [];
+  const actorState = {
+    activeId: null,
+    char1: null,
+    char2: null
+  };
+  let actorCounter = 1;
+  let primitiveCounter = 1;
+  let modelCounter = 1;
+
+  let renderer;
+  let scene;
+  let camera;
+  let orbit;
+  let transform;
+  let gridHelper;
+
+  const defaultCam = {
+    pos: new THREE.Vector3(0, 0.9, 2.6),
+    look: new THREE.Vector3(0, 0.55, 0)
+  };
+
+  const FOCAL_FOV = {
+    18: 80,
+    24: 65,
+    35: 45,
+    50: 32,
+    85: 20,
+    135: 12
+  };
+
+  const THREE_OK = !!(window.THREE && THREE.OrbitControls && THREE.TransformControls && THREE.GLTFLoader);
+
+  if (!THREE_OK){
+    setStatus("3D disabled (Three controls not loaded)", "err");
+    btn3D.disabled = true;
+  }
+
+  $("btn-back").addEventListener("click", ()=>location.href = "https://lightfull.ai/cinema_lab");
+
+  function openModal(el){
+    if (el) el.style.display = "flex";
+  }
+
+  function closeModal(el){
+    if (el) el.style.display = "none";
+  }
+
+  async function apiLibrary(action, payload){
+    return fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ action, ...payload })
+    });
+  }
+
+  async function loadLibraryProjects(){
+    const r = await apiLibrary("library_list_projects", {});
+    libProjects = r.projects || [];
+  }
+
+  async function loadLibraryScenes(projectId){
+    const r = await apiLibrary("library_list_scenes", { project_id: projectId });
+    libScenes = r.scenes || [];
+  }
+
+  async function loadLibraryAssets(sceneId){
+    const r = await apiLibrary("library_list_assets", { scene_id: sceneId });
+    libAssets = (r.assets||[]).filter(a=>a.kind==="shot");
+  }
+
+  function renderProjects(){
+    const q = String(libProjectSearch?.value || "").trim().toLowerCase();
+    const items = libProjects.filter(p => !q || String(p.title||"").toLowerCase().includes(q));
+    libProjectsList.innerHTML = items.map(p => {
+      const active = libSelectedProject?.id === p.id;
+      return `
+        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${p.id}">
+          <div class="lf-libraryMeta">
+            <div class="lf-libraryTitle">${escapeHtml(p.title)}</div>
+            <div class="lf-muted">${(p.updated_at||p.created_at||"").toString().slice(0,19).replace("T"," ")}</div>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No projects</div>`;
+  }
+
+  function renderScenes(){
+    const q = String(libSceneSearch?.value || "").trim().toLowerCase();
+    const items = libScenes.filter(s => !q || String(s.title||"").toLowerCase().includes(q));
+    libScenesList.innerHTML = items.map(s => {
+      const active = libSelectedScene?.id === s.id;
+      return `
+        <div class="lf-libraryCard ${active ? "active" : ""}" data-id="${s.id}">
+          <div class="lf-libraryMeta">
+            <div class="lf-libraryTitle">${escapeHtml(s.title)}</div>
+            <div class="lf-muted">Scene</div>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No scenes</div>`;
+  }
+
+  function renderAssets(){
+    if (!libSelectedScene){
+      libAssetsHint.textContent = "Select a scene";
+      libAssetsGrid.innerHTML = "";
+      return;
+    }
+    libAssetsHint.textContent = `Scene: ${libSelectedScene.title || "—"}`;
+    libAssetsGrid.innerHTML = (libAssets || []).map(a => {
+      const title = a.title || `${a.kind || "asset"} ${String(a.generation_id||"")}`.trim();
+      const url = a.thumb_url || a.url || "";
+      const kind = a.kind || "";
+      return `
+        <div class="lf-assetCard" data-id="${a.id}">
+          <img src="${escapeAttr(url)}" alt="">
+          <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+            <div class="lf-libraryTitle" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+            ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
+          </div>
+          <div class="lf-assetActions">
+            <button class="lf-btnSmall" data-act="add">Add to Scene</button>
+            <button class="lf-btnSmall" data-act="rename">✎</button>
+            <button class="lf-btnSmall" data-act="delete">X</button>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No assets yet</div>`;
+  }
+
+  function updateBreadcrumb(){
+    const p = libSelectedProject?.title || "—";
+    const s = libSelectedScene?.title || "—";
+    libBreadcrumb.textContent = `Project: ${p} / Scene: ${s}`;
+  }
+
+  function escapeHtml(s){
+    return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  }
+
+  function escapeAttr(s){
+    return escapeHtml(s).replaceAll("'","&#39;");
+  }
+
+  function setLibTab(tab){
+    const isManager = tab === "manager";
+    libTabManager.classList.toggle("active", isManager);
+    libTabAdd.classList.toggle("active", !isManager);
+    libManagerView.style.display = isManager ? "grid" : "none";
+    libAddView.style.display = isManager ? "none" : "block";
+  }
+
+  async function refreshLibraryAll(){
+    await loadLibraryProjects();
+    if (!libSelectedProject && libProjects[0]) libSelectedProject = libProjects[0];
+    if (libSelectedProject){
+      await loadLibraryScenes(libSelectedProject.id);
+      if (!libSelectedScene && libScenes[0]) libSelectedScene = libScenes[0];
+    }
+    if (libSelectedScene){
+      await loadLibraryAssets(libSelectedScene.id);
+    }
+    updateBreadcrumb();
+    renderProjects();
+    renderScenes();
+    renderAssets();
+  }
+
+  async function refreshGenerationsForAdd(){
+    if (!libSelectedScene){
+      libGenGrid.innerHTML = `<div class="lf-muted">Select a scene first (Library tab).</div>`;
+      return;
+    }
+    libGenGrid.innerHTML = `<div class="lf-muted">Loading…</div>`;
+
+    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?limit=80&offset=0", { method:"GET" });
+    const gens = Array.isArray(data.generations) ? data.generations : [];
+    libGenerations = gens.filter(g => String(g.lab||"").toLowerCase() === "cinema");
+
+    renderGenerationsGrid();
+  }
+
+  function renderGenerationsGrid(){
+    if (!libSelectedScene){
+      libGenGrid.innerHTML = `<div class="lf-muted">Select a scene first.</div>`;
+      return;
+    }
+    const q = String(libGenSearch?.value || "").trim().toLowerCase();
+    const kindFilter = String(libGenKind?.value || "").trim().toLowerCase();
+
+    const items = libGenerations.filter(g=>{
+      const title = String(g.title||"").toLowerCase();
+      const kind = String(g.kind||"").toLowerCase();
+      if (kindFilter && kind !== kindFilter) return false;
+      if (q && !title.includes(q)) return false;
+      return true;
+    });
+
+    libGenGrid.innerHTML = items.map(g=>{
+      const url = g.output_url || "";
+      const title = g.title || `${g.kind || "item"} ${g.id}`;
+      const kind = g.kind || "";
+      return `
+        <div class="lf-assetCard" data-gen-id="${g.id}">
+          <img src="${escapeAttr(url)}" alt="">
+          <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+            <div class="lf-libraryTitle" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+            ${kind ? `<span class="lf-chip">${escapeHtml(kind)}</span>` : ""}
+          </div>
+          <div class="lf-assetActions">
+            <button class="lf-btnSmall" data-act="add-gen">Add</button>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="lf-muted">No generations</div>`;
+  }
+
+  async function forceDownload(url, filename){
+    if (!url) return;
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename || "cinema-shot.png";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(blobUrl);
+  }
+
+  async function copyToClipboard(text){
+    if (!text) return;
+    if (navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const input = document.createElement("textarea");
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy");
+    input.remove();
+  }
+
+  function setProjectStatus(title){
+    const label = title ? `Project: ${title}` : "Project: —";
+    if (projectStatus) projectStatus.textContent = label;
+  }
+
+  function openCharacterLibrary(context){
+    charLibraryContext = context || "global";
+    if (charLibrarySearch) charLibrarySearch.value = "";
+    openModal(charLibraryModal);
+    loadCharacterLibrary();
+  }
+
+  (function initCinematicPresets(){
+    if (!camPresetEl) return;
+    camPresetEl.innerHTML = "";
+    Object.keys(LF_CAMERA_PRESETS).forEach((k)=>{
+      const opt = document.createElement("option");
+      opt.value = k;
+      opt.textContent = LF_CAMERA_PRESETS[k].label;
+      camPresetEl.appendChild(opt);
+    });
+    camPresetEl.value = "IMAX_PANAVISION_ANAMORPHIC";
+  })();
+
+  function isCinematicAspect(aspect){
+    return aspect === "16:9" || aspect === "21:9";
+  }
+
+  function setAspect(val){
+    selectedAspect = String(val || "16:9");
+    if (aspectBtnLabel) aspectBtnLabel.textContent = selectedAspect;
+    if (aspectBtnBadge) {
+      aspectBtnBadge.style.display = isCinematicAspect(selectedAspect) ? "inline-flex" : "none";
+    }
+    if (aspectMenu) {
+      aspectMenu.querySelectorAll(".lf-dropdown-item").forEach(item=>{
+        item.classList.toggle("active", item.dataset.aspect === selectedAspect);
+      });
+    }
+    updateFrameAspect();
+  }
+
+  function updateFrameAspect(){
+    const map = {
+      "16:9": "16 / 9",
+      "21:9": "21 / 9",
+      "9:16": "9 / 16",
+      "1:1": "1 / 1",
+      "4:3": "4 / 3",
+      "3:2": "3 / 2",
+      "2:3": "2 / 3"
+    };
+    frame.style.setProperty("--frame-aspect", map[selectedAspect] || "16 / 9");
+    resizeAll();
+    if (THREE_OK) onResize3D();
+  }
+
+  if (aspectDropdown && aspectBtn && aspectMenu){
+    aspectBtn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      aspectDropdown.classList.toggle("open");
+    });
+    aspectMenu.addEventListener("click", (e)=>{
+      const item = e.target.closest(".lf-dropdown-item");
+      if (!item) return;
+      setAspect(item.dataset.aspect);
+      aspectDropdown.classList.remove("open");
+    });
+  }
+  setAspect("16:9");
+
+  function setStatus(t, kind){
+    statusText.textContent = t || "";
+    statusText.classList.remove("err","ok");
+    if (kind) statusText.classList.add(kind);
+  }
+
+  function isVideoUrl(url){
+    const u = String(url||"").toLowerCase();
+    return u.includes(".mp4") || u.includes(".webm") || u.includes(".mov") || u.includes("fal.media");
+  }
+
+  function showResult(url, status){
+    resultOverlay.style.display = "flex";
+    currentOutputUrl = url;
+    download.href = url || "#";
+    meta.textContent = `status: ${status} • jobId: ${currentJobId}`;
+    outVideo.classList.add("hidden");
+    outImg.classList.add("hidden");
+    outVideo.pause();
+    outVideo.removeAttribute("src");
+    outImg.removeAttribute("src");
+
+    if (isVideoUrl(url)) {
+      outVideo.src = url;
+      outVideo.classList.remove("hidden");
+      outVideo.load();
+      outVideo.play().catch(()=>{});
+    } else {
+      outImg.src = url;
+      outImg.classList.remove("hidden");
+    }
+  }
+
+  closeResult.addEventListener("click", ()=>{ resultOverlay.style.display = "none"; });
+  download.addEventListener("click", (e)=>{
+    e.preventDefault();
+    forceDownload(currentOutputUrl || download.href, "cinema-shot.png");
+  });
+
+  function showLoader(on){
+    loader.style.display = on ? "flex" : "none";
+    if (on) startTimer(ETA_SECONDS);
+    if (!on) stopTimer();
+  }
+
+  function showPromptLoader(on){
+    promptLoader.style.display = on ? "flex" : "none";
+  }
+
+  function startTimer(sec){
+    stopTimer();
+    timeLeft = Math.max(0, Math.floor(sec));
+    const tick = ()=>{
+      const m = Math.floor(timeLeft/60);
+      const s = String(timeLeft%60).padStart(2,"0");
+      loaderTime.textContent = `${m}:${s}`;
+      timeLeft = Math.max(0, timeLeft-1);
+    };
+    tick();
+    timer = setInterval(tick, 1000);
+  }
+
+  function stopTimer(){
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+
+  function uuid(){
+    if (crypto && crypto.randomUUID) return crypto.randomUUID();
+    return Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function formatSize(bytes){
+    const kb = Math.round(bytes/1024);
+    if (kb < 1024) return kb + " KB";
+    return (kb/1024).toFixed(1) + " MB";
+  }
+
+  function isCharPhotoActive(index){
+    const actor = index === 1 ? actorState.char1 : actorState.char2;
+    const file = index === 1 ? char1PhotoFileObj : char2PhotoFileObj;
+    const libUrl = index === 1 ? char1LibraryUrl : char2LibraryUrl;
+    return !!(actor && actor.visible && (file || libUrl));
+  }
+
+  function getMaxLeftImages(){
+    const compositeSlot = shouldUseComposite() ? 1 : 0;
+    const char1Slot = isCharPhotoActive(1) ? 1 : 0;
+    const char2Slot = isCharPhotoActive(2) ? 1 : 0;
+    return Math.max(0, MAX_IMAGES - compositeSlot - char1Slot - char2Slot);
+  }
+
+  function getLeftImageCount(){
+    return selectedFiles.length + selectedUrls.length;
+  }
+
+  function ensureLimit(files, limit){
+    if (files.length <= limit) return files;
+    return files.slice(0, limit);
+  }
+
+  function dedupeBySignature(files){
+    const seen = new Set();
+    const out = [];
+    for (const f of files){
+      const key = `${f.name}|${f.size}|${f.lastModified}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(f);
+    }
+    return out;
+  }
+
+  function addFiles(files){
+    const imgs = Array.from(files || []).filter(f => f && f.type && f.type.startsWith("image/"));
+    if (!imgs.length) return;
+
+    const merged = selectedFiles.concat(imgs);
+    const maxLeft = getMaxLeftImages();
+    const available = Math.max(0, maxLeft - selectedUrls.length);
+    if (available === 0){
+      setStatus(`Max ${maxLeft} images for this setup. Remove images to add more.`, "err");
+      setTimeout(()=>setStatus(""), 1600);
+      return;
+    }
+    const limited = ensureLimit(dedupeBySignature(merged), available);
+    if (limited.length < merged.length){
+      setStatus(`Max ${maxLeft} images for this setup. Extra files ignored.`, "err");
+      setTimeout(()=>setStatus(""), 1600);
+    }
+    selectedFiles = limited;
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = [];
+    cachedSignature = "";
+  }
+
+  function addReferenceUrl(url){
+    if (!url) return;
+    if (selectedUrls.includes(url)) return;
+    const maxLeft = getMaxLeftImages();
+    if (getLeftImageCount() >= maxLeft){
+      setStatus(`Max ${maxLeft} images for this setup. Remove images to add more.`, "err");
+      setTimeout(()=>setStatus(""), 1600);
+      return;
+    }
+    selectedUrls.push(url);
+    renderThumbs();
+    updateDropText();
+  }
+
+  function removeFileAt(idx){
+    const f = selectedFiles[idx];
+    if (f && f.__previewUrl) {
+      try { URL.revokeObjectURL(f.__previewUrl); } catch(e){}
+    }
+    selectedFiles.splice(idx, 1);
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = [];
+    cachedSignature = "";
+  }
+
+  function removeUrlAt(idx){
+    selectedUrls.splice(idx, 1);
+    renderThumbs();
+    updateDropText();
+  }
+
+  function clearFiles(){
+    for (const f of selectedFiles){
+      if (f && f.__previewUrl){
+        try { URL.revokeObjectURL(f.__previewUrl); } catch(e){}
+      }
+    }
+    selectedFiles = [];
+    selectedUrls = [];
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = [];
+    cachedSignature = "";
+  }
+
+  function renderThumbs(){
+    thumbsEl.innerHTML = "";
+    if (!selectedFiles.length && !selectedUrls.length){
+      thumbsEl.style.display = "none";
+      return;
+    }
+
+    thumbsEl.style.display = "flex";
+
+    selectedUrls.forEach((url, idx) => {
+      const box = document.createElement("div");
+      box.className = "lf-thumbbox";
+
+      const img = document.createElement("img");
+      img.alt = "Reference image";
+      img.src = url;
+
+      const x = document.createElement("div");
+      x.className = "x";
+      x.textContent = "×";
+      x.title = "Remove";
+      x.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        removeUrlAt(idx);
+      });
+
+      box.appendChild(img);
+      box.appendChild(x);
+      thumbsEl.appendChild(box);
+    });
+
+    selectedFiles.forEach((file, idx) => {
+      const box = document.createElement("div");
+      box.className = "lf-thumbbox";
+
+      if (!file.__previewUrl){
+        try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
+      }
+
+      const img = document.createElement("img");
+      img.alt = file.name || "image";
+      img.src = file.__previewUrl || "";
+
+      const x = document.createElement("div");
+      x.className = "x";
+      x.textContent = "×";
+      x.title = "Remove";
+      x.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        removeFileAt(idx);
+      });
+
+      box.appendChild(img);
+      box.appendChild(x);
+      thumbsEl.appendChild(box);
+    });
+  }
+
+  function updateDropText(){
+    const maxLeft = getMaxLeftImages();
+    const totalCount = getLeftImageCount();
+    if (!totalCount){
+      dropTitle.textContent = "Upload images";
+      dropSub.textContent = `Click or drag&drop • up to ${maxLeft} images`;
+      return;
+    }
+    const totalBytes = selectedFiles.reduce((s,f)=>s+(f?.size||0), 0);
+
+    dropTitle.textContent = `${totalCount} image${totalCount>1?"s":""} selected`;
+    dropSub.textContent = `Total: ${formatSize(totalBytes)} • Click to add more • Up to ${maxLeft} images`;
+  }
+
+  function enforceLeftLimit(reason){
+    const maxLeft = getMaxLeftImages();
+    if (selectedUrls.length > maxLeft) {
+      selectedUrls = selectedUrls.slice(0, maxLeft);
+    }
+    const available = Math.max(0, maxLeft - selectedUrls.length);
+    if (selectedFiles.length > available){
+      selectedFiles = selectedFiles.slice(0, available);
+      cachedImageUrls = [];
+      cachedSignature = "";
+      if (reason) {
+        setStatus(`Max ${maxLeft} images for this setup. Extra files ignored.`, "err");
+        setTimeout(()=>setStatus(""), 1600);
+      }
+    }
+    renderThumbs();
+    updateDropText();
+  }
+
+  async function getSessionOrRedirect(){
+    const sb = window.sb;
+    if (!sb) { location.href = BASE + "/login"; throw new Error("No supabase client"); }
+    const { data } = await sb.auth.getSession();
+    const s = data?.session;
+    if (!s) { location.href = BASE + "/login"; throw new Error("No session"); }
+    return s;
+  }
+
+  async function refreshSessionSafe(){
+    const sb = window.sb;
+    try { await sb.auth.refreshSession(); } catch(e){}
+    return getSessionOrRedirect();
+  }
+
+  async function fetchJsonWithAuth(url, options={}){
+    let s = await getSessionOrRedirect();
+    let r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+
+    if (r.status===401 || r.status===403){
+      s = await refreshSessionSafe();
+      r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+    }
+
+    const raw = await r.text();
+    let j={}; try{ j=raw?JSON.parse(raw):{} }catch(_){ }
+
+    if (!r.ok || j?.ok===false){
+      const err = new Error(j.error || ("HTTP "+r.status));
+      err.status = r.status;
+      err.data = j;
+      err.raw = raw;
+      throw err;
+    }
+    return j;
+  }
+
+  function extractGenerations(data){
+    if (Array.isArray(data?.generations)) return data.generations;
+    if (Array.isArray(data?.data?.generations)) return data.data.generations;
+    if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data)) return data;
+    return [];
+  }
+
+  function extractProjects(data){
+    if (Array.isArray(data?.projects)) return data.projects;
+    if (Array.isArray(data?.data?.projects)) return data.data.projects;
+    if (Array.isArray(data)) return data;
+    return [];
+  }
+
+  function getGenerationLab(item){
+    return item?.lab || item?.meta?.lab || item?.data?.lab || "";
+  }
+
+  function getGenerationKind(item){
+    return item?.kind || item?.meta?.kind || item?.data?.kind || "";
+  }
+
+  function getGenerationId(item){
+    return item?.generation_id || item?.id || item?.gen_id || item?.generationId || "";
+  }
+
+  function getGenerationUrl(item){
+    const raw = item?.output_url || item?.outputUrl || item?.url || item?.image_url || item?.imageUrl || item?.preview_url || item?.previewUrl || "";
+    if (Array.isArray(raw)) return raw[0] || "";
+    return raw || "";
+  }
+
+  function getGenerationTitle(item, fallbackPrefix){
+    const title = String(item?.title || item?.name || "").trim();
+    if (title) return title;
+    const id = getGenerationId(item) || "—";
+    return `${fallbackPrefix} ${id}`;
+  }
+
+  function matchesGeneration(item, lab, kind){
+    const labVal = String(getGenerationLab(item)).toLowerCase();
+    const kindVal = String(getGenerationKind(item)).toLowerCase();
+    if (!labVal || !kindVal) return false;
+    return labVal === lab && kindVal === kind;
+  }
+
+  async function uploadReferenceToInputs(file){
+    const sb = window.sb;
+    const session = await getSessionOrRedirect();
+
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const safeExt = ["png","jpg","jpeg","webp","glb"].includes(ext) ? ext : "png";
+    const path = `${session.user.id}/${uuid()}.${safeExt}`;
+
+    let up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, {
+      upsert:false,
+      contentType: file.type || "application/octet-stream"
+    });
+
+    if (up?.error && (up.error.statusCode === 401 || up.error.statusCode === 403)){
+      await refreshSessionSafe();
+      up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, {
+        upsert:false,
+        contentType: file.type || "application/octet-stream"
+      });
+    }
+
+    if (up.error) throw up.error;
+
+    const pub = sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
+    return pub.data.publicUrl;
+  }
+
+  async function renameGenerationTitle(genId, newTitle){
+    if (!genId || !newTitle) return;
+    await fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action: "set_generation_title",
+        generation_id: genId,
+        title: newTitle
+      })
+    });
+  }
+
+  function renderCharacterLibrary(){
+    if (!charLibraryList) return;
+    charLibraryList.innerHTML = "";
+    const query = String(charLibrarySearch?.value || "").trim().toLowerCase();
+    const filtered = charLibraryItems.filter(item => {
+      const title = getGenerationTitle(item, "Character").toLowerCase();
+      return !query || title.includes(query);
+    });
+
+    if (!filtered.length){
+      charLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">No characters found.</div>";
+      return;
+    }
+
+    filtered.forEach(item => {
+      const url = getGenerationUrl(item);
+      const title = getGenerationTitle(item, "Character");
+      const genId = getGenerationId(item);
+
+      const card = document.createElement("div");
+      card.className = "lf-libraryCard";
+      card.addEventListener("click", ()=>{
+        if (!url) return;
+        if (charLibraryContext === "global"){
+          addReferenceUrl(url);
+        } else if (charLibraryContext === "char1"){
+          setCharPhotoFromUrl(1, url);
+        } else if (charLibraryContext === "char2"){
+          setCharPhotoFromUrl(2, url);
+        }
+        closeModal(charLibraryModal);
+      });
+
+      const img = document.createElement("img");
+      img.alt = title;
+      img.src = url || "";
+
+      const meta = document.createElement("div");
+      meta.className = "lf-libraryMeta";
+      const titleEl = document.createElement("div");
+      titleEl.className = "lf-libraryTitle";
+      titleEl.textContent = title;
+      const sub = document.createElement("div");
+      sub.className = "lf-muted";
+      sub.textContent = url ? "Click to select" : "No preview URL";
+
+      const actions = document.createElement("div");
+      actions.className = "lf-row";
+      const renameBtn = document.createElement("button");
+      renameBtn.className = "lf-btnSmall";
+      renameBtn.textContent = "✎";
+      renameBtn.title = "Rename";
+      renameBtn.addEventListener("click", async (ev)=>{
+        ev.stopPropagation();
+        const next = prompt("New character name:", title);
+        if (!next) return;
+        try{
+          await renameGenerationTitle(genId, next);
+          item.title = next;
+          renderCharacterLibrary();
+        } catch(e){
+          setStatus("Rename failed", "err");
+        }
+      });
+
+      actions.appendChild(renameBtn);
+      meta.appendChild(titleEl);
+      meta.appendChild(sub);
+      meta.appendChild(actions);
+      card.appendChild(img);
+      card.appendChild(meta);
+      charLibraryList.appendChild(card);
+    });
+  }
+
+  async function loadCharacterLibrary(){
+    if (!charLibraryList) return;
+    charLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Loading…</div>";
+    try{
+      const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?limit=100&offset=0", { method:"GET" });
+      const gens = extractGenerations(data);
+      charLibraryItems = gens.filter(item => matchesGeneration(item, "cinema", "character"));
+      renderCharacterLibrary();
+    } catch(e){
+      charLibraryList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Failed to load library.</div>";
+    }
+  }
+
+  async function fetchProjectsList(){
+    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/me?projects=1", { method:"GET" });
+    return extractProjects(data);
+  }
+
+  async function fetchProjectById(id){
+    const data = await fetchJsonWithAuth(BACKEND_BASE + `/api/me?project_id=${encodeURIComponent(id)}`, { method:"GET" });
+    return data?.project || data?.data?.project || data?.project_data || data;
+  }
+
+  async function upsertProject({ projectId, title, data }){
+    return fetchJsonWithAuth(BACKEND_BASE + "/api/me", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action: "upsert_project",
+        project_id: projectId || null,
+        title,
+        data
+      })
+    });
+  }
+
+  function renderProjectList(items){
+    if (!projectList) return;
+    projectList.innerHTML = "";
+    if (!items.length){
+      projectList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">No projects found.</div>";
+      return;
+    }
+    items.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "lf-libraryCard";
+      card.addEventListener("click", async ()=>{
+        closeModal(projectListModal);
+        await openProject(item.id || item.project_id);
+      });
+
+      const meta = document.createElement("div");
+      meta.className = "lf-libraryMeta";
+      const titleEl = document.createElement("div");
+      titleEl.className = "lf-libraryTitle";
+      titleEl.textContent = item.title || `Project ${item.id || item.project_id || "—"}`;
+      const sub = document.createElement("div");
+      sub.className = "lf-muted";
+      const updated = item.updated_at || item.updatedAt || item.created_at || "";
+      sub.textContent = updated ? `Updated: ${updated}` : "Click to open";
+      meta.appendChild(titleEl);
+      meta.appendChild(sub);
+      card.appendChild(meta);
+      projectList.appendChild(card);
+    });
+  }
+
+  async function openProjectList(){
+    openModal(projectListModal);
+    projectList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Loading…</div>";
+    try{
+      const items = await fetchProjectsList();
+      renderProjectList(items);
+    } catch(e){
+      projectList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">Failed to load projects.</div>";
+    }
+  }
+
+  async function uploadAllSelectedOrThrow(){
+    if (!selectedFiles.length) return [];
+    loaderSub.textContent = `Uploading ${selectedFiles.length} image(s)…`;
+
+    const urls = [];
+    for (let i=0; i<selectedFiles.length; i++){
+      loaderSub.textContent = `Uploading ${i+1}/${selectedFiles.length}…`;
+      const url = await uploadReferenceToInputs(selectedFiles[i]);
+      urls.push(url);
+    }
+    return urls;
+  }
+
+  function filesSignature(files){
+    return (files||[]).map(f => `${f.name}|${f.size}|${f.lastModified}`).join("||");
+  }
+
+  function dedupeUrls(urls){
+    const seen = new Set();
+    const out = [];
+    (urls || []).forEach(url => {
+      const key = String(url || "").trim();
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      out.push(key);
+    });
+    return out;
+  }
+
+  async function getOrUploadImageUrls(){
+    if (!selectedFiles.length && !selectedUrls.length) return [];
+
+    const sig = filesSignature(selectedFiles);
+    if (cachedSignature === sig && cachedImageUrls.length === selectedFiles.length){
+      return dedupeUrls([...selectedUrls, ...cachedImageUrls]);
+    }
+
+    const urls = await uploadAllSelectedOrThrow();
+    cachedSignature = sig;
+    cachedImageUrls = urls;
+    return dedupeUrls([...selectedUrls, ...urls]);
+  }
+
+  function setResolution(val){
+    selectedRes = val;
+    if (resBtn) resBtn.textContent = val;
+    if (resMenu) {
+      resMenu.querySelectorAll(".lf-dropdown-item").forEach(item=>{
+        item.classList.toggle("active", item.dataset.value === val);
+      });
+    }
+    calcCost();
+  }
+
+  function calcCost(){
+    const res = String(selectedRes || "2K");
+    const cost = (res === "4K") ? 2 : 1;
+    $("cost").textContent = cost + " Cr";
+  }
+
+  function resolveFovFromFocal(mm){
+    const val = Number(mm || 35);
+    if (FOCAL_FOV[val]) return FOCAL_FOV[val];
+    return FOCAL_FOV[35];
+  }
+
+  function applyFocalToCamera(){
+    if (!camera) return;
+    camera.fov = resolveFovFromFocal(focalEl?.value || 35);
+    camera.updateProjectionMatrix();
+  }
+
+  function nanoPromptBuilderSystem(){
+    return `
+You are a PROMPT BUILDER for "Nano Banana Pro (Image)".
+
+ABSOLUTE RULES:
+- You are NOT a chat assistant. Do NOT answer general questions.
+- Do NOT ask clarifying questions.
+- Output ONLY between tags: <PROMPT>...</PROMPT> (no extra text).
+- The final output PROMPT MUST BE IN ENGLISH, regardless of user's language.
+- If the user request is NOT about image generation/editing, output: <PROMPT>DECLINED</PROMPT>
+
+PRIMARY GOAL:
+Write a prompt that transforms the provided reference image(s) according to the user's intent.
+Do NOT re-describe the image in detail. Only a minimal subject hint is allowed (<= 10 words).
+
+WHEN REFERENCE IMAGES ARE PROVIDED (default behavior):
+- Treat the input image as a locked base reference.
+- Preserve character identity, pose, silhouette, and composition.
+- Preserve clothing/outfit and materials unless user explicitly requests wardrobe change.
+- Change only what the user requests (style/render/lighting/materials/environment).
+
+OUTPUT FORMAT (single paragraph, no bullets):
+Start with: "Use the input image as a locked base reference."
+Then: "TASK: ..." describing the transformation.
+Then: "KEEP: ..." (identity/pose/composition/wardrobe).
+Then: "CHANGE: ..." (style/render/lighting/camera/grade).
+Then: "AVOID: ..." (negative constraints, especially illustration/lineart, HDR, glossy).
+
+Keep it compact but unambiguous.
+`.trim();
+  }
+
+  function enforceCinematicRealism(prompt, userText){
+    const t = (userText||"").toLowerCase();
+    const wantsRealism = /реал|кин|cinema|cinematic|photo|photoreal|live[- ]action/.test(t);
+    if (!wantsRealism) return prompt;
+    if (prompt.toLowerCase().includes("avoid:")) return prompt;
+    const add = ` AVOID: illustration, cartoon, anime, painterly, lineart, comic, cel-shaded, CGI look, over-sharpening, HDR, plastic skin, "AI glossy" look.`;
+    return prompt + add;
+  }
+
+  function extractPromptTag(text){
+    const s = String(text||"");
+    const a = "<PROMPT>";
+    const b = "</PROMPT>";
+    const i = s.indexOf(a);
+    const j = s.indexOf(b);
+    if (i !== -1 && j !== -1 && j > i) return s.slice(i+a.length, j).trim();
+    return s.trim();
+  }
+
+  async function gptStart(prompt, image_urls){
+    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/chatgpt_start_json", {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({
+        prompt,
+        image_urls,
+        system_prompt: nanoPromptBuilderSystem(),
+        reasoning_effort: "minimal",
+        model: "nano"
+      })
+    });
+    return data.jobId;
+  }
+
+  async function gptPoll(jobId){
+    const t0 = Date.now();
+    const maxMs = 90000;
+
+    while (true){
+      if (Date.now() - t0 > maxMs) throw new Error("GPT timeout");
+
+      const s = await fetchJsonWithAuth(BACKEND_BASE + "/api/chatgpt_status?jobId=" + encodeURIComponent(jobId), {
+        method: "GET"
+      });
+
+      if (s.status === "succeeded") return String(s.text || "").trim();
+      if (s.status === "failed" || s.status === "canceled") throw new Error(s.error || "GPT failed");
+      await new Promise(r => setTimeout(r, 900));
+    }
+  }
+
+  async function buildPromptNano(){
+    gptBtn.disabled = true;
+    runBtn.disabled = true;
+
+    setStatus("", "");
+    showPromptLoader(true);
+
+    try{
+      let userRequest = (sceneEl.value || "").trim();
+
+      if (styleChk.checked) {
+        userRequest += " \n[INSTRUCTION: STYLE-ONLY. Preserve identity, clothing/wardrobe, composition, and background layout. Do NOT add/remove objects. Only adjust lighting, atmosphere, camera optics, film grain.]";
+      }
+
+      const image_urls = await getOrUploadImageUrls();
+
+      const jobId = await gptStart(userRequest || "Make a high-quality image based on the reference.", image_urls);
+      const raw = await gptPoll(jobId);
+      let built = extractPromptTag(raw);
+
+      if (built === "DECLINED"){
+        showPromptLoader(false);
+        setStatus("GPT работает только для генерации промтов (не чат). Опиши, что хочешь получить на изображении.", "err");
+        return;
+      }
+
+      built = enforceCinematicRealism(built, sceneEl.value);
+      sceneEl.value = built;
+      setStatus("Prompt generated ✓", "ok");
+    } finally {
+      showPromptLoader(false);
+      gptBtn.disabled = false;
+      runBtn.disabled = false;
+    }
+  }
+
+  function setMode(next){
+    if (mode === next && next !== "view") next = "view";
+    mode = next;
+    btnDraw.classList.toggle("active", next==="draw");
+    btn3D.classList.toggle("active", next==="3d");
+    if (next === "draw") {
+      drawCanvas.style.pointerEvents = "auto";
+      glCanvas.style.pointerEvents = "none";
+    } else {
+      drawCanvas.style.pointerEvents = "none";
+      glCanvas.style.pointerEvents = "auto";
+    }
+    stateText&&(stateText.textContent="Cinema");
+    update3DVisibility();
+  }
+
+  function applyAspectRatio(){
+    updateFrameAspect();
+  }
+
+  function resizeAll(){
+    const rect = frame.getBoundingClientRect();
+    const w = Math.max(2, Math.floor(rect.width));
+    const h = Math.max(2, Math.floor(rect.height));
+    const saved = drawCanvas.toDataURL("image/png");
+    for (const c of [bgCanvas, drawCanvas, glCanvas]){
+      c.width = w;
+      c.height = h;
+    }
+    redrawBackground();
+    const img = new Image();
+    img.onload = ()=>{
+      dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
+      dCtx.drawImage(img, 0,0, drawCanvas.width, drawCanvas.height);
+    };
+    img.src = saved;
+  }
+
+  const ro = new ResizeObserver(()=>{ resizeAll(); if(THREE_OK) onResize3D(); });
+  ro.observe(frame);
+
+  function redrawBackground(){
+    const w = bgCanvas.width, h = bgCanvas.height;
+    bgCtx.clearRect(0,0,w,h);
+    if (!bgImage) return;
+    const iw = bgImage.naturalWidth || bgImage.width;
+    const ih = bgImage.naturalHeight || bgImage.height;
+    const s = Math.max(w/iw, h/ih);
+    const dw = iw*s, dh = ih*s;
+    const dx = (w - dw)/2;
+    const dy = (h - dh)/2;
+    bgCtx.drawImage(bgImage, dx, dy, dw, dh);
+  }
+
+  async function loadImageFromFile(file){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.onload = ()=>resolve(img);
+      img.onerror = reject;
+      img.crossOrigin = "anonymous";
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function loadImageFromUrl(url){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.onload = ()=>resolve(img);
+      img.onerror = reject;
+      img.crossOrigin = "anonymous";
+      img.src = url;
+    });
+  }
+
+  function clearDrawCanvas(){
+    dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
+    drawDirty = false;
+    drawPublicUrl = "";
+  }
+
+  async function setBackgroundFromUrl(url){
+    if (!url) return;
+    bgImage = await loadImageFromUrl(url);
+    bgFileObj = null;
+    bgPublicUrl = url;
+    bgUploadSignature = "";
+    redrawBackground();
+    bgTitle.textContent = "Background loaded";
+    bgSub.textContent = url;
+    enforceLeftLimit(true);
+  }
+
+  async function setDrawFromUrl(url){
+    if (!url) return;
+    const img = await loadImageFromUrl(url);
+    dCtx.clearRect(0,0,drawCanvas.width, drawCanvas.height);
+    dCtx.drawImage(img, 0, 0, drawCanvas.width, drawCanvas.height);
+    drawDirty = true;
+    drawPublicUrl = url;
+    enforceLeftLimit(true);
+  }
+
+  async function setBackground(file){
+    bgFileObj = file;
+    bgPublicUrl = "";
+    bgUploadSignature = "";
+    bgImage = await loadImageFromFile(file);
+    redrawBackground();
+    bgTitle.textContent = "Background loaded";
+    bgSub.textContent = (file?.name ? file.name : "—") + " • " + formatSize(file.size||0);
+    enforceLeftLimit(true);
+  }
+
+  function clearBackground(){
+    if (bgImage && bgImage.src && bgImage.src.startsWith("blob:")){
+      try{ URL.revokeObjectURL(bgImage.src); }catch(e){}
+    }
+    bgImage = null;
+    bgFileObj = null;
+    bgPublicUrl = "";
+    bgUploadSignature = "";
+    redrawBackground();
+    bgTitle.textContent = "Upload background";
+    bgSub.textContent = "Click or drag&drop";
+    enforceLeftLimit(false);
+  }
+
+  function clearCharPhoto(index){
+    if (index === 1){
+      if (char1PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char1PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char1PhotoFileObj = null;
+      char1PhotoUrl = "";
+      char1PhotoSignature = "";
+      char1LibraryUrl = "";
+      char1PhotoPreview?.classList.add("hidden");
+      if (char1PhotoPreview) char1PhotoPreview.src = "";
+      if (char1PhotoDrop) {
+        const placeholder = char1PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "block";
+      }
+    } else {
+      if (char2PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char2PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char2PhotoFileObj = null;
+      char2PhotoUrl = "";
+      char2PhotoSignature = "";
+      char2LibraryUrl = "";
+      char2PhotoPreview?.classList.add("hidden");
+      if (char2PhotoPreview) char2PhotoPreview.src = "";
+      if (char2PhotoDrop) {
+        const placeholder = char2PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "block";
+      }
+    }
+    enforceLeftLimit(true);
+  }
+
+  function setCharPhoto(index, file){
+    if (!file) return;
+    if (index === 1){
+      if (char1PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char1PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char1PhotoFileObj = file;
+      char1PhotoSignature = "";
+      char1PhotoUrl = "";
+      char1LibraryUrl = "";
+      if (!file.__previewUrl){
+        try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
+      }
+      if (char1PhotoPreview) {
+        char1PhotoPreview.src = file.__previewUrl || "";
+        char1PhotoPreview.classList.remove("hidden");
+      }
+      if (char1PhotoDrop) {
+        const placeholder = char1PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "none";
+      }
+    } else {
+      if (char2PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char2PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char2PhotoFileObj = file;
+      char2PhotoSignature = "";
+      char2PhotoUrl = "";
+      char2LibraryUrl = "";
+      if (!file.__previewUrl){
+        try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
+      }
+      if (char2PhotoPreview) {
+        char2PhotoPreview.src = file.__previewUrl || "";
+        char2PhotoPreview.classList.remove("hidden");
+      }
+      if (char2PhotoDrop) {
+        const placeholder = char2PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "none";
+      }
+    }
+    enforceLeftLimit(true);
+  }
+
+  function setCharPhotoFromUrl(index, url){
+    if (!url) return;
+    if (index === 1){
+      if (char1PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char1PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char1PhotoFileObj = null;
+      char1PhotoSignature = "";
+      char1PhotoUrl = "";
+      char1LibraryUrl = url;
+      if (char1PhotoPreview) {
+        char1PhotoPreview.src = url;
+        char1PhotoPreview.classList.remove("hidden");
+      }
+      if (char1PhotoDrop) {
+        const placeholder = char1PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "none";
+      }
+    } else {
+      if (char2PhotoFileObj?.__previewUrl){
+        try { URL.revokeObjectURL(char2PhotoFileObj.__previewUrl); } catch(e){}
+      }
+      char2PhotoFileObj = null;
+      char2PhotoSignature = "";
+      char2PhotoUrl = "";
+      char2LibraryUrl = url;
+      if (char2PhotoPreview) {
+        char2PhotoPreview.src = url;
+        char2PhotoPreview.classList.remove("hidden");
+      }
+      if (char2PhotoDrop) {
+        const placeholder = char2PhotoDrop.querySelector(".lf-photoPlaceholder");
+        if (placeholder) placeholder.style.display = "none";
+      }
+    }
+    enforceLeftLimit(true);
+  }
+
+  function fileSignature(file){
+    if (!file) return "";
+    return `${file.name}|${file.size}|${file.lastModified}`;
+  }
+
+  async function getCharPhotoUrl(index){
+    const file = index === 1 ? char1PhotoFileObj : char2PhotoFileObj;
+    const libUrl = index === 1 ? char1LibraryUrl : char2LibraryUrl;
+    if (libUrl) return libUrl;
+    if (!file) return "";
+    const sig = fileSignature(file);
+    if (index === 1 && sig && char1PhotoSignature === sig && char1PhotoUrl) return char1PhotoUrl;
+    if (index === 2 && sig && char2PhotoSignature === sig && char2PhotoUrl) return char2PhotoUrl;
+    const url = await uploadReferenceToInputs(file);
+    if (index === 1){
+      char1PhotoSignature = sig;
+      char1PhotoUrl = url;
+    } else {
+      char2PhotoSignature = sig;
+      char2PhotoUrl = url;
+    }
+    return url;
+  }
+
+  function buildPalette(){
+    paletteEl.innerHTML = "";
+    palette.forEach((c, idx)=>{
+      const s = document.createElement("div");
+      s.className = "lf-swatch" + (idx===0 ? " active" : "");
+      s.style.background = c;
+      s.addEventListener("click", ()=>{
+        brushColor = c;
+        eraser = false;
+        btnEraser.classList.remove("active");
+        [...paletteEl.children].forEach(x=>x.classList.remove("active"));
+        s.classList.add("active");
+      });
+      paletteEl.appendChild(s);
+    });
+    brushColor = palette[0];
+  }
+
+  function pointerPos(ev, canvas){
+    const rect = canvas.getBoundingClientRect();
+    const x = (ev.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (ev.clientY - rect.top) * (canvas.height / rect.height);
+    return { x, y };
+  }
+
+  function drawLine(x0,y0,x1,y1){
+    const size = Number(brushSizeEl.value||14);
+    const op = Number(brushOpacityEl.value||0.9);
+    dCtx.save();
+    dCtx.lineCap = "round";
+    dCtx.lineJoin = "round";
+    dCtx.lineWidth = size;
+    dCtx.globalAlpha = op;
+    if (eraser){
+      dCtx.globalCompositeOperation = "destination-out";
+      dCtx.strokeStyle = "rgba(0,0,0,1)";
+    } else {
+      dCtx.globalCompositeOperation = "source-over";
+      dCtx.strokeStyle = brushColor;
+    }
+    dCtx.beginPath();
+    dCtx.moveTo(x0,y0);
+    dCtx.lineTo(x1,y1);
+    dCtx.stroke();
+    dCtx.restore();
+    if (!drawDirty){
+      drawDirty = true;
+      enforceLeftLimit(true);
+    }
+  }
+
+  drawCanvas.addEventListener("mousedown", (ev)=>{
+    if (mode !== "draw") return;
+    drawing = true;
+    const p = pointerPos(ev, drawCanvas);
+    lastX = p.x; lastY = p.y;
+  });
+  window.addEventListener("mousemove", (ev)=>{
+    if (!drawing || mode !== "draw") return;
+    const p = pointerPos(ev, drawCanvas);
+    drawLine(lastX,lastY,p.x,p.y);
+    lastX = p.x; lastY = p.y;
+  });
+  window.addEventListener("mouseup", ()=>{ drawing = false; });
+  drawCanvas.addEventListener("touchstart", (ev)=>{
+    if (mode !== "draw") return;
+    ev.preventDefault();
+    drawing = true;
+    const t = ev.touches[0];
+    const p = pointerPos(t, drawCanvas);
+    lastX = p.x; lastY = p.y;
+  }, { passive:false });
+  drawCanvas.addEventListener("touchmove", (ev)=>{
+    if (!drawing || mode !== "draw") return;
+    ev.preventDefault();
+    const t = ev.touches[0];
+    const p = pointerPos(t, drawCanvas);
+    drawLine(lastX,lastY,p.x,p.y);
+    lastX = p.x; lastY = p.y;
+  }, { passive:false });
+  drawCanvas.addEventListener("touchend", ()=>{ drawing = false; });
+
+  btnEraser.addEventListener("click", ()=>{
+    eraser = !eraser;
+    btnEraser.classList.toggle("active", eraser);
+  });
+  btnClearDraw.addEventListener("click", ()=>{
+    if (!confirm("Clear drawings?")) return;
+    clearDrawCanvas();
+    enforceLeftLimit(false);
+  });
+
+  function init3D(){
+    renderer = new THREE.WebGLRenderer({
+      canvas: glCanvas,
+      alpha: true,
+      antialias: true,
+      preserveDrawingBuffer: true
+    });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setSize(glCanvas.width, glCanvas.height, false);
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(resolveFovFromFocal(focalEl?.value || 35), glCanvas.width/glCanvas.height, 0.01, 50);
+    camera.position.copy(defaultCam.pos);
+    camera.lookAt(defaultCam.look);
+
+    orbit = new THREE.OrbitControls(camera, glCanvas);
+    orbit.enableDamping = true;
+    orbit.dampingFactor = 0.08;
+
+    gridHelper = new THREE.GridHelper(6, 12, 0x2b6cff, 0x222222);
+    gridHelper.material.opacity = 0.15;
+    gridHelper.material.transparent = true;
+    gridHelper.name = "grid";
+    scene.add(gridHelper);
+
+    const key = new THREE.DirectionalLight(0xffffff, 1.05);
+    key.position.set(2,3,2);
+    scene.add(key);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+    transform = new THREE.TransformControls(camera, glCanvas);
+    transform.setSize(1.0);
+    transform.addEventListener("dragging-changed", (e)=>{
+      orbit.enabled = !e.value;
+    });
+    scene.add(transform);
+
+    animate3D();
+    onResize3D();
+    update3DVisibility();
+  }
+
+  function onResize3D(){
+    if (!renderer || !camera) return;
+    const w = glCanvas.width;
+    const h = glCanvas.height;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+
+  function animate3D(){
+    requestAnimationFrame(animate3D);
+    if (orbit) orbit.update();
+    if (transform) transform.updateMatrixWorld();
+    updateControlBallSizes();
+    if (renderer && scene && camera){
+      renderer.render(scene, camera);
+    }
+  }
+
+  function update3DVisibility(){
+    if (!scene) return;
+    const show3D = mode !== "draw";
+    glCanvas.style.visibility = show3D ? "visible" : "hidden";
+  }
+
+  function makePrimitiveMesh(type, color, opacity){
+    const mat = new THREE.MeshStandardMaterial({
+      color,
+      transparent: true,
+      opacity,
+      roughness: 0.65,
+      metalness: 0.0
+    });
+    let geo;
+    if (type === "cylinder") geo = new THREE.CylinderGeometry(0.22, 0.22, 0.62, 32, 1);
+    else if (type === "plane") geo = new THREE.BoxGeometry(0.72, 0.52, 0.02);
+    else geo = new THREE.BoxGeometry(0.52, 0.52, 0.52);
+    geo.center();
+
+    const mesh = new THREE.Mesh(geo, mat);
+
+    const wireGeo = new THREE.WireframeGeometry(geo);
+    const wireMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
+    const wireframe = new THREE.LineSegments(wireGeo, wireMat);
+    wireframe.name = "structural_wireframe";
+    mesh.add(wireframe);
+
+    return mesh;
+  }
+
+  function findFirstSkinnedMeshAndSetupRig(root) {
+    let skinned = null;
+    root.traverse(o => {
+      if (o.isSkinnedMesh && o.skeleton && o.skeleton.bones && o.skeleton.bones.length > 0) {
+        if (!skinned) skinned = o;
+      }
+    });
+
+    if (skinned) {
+      const allBones = skinned.skeleton.bones;
+
+      const filteredIndices = [];
+      allBones.forEach((b, i) => {
+        if (ALLOWED_BONES.includes(b.name)) {
+          filteredIndices.push(i);
+        }
+      });
+
+      const bindPose = allBones.map(b=>({
+        uuid: b.uuid,
+        pos: b.position.clone(),
+        quat: b.quaternion.clone(),
+        scl: b.scale.clone()
+      }));
+
+      const controlBalls = [];
+      const ballGeo = new THREE.SphereGeometry(0.04, 16, 16);
+      const ballMat = new THREE.MeshBasicMaterial({ color: 0xffff00, depthTest: false, transparent: true, opacity: 0.85 });
+
+      filteredIndices.forEach(idx => {
+        const bone = allBones[idx];
+        const ball = new THREE.Mesh(ballGeo, ballMat);
+        ball.userData = { boneIndex: idx, isBoneBall: true };
+        bone.add(ball);
+        controlBalls.push(ball);
+      });
+
+      return { root, skinned, bones: allBones, bindPose, controlBalls, filteredIndices };
+    }
+    return null;
+  }
+
+  function updateControlBallSizes(){
+    const scaleVec = new THREE.Vector3();
+    actors.forEach(actor => {
+      if (!actor.rig || !actor.rig.controlBalls) return;
+      actor.rig.controlBalls.forEach(ball => {
+        if (!ball.parent) return;
+        ball.parent.getWorldScale(scaleVec);
+        const inv = 1 / Math.max(scaleVec.x, scaleVec.y, scaleVec.z, 0.0001);
+        ball.scale.setScalar(inv);
+      });
+    });
+  }
+
+  function updateModelMaterial(obj, color, opacity){
+    const mat = new THREE.MeshStandardMaterial({
+      color,
+      transparent: true,
+      opacity,
+      roughness: 0.65,
+      metalness: 0.0
+    });
+
+    obj.traverse((child)=>{
+      if (child.isMesh && !child.userData?.isBoneBall){
+        child.material = mat;
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }
+
+  function normalizeModel(root){
+    const box = new THREE.Box3().setFromObject(root);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    const scaleFactor = 1.2 / maxDim;
+    root.scale.setScalar(scaleFactor);
+
+    const box2 = new THREE.Box3().setFromObject(root);
+    const center = new THREE.Vector3();
+    box2.getCenter(center);
+    root.position.x -= center.x;
+    root.position.z -= center.z;
+    root.position.y -= box2.min.y;
+  }
+
+  function createActor({ name, color, type, group, isCharacter=false, characterIndex=null, shortLabel="L", sourceUrl="", sourceFile=null, primitiveType="" }){
+    return {
+      id: `actor-${actorCounter++}`,
+      name,
+      color,
+      type,
+      group,
+      visible: true,
+      rig: null,
+      poseMode: false,
+      selectedBoneIndex: null,
+      isCharacter,
+      characterIndex,
+      shortLabel,
+      sourceUrl,
+      sourceFile,
+      primitiveType
+    };
+  }
+
+  function addActor(actor){
+    if (!scene) return;
+    actors.push(actor);
+    scene.add(actor.group);
+    renderLayers();
+    setActiveActor(actor.id);
+    updateCharactersUI();
+    enforceLeftLimit(true);
+  }
+
+  function removeActor(actor){
+    if (!actor) return;
+    if (transform) transform.detach();
+    if (scene) scene.remove(actor.group);
+    const idx = actors.findIndex(a => a.id === actor.id);
+    if (idx !== -1) actors.splice(idx, 1);
+    if (actorState.activeId === actor.id){
+      actorState.activeId = actors[0]?.id || null;
+    }
+    renderLayers();
+    updateActiveUI();
+    updateCharactersUI();
+    enforceLeftLimit(true);
+  }
+
+  function setActorVisible(actor, visible){
+    actor.visible = visible;
+    actor.group.visible = visible;
+    if (actor.rig && actor.rig.controlBalls){
+      actor.rig.controlBalls.forEach(ball => {
+        ball.visible = visible && actor.poseMode;
+      });
+    }
+    renderLayers();
+    updateActiveUI();
+    enforceLeftLimit(true);
+  }
+
+  function setActiveActor(id){
+    actorState.activeId = id;
+    renderLayers();
+    updateActiveUI();
+  }
+
+  function getActiveActor(){
+    return actors.find(a => a.id === actorState.activeId) || null;
+  }
+
+  function renderLayers(){
+    layersList.innerHTML = "";
+    if (!actors.length){
+      layersList.innerHTML = "<div style=\"font-size:12px;color:var(--text-sec);\">No layers yet.</div>";
+      return;
+    }
+    actors.forEach(actor => {
+      const item = document.createElement("div");
+      item.className = "lf-layeritem" + (actor.id === actorState.activeId ? " active" : "");
+      item.addEventListener("click", ()=>setActiveActor(actor.id));
+
+      const visBtn = document.createElement("button");
+      visBtn.className = "lf-btnSmall";
+      visBtn.textContent = actor.visible ? "ON" : "OFF";
+      visBtn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        setActorVisible(actor, !actor.visible);
+      });
+
+      const badge = document.createElement("span");
+      badge.className = "lf-layer-badge";
+      badge.style.background = actor.color;
+
+      const label = document.createElement("span");
+      label.className = "lf-layer-label";
+      label.textContent = actor.shortLabel || "L";
+
+      const name = document.createElement("span");
+      name.className = "lf-layer-name";
+      name.textContent = actor.name;
+
+      item.appendChild(visBtn);
+      item.appendChild(badge);
+      item.appendChild(label);
+      item.appendChild(name);
+      layersList.appendChild(item);
+    });
+  }
+
+  function updateActiveUI(){
+    const actor = getActiveActor();
+    if (!transform) return;
+    transform.detach();
+    if (!actor){
+      poseSection.style.display = "none";
+      return;
+    }
+    if (actor.poseMode && actor.rig){
+      poseSection.style.display = "block";
+      poseToggle.classList.toggle("on", true);
+      fillBoneSelect(actor);
+      attachSelectedBone(actor);
+      setTransformMode("rotate");
+      transform.setSpace("local");
+    } else {
+      poseSection.style.display = actor.rig ? "block" : "none";
+      poseToggle.classList.toggle("on", false);
+      if (actor.group) transform.attach(actor.group);
+      setTransformMode("translate");
+      transform.setSpace("world");
+    }
+    transform.enabled = actor.visible;
+  }
+
+  function fillBoneSelect(actor) {
+    boneSelect.innerHTML = "";
+    if (!actor?.rig) return;
+    actor.rig.filteredIndices.forEach(idx => {
+      const bone = actor.rig.bones[idx];
+      const rusName = BONE_MAPPING[bone.name] || bone.name;
+      const opt = document.createElement("option");
+      opt.value = idx;
+      opt.textContent = rusName;
+      boneSelect.appendChild(opt);
+    });
+    if (actor.selectedBoneIndex === null && actor.rig.filteredIndices.length){
+      actor.selectedBoneIndex = actor.rig.filteredIndices[0];
+    }
+    boneSelect.value = actor.selectedBoneIndex || actor.rig.filteredIndices[0] || "";
+  }
+
+  function attachSelectedBone(actor) {
+    if (!actor?.rig || !actor.poseMode) return;
+    const idx = parseInt(actor.selectedBoneIndex ?? boneSelect.value, 10);
+    const bone = actor.rig.bones[idx];
+    if (bone) {
+      transform.detach();
+      transform.attach(bone);
+      transform.setSpace("local");
+      setTransformMode("rotate");
+    }
+  }
+
+  function resetPose(actor) {
+    if (!actor?.rig) return;
+    actor.rig.bones.forEach((b, i) => {
+      const bp = actor.rig.bindPose[i];
+      if (bp && bp.uuid === b.uuid) {
+        b.position.copy(bp.pos);
+        b.quaternion.copy(bp.quat);
+        b.scale.copy(bp.scl);
+      }
+    });
+    if (actor.poseMode) attachSelectedBone(actor);
+  }
+
+  function setPoseModeForActor(actor, on){
+    if (on && !actor?.rig) { alert("No rig found!"); return; }
+    actor.poseMode = on;
+    poseToggle.classList.toggle("on", on);
+    if (actor.rig && actor.rig.controlBalls) {
+      actor.rig.controlBalls.forEach(ball => ball.visible = on && actor.visible);
+    }
+    if (!transform) return;
+    if (on) {
+      setTransformMode("rotate");
+      transform.setSpace("local");
+      attachSelectedBone(actor);
+    } else {
+      transform.detach();
+      transform.setSpace("world");
+      if (actor.group) transform.attach(actor.group);
+    }
+  }
+
+  function updateCharactersUI(){
+    char1Toggle.classList.toggle("on", !!(actorState.char1 && actorState.char1.visible));
+    char2Toggle.classList.toggle("on", !!(actorState.char2 && actorState.char2.visible));
+  }
+
+  function setTransformMode(modeName){
+    if (!transform) return;
+    transform.setMode(modeName);
+    tMove.classList.toggle("active", modeName === "translate");
+    tRot.classList.toggle("active", modeName === "rotate");
+    tScale.classList.toggle("active", modeName === "scale");
+  }
+
+  function addCharacter(index, gltf, label, sourceUrl=""){
+    const root = gltf.scene;
+    normalizeModel(root);
+    const wrapper = new THREE.Group();
+    wrapper.add(root);
+    wrapper.position.set(0, 0.05, 0);
+
+    const color = index === 1 ? 0xff3b30 : 0x2b6cff;
+    const opacity = 0.85;
+    updateModelMaterial(wrapper, color, opacity);
+
+    const actor = createActor({
+      name: label,
+      color: index === 1 ? "#ff3b30" : "#2b6cff",
+      type: "character",
+      group: wrapper,
+      isCharacter: true,
+      characterIndex: index,
+      shortLabel: `C${index}`,
+      sourceUrl: sourceUrl || HUMAN_URL
+    });
+
+    actor.rig = findFirstSkinnedMeshAndSetupRig(root);
+    if (actor.rig) {
+      actor.poseMode = true;
+      actor.selectedBoneIndex = actor.rig.filteredIndices[0] || null;
+      actor.rig.controlBalls.forEach(ball => ball.visible = true);
+    }
+
+    if (index === 1 && actorState.char1) removeActor(actorState.char1);
+    if (index === 2 && actorState.char2) removeActor(actorState.char2);
+
+    if (index === 1) actorState.char1 = actor;
+    if (index === 2) actorState.char2 = actor;
+
+    addActor(actor);
+    setMode("3d");
+    return actor;
+  }
+
+  function addPrimitiveActor(){
+    const type = primTypeEl.value || "box";
+    const opacity = Number(primOpacityEl.value || 0.6);
+    const mesh = makePrimitiveMesh(type, 0xffffff, opacity);
+    const wrapper = new THREE.Group();
+    wrapper.add(mesh);
+    wrapper.position.set(0, 0.05, 0);
+    const label = `P${primitiveCounter++}`;
+
+    const actor = createActor({
+      name: `Primitive ${label}`,
+      color: "#bbbbbb",
+      type: "primitive",
+      group: wrapper,
+      shortLabel: label,
+      primitiveType: type
+    });
+    addActor(actor);
+    setMode("3d");
+    return actor;
+  }
+
+  function addModelActor(gltf, label, sourceFile=null, sourceUrl=""){
+    const root = gltf.scene;
+    normalizeModel(root);
+    const wrapper = new THREE.Group();
+    wrapper.add(root);
+    wrapper.position.set(0, 0.05, 0);
+    updateModelMaterial(wrapper, 0xffffff, 0.75);
+
+    const modelLabel = `M${modelCounter++}`;
+    const actor = createActor({
+      name: label,
+      color: "#ffffff",
+      type: "model",
+      group: wrapper,
+      shortLabel: modelLabel,
+      sourceUrl,
+      sourceFile
+    });
+    actor.rig = findFirstSkinnedMeshAndSetupRig(root);
+    if (actor.rig){
+      actor.poseMode = false;
+      actor.rig.controlBalls.forEach(ball => ball.visible = false);
+    }
+    addActor(actor);
+    setMode("3d");
+    return actor;
+  }
+
+  function loadGltfFromFile(file){
+    return new Promise((resolve, reject)=>{
+      if (!THREE.GLTFLoader) return reject(new Error("Loader not found"));
+      const loader = new THREE.GLTFLoader();
+      const url = URL.createObjectURL(file);
+      loader.load(url, (gltf) => {
+        resolve(gltf);
+      }, undefined, (err)=>{
+        reject(err);
+      });
+    });
+  }
+
+  function loadGltfFromUrl(url){
+    return new Promise((resolve, reject)=>{
+      if (!THREE.GLTFLoader) return reject(new Error("Loader not found"));
+      const loader = new THREE.GLTFLoader();
+      loader.setCrossOrigin("anonymous");
+      loader.load(url, (gltf)=>resolve(gltf), undefined, (err)=>reject(err));
+    });
+  }
+
+  function updateRaycastSelection(){
+    if (!THREE_OK) return;
+    glCanvas.addEventListener("pointerdown", (ev)=>{
+      const actor = getActiveActor();
+      if (!actor || !actor.poseMode || !actor.rig) return;
+      const rect = glCanvas.getBoundingClientRect();
+      const x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+
+      const mouse = new THREE.Vector2(x, y);
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, camera);
+
+      const intersects = raycaster.intersectObjects(actor.rig.controlBalls || []);
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        const boneIndex = hit.userData.boneIndex;
+        actor.selectedBoneIndex = boneIndex;
+        boneSelect.value = boneIndex;
+        attachSelectedBone(actor);
+      }
+    });
+  }
+
+  function updatePoseUiFromSelection(){
+    const actor = getActiveActor();
+    if (!actor || !actor.rig) return;
+    fillBoneSelect(actor);
+  }
+
+  function updateTransformForMode(modeName){
+    const actor = getActiveActor();
+    if (actor?.poseMode) return;
+    if (!transform) return;
+    setTransformMode(modeName);
+  }
+
+  function update3DState(){
+    stateText&&(stateText.textContent="Cinema");
+  }
+
+  async function exportCompositeBlob(){
+    const w = glCanvas.width;
+    const h = glCanvas.height;
+    if (!w || !h) return null;
+
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = w;
+    tempCanvas.height = h;
+    const ctx = tempCanvas.getContext("2d");
+
+    const prevTransformVisible = transform ? transform.visible : false;
+    const prevGridVisible = gridHelper?.visible;
+    if (transform) transform.visible = false;
+    if (gridHelper) gridHelper.visible = false;
+    actors.forEach(actor => {
+      if (actor.rig?.controlBalls) {
+        actor.rig.controlBalls.forEach(ball => ball.visible = false);
+      }
+    });
+
+    if (renderer && scene && camera) {
+      renderer.render(scene, camera);
+    }
+
+    ctx.drawImage(bgCanvas, 0, 0, w, h);
+    ctx.drawImage(glCanvas, 0, 0, w, h);
+    ctx.drawImage(drawCanvas, 0, 0, w, h);
+
+    if (transform) transform.visible = prevTransformVisible;
+    if (gridHelper) gridHelper.visible = prevGridVisible;
+    actors.forEach(actor => {
+      if (actor.rig?.controlBalls) {
+        actor.rig.controlBalls.forEach(ball => ball.visible = actor.poseMode && actor.visible);
+      }
+    });
+
+    return new Promise(resolve => {
+      tempCanvas.toBlob((blob)=>resolve(blob), "image/png", 0.95);
+    });
+  }
+
+  async function buildCompositeBlob(){
+    if (!shouldUseComposite()) return null;
+    return exportCompositeBlob();
+  }
+
+  function shouldUseComposite(){
+    const hasActors = actors.some(a => a.visible);
+    return !!bgImage || drawDirty || hasActors;
+  }
+
+  async function buildCompositeUrl(){
+    if (!shouldUseComposite()) return null;
+    const blob = await exportCompositeBlob();
+    if (!blob) return null;
+    const file = new File([blob], `composite-${uuid()}.png`, { type: "image/png" });
+    return uploadReferenceToInputs(file);
+  }
+
+  async function canvasToBlob(canvas){
+    return new Promise(resolve => {
+      canvas.toBlob((blob)=>resolve(blob), "image/png", 0.95);
+    });
+  }
+
+  function serializeVector(vec){
+    return [vec.x, vec.y, vec.z];
+  }
+
+  function serializeQuaternion(q){
+    return [q.x, q.y, q.z, q.w];
+  }
+
+  async function serializeActors(){
+    const serialized = [];
+    for (const actor of actors){
+      const transforms = {
+        position: serializeVector(actor.group.position),
+        rotation: serializeVector(actor.group.rotation),
+        scale: serializeVector(actor.group.scale)
+      };
+      const data = {
+        type: actor.type,
+        name: actor.name,
+        visible: actor.visible,
+        shortLabel: actor.shortLabel,
+        characterIndex: actor.characterIndex,
+        primitiveType: actor.primitiveType || "",
+        modelUrl: actor.sourceUrl || "",
+        transforms,
+        poseMode: actor.poseMode
+      };
+
+      if (actor.type === "model" && actor.sourceFile && !data.modelUrl){
+        data.modelUrl = await uploadReferenceToInputs(actor.sourceFile);
+        actor.sourceUrl = data.modelUrl;
+      }
+      if (actor.type === "character" && !data.modelUrl){
+        data.modelUrl = HUMAN_URL;
+      }
+
+      if (actor.poseMode && actor.rig?.bones){
+        const rotations = {};
+        actor.rig.bones.forEach(bone => {
+          rotations[bone.name] = serializeQuaternion(bone.quaternion);
+        });
+        data.boneRotations = rotations;
+      }
+
+      serialized.push(data);
+    }
+    return serialized;
+  }
+
+  async function buildProjectData(){
+    let bgUrl = bgPublicUrl;
+    if (bgFileObj){
+      const sig = fileSignature(bgFileObj);
+      if (!bgPublicUrl || bgUploadSignature !== sig){
+        bgPublicUrl = await uploadReferenceToInputs(bgFileObj);
+        bgUploadSignature = sig;
+      }
+      bgUrl = bgPublicUrl;
+    }
+
+    let drawUrl = drawPublicUrl;
+    if (drawDirty){
+      const blob = await canvasToBlob(drawCanvas);
+      if (blob){
+        drawUrl = await uploadReferenceToInputs(new File([blob], `draw-${uuid()}.png`, { type: "image/png" }));
+        drawPublicUrl = drawUrl;
+      }
+    }
+
+    const actorsData = await serializeActors();
+
+    const leftUrls = await getOrUploadImageUrls();
+    const char1Url = isCharPhotoActive(1) ? await getCharPhotoUrl(1) : "";
+    const char2Url = isCharPhotoActive(2) ? await getCharPhotoUrl(2) : "";
+
+    return {
+      version: 1,
+      ui: { selectedAspect, selectedRes, styleOnly: !!styleChk.checked },
+      prompt: sceneEl.value,
+      camera: {
+        presetKey: camPresetEl?.value,
+        focalMm: Number(focalEl?.value || 35),
+        aperture: String(apertureEl?.value || "f/2.0"),
+        grain: String(grainEl?.value || "subtle"),
+        exposure: String(exposureEl?.value || "natural"),
+        flare: String(flareEl?.value || "subtle"),
+        bloom: String(bloomEl?.value || "subtle")
+      },
+      refs: {
+        leftUrls: dedupeUrls(leftUrls),
+        char1Url: char1Url || "",
+        char2Url: char2Url || "",
+        compositeUsed: shouldUseComposite()
+      },
+      background: { bgUrl: bgUrl || "" },
+      draw: { drawUrl: drawUrl || "" },
+      actors: actorsData,
+      projectTitle: currentProjectTitle || "",
+      savedAt: Date.now()
+    };
+  }
+
+  async function restoreActors(actorData){
+    while (actors.length){
+      removeActor(actors[0]);
+    }
+    actorState.char1 = null;
+    actorState.char2 = null;
+
+    for (const data of actorData || []){
+      let actor = null;
+      if (data.type === "character"){
+        if (!data.modelUrl) data.modelUrl = HUMAN_URL;
+        const gltf = await loadGltfFromUrl(data.modelUrl);
+        actor = addCharacter(data.characterIndex || 1, gltf, data.name || "Character", data.modelUrl);
+      } else if (data.type === "model"){
+        if (!data.modelUrl) continue;
+        const gltf = await loadGltfFromUrl(data.modelUrl);
+        actor = addModelActor(gltf, data.name || "Model", null, data.modelUrl);
+      } else if (data.type === "primitive"){
+        const prev = primTypeEl.value;
+        primTypeEl.value = data.primitiveType || "box";
+        actor = addPrimitiveActor();
+        primTypeEl.value = prev;
+      }
+
+      if (!actor) continue;
+      if (data.name) actor.name = data.name;
+      if (data.shortLabel) actor.shortLabel = data.shortLabel;
+      if (data.transforms?.position) actor.group.position.set(...data.transforms.position);
+      if (data.transforms?.rotation) actor.group.rotation.set(...data.transforms.rotation);
+      if (data.transforms?.scale) actor.group.scale.set(...data.transforms.scale);
+      if (typeof data.visible === "boolean") setActorVisible(actor, data.visible);
+
+      if (data.poseMode && actor.rig?.bones){
+        actor.poseMode = true;
+        Object.entries(data.boneRotations || {}).forEach(([name, quat])=>{
+          const bone = actor.rig.bones.find(b => b.name === name);
+          if (bone && Array.isArray(quat) && quat.length === 4){
+            bone.quaternion.set(quat[0], quat[1], quat[2], quat[3]);
+          }
+        });
+        actor.rig.controlBalls?.forEach(ball => ball.visible = actor.visible && actor.poseMode);
+      } else if (actor.rig){
+        actor.poseMode = false;
+        actor.rig.controlBalls?.forEach(ball => ball.visible = false);
+      }
+    }
+    renderLayers();
+  }
+
+  async function applyProjectData(data){
+    if (!data) return;
+    selectedUrls = [];
+    clearFiles();
+
+    if (data.ui?.selectedAspect) setAspect(data.ui.selectedAspect);
+    if (data.ui?.selectedRes) setResolution(data.ui.selectedRes);
+    styleChk.checked = !!data.ui?.styleOnly;
+
+    sceneEl.value = data.prompt || "";
+
+    if (data.camera?.presetKey) camPresetEl.value = data.camera.presetKey;
+    if (focalEl && data.camera?.focalMm) focalEl.value = data.camera.focalMm;
+    if (apertureEl && data.camera?.aperture) apertureEl.value = data.camera.aperture;
+    if (grainEl && data.camera?.grain) grainEl.value = data.camera.grain;
+    if (exposureEl && data.camera?.exposure) exposureEl.value = data.camera.exposure;
+    if (flareEl && data.camera?.flare) flareEl.value = data.camera.flare;
+    if (bloomEl && data.camera?.bloom) bloomEl.value = data.camera.bloom;
+    applyFocalToCamera();
+
+    clearBackground();
+    clearDrawCanvas();
+    clearCharPhoto(1);
+    clearCharPhoto(2);
+
+    if (data.background?.bgUrl) await setBackgroundFromUrl(data.background.bgUrl);
+    if (data.draw?.drawUrl) await setDrawFromUrl(data.draw.drawUrl);
+
+    const refs = data.refs || {};
+    selectedUrls = dedupeUrls(refs.leftUrls || []);
+    renderThumbs();
+    updateDropText();
+
+    if (refs.char1Url) setCharPhotoFromUrl(1, refs.char1Url);
+    if (refs.char2Url) setCharPhotoFromUrl(2, refs.char2Url);
+
+    await restoreActors(data.actors || []);
+  }
+
+  async function openProject(projectId){
+    if (!projectId) return;
+    setStatus("Loading project…");
+    try{
+      const project = await fetchProjectById(projectId);
+      const payload = project?.data || project?.project?.data || project?.project_data || project;
+      await applyProjectData(payload);
+      currentProjectId = project?.id || project?.project_id || projectId;
+      currentProjectTitle = project?.title || payload?.projectTitle || "";
+      setProjectStatus(currentProjectTitle);
+      setStatus("Project loaded", "ok");
+    } catch(e){
+      setStatus("Project load failed", "err");
+    }
+  }
+
+  async function saveProjectFlow({ promptTitle = "" } = {}){
+    const data = await buildProjectData();
+    const title = promptTitle || currentProjectTitle || "Untitled project";
+    const res = await upsertProject({ projectId: currentProjectId, title, data });
+    currentProjectId = res?.project?.id || res?.id || currentProjectId;
+    currentProjectTitle = title;
+    setProjectStatus(currentProjectTitle);
+    setStatus("Project saved", "ok");
+  }
+
+  function buildImageInputPlan({ compositeUrl, char1Url, char2Url, leftUrls }){
+    const urls = [];
+    const indexMap = {};
+    if (compositeUrl){
+      indexMap.composite = urls.length + 1;
+      urls.push(compositeUrl);
+    }
+    if (char1Url){
+      indexMap.char1 = urls.length + 1;
+      urls.push(char1Url);
+    }
+    if (char2Url){
+      indexMap.char2 = urls.length + 1;
+      urls.push(char2Url);
+    }
+    (leftUrls || []).forEach(url => urls.push(url));
+    return { urls, indexMap };
+  }
+
+  function buildCinemaLockPrompt({ indexMap, hasComposite }){
+    if (!hasComposite || !indexMap.composite) return "";
+
+    const identitySources = [];
+    if (indexMap.char1) identitySources.push(`#${indexMap.char1}`);
+    if (indexMap.char2) identitySources.push(`#${indexMap.char2}`);
+    const identityLine = identitySources.length
+      ? `2) Identity from Image ${identitySources.join("/")} (ABSOLUTE).`
+      : "2) Identity from Image #CHAR1/#CHAR2 (ABSOLUTE).";
+
+    const lines = [
+      "PRIORITY ORDER:",
+      `1) Pose + camera from Image #${indexMap.composite} (ABSOLUTE).`,
+      identityLine,
+      "3) Style/cinematic settings are THIRD priority. They must NOT change pose/camera.",
+      "",
+      "POSE/CAMERA LOCK:",
+      `- Use Image #${indexMap.composite} as the ONLY source of pose, camera angle, framing, distance, perspective, and scale.`,
+      "- Match the pose 1:1. Same joint angles. No “improving” the pose.",
+      "- Match camera 1:1. No reframing, no moving subject, no changing lens perspective."
+    ];
+
+    if (indexMap.char1){
+      lines.push(
+        "",
+        "CHARACTER 1:",
+        `- Replace the RED proxy with the real person from Image #${indexMap.char1}.`,
+        `- Use Image #${indexMap.char1} ONLY for identity (face/body/clothes), NOT for pose/camera.`
+      );
+    }
+
+    if (indexMap.char2){
+      lines.push(
+        "",
+        "CHARACTER 2:",
+        `- Replace the BLUE proxy with the real person from Image #${indexMap.char2}.`,
+        `- Use Image #${indexMap.char2} ONLY for identity, NOT for pose/camera.`
+      );
+    }
+
+    return lines.join("\n");
+  }
+
+  let previewObjectUrl = "";
+
+  function closeInputPreview(){
+    if (previewObjectUrl){
+      try { URL.revokeObjectURL(previewObjectUrl); } catch(e){}
+      previewObjectUrl = "";
+    }
+    if (inputPreviewOverlay) inputPreviewOverlay.style.display = "none";
+  }
+
+  async function openInputPreview(){
+    if (!previewBtn) return;
+    previewBtn.disabled = true;
+    setStatus("");
+    try{
+      if (previewObjectUrl){
+        try { URL.revokeObjectURL(previewObjectUrl); } catch(e){}
+        previewObjectUrl = "";
+      }
+      const compositeBlob = await buildCompositeBlob();
+      if (compositeBlob){
+        previewObjectUrl = URL.createObjectURL(compositeBlob);
+      }
+
+      const leftUrls = await getOrUploadImageUrls();
+      const useChar1 = isCharPhotoActive(1);
+      const useChar2 = isCharPhotoActive(2);
+      const char1Url = useChar1 ? await getCharPhotoUrl(1) : "";
+      const char2Url = useChar2 ? await getCharPhotoUrl(2) : "";
+      const compositeUrl = compositeBlob
+        ? await uploadReferenceToInputs(new File([compositeBlob], `composite-${uuid()}.png`, { type: "image/png" }))
+        : null;
+
+      const imagePlan = buildImageInputPlan({
+        compositeUrl,
+        char1Url,
+        char2Url,
+        leftUrls
+      });
+
+      if (!imagePlan.urls.length){
+        closeInputPreview();
+        setStatus("No input images to preview.", "err");
+        return;
+      }
+
+      const primaryUrl = compositeUrl || char1Url || char2Url || leftUrls[0] || "";
+
+      if (previewImg){
+        previewImg.src = previewObjectUrl || primaryUrl || "";
+      }
+      if (previewPrimary){
+        previewPrimary.innerHTML = primaryUrl
+          ? `Primary image_input_url: <a href="${primaryUrl}" target="_blank" rel="noopener noreferrer">${primaryUrl}</a>`
+          : "Primary image_input_url: —";
+      }
+      if (previewList){
+        previewList.innerHTML = "";
+        imagePlan.urls.forEach((url, idx)=>{
+          const row = document.createElement("div");
+          row.innerHTML = `image_input_urls[${idx + 1}]: <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+          previewList.appendChild(row);
+        });
+      }
+
+      if (inputPreviewOverlay) inputPreviewOverlay.style.display = "flex";
+    } finally {
+      previewBtn.disabled = false;
+    }
+  }
+
+  async function startJob(){
+    runBtn.disabled = true;
+    gptBtn.disabled = true;
+    stopBtn.style.display = "block";
+    abortPoll = false;
+    currentJobId = null;
+    if (pollTimer) clearTimeout(pollTimer);
+
+    setStatus("");
+    showLoader(true);
+    loaderSub.textContent = "Preparing…";
+
+    const fd = new FormData();
+    fd.append("presetId", PRESET_ID);
+    fd.append("origin_path", "/cinema_shot");
+
+    const userPromptRaw = (sceneEl.value||"").trim();
+
+    const presetKey = String(camPresetEl?.value || "IMAX_PANAVISION_ANAMORPHIC");
+    const focalMm = Number(focalEl?.value || 35);
+    const aperture = String(apertureEl?.value || "f/2.0");
+    const grain = String(grainEl?.value || "subtle");
+    const exposure = String(exposureEl?.value || "natural");
+    const flare = String(flareEl?.value || "subtle");
+    const bloom = String(bloomEl?.value || "subtle");
+
+    const resVal = String(selectedRes || "2K");
+
+    const leftUrls = await getOrUploadImageUrls();
+    const compositeUrl = await buildCompositeUrl();
+    const useChar1 = isCharPhotoActive(1);
+    const useChar2 = isCharPhotoActive(2);
+    const char1Url = useChar1 ? await getCharPhotoUrl(1) : "";
+    const char2Url = useChar2 ? await getCharPhotoUrl(2) : "";
+    const imagePlan = buildImageInputPlan({
+      compositeUrl,
+      char1Url,
+      char2Url,
+      leftUrls
+    });
+    const hasImage = imagePlan.urls.length > 0;
+    if (!userPromptRaw && !hasImage){
+      showLoader(false);
+      runBtn.disabled = false;
+      gptBtn.disabled = false;
+      stopBtn.style.display = "none";
+      setStatus("Add a prompt or at least one image input.", "err");
+      return;
+    }
+    const identityMode = compositeUrl && (useChar1 || useChar2) ? "proxy_layout_plate" : "generic_locked_image";
+    const effectiveStyleOnly = userPromptRaw ? !!styleChk.checked : true;
+    const safeUserText = "No extra instructions. Do not add props. Do not change pose/camera. Only apply cinematic optics/grade subtly.";
+    const locksFirst = !!compositeUrl && (useChar1 || useChar2);
+    const cinemaLock = buildCinemaLockPrompt({
+      indexMap: imagePlan.indexMap,
+      hasComposite: !!compositeUrl
+    });
+
+    const finalPrompt = buildFinalPrompt({
+      userPrompt: userPromptRaw || safeUserText,
+      hasImage,
+      presetKey,
+      focalMm,
+      aperture,
+      grain,
+      exposure,
+      aspect: selectedAspect,
+      res: resVal,
+      styleOnly: effectiveStyleOnly,
+      flare,
+      bloom,
+      cinemaLock,
+      identityMode,
+      locksFirst
+    });
+    
+    fd.append("scene", finalPrompt);
+    fd.append("prompt_user", userPromptRaw);
+    fd.append("aspect_ratio", selectedAspect);
+    fd.append("resolution", resVal);
+    fd.append("output_format", "png");
+    fd.append("safety_filter_level", "block_only_high");
+
+    const primaryUrl = compositeUrl || char1Url || char2Url || leftUrls[0];
+    if (primaryUrl){
+      fd.append("image_input_url", primaryUrl);
+    }
+    imagePlan.urls.forEach(u => fd.append("image_input_urls", u));
+
+    loaderSub.textContent = "Sending task…";
+
+    let data;
+    try{
+      data = await fetchJsonWithAuth(BACKEND_BASE + "/api/start", {
+        method: "POST",
+        body: fd
+      });
+    } catch(e){
+      showLoader(false);
+      runBtn.disabled = false;
+      gptBtn.disabled = false;
+      stopBtn.style.display = "none";
+
+      if (e.status === 402 && e.data) {
+        const need = e.data.required ?? "?";
+        const have = e.data.credits ?? 0;
+        setStatus(`Not enough credits • need ${need} Cr • you have ${have} Cr`, "err");
+        return;
+      }
+
+      setStatus("Error", "err");
+      alert("Start error:\n\n" + (e?.message||e));
+      return;
+    }
+
+    currentJobId = data.jobId;
+
+    if (typeof data.cost !== "undefined" && typeof data.credits_left !== "undefined") {
+      setStatus(`Started • cost ${data.cost} Cr • left ${data.credits_left} Cr`, "ok");
+    } else {
+      setStatus("jobId: " + currentJobId, "");
+    }
+
+    pollStatus();
+  }
+
+  async function pollStatus(){
+    abortPoll = false;
+
+    const tick = async ()=>{
+      if (abortPoll) return;
+
+      try{
+        const data = await fetchJsonWithAuth(BACKEND_BASE + `/api/status?jobId=${encodeURIComponent(currentJobId)}`, {
+          method:"GET"
+        });
+
+        loaderSub.textContent = "status: " + data.status;
+
+        if (data.status === "succeeded"){
+          showLoader(false);
+          runBtn.disabled = false;
+          gptBtn.disabled = false;
+          stopBtn.style.display = "none";
+          setStatus("Done", "ok");
+          if (data.output_url) showResult(data.output_url, data.status);
+          return;
+        }
+
+        if (data.status === "failed" || data.status === "canceled"){
+          showLoader(false);
+          runBtn.disabled = false;
+          gptBtn.disabled = false;
+          stopBtn.style.display = "none";
+          setStatus("Failed", "err");
+          return;
+        }
+
+        pollTimer = setTimeout(tick, 1200);
+      } catch(e){
+        showLoader(false);
+        runBtn.disabled = false;
+        gptBtn.disabled = false;
+        stopBtn.style.display = "none";
+        setStatus("Status error", "err");
+        alert("Status error:\n\n" + (e?.message || e));
+      }
+    };
+
+    tick();
+  }
+
+  drop.addEventListener("click", ()=>fileEl.click());
+
+  fileEl.addEventListener("change", (e)=>{
+    const files = Array.from(e.target.files || []);
+    fileEl.value = "";
+    addFiles(files);
+  });
+  if (uploadImagesBtn){
+    uploadImagesBtn.addEventListener("click", ()=>fileEl.click());
+  }
+  if (myCharsGlobal){
+    myCharsGlobal.addEventListener("click", ()=>openCharacterLibrary("global"));
+  }
+
+  ["dragenter","dragover"].forEach(evt=>{
+    drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="rgba(43,108,255,.55)"; });
+  });
+  ["dragleave","drop"].forEach(evt=>{
+    drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="var(--border)"; });
+  });
+  drop.addEventListener("drop",(ev)=>{
+    const files = ev.dataTransfer?.files;
+    addFiles(files);
+  });
+
+  runBtn.addEventListener("click", async ()=>{
+    try{ await startJob(); }
+    catch(e){
+      showLoader(false);
+      runBtn.disabled=false;
+      gptBtn.disabled=false;
+      stopBtn.style.display="none";
+      setStatus("Error", "err");
+      alert("Start error:\n\n" + (e?.message||e));
+    }
+  });
+
+  gptBtn.addEventListener("click", async ()=>{
+    try { await buildPromptNano(); }
+    catch(e){
+      showPromptLoader(false);
+      setStatus("GPT error", "err");
+      alert("GPT error:\n\n" + (e?.message || e));
+      gptBtn.disabled = false;
+      runBtn.disabled = false;
+    }
+  });
+
+  if (previewBtn){
+    previewBtn.addEventListener("click", async ()=>{
+      try { await openInputPreview(); }
+      catch(e){
+        closeInputPreview();
+        setStatus("Preview error", "err");
+        alert("Preview error:\n\n" + (e?.message || e));
+      }
+    });
+  }
+
+  stopBtn.addEventListener("click", ()=>{
+    abortPoll = true;
+    if (pollTimer) clearTimeout(pollTimer);
+    showLoader(false);
+    runBtn.disabled = false;
+    gptBtn.disabled = false;
+    stopBtn.style.display = "none";
+    setStatus("Stopped");
+  });
+
+  if (previewClose){
+    previewClose.addEventListener("click", closeInputPreview);
+  }
+  if (inputPreviewOverlay){
+    inputPreviewOverlay.addEventListener("click", (e)=>{
+      if (e.target === inputPreviewOverlay) closeInputPreview();
+    });
+  }
+
+  if (openCinemaLibrary){
+    openCinemaLibrary.addEventListener("click", async ()=>{
+      setLibTab("manager");
+      openModal(cinemaLibraryModal);
+      await refreshLibraryAll();
+    });
+  }
+  if (cinemaLibraryClose){
+    cinemaLibraryClose.addEventListener("click", ()=>closeModal(cinemaLibraryModal));
+  }
+  if (cinemaLibraryModal){
+    cinemaLibraryModal.addEventListener("click", (e)=>{
+      if (e.target === cinemaLibraryModal) closeModal(cinemaLibraryModal);
+    });
+  }
+  if (libTabManager){
+    libTabManager.addEventListener("click", ()=>setLibTab("manager"));
+  }
+  if (libTabAdd){
+    libTabAdd.addEventListener("click", async ()=>{
+      setLibTab("add");
+      await refreshGenerationsForAdd();
+    });
+  }
+  if (libRefresh){
+    libRefresh.addEventListener("click", ()=>refreshLibraryAll());
+  }
+  if (libProjectSearch){
+    libProjectSearch.addEventListener("input", renderProjects);
+  }
+  if (libSceneSearch){
+    libSceneSearch.addEventListener("input", renderScenes);
+  }
+  if (libProjectsList){
+    libProjectsList.addEventListener("click", async (e)=>{
+      const card = e.target.closest(".lf-libraryCard");
+      if (!card) return;
+      const id = card.dataset.id;
+      libSelectedProject = libProjects.find(x=>String(x.id)===String(id)) || null;
+      libSelectedScene = null;
+      libScenes = [];
+      libAssets = [];
+      if (libSelectedProject){
+        await loadLibraryScenes(libSelectedProject.id);
+        if (libScenes[0]) libSelectedScene = libScenes[0];
+      }
+      if (libSelectedScene) await loadLibraryAssets(libSelectedScene.id);
+      updateBreadcrumb();
+      renderProjects();
+      renderScenes();
+      renderAssets();
+    });
+  }
+  if (libScenesList){
+    libScenesList.addEventListener("click", async (e)=>{
+      const card = e.target.closest(".lf-libraryCard");
+      if (!card) return;
+      const id = card.dataset.id;
+      libSelectedScene = libScenes.find(x=>String(x.id)===String(id)) || null;
+      libAssets = [];
+      if (libSelectedScene) await loadLibraryAssets(libSelectedScene.id);
+      updateBreadcrumb();
+      renderScenes();
+      renderAssets();
+    });
+  }
+  if (libAssetsGrid){
+    libAssetsGrid.addEventListener("click", async (e)=>{
+      const card = e.target.closest(".lf-assetCard");
+      if (!card) return;
+      const assetId = card.dataset.id;
+      const actBtn=e.target.closest("button");
+if(!actBtn){const a=libAssets.find(x=>String(x.id)===String(assetId));if(a){shotModalImg.src=a.url||a.thumb_url||"";openModal(shotModal);}return;}
+
+
+      const act = actBtn.dataset.act;
+      const asset = libAssets.find(a=>String(a.id)===String(assetId));
+      if (!asset) return;
+
+      if (act === "add"){
+        addReferenceUrl(asset.url);
+        setStatus("Added to Reference Images", "ok");
+        setTimeout(()=>setStatus(""), 1200);
+      }
+
+      if (act === "rename"){
+        const next = prompt("New asset name:", asset.title || "");
+        if (!next) return;
+        await apiLibrary("library_rename_asset", { asset_id: asset.id, title: next });
+        asset.title = next;
+        renderAssets();
+      }
+
+      if (act === "delete"){
+        if (!confirm("Remove asset from this scene?")) return;
+        await apiLibrary("library_delete_asset", { asset_id: asset.id });
+        libAssets = libAssets.filter(a=>a.id!==asset.id);
+        renderAssets();
+      }
+    });
+  }
+  if (libNewProject){
+    libNewProject.addEventListener("click", async ()=>{
+      const title = prompt("Project name:");
+      if (!title) return;
+      const r = await apiLibrary("library_create_project", { title });
+      libSelectedProject = r.project;
+      libSelectedScene = null;
+      await refreshLibraryAll();
+    });
+  }
+  if (libNewScene){
+    libNewScene.addEventListener("click", async ()=>{
+      if (!libSelectedProject) return alert("Select a project first");
+      const title = prompt("Scene name:");
+      if (!title) return;
+      const r = await apiLibrary("library_create_scene", { project_id: libSelectedProject.id, title });
+      libSelectedScene = r.scene;
+      await refreshLibraryAll();
+    });
+  }
+  if (libGenRefresh){
+    libGenRefresh.addEventListener("click", refreshGenerationsForAdd);
+  }
+  if (libGenSearch){
+    libGenSearch.addEventListener("input", renderGenerationsGrid);
+  }
+  if (libGenKind){
+    libGenKind.addEventListener("change", renderGenerationsGrid);
+  }
+  if (libGenGrid){
+    libGenGrid.addEventListener("click", async (e)=>{
+      const card = e.target.closest(".lf-assetCard");
+      const btn=e.target.closest("button");
+if(!btn&&e.target.tagName==="IMG"){shotModalImg.src=e.target.src;openModal(shotModal);return;}
+      if (btn.dataset.act !== "add-gen") return;
+
+      if (!libSelectedScene) return alert("Select a scene first");
+      const genId = card.dataset.genId;
+      const g = libGenerations.find(x=>String(x.id)===String(genId));
+      if (!g) return;
+
+      await apiLibrary("library_add_asset", {
+        scene_id: libSelectedScene.id,
+        generation_id: g.id,
+        title: g.title || null,
+        kind: g.kind || null,
+        url: g.output_url,
+        thumb_url: g.output_url
+      });
+
+      setStatus("Added to Library", "ok");
+      setTimeout(()=>setStatus(""), 1200);
+
+      await loadLibraryAssets(libSelectedScene.id);
+      if (libTabManager.classList.contains("active")) renderAssets();
+    });
+  }
+
+  if (shotModalClose){
+    shotModalClose.addEventListener("click", ()=>closeModal(shotModal));
+  }
+  if (shotModal){
+    shotModal.addEventListener("click", (e)=>{
+      if (e.target === shotModal) closeModal(shotModal);
+    });
+  }
+  if (shotModalDownload){
+    shotModalDownload.addEventListener("click", ()=>{
+      if (!shotModalItem) return;
+      forceDownload(getGenerationUrl(shotModalItem), "cinema-shot.png");
+    });
+  }
+  if (shotModalCopy){
+    shotModalCopy.addEventListener("click", async ()=>{
+      if (!shotModalItem) return;
+      await copyToClipboard(getGenerationUrl(shotModalItem));
+      setStatus("URL copied", "ok");
+      setTimeout(()=>setStatus(""), 1200);
+    });
+  }
+  if (shotModalRename){
+    shotModalRename.addEventListener("click", async ()=>{
+      if (!shotModalItem) return;
+      const title = getGenerationTitle(shotModalItem, "Shot");
+      const next = prompt("New shot name:", title);
+      if (!next) return;
+      try{
+        await renameGenerationTitle(getGenerationId(shotModalItem), next);
+        shotModalItem.title = next;
+        if (shotModalTitle) shotModalTitle.textContent = next;
+      } catch(e){
+        setStatus("Rename failed", "err");
+      }
+    });
+  }
+
+  if (charLibraryClose){
+    charLibraryClose.addEventListener("click", ()=>closeModal(charLibraryModal));
+  }
+  if (charLibraryModal){
+    charLibraryModal.addEventListener("click", (e)=>{
+      if (e.target === charLibraryModal) closeModal(charLibraryModal);
+    });
+  }
+  if (charLibrarySearch){
+    charLibrarySearch.addEventListener("input", ()=>renderCharacterLibrary());
+  }
+  if (charLibraryRefresh){
+    charLibraryRefresh.addEventListener("click", ()=>loadCharacterLibrary());
+  }
+
+  if (projectOpen){
+    projectOpen.addEventListener("click", ()=>openProjectList());
+  }
+  if (projectListClose){
+    projectListClose.addEventListener("click", ()=>closeModal(projectListModal));
+  }
+  if (projectListModal){
+    projectListModal.addEventListener("click", (e)=>{
+      if (e.target === projectListModal) closeModal(projectListModal);
+    });
+  }
+  if (projectSave){
+    projectSave.addEventListener("click", async ()=>{
+      if (currentProjectId){
+        try{
+          await saveProjectFlow();
+        } catch(e){
+          setStatus("Project save failed", "err");
+        }
+        return;
+      }
+      if (projectSaveTitle) projectSaveTitle.textContent = "Save Project";
+      if (projectNameInput) projectNameInput.value = currentProjectTitle || "";
+      openModal(projectSaveModal);
+    });
+  }
+  if (projectRename){
+    projectRename.addEventListener("click", ()=>{
+      if (projectSaveTitle) projectSaveTitle.textContent = "Rename Project";
+      if (projectNameInput) projectNameInput.value = currentProjectTitle || "";
+      openModal(projectSaveModal);
+    });
+  }
+  if (projectSaveClose){
+    projectSaveClose.addEventListener("click", ()=>closeModal(projectSaveModal));
+  }
+  if (projectSaveModal){
+    projectSaveModal.addEventListener("click", (e)=>{
+      if (e.target === projectSaveModal) closeModal(projectSaveModal);
+    });
+  }
+  if (projectSaveConfirm){
+    projectSaveConfirm.addEventListener("click", async ()=>{
+      const title = String(projectNameInput?.value || "").trim();
+      if (!title){
+        alert("Enter a project name.");
+        return;
+      }
+      currentProjectTitle = title;
+      try{
+        await saveProjectFlow({ promptTitle: title });
+        closeModal(projectSaveModal);
+      } catch(e){
+        setStatus("Project save failed", "err");
+      }
+    });
+  }
+
+  drop.addEventListener("contextmenu", (e)=>{
+    e.preventDefault();
+    if (!selectedFiles.length) return;
+    if (confirm("Clear selected images?")) clearFiles();
+  });
+
+  if (resDropdown && resBtn && resMenu){
+    resBtn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      resDropdown.classList.toggle("open");
+    });
+    resMenu.addEventListener("click", (e)=>{
+      const item = e.target.closest(".lf-dropdown-item");
+      if (!item) return;
+      setResolution(item.dataset.value);
+      resDropdown.classList.remove("open");
+    });
+    window.addEventListener("click", ()=>{
+      resDropdown.classList.remove("open");
+      if (aspectDropdown) aspectDropdown.classList.remove("open");
+    });
+  }
+  setResolution(selectedRes);
+  updateDropText();
+  buildPalette();
+  applyAspectRatio();
+  setProjectStatus(currentProjectTitle);
+  if (focalEl){
+    focalEl.addEventListener("change", ()=>{
+      applyFocalToCamera();
+    });
+  }
+
+  btnDraw.addEventListener("click", ()=>setMode("draw"));
+  btn3D.addEventListener("click", ()=>setMode("3d"));
+
+  bgDrop.addEventListener("click", ()=>bgFile.click());
+  bgFile.addEventListener("change", async (e)=>{
+    const file = e.target.files?.[0];
+    bgFile.value = "";
+    if (!file) return;
+    await setBackground(file);
+  });
+  bgClear.addEventListener("click", ()=>clearBackground());
+
+  if (char1Default) char1Default.onclick = async () => {
+  try {
+    const gltf = await loadGltfFromUrl(HUMAN_URL);
+    addCharacter(1, gltf, "Character 1", HUMAN_URL);
+  } catch (e) {
+    console.error(e);
+    alert("Error loading default character");
+  }
+};
+  if (char1Library){
+    char1Library.addEventListener("click", ()=>openCharacterLibrary("char1"));
+  }
+  char1PhotoDrop.addEventListener("click", ()=>char1PhotoFile.click());
+  char1PhotoFile.addEventListener("change", (e)=>{
+    const file = e.target.files?.[0];
+    char1PhotoFile.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    setCharPhoto(1, file);
+  });
+  ["dragenter","dragover"].forEach(evt=>{
+    char1PhotoDrop.addEventListener(evt,(ev)=>{ ev.preventDefault(); char1PhotoDrop.style.borderColor="rgba(43,108,255,.55)"; });
+  });
+  ["dragleave","drop"].forEach(evt=>{
+    char1PhotoDrop.addEventListener(evt,(ev)=>{ ev.preventDefault(); char1PhotoDrop.style.borderColor="rgba(255,255,255,.2)"; });
+  });
+  char1PhotoDrop.addEventListener("drop",(ev)=>{
+    const file = ev.dataTransfer?.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    setCharPhoto(1, file);
+  });
+  char1PhotoClear.addEventListener("click", ()=>clearCharPhoto(1));
+  char1Remove.addEventListener("click", ()=>{
+    if (actorState.char1) {
+      removeActor(actorState.char1);
+      actorState.char1 = null;
+      updateCharactersUI();
+    }
+  });
+  char1Toggle.addEventListener("click", ()=>{
+    if (actorState.char1) setActorVisible(actorState.char1, !actorState.char1.visible);
+  });
+
+  if (char2Default) char2Default.onclick = async () => {
+  try {
+    const gltf = await loadGltfFromUrl(HUMAN_URL);
+    addCharacter(2, gltf, "Character 2", HUMAN_URL);
+  } catch (e) {
+    console.error(e);
+    alert("Error loading default character");
+  }
+};
+  if (char2Library){
+    char2Library.addEventListener("click", ()=>openCharacterLibrary("char2"));
+  }
+  char2PhotoDrop.addEventListener("click", ()=>char2PhotoFile.click());
+  char2PhotoFile.addEventListener("change", (e)=>{
+    const file = e.target.files?.[0];
+    char2PhotoFile.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    setCharPhoto(2, file);
+  });
+  ["dragenter","dragover"].forEach(evt=>{
+    char2PhotoDrop.addEventListener(evt,(ev)=>{ ev.preventDefault(); char2PhotoDrop.style.borderColor="rgba(43,108,255,.55)"; });
+  });
+  ["dragleave","drop"].forEach(evt=>{
+    char2PhotoDrop.addEventListener(evt,(ev)=>{ ev.preventDefault(); char2PhotoDrop.style.borderColor="rgba(255,255,255,.2)"; });
+  });
+  char2PhotoDrop.addEventListener("drop",(ev)=>{
+    const file = ev.dataTransfer?.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    setCharPhoto(2, file);
+  });
+  char2PhotoClear.addEventListener("click", ()=>clearCharPhoto(2));
+  char2Remove.addEventListener("click", ()=>{
+    if (actorState.char2) {
+      removeActor(actorState.char2);
+      actorState.char2 = null;
+      updateCharactersUI();
+    }
+  });
+  char2Toggle.addEventListener("click", ()=>{
+    if (actorState.char2) setActorVisible(actorState.char2, !actorState.char2.visible);
+  });
+
+  btnAddPrimitive.addEventListener("click", ()=>addPrimitiveActor());
+  btnAddModel.addEventListener("click", ()=>modelFile.click());
+  modelFile.addEventListener("change", async (e)=>{
+    const file = e.target.files?.[0];
+    modelFile.value = "";
+    if (!file) return;
+    try{
+      const gltf = await loadGltfFromFile(file);
+      addModelActor(gltf, file.name, file);
+    } catch(e){
+      alert("Error loading GLB");
+    }
+  });
+
+  tMove.addEventListener("click", ()=>updateTransformForMode("translate"));
+  tRot.addEventListener("click", ()=>updateTransformForMode("rotate"));
+  tScale.addEventListener("click", ()=>updateTransformForMode("scale"));
+
+  poseToggle.addEventListener("click", ()=>{
+    const actor = getActiveActor();
+    if (!actor) return;
+    setPoseModeForActor(actor, !actor.poseMode);
+    updateActiveUI();
+  });
+  boneSelect.addEventListener("change", ()=>{
+    const actor = getActiveActor();
+    if (!actor) return;
+    actor.selectedBoneIndex = parseInt(boneSelect.value, 10);
+    attachSelectedBone(actor);
+  });
+  resetPoseBtn.addEventListener("click", ()=>{
+    const actor = getActiveActor();
+    if (actor) resetPose(actor);
+  });
+
+  if (THREE_OK) {
+    init3D();
+    updateRaycastSelection();
+  }
+
+
+  setMode("view");
+  update3DState();
+})();
+</script>
