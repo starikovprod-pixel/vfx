@@ -99,6 +99,21 @@
   .pcover-del{ right:58px; }
   .pcover-edit:hover, .pcover-del:hover{ background:#fff; color:#000; }
 
+  .pcover-overlay{
+    position:absolute; inset:0;
+    display:flex;
+    align-items:flex-end;
+    padding:14px;
+    z-index:3;
+  }
+  .pcover-overlay .phead{
+    background: rgba(0,0,0,0.35);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:18px;
+    padding:10px 12px;
+    backdrop-filter: blur(10px);
+  }
+
   .phead{ display:flex; gap:14px; align-items:center; position:relative; }
   .pava{
     width:64px; height:64px; border-radius:50%;
@@ -1233,24 +1248,29 @@
   <div class="vfy-tip" id="vfyTip">Verified — awarded at 100 followers. Helps ranking in Feed.</div>
   <div class="toast" id="toast"></div>
 
-  <div class="wrap">
-    <div class="top">
+    <div class="wrap">
+      <div class="top">
       <div>
-        <div class="phead">
-          <div class="pava" id="p-ava"></div>
-          <div>
-            <div class="pname" id="p-name">Loading…</div>
-            <div class="puser" id="p-user">@…</div>
-            <div class="fcnt"><span>Followers</span><b id="p-followers">0</b></div>
-          </div>
-        </div>
+        <div class="pbio" id="p-bio" style="display:none;"></div>
+        <div class="links" id="p-links" style="display:none;"></div>
+
         <div class="pcover pcover-inline" id="pcover">
           <div class="pcover-bg" id="pcoverBg"></div>
+
+          <div class="pcover-overlay">
+            <div class="phead">
+              <div class="pava" id="p-ava"></div>
+              <div>
+                <div class="pname" id="p-name">Loading…</div>
+                <div class="puser" id="p-user">@…</div>
+                <div class="fcnt"><span>Followers</span><b id="p-followers">0</b></div>
+              </div>
+            </div>
+          </div>
+
           <button class="pcover-edit" id="pcoverEdit" type="button" style="display:none;" title="Change cover">✎</button>
           <button class="pcover-del" id="pcoverDel" type="button" style="display:none;" title="Remove cover">✕</button>
         </div>
-        <div class="pbio" id="p-bio" style="display:none;"></div>
-        <div class="links" id="p-links" style="display:none;"></div>
       </div>
 
       <div class="controls">
@@ -1611,7 +1631,8 @@
 
 <script>
 (() => {
-  const BACKEND = "https://api.lightfull.ai";
+  const READ_BACKEND = "https://api.lightfull.ai";
+  const WRITE_BACKEND = "https://ai-vfx-backend.vercel.app";
   const DEFAULT_PROFILE_COVER = "https://fs.getcourse.ru/fileservice/file/download/a/384380/sc/439/h/fdef161860d4b1a6fbfd9ce6813dcd8b.png";
   const PAGE_SIZE = 24;
   const VERIFIED_SVG = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z\"/></svg>";
@@ -2046,7 +2067,7 @@ Download link:
   }
   async function fetchMyPublicProfile(accessToken){
     try{
-      const r = await fetch("https://api.lightfull.ai/api/profile_public", {
+      const r = await fetch(READ_BACKEND + "/api/profile_public", {
         method:"GET",
         headers:{ Authorization: "Bearer " + accessToken }
       });
@@ -2069,7 +2090,8 @@ Download link:
     const needsAuthGet = method === "GET" && path.startsWith("/api/feed/state");
     if(token && (method !== "GET" || needsAuthGet)) headers.Authorization = "Bearer " + token;
 
-    const r = await fetch(BACKEND + path, Object.assign({}, opts, { headers, signal: opts.signal }));
+    const base = (method === "GET") ? READ_BACKEND : WRITE_BACKEND;
+    const r = await fetch(base + path, Object.assign({}, opts, { headers, signal: opts.signal }));
     const j = await r.json().catch(()=> ({}));
     if(!r.ok) {
       const msg = j?.error || j?.details || ("HTTP " + r.status);
@@ -3691,7 +3713,7 @@ Download link:
       const token = await getSessionToken();
       const headers = { "Content-Type":"application/json" };
       if(token) headers.Authorization = "Bearer " + token;
-      await fetch(BACKEND + "/api/feed/view", {
+      await fetch(WRITE_BACKEND + "/api/feed/view", {
         method:"POST", headers,
         body: JSON.stringify({ post_id: it.id, client_id: (crypto?.randomUUID?crypto.randomUUID():String(Date.now()) + Math.random()) })
       });
@@ -4067,6 +4089,17 @@ Download link:
         toast(e.message || "Failed to load collection items");
       }
     }
+
+    if(mode !== "edit"){
+      $kPickMedia.style.display = "none";
+      $kPickedInfo.style.display = "none";
+      $kSelectedWrap.style.display = "none";
+    } else {
+      $kPickMedia.style.display = "inline-flex";
+      $kPickedInfo.style.display = "block";
+      $kSelectedWrap.style.display = colDraftMedia.length ? "block" : "none";
+    }
+
     $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
     $kPickGrid.style.display = "none";
     $kPickGrid.innerHTML = "";
@@ -4127,8 +4160,19 @@ Download link:
         await api("/api/collections/update", { method:"POST", body: JSON.stringify({ id: editingColId, title, description, feed_post_ids: colDraftMedia, cover_feed_post_id: colDraftCover }) });
         toast("Updated");
       } else {
-        await api("/api/collections/create", { method:"POST", body: JSON.stringify({ title, description, feed_post_ids: colDraftMedia, cover_feed_post_id: colDraftCover }) });
-        toast("Created");
+        const r = await api("/api/collections/create", {
+          method:"POST",
+          body: JSON.stringify({ title, description, feed_post_ids: [], cover_feed_post_id: null })
+        });
+
+        closeCollectionSheet();
+        await loadCollections(true);
+
+        const newColId = r?.id || r?.collection_id || r?.collection?.id;
+        if(newColId) await openCollectionModal(newColId);
+        openSceneSheet("new", null);
+        toast("Now create a scene");
+        return;
       }
 
       closeCollectionSheet();
