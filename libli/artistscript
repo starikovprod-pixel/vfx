@@ -5,7 +5,7 @@
   const DEFAULT_PROFILE_COVER = "https://fs.getcourse.ru/fileservice/file/download/a/384380/sc/439/h/fdef161860d4b1a6fbfd9ce6813dcd8b.png";
   const PAGE_SIZE = 24;
   const VERIFIED_SVG = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z\"/></svg>";
-  const VFY_TOOLTIP = "Verified — awarded at 100 followers. Helps ranking in Feed.";
+  const VFY_TOOLTIP = "Verified at 100 followers.";
   const LS_FOLLOW = "lf_follow_cache_v1";
 
   const $gridWrap = document.getElementById("gridWrap");
@@ -181,7 +181,6 @@
   let currentCol = null;
   let colReorderMode = false;
   let colOriginalOrderIds = [];
-  let dragFromIndex = null;
   let editingSceneId = null;
   let fsCollectionId = null;
 
@@ -196,10 +195,8 @@
   let mvIndex = 0;
   let mvOnChange = null;
 
-  let pickMode = null;
   let pickSelectedId = null;
   let pickSelectedSet = new Set();
-  let pickResolve = null;
 
   const postCommentsMode = new Map();
   const replyToByPost = new Map();
@@ -327,18 +324,7 @@
 
   function bindFilmRulesTooltip(){
     if(!$fsRulesBtn || !$fsTip) return;
-    const text = `Rules:
-• No porn / nudity
-• No politics / propaganda
-• No hate / violence
-• No doxxing / personal data
-
-Requirements:
-• Duration: 20 sec – 5 min
-• Quality: HD – 4K
-
-Download link:
-• Make sure we can download the file from your link.`;
+    const text = `Rules: no porn/politics/hate/doxxing.\n20 sec–5 min, HD–4K.\nProvide downloadable link.`;
 
     $fsRulesBtn.addEventListener("mouseenter", (ev)=>{
       $fsTip.textContent = text;
@@ -852,9 +838,7 @@ Download link:
       ? `<span>${escapeHtml(profile?.avatar_emoji || "")}</span>`
       : (profile?.avatar_url ? `<img src="${escapeHtml(profile.avatar_url)}" />` : "");
 
-    $grid.innerHTML = `
-      <div class="feed" id="feed">
-        ${postItems.map((p, idx)=>{
+    $grid.innerHTML = `<div class="feed" id="feed">${postItems.map((p, idx)=>{
           const media = Array.isArray(p.media) ? p.media : [];
           const parts = parseBodyWithEmbeds(p.body || "");
 
@@ -920,9 +904,7 @@ Download link:
               ${idx < postItems.length-1 ? `<div class="feed-sep"></div>` : ``}
             </div>
           `;
-        }).join("")}
-      </div>
-    `;
+        }).join("")}</div>`;
 
     bindVerifiedTooltip($grid);
 
@@ -1349,9 +1331,7 @@ Download link:
       return;
     }
 
-    $grid.innerHTML = `
-      <div class="cgrid" id="cgridRoot">
-        ${collectionItems.map(c=>{
+    $grid.innerHTML = `<div class="cgrid" id="cgridRoot">${collectionItems.map(c=>{
           const prev = Array.isArray(c.preview_items) ? c.preview_items : [];
           const imgs = prev
             .map(x => (x.thumb_url || x.media_url || "").trim())
@@ -1376,9 +1356,7 @@ Download link:
               </div>
             </div>
           `;
-        }).join("")}
-      </div>
-    `;
+        }).join("")}</div>`;
 
     $grid.querySelectorAll("[data-col]").forEach(el=>{
       el.onclick = () => openCollectionModal(el.getAttribute("data-col"));
@@ -1459,7 +1437,6 @@ Download link:
   async function openCollectionModal(collection_id){
     currentCol = null;
     colReorderMode = false;
-    dragFromIndex = null;
 
     $cb.classList.add("open");
     lockPageScroll();
@@ -1484,24 +1461,13 @@ Download link:
 
       $ctitle.textContent = col.title || "Untitled collection";
       $cdesc.textContent = col.description || "";
-      $cmeta.innerHTML = `
-        <div class="stat">${ICONS.like} ${col.like_count||0}</div>
-        <div class="stat">${ICONS.view} ${col.view_count||0}</div>
-        <div class="stat">${ICONS.save} ${col.save_count||0}</div>
-      `;
+      $cmeta.innerHTML = `<div class="stat">${ICONS.like} ${col.like_count||0}</div><div class="stat">${ICONS.view} ${col.view_count||0}</div><div class="stat">${ICONS.save} ${col.save_count||0}</div>`;
 
       const film = j.film || null;
       renderCollectionFilmBlock(film, currentCol.col.id);
 
       const client_id = (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
       api("/api/collections/view", { method:"POST", body: JSON.stringify({ collection_id: col.id, client_id }) }).catch(()=>{});
-
-      if(isOwnProfile){
-        $btnColEdit.style.display = "inline-flex";
-        $btnSceneNew.style.display = "inline-flex";
-        $btnColReorder.style.display = "inline-flex";
-        $btnColDelete.style.display = "inline-flex";
-      }
 
       if(isOwnProfile){
         $btnColEdit.style.display = "inline-flex";
@@ -2029,7 +1995,6 @@ Download link:
     colOriginalOrderIds = [];
     $colReorderFooter.classList.remove("open");
     $btnColReorder.textContent = "Reorder";
-    dragFromIndex = null;
   }
 
   function renderLibrary(){
@@ -2046,9 +2011,7 @@ Download link:
       ? `<span>${escapeHtml(profile?.avatar_emoji || "")}</span>`
       : (profile?.avatar_url ? `<img src="${escapeHtml(profile.avatar_url)}" />` : "");
 
-    $grid.innerHTML = `
-      <div class="lf-grid">
-        ${items.map(it=>{
+    $grid.innerHTML = `<div class="lf-grid">${items.map(it=>{
           const video = isVideoUrl(it.media_url || it.thumb_url);
           const media = (it.media_url || it.thumb_url || "").trim();
 
@@ -2086,9 +2049,7 @@ Download link:
               </div>
             </div>
           `;
-        }).join("")}
-      </div>
-    `;
+        }).join("")}</div>`;
 
     bindVerifiedTooltip($grid);
 
@@ -2476,7 +2437,6 @@ Download link:
   }
 
   function openPicker(mode, data){
-    pickMode = mode;
     pickSelectedId = null;
     pickSelectedSet = new Set();
     $pickTitle.textContent = data.title || "Pick";
@@ -2529,9 +2489,7 @@ Download link:
       });
       const items = source.slice(0, visibleCount);
 
-      $pickList.innerHTML = `
-        <div class="pick-list ${layout === "wide" ? "wide" : ""}" id="pickListInner">
-          ${items.map(it=>{
+      $pickList.innerHTML = `<div class="pick-list ${layout === "wide" ? "wide" : ""}" id="pickListInner">${items.map(it=>{
             const pid = String(it.id);
             const on = data.multi ? pickSelectedSet.has(pid) : (String(pickSelectedId) === pid);
             const kind = resolveKind(it);
@@ -2546,9 +2504,7 @@ Download link:
                 ${layout === "wide" ? `<div class="pick-check">${on ? "✓" : ""}</div>` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`}
               </div>
             `;
-          }).join("")}
-        </div>
-      `;
+          }).join("")}</div>`;
 
       $pickList.querySelectorAll("[data-pid]").forEach(row=>{
         row.onclick = ()=>{
@@ -2584,7 +2540,6 @@ Download link:
     };
 
     return new Promise((resolve)=>{
-      pickResolve = resolve;
       $pickOk.onclick = ()=>{
         const result = data.multi ? Array.from(pickSelectedSet) : pickSelectedId;
         closePicker();
@@ -2599,10 +2554,8 @@ Download link:
   function closePicker(){
     $pickB.classList.remove("open");
     if($pickFilters) $pickFilters.style.display = "none";
-    pickMode = null;
     pickSelectedId = null;
     pickSelectedSet = new Set();
-    pickResolve = null;
   }
 
   async function savePostDraft(){
