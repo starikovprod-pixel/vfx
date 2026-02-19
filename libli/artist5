@@ -1763,7 +1763,6 @@
   const $pillRange = document.getElementById("pill-range");
   const $range = document.getElementById("range");
 
-  // Work modal (library)
   const $mb = document.getElementById("mb");
   const $mclose = document.getElementById("mclose");
   const $mp = document.getElementById("mp");
@@ -1788,7 +1787,6 @@
   const $titleCancel = document.getElementById("title-cancel");
   const $vfyTip = document.getElementById("vfyTip");
 
-  // Collection modal
   const $cb = document.getElementById("cb");
   const $cclose = document.getElementById("cclose");
   const $ctitle = document.getElementById("ctitle");
@@ -1804,7 +1802,6 @@
   const $btnColReorderSave = document.getElementById("btn-col-reorder-save");
   const $btnColReorderCancel = document.getElementById("btn-col-reorder-cancel");
 
-  // Media viewer
   const $mvb = document.getElementById("mvb");
   const $mvClose = document.getElementById("mvClose");
   const $mvPrev = document.getElementById("mvPrev");
@@ -1813,7 +1810,6 @@
   const $mvTitle = document.getElementById("mvTitle");
   const $mvDots = document.getElementById("mvDots");
 
-  // Post sheet
   const $pb = document.getElementById("pb");
   const $pclose = document.getElementById("pclose");
   const $ptitle = document.getElementById("ptitle");
@@ -1825,7 +1821,6 @@
   const $psave = document.getElementById("psave");
   const $pcancel = document.getElementById("pcancel");
 
-  // Collection sheet
   const $kb = document.getElementById("kb");
   const $kclose = document.getElementById("kclose");
   const $ktitle = document.getElementById("ktitle");
@@ -1842,7 +1837,6 @@
   const $kcancel = document.getElementById("kcancel");
 
 
-  // Universal picker
   const $pickB = document.getElementById("pickB");
   const $pickTitle = document.getElementById("pickTitle");
   const $pickClose = document.getElementById("pickClose");
@@ -1885,7 +1879,6 @@
   const $emoSearch = document.getElementById("emoSearch");
   const $emoGrid = document.getElementById("emoGrid");
 
-  // State
   let username = "";
   let profile = null;
   let myProfile = null;
@@ -1905,24 +1898,20 @@
   let isSwitching = false;
   let activeAbort = null;
 
-  let libraryItems = [];      // works
-  let postItems = [];         // profile posts
-  let collectionItems = [];   // collections
+  let libraryItems = [];
+  let postItems = [];
+  let collectionItems = [];
 
-  // Work modal state
   let currentWork = null;
   let liked = false;
   let saved = false;
 
-  // Collection modal state
   let currentCol = null;
   let colReorderMode = false;
   let colOriginalOrderIds = [];
-  let dragFromIndex = null;
   let editingSceneId = null;
   let fsCollectionId = null;
 
-  // Create/edit
   let editingPostId = null;
   let postDraftMedia = [];
 
@@ -1930,7 +1919,6 @@
   let colDraftMedia = [];
   let colDraftCover = null;
 
-  // Media Viewer state
   let mvItems = [];
   let mvIndex = 0;
   let mvOnChange = null;
@@ -1941,7 +1929,7 @@
   let pickResolve = null;
 
   const postCommentsMode = new Map();
-  const replyToByPost = new Map(); // post_id -> { comment_id, username }
+  const replyToByPost = new Map();
   const ICONS = {
     like: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.6-9.5-9C.6 8.6 2.6 5 6.5 5c2.1 0 3.6 1.2 4.5 2.4C11.9 6.2 13.4 5 15.5 5 19.4 5 21.4 8.6 21.5 12c-2.5 4.4-9.5 9-9.5 9z"/></svg>',
     comm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
@@ -2183,7 +2171,6 @@ Download link:
     const headers = Object.assign({}, opts.headers || {});
     if(opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
 
-    // auth GET only for feed/state
     const needsAuthGet = method === "GET" && path.startsWith("/api/feed/state");
     if(token && (method !== "GET" || needsAuthGet)) headers.Authorization = "Bearer " + token;
 
@@ -2192,7 +2179,6 @@ Download link:
     const j = await r.json().catch(()=> ({}));
     if(!r.ok) {
       const msg = j?.error || j?.details || ("HTTP " + r.status);
-      console.error("API FAIL:", path, { status: r.status, body: j });
       throw new Error(msg);
     }
     return j;
@@ -2218,7 +2204,6 @@ Download link:
 
   function showLoader(v){ $loader.style.display = v ? "flex" : "none"; }
 
-  // -------- Profile header ----------
   function renderProfileCover(p){
     if(!$pcover || !$pcoverBg) return;
     const coverId = (p && p.header_feed_post_id) ? String(p.header_feed_post_id) : "";
@@ -2316,12 +2301,10 @@ Download link:
         bindVerifiedTooltip($pName);
       }
     }catch(e){
-      console.error("FOLLOW ERROR:", e);
       alert(e?.message || String(e));
     }
   }
 
-  // -------- Tab state ----------
   function renderTabControls(){
     $segSort.style.display = (tab === "collections") ? "flex" : (tab === "library" ? "flex" : "none");
     $pillRange.style.display = (tab === "library") ? "flex" : "none";
@@ -2390,7 +2373,6 @@ Download link:
     ? tabFromUrl
     : "posts";
 
-  // ✅ ВАЖНО: ищем кнопку ТОЛЬКО в табах artist, НЕ в документе (чтобы не кликать header)
   const btn = $segTabs?.querySelector(`button[data-tab="${wanted}"]`);
 
   if(btn) btn.click();
@@ -2399,14 +2381,13 @@ Download link:
 
 
   window.addEventListener("DOMContentLoaded", () => {
-    applyTabFromUrl().catch(e => console.error(e));
+    applyTabFromUrl().catch(()=>{});
   });
 
   window.addEventListener("popstate", () => {
-    applyTabFromUrl().catch(e => console.error(e));
+    applyTabFromUrl().catch(()=>{});
   });
 
-  // -------- Data loaders ----------
   async function loadLibrary(reset=false, opts={}){
     const state = tabState.library;
     if(state.loading) return;
@@ -2419,7 +2400,6 @@ Download link:
       const j = await api(`/api/u/${encodeURIComponent(username)}?limit=${PAGE_SIZE}&offset=${state.offset}`, { method:"GET", signal: opts.signal });
       let page = Array.isArray(j.works) ? j.works : [];
 
-      // apply sort/range like before
       if(sort === "top"){
         page.sort((a,b)=> (b.like_count||0) - (a.like_count||0));
       } else {
@@ -2483,7 +2463,6 @@ Download link:
         }
       }
 
-      // preload library first page if empty (so media viewer can open)
       if(!libraryItems.length){
         try{ await loadLibrary(true); }catch(e){}
       }
@@ -2546,8 +2525,6 @@ Download link:
     }
   }
 
-  // -------- Render: POSTS ----------
-  // marker: [[collection:UUID]]
   function parseBodyWithEmbeds(text){
     const s = String(text||"");
     const re = /\[\[collection:([0-9a-fA-F-]{36})\]\]/g;
@@ -2594,92 +2571,18 @@ Download link:
       ? `<span>${escapeHtml(profile?.avatar_emoji || "")}</span>`
       : (profile?.avatar_url ? `<img src="${escapeHtml(profile.avatar_url)}" />` : "");
 
-    $grid.innerHTML = `
-      <div class="feed" id="feed">
-        ${postItems.map((p, idx)=>{
-          const media = Array.isArray(p.media) ? p.media : [];
-          const parts = parseBodyWithEmbeds(p.body || "");
-
-          const bodyHtml = parts.map(part=>{
-            if(part.type === "text"){
-              return `<span>${escapeHtml(part.value)}</span>`;
-            }
-            // collection embed placeholder; will hydrate after render
-            return `<div class="embed-collection" data-embed-col="${escapeHtml(part.id)}">
-                      <div class="embed-bg" data-embed-bg="${escapeHtml(part.id)}"></div>
-                      <div class="embed-overlay">
-                        <div class="embed-title">Collection</div>
-                        <div class="embed-desc">Loading…</div>
-                      </div>
-                    </div>`;
-          }).join("");
-
-          const hasSlider = media.length > 0;
-          const sliderId = `ps_${p.id.replaceAll("-","")}`;
-
-          return `
-            <div class="post" data-post="${escapeHtml(p.id)}">
-              <div class="post-head">
-                <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
-                <div class="post-meta">
-                  <div class="post-name">${escapeHtml(p.display_name || p.username || username)} ${verifiedBadgeHTML(p.verified === true)}</div>
-                  <div class="post-time">${escapeHtml(fmtDate(p.created_at))}</div>
-                </div>
-              </div>
-
-              <div class="post-body">${bodyHtml}</div>
-
-              ${hasSlider ? `
-                <div class="pslider" data-slider="${sliderId}">
-                  <div class="pslide" data-slide></div>
-                  ${media.length > 1 ? `<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button>` : ``}
-                  ${media.length > 1 ? `<div class="pdots" data-dots></div>` : ``}
-                </div>
-              ` : ``}
-
-              <div class="post-actions">
-                <button class="mini ${p._liked ? "on like" : ""}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button>
-                <button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button>
-                <button class="mini ${p._saved ? "on save" : ""}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button>
-                <div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div>
-
-                ${isOwnProfile ? `
-                  <button class="mini" data-act="edit" data-post="${escapeHtml(p.id)}">${ICONS.edit}<span>Edit</span></button>
-                  <button class="mini danger" data-act="delete" data-post="${escapeHtml(p.id)}">${ICONS.trash}<span>Delete</span></button>
-                ` : ``}
-              </div>
-
-              <div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0 ? "flex" : "none"};">
-                <div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="empty" style="padding:18px">Loading…</div></div>
-                <button class="btn-ghost" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button>
-                <div class="pc-form">
-                  ${myAvatarHTML()}
-                  <textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea>
-                  <button class="mini" type="button" data-emo="${escapeHtml(p.id)}">Emoji</button>
-                  <button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button>
-                </div>
-              </div>
-
-              ${idx < postItems.length-1 ? `<div class="feed-sep"></div>` : ``}
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
+    $grid.innerHTML = `<div class="feed" id="feed">${postItems.map((p, idx)=>{ const media = Array.isArray(p.media) ? p.media : []; const parts = parseBodyWithEmbeds(p.body || ""); const bodyHtml = parts.map(part=>{ if(part.type === "text"){ return `<span>${escapeHtml(part.value)}</span>`; } return `<div class="embed-collection" data-embed-col="${escapeHtml(part.id)}"><div class="embed-bg" data-embed-bg="${escapeHtml(part.id)}"></div><div class="embed-overlay"><div class="embed-title">Collection</div><div class="embed-desc">Loading…</div></div></div>`; }).join(""); const hasSlider = media.length > 0; const sliderId = `ps_${p.id.replaceAll("-","")}`; return `<div class="post" data-post="${escapeHtml(p.id)}"><div class="post-head"><div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div><div class="post-meta"><div class="post-name">${escapeHtml(p.display_name || p.username || username)} ${verifiedBadgeHTML(p.verified === true)}</div><div class="post-time">${escapeHtml(fmtDate(p.created_at))}</div></div></div><div class="post-body">${bodyHtml}</div> ${hasSlider ? `<div class="pslider" data-slider="${sliderId}"><div class="pslide" data-slide></div> ${media.length > 1 ? `<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button>` : ``} ${media.length > 1 ? `<div class="pdots" data-dots></div>` : ``} </div>` : ``} <div class="post-actions"><button class="mini ${p._liked ? "on like" : ""}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button><button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button><button class="mini ${p._saved ? "on save" : ""}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button><div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div> ${isOwnProfile ? `<button class="mini" data-act="edit" data-post="${escapeHtml(p.id)}">${ICONS.edit}<span>Edit</span></button><button class="mini danger" data-act="delete" data-post="${escapeHtml(p.id)}">${ICONS.trash}<span>Delete</span></button>` : ``} </div><div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0 ? "flex" : "none"};"><div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="empty" style="padding:18px">Loading…</div></div><button class="btn-ghost" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button><div class="pc-form"> ${myAvatarHTML()} <textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea><button class="mini" type="button" data-emo="${escapeHtml(p.id)}">Emoji</button><button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button></div></div> ${idx < postItems.length-1 ? `<div class="feed-sep"></div>` : ``} </div>`; }).join("")}</div>`;
 
     bindVerifiedTooltip($grid);
 
-    // init sliders for each post
     postItems.forEach(p=>{
       const media = Array.isArray(p.media) ? p.media : [];
       if(!media.length) return;
       initPostSlider(p.id, media);
     });
 
-    // hydrate collection embeds
     hydrateCollectionEmbeds();
 
-    // actions
     $grid.querySelectorAll("[data-act]").forEach(btn=>{
       btn.onclick = async ()=>{
         const act = btn.getAttribute("data-act");
@@ -2746,7 +2649,6 @@ Download link:
       };
     });
 
-    // send comment buttons
     $grid.querySelectorAll("[data-send]").forEach(btn=>{
       btn.onclick = () => sendPostComment(btn.getAttribute("data-send"));
     });
@@ -2792,7 +2694,6 @@ Download link:
       }
     });
 
-    // count views once per post render (dedupe server-side)
     postItems.forEach(p=>{
       if(p._viewed) return;
       p._viewed = true;
@@ -2997,7 +2898,6 @@ Download link:
       autoGrow(inp);
       await loadPostComments(post_id);
 
-      // refresh counts locally
       const p = postItems.find(x=> String(x.id)===String(post_id));
       if(p) p.comment_count = (p.comment_count||0) + 1;
       const commentsBtn = $grid.querySelector(`[data-act="toggle-comments"][data-post="${CSS.escape(String(post_id))}"] span`);
@@ -3011,7 +2911,6 @@ Download link:
     }
   }
 
-  // Post slider init
   function initPostSlider(postId, mediaArr){
     const sliderId = `ps_${postId.replaceAll("-","")}`;
     const host = $grid.querySelector(`[data-slider="${CSS.escape(sliderId)}"]`);
@@ -3056,7 +2955,6 @@ Download link:
         }
       }
 
-      // click opens Media Viewer slider for whole post
       $slide.onclick = () => {
         openMediaViewer(
           mediaArr.map(m => ({
@@ -3081,7 +2979,6 @@ Download link:
     if($prev) $prev.onclick = (e)=>{ e.stopPropagation(); set(idx-1); };
     if($next) $next.onclick = (e)=>{ e.stopPropagation(); set(idx+1); };
 
-    // basic swipe
     let startX = null;
     $slide.addEventListener("touchstart", (e)=>{ startX = e.touches[0].clientX; }, {passive:true});
     $slide.addEventListener("touchend", (e)=>{
@@ -3095,44 +2992,13 @@ Download link:
     set(0);
   }
 
-  // -------- Render: COLLECTIONS ----------
   function renderCollections(){
     if(!collectionItems.length){
       $grid.innerHTML = `<div class="empty">No collections yet.</div>`;
       return;
     }
 
-    $grid.innerHTML = `
-      <div class="cgrid" id="cgridRoot">
-        ${collectionItems.map(c=>{
-          const prev = Array.isArray(c.preview_items) ? c.preview_items : [];
-          // Use thumbs only for slideshow
-          const imgs = prev
-            .map(x => (x.thumb_url || x.media_url || "").trim())
-            .filter(Boolean)
-            .slice(0, 10);
-
-          return `
-            <div class="ccard" data-col="${escapeHtml(c.id)}">
-              <div class="cc-bg" data-ccbg="${escapeHtml(c.id)}">
-                ${imgs.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>` : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("")}
-              </div>
-              <div class="cc-glass">
-                <div>
-                  <div class="cc-title">${escapeHtml(c.title || "Untitled collection")}</div>
-                  <div class="cc-desc">${escapeHtml(c.description || "")}</div>
-                </div>
-                <div class="cc-meta">
-                  <div class="cc-pill" data-clike="${escapeHtml(c.id)}">${ICONS.like} <b>${c.like_count||0}</b></div>
-                  <div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div>
-                  <div class="cc-pill ${c._saved ? "mini on save" : ""}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div>
-                </div>
-              </div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
+    $grid.innerHTML = `<div class="cgrid" id="cgridRoot">${collectionItems.map(c=>{ const prev = Array.isArray(c.preview_items) ? c.preview_items : []; const imgs = prev .map(x => (x.thumb_url || x.media_url || "").trim()) .filter(Boolean) .slice(0, 10); return `<div class="ccard" data-col="${escapeHtml(c.id)}"><div class="cc-bg" data-ccbg="${escapeHtml(c.id)}"> ${imgs.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>` : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("")} </div><div class="cc-glass"><div><div class="cc-title">${escapeHtml(c.title || "Untitled collection")}</div><div class="cc-desc">${escapeHtml(c.description || "")}</div></div><div class="cc-meta"><div class="cc-pill" data-clike="${escapeHtml(c.id)}">${ICONS.like} <b>${c.like_count||0}</b></div><div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div><div class="cc-pill ${c._saved ? "mini on save" : ""}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div></div></div></div>`; }).join("")}</div>`;
 
     $grid.querySelectorAll("[data-col]").forEach(el=>{
       el.onclick = () => openCollectionModal(el.getAttribute("data-col"));
@@ -3213,7 +3079,6 @@ Download link:
   async function openCollectionModal(collection_id){
     currentCol = null;
     colReorderMode = false;
-    dragFromIndex = null;
 
     $cb.classList.add("open");
     $ctitle.textContent = "Loading…";
@@ -3246,18 +3111,9 @@ Download link:
       const film = j.film || null;
       renderCollectionFilmBlock(film, currentCol.col.id);
 
-      // view count dedupe
       const client_id = (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
       api("/api/collections/view", { method:"POST", body: JSON.stringify({ collection_id: col.id, client_id }) }).catch(()=>{});
 
-      if(isOwnProfile){
-        $btnColEdit.style.display = "inline-flex";
-        $btnSceneNew.style.display = "inline-flex";
-        $btnColReorder.style.display = "inline-flex";
-        $btnColDelete.style.display = "inline-flex";
-      }
-
-      // страховка: кнопки владельца всегда видны
       if(isOwnProfile){
         $btnColEdit.style.display = "inline-flex";
         $btnSceneNew.style.display = "inline-flex";
@@ -3301,40 +3157,10 @@ Download link:
         const url = (it.media_url || it.thumb_url || "").trim();
         const isV = isVideoUrl(url);
         const thumb = (it.thumb_url || it.media_url || "").trim();
-        return `
-          <div class="col-item" draggable="${(colReorderMode && !sections.length) ? "true" : "false"}" data-idx="${idx}" data-scene="${sceneIdx}">
-            ${isV
-              ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>`
-              : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />`
-            }
-            ${colReorderMode ? `
-              <div class="drag-handle" title="Drag">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-                </svg>
-              </div>` : ``}
-          </div>
-        `;
+        return `<div class="col-item" draggable="${(colReorderMode && !sections.length) ? "true" : "false"}" data-idx="${idx}" data-scene="${sceneIdx}">${isV ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>` : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />` }${colReorderMode ? `<div class="drag-handle" title="Drag"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>` : ``}</div>`;
       }).join("");
 
-      return `
-        <div class="scene" data-scene="${sceneIdx}">
-          <div class="scene-head">
-            <div>
-              <div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>
-              ${scene.description ? `<div class="scene-desc">${escapeHtml(scene.description)}</div>` : ``}
-            </div>
-            ${isOwnProfile ? `
-              <div class="scene-actions">
-                <button class="btn-ghost" data-sc-add="${escapeHtml(String(scene.id ?? ""))}">+ Add</button>
-                ${scene.id ? `<button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>` : ``}
-                ${scene.id ? `<button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>` : ``}
-              </div>
-            ` : ``}
-          </div>
-          <div class="scene-grid">${grid || `<div class="empty" style="grid-column:1/-1">No items.</div>`}</div>
-        </div>
-      `;
+      return `<div class="scene" data-scene="${sceneIdx}"><div class="scene-head"><div><div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>${scene.description ? `<div class="scene-desc">${escapeHtml(scene.description)}</div>` : ``}</div>${isOwnProfile ? `<div class="scene-actions"><button class="btn-ghost" data-sc-add="${escapeHtml(String(scene.id ?? ""))}">+ Add</button> ${scene.id ? `<button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>` : ``} ${scene.id ? `<button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>` : ``} </div>` : ``}</div><div class="scene-grid">${grid || `<div class="empty" style="grid-column:1/-1">No items.</div>`}</div></div>`;
     }).join("");
 
     $cgrid.querySelectorAll(".col-item").forEach(el=>{
@@ -3443,39 +3269,19 @@ Download link:
   function renderCollectionFilmBlock(film, collectionId){
     if(!$colFilm) return;
 
-    // 2) Публичным зрителям НЕ показываем статус отправки/пендинг
     if(!isOwnProfile && film && film.status !== "approved"){
       $colFilm.style.display = "none";
       $colFilm.innerHTML = "";
       return;
     }
 
-    // APPROVED: красивая кинематографичная шапка
     if(film && film.status === "approved" && film.published_url){
       $colFilm.style.display = "block";
 
       const t = (film.title || "Film").trim();
       const d = (film.description || "").trim();
 
-      $colFilm.innerHTML = `
-        <div class="film-hero">
-          <div class="film-media">
-            <video controls playsinline preload="metadata" src="${escapeHtml(film.published_url)}"></video>
-          </div>
-          <div class="film-caption">
-            <h3 class="film-title">${escapeHtml(t)}</h3>
-            ${d ? `
-              <div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>
-              <button class="film-more" id="filmMore" type="button" aria-label="Toggle description">
-                <span>Read more</span>
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            ` : ``}
-          </div>
-        </div>
-      `;
+      $colFilm.innerHTML = `<div class="film-hero"><div class="film-media"><video controls playsinline preload="metadata" src="${escapeHtml(film.published_url)}"></video></div><div class="film-caption"><h3 class="film-title">${escapeHtml(t)}</h3>${d ? `<div class="film-desc" id="filmDesc">${escapeHtml(d)}</div><button class="film-more" id="filmMore" type="button" aria-label="Toggle description"><span>Read more</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>` : ``}</div></div>`;
 
       const more = document.getElementById("filmMore");
       const desc = document.getElementById("filmDesc");
@@ -3491,20 +3297,12 @@ Download link:
       return;
     }
 
-    // PENDING: показываем ТОЛЬКО владельцу (isOwnProfile)
     if(isOwnProfile && film && film.status === "pending"){
       $colFilm.style.display = "block";
-      $colFilm.innerHTML = `
-        <div class="col-film">
-          <h3 style="margin:0;">Film submission</h3>
-          <p style="margin-top:8px;"><span class="pill">Pending review</span></p>
-          <p>We’ll review it within 1–2 days.</p>
-        </div>
-      `;
+      $colFilm.innerHTML = `<div class="col-film"><h3 style="margin:0;">Film submission</h3><p style="margin-top:8px;"><span class="pill">Pending review</span></p><p>We’ll review it within 1–2 days.</p></div>`;
       return;
     }
 
-    // Нет фильма: показываем кнопку submit ТОЛЬКО владельцу
     if(!isOwnProfile){
       $colFilm.style.display = "none";
       $colFilm.innerHTML = "";
@@ -3512,15 +3310,7 @@ Download link:
     }
 
     $colFilm.style.display = "block";
-    $colFilm.innerHTML = `
-      <div class="col-film" style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
-        <div>
-          <h3 style="margin:0;">Your film</h3>
-          <p style="margin-top:6px;">You can submit a short film for review.</p>
-        </div>
-        <button class="btn-primary" id="openFilmSubmit">Submit film</button>
-      </div>
-    `;
+    $colFilm.innerHTML = `<div class="col-film" style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;"><div><h3 style="margin:0;">Your film</h3><p style="margin-top:6px;">You can submit a short film for review.</p></div><button class="btn-primary" id="openFilmSubmit">Submit film</button></div>`;
 
     const btn = document.getElementById("openFilmSubmit");
     if(btn) btn.onclick = ()=> openFilmSheet(collectionId);
@@ -3643,7 +3433,6 @@ Download link:
           body: JSON.stringify({ collection_id: currentCol.col.id, ordered_section_ids })
         });
       }catch(e){
-        console.warn("sections/reorder failed:", e);
       }
     }
 
@@ -3661,10 +3450,8 @@ Download link:
     colOriginalOrderIds = [];
     $colReorderFooter.classList.remove("open");
     $btnColReorder.textContent = "Reorder";
-    dragFromIndex = null;
   }
 
-  // -------- Render: LIBRARY ----------
   function renderLibrary(){
     const items = libraryItems;
     if(!items.length){
@@ -3679,49 +3466,7 @@ Download link:
       ? `<span>${escapeHtml(profile?.avatar_emoji || "")}</span>`
       : (profile?.avatar_url ? `<img src="${escapeHtml(profile.avatar_url)}" />` : "");
 
-    $grid.innerHTML = `
-      <div class="lf-grid">
-        ${items.map(it=>{
-          const video = isVideoUrl(it.media_url || it.thumb_url);
-          const media = (it.media_url || it.thumb_url || "").trim();
-
-          const mediaHtml = video
-            ? `
-              <video class="lf-poster-video" muted playsinline preload="metadata" src="${escapeHtml(media)}"></video>
-              <video class="lf-hover-video" muted playsinline preload="none">
-                <source src="${escapeHtml(media)}" type="video/mp4">
-              </video>
-            `
-            : `
-              <img class="lf-thumb" src="${escapeHtml(it.thumb_url || it.media_url || "")}" loading="lazy" decoding="async" />
-            `;
-
-          return `
-            <div class="lf-card" data-id="${escapeHtml(it.id)}">
-              <div class="lf-media">
-                ${mediaHtml}
-                <div class="card-bottom">
-                  <div class="card-author">
-                    <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
-                    <div class="author-txt">
-                      <div class="author-name">${escapeHtml(displayName)} ${verifiedBadgeHTML(profile?.verified === true)}</div>
-                      <div class="author-username">@${escapeHtml(userName)}</div>
-                    </div>
-                  </div>
-                  <div class="card-title">${escapeHtml(it.title||"Untitled")}</div>
-                  <div class="card-stats">
-                    <div class="stat">${ICONS.like} ${it.like_count||0}</div>
-                    <div class="stat">${ICONS.comm} ${it.comment_count||0}</div>
-                    <div class="stat">${ICONS.save} ${it.save_count||0}</div>
-                    <div class="stat">${ICONS.view} ${it.view_count||0}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    `;
+    $grid.innerHTML = `<div class="lf-grid">${items.map(it=>{ const video = isVideoUrl(it.media_url || it.thumb_url); const media = (it.media_url || it.thumb_url || "").trim(); const mediaHtml = video ? `<video class="lf-poster-video" muted playsinline preload="metadata" src="${escapeHtml(media)}"></video><video class="lf-hover-video" muted playsinline preload="none"><source src="${escapeHtml(media)}" type="video/mp4"></video>` : `<img class="lf-thumb" src="${escapeHtml(it.thumb_url || it.media_url || "")}" loading="lazy" decoding="async" />`; return `<div class="lf-card" data-id="${escapeHtml(it.id)}"><div class="lf-media"> ${mediaHtml} <div class="card-bottom"><div class="card-author"><div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div><div class="author-txt"><div class="author-name">${escapeHtml(displayName)} ${verifiedBadgeHTML(profile?.verified === true)}</div><div class="author-username">@${escapeHtml(userName)}</div></div></div><div class="card-title">${escapeHtml(it.title||"Untitled")}</div><div class="card-stats"><div class="stat">${ICONS.like} ${it.like_count||0}</div><div class="stat">${ICONS.comm} ${it.comment_count||0}</div><div class="stat">${ICONS.save} ${it.save_count||0}</div><div class="stat">${ICONS.view} ${it.view_count||0}</div></div></div></div></div>`; }).join("")}</div>`;
 
     bindVerifiedTooltip($grid);
 
@@ -3762,8 +3507,7 @@ Download link:
     });
   }
 
-  // -------- Collection embeds inside posts ----------
-  const embedCache = new Map(); // id -> {collection, items}
+  const embedCache = new Map();
   async function hydrateCollectionEmbeds(){
     const nodes = Array.from(document.querySelectorAll("[data-embed-col]"));
     for(const el of nodes){
@@ -3784,7 +3528,6 @@ Download link:
         el.querySelector(".embed-title").textContent = col.title || "Collection";
         el.querySelector(".embed-desc").textContent = col.description || "";
 
-        // build bg slideshow
         const bg = el.querySelector("[data-embed-bg]");
         const thumbs = items
           .map(x => (x.thumb_url || x.media_url || "").trim())
@@ -3816,7 +3559,6 @@ Download link:
     }
   }
 
-  // -------- Media Viewer ----------
   function openMediaViewer(items, startIndex=0, onChange=null){
     mvItems = Array.isArray(items) ? items : [];
     if(!mvItems.length) return;
@@ -3843,7 +3585,6 @@ Download link:
 
     $mvTitle.textContent = (item.title || "—") + `  •  ${mvIndex+1}/${mvItems.length}`;
 
-    // render media
     $mvHost.innerHTML = "";
     if(item.isVideo){
       const v = document.createElement("video");
@@ -3860,13 +3601,11 @@ Download link:
       $mvHost.appendChild(img);
     }
 
-    // dots
     $mvDots.innerHTML = mvItems.map((_,i)=> `<button class="${i===mvIndex?'on':''}" data-mvdot="${i}"></button>`).join("");
     $mvDots.querySelectorAll("[data-mvdot]").forEach(b=>{
       b.onclick = ()=> setMediaIndex(Number(b.getAttribute("data-mvdot")));
     });
 
-    // nav visible?
     $mvPrev.style.display = mvItems.length > 1 ? "flex" : "none";
     $mvNext.style.display = mvItems.length > 1 ? "flex" : "none";
   }
@@ -3878,7 +3617,6 @@ Download link:
     if(mvOnChange) mvOnChange(mvIndex);
   }
 
-  // swipe for viewer
   function bindViewerSwipe(){
     let startX = null;
     $mvHost.addEventListener("touchstart", (e)=>{ startX = e.touches[0].clientX; }, {passive:true});
@@ -3892,7 +3630,6 @@ Download link:
     }, {passive:true});
   }
 
-  // -------- Work modal (Library item) ----------
   async function openWorkModal(it){
     currentWork = Object.assign({}, it);
     liked = false;
@@ -4091,7 +3828,6 @@ Download link:
     }
   }
 
-  // -------- Sheets: Post ----------
   function openPostSheet(mode, post=null){
     editingPostId = null;
     postDraftMedia = [];
@@ -4171,26 +3907,7 @@ Download link:
       });
       const items = source.slice(0, visibleCount);
 
-      $pickList.innerHTML = `
-        <div class="pick-list ${layout === "wide" ? "wide" : ""}" id="pickListInner">
-          ${items.map(it=>{
-            const pid = String(it.id);
-            const on = data.multi ? pickSelectedSet.has(pid) : (String(pickSelectedId) === pid);
-            const kind = resolveKind(it);
-            return `
-              <div class="pick-row ${on?'on':''} ${layout === "wide" ? "wide" : ""}" data-pid="${pid}">
-                <div class="pick-thumb ${layout === "wide" ? "wide" : ""}">${it.thumb ? `<img src="${it.thumb}">` : ""}</div>
-                <div class="pick-main ${layout === "wide" ? "wide" : ""}">
-                  <div class="pick-name">${escapeHtml(it.title||"Untitled")}</div>
-                  <div class="pick-sub">${escapeHtml(it.description||"")}</div>
-                  ${layout === "wide" ? `<div class="pick-sub" style="margin-top:6px;">${kind === "video" ? "Video" : "Image"}</div>` : ``}
-                </div>
-                ${layout === "wide" ? `<div class="pick-check">${on ? "✓" : ""}</div>` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`}
-              </div>
-            `;
-          }).join("")}
-        </div>
-      `;
+      $pickList.innerHTML = `<div class="pick-list${layout === "wide" ? "wide" : ""}" id="pickListInner">${items.map(it=>{ const pid = String(it.id); const on = data.multi ? pickSelectedSet.has(pid) : (String(pickSelectedId) === pid); const kind = resolveKind(it); return `<div class="pick-row ${on?'on':''} ${layout === "wide" ? "wide" : ""}" data-pid="${pid}"><div class="pick-thumb ${layout === "wide" ? "wide" : ""}">${it.thumb ? `<img src="${it.thumb}">` : ""}</div><div class="pick-main ${layout === "wide" ? "wide" : ""}"><div class="pick-name">${escapeHtml(it.title||"Untitled")}</div><div class="pick-sub">${escapeHtml(it.description||"")}</div> ${layout === "wide" ? `<div class="pick-sub" style="margin-top:6px;">${kind === "video" ? "Video" : "Image"}</div>` : ``} </div> ${layout === "wide" ? `<div class="pick-check">${on ? "✓" : ""}</div>` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`} </div>`; }).join("")}</div>`;
 
       $pickList.querySelectorAll("[data-pid]").forEach(row=>{
         row.onclick = ()=>{
@@ -4267,7 +3984,6 @@ Download link:
     }
   }
 
-  // Attach collection into post body via marker
   async function attachCollectionMarker(){
     try{
       if(!collectionItems.length){
@@ -4301,7 +4017,6 @@ Download link:
     }
   }
 
-  // -------- Sheets: Collection ----------
   async function openCollectionSheet(mode, col=null){
     editingColId = null;
     colDraftMedia = [];
@@ -4405,7 +4120,6 @@ Download link:
     }
   }
 
-  // -------- Events ----------
   $segTabs.querySelectorAll("button").forEach(b=>{
     b.onclick = () => switchTab(b.dataset.tab).catch(e=>toast(e.message||"Failed"));
   });
@@ -4435,7 +4149,6 @@ Download link:
 
   $pFollowBtn.onclick = () => toggleFollow().catch(e=>toast(e.message||"Failed"));
 
-  // Work modal events
   $mclose.onclick = closeWorkModal;
   $mb.onclick = (e) => { if(e.target === $mb) closeWorkModal(); };
   $likeBtn.onclick = () => toggleWorkLike().catch(e=>toast(e.message||"Failed"));
@@ -4446,7 +4159,6 @@ Download link:
   $titleCancel.onclick = () => { $titleEdit.style.display = "none"; };
   $titleSave.onclick = async () => { try{ await saveTitle(); }catch(e){ toast(e.message || "Save failed"); } };
 
-  // Collection modal events
   $cclose.onclick = closeCollectionModal;
   $cb.onclick = (e) => { if(e.target === $cb) closeCollectionModal(); };
 
@@ -4507,7 +4219,6 @@ Download link:
     }
   };
 
-  // Post sheet
   $btnNewPost.onclick = () => openPostSheet("new", null);
   $pclose.onclick = closePostSheet;
   $pb.onclick = (e)=>{ if(e.target === $pb) closePostSheet(); };
@@ -4541,7 +4252,6 @@ Download link:
 
   $pPickCollection.onclick = attachCollectionMarker;
 
-  // Collection sheet
   $btnNewCol.onclick = () => openCollectionSheet("new", null).catch(e=>toast(e.message||"Failed"));
   $kclose.onclick = closeCollectionSheet;
   $kb.onclick = (e)=>{ if(e.target === $kb) closeCollectionSheet(); };
@@ -4676,7 +4386,6 @@ Download link:
   $fsClose.onclick = closeFilmSheet;
   $fsB.onclick = (e)=>{ if(e.target === $fsB) closeFilmSheet(); };
 
-  // Media Viewer events
   $mvClose.onclick = closeMediaViewer;
   $mvb.onclick = (e)=>{ if(e.target === $mvb) closeMediaViewer(); };
   $mvPrev.onclick = ()=> setMediaIndex(mvIndex-1);
@@ -4690,7 +4399,6 @@ Download link:
   $cfCancel.onclick = ()=> $cfB.classList.remove("open");
   $cfB.onclick = (e)=>{ if(e.target === $cfB) $cfB.classList.remove("open"); };
 
-  // -------- Init ----------
   async function init(){
     username = (qs("username") || "").trim();
     if(!username){
@@ -4730,8 +4438,6 @@ Download link:
   }
 
   init().catch(e=>{
-    console.error(e);
     $grid.innerHTML = `<div class="empty" style="color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(e.message)}</div>`;
   });
-})();
-</script>
+})();</script>
