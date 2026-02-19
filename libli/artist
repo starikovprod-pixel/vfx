@@ -50,12 +50,12 @@
   .pcover{
     position:relative;
     width:100%;
-    height:180px;
+    height:170px;
     border-radius:22px;
     overflow:hidden;
     border:1px solid rgba(255,255,255,0.10);
     background: rgba(255,255,255,0.03);
-    margin-bottom:16px;
+    margin-bottom:-34px;
   }
   .pcover-bg{
     position:absolute; inset:0;
@@ -65,8 +65,8 @@
     position:absolute; inset:0;
     width:100%; height:100%;
     object-fit:cover;
-    object-position: 50% 50%;
-    transform: scale(1.08);
+    object-position: 50% 45%;
+    transform: scale(1.03);
     filter: saturate(1.05) contrast(1.05);
   }
   .pcover-bg::after{
@@ -90,11 +90,12 @@
   .pcover-del{ right:58px; }
   .pcover-edit:hover, .pcover-del:hover{ background:#fff; color:#000; }
 
-  .phead{ display:flex; gap:14px; align-items:center; }
+  .phead{ display:flex; gap:14px; align-items:center; position:relative; margin-top:-18px; }
   .pava{
     width:64px; height:64px; border-radius:50%;
     background: rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.12);
+    border:3px solid rgba(0,0,0,0.55);
+    box-shadow: 0 18px 60px rgba(0,0,0,0.45);
     overflow:hidden; flex:0 0 auto;
   }
   .pava img{ width:100%; height:100%; object-fit:cover; display:block; }
@@ -1346,6 +1347,7 @@
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <button class="btn-ghost" id="btn-col-edit" style="display:none;">Edit</button>
+          <button class="btn-primary" id="btn-scene-new" style="display:none;">+ Scene</button>
           <button class="btn-ghost" id="btn-col-reorder" style="display:none;">Reorder</button>
           <button class="btn-danger" id="btn-col-delete" style="display:none;">Delete</button>
         </div>
@@ -1491,6 +1493,74 @@
   </div>
 
 
+  <div class="sheet-backdrop" id="scB">
+    <div class="sheet" onclick="event.stopPropagation()" style="max-width:640px;height:auto;max-height:80vh;">
+      <div class="sheet-head">
+        <div class="sheet-title" id="scTitle">New scene</div>
+        <button class="sheet-close" id="scClose">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="field">
+          <label>Scene title</label>
+          <input id="scName" maxlength="80" placeholder="Scene 1" />
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea id="scDesc" placeholder="Short description…"></textarea>
+        </div>
+        <div class="sheet-actions">
+          <button class="btn-primary" id="scSave">Save</button>
+          <button class="btn-ghost" id="scCancel">Cancel</button>
+        </div>
+        <div class="status" id="scStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Film submit sheet -->
+  <div class="sheet-backdrop" id="fsB">
+    <div class="sheet" onclick="event.stopPropagation()" style="max-width:760px;height:auto;max-height:86vh;">
+      <div class="sheet-head">
+        <div class="sheet-title">Submit your film</div>
+        <button class="sheet-close" id="fsClose">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="muted" style="margin-top:-2px;">
+          Want to share your film? Send it to us and if it doesn’t violate the rules, we’ll publish it within 1–2 days.
+        </div>
+
+        <div class="field">
+          <label>Film title</label>
+          <input id="fsTitle" maxlength="80" placeholder="My short film" />
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea id="fsDesc" placeholder="What is this film about?"></textarea>
+        </div>
+
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:10px;">
+            Cloud download link
+            <span class="pill" id="fsRulesBtn" style="cursor:pointer;">Rules</span>
+          </label>
+          <input id="fsUrl" placeholder="https://drive.google.com/..." />
+          <div class="muted">Make sure we can download the file from your link.</div>
+        </div>
+
+        <div class="sheet-actions">
+          <button class="btn-primary" id="fsSubmit">Submit film</button>
+          <button class="btn-ghost" id="fsCancel">Cancel</button>
+        </div>
+
+        <div class="status" id="fsStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Film rules tooltip -->
+  <div class="vfy-tip" id="fsTip" style="max-width:360px;"></div>
+
   <div class="sheet-backdrop" id="cfB">
     <div class="sheet" onclick="event.stopPropagation()" style="max-width:520px;height:auto;">
       <div class="sheet-head">
@@ -1595,6 +1665,7 @@
   const $cgrid = document.getElementById("cScenes");
   const $colFilm = document.getElementById("colFilm");
   const $btnColEdit = document.getElementById("btn-col-edit");
+  const $btnSceneNew = document.getElementById("btn-scene-new");
   const $btnColReorder = document.getElementById("btn-col-reorder");
   const $btnColDelete = document.getElementById("btn-col-delete");
   const $colReorderFooter = document.getElementById("colReorderFooter");
@@ -1650,6 +1721,26 @@
   const $pickHint = document.getElementById("pickHint");
   const $pickFilters = document.getElementById("pickFilters");
 
+  const $scB = document.getElementById("scB");
+  const $scTitle = document.getElementById("scTitle");
+  const $scClose = document.getElementById("scClose");
+  const $scCancel = document.getElementById("scCancel");
+  const $scSave = document.getElementById("scSave");
+  const $scName = document.getElementById("scName");
+  const $scDesc = document.getElementById("scDesc");
+  const $scStatus = document.getElementById("scStatus");
+
+  const $fsB = document.getElementById("fsB");
+  const $fsClose = document.getElementById("fsClose");
+  const $fsCancel = document.getElementById("fsCancel");
+  const $fsSubmit = document.getElementById("fsSubmit");
+  const $fsTitle = document.getElementById("fsTitle");
+  const $fsDesc = document.getElementById("fsDesc");
+  const $fsUrl = document.getElementById("fsUrl");
+  const $fsStatus = document.getElementById("fsStatus");
+  const $fsRulesBtn = document.getElementById("fsRulesBtn");
+  const $fsTip = document.getElementById("fsTip");
+
   const $cfB = document.getElementById("cfB");
   const $cfTitle = document.getElementById("cfTitle");
   const $cfText = document.getElementById("cfText");
@@ -1696,6 +1787,8 @@
   let colReorderMode = false;
   let colOriginalOrderIds = [];
   let dragFromIndex = null;
+  let editingSceneId = null;
+  let fsCollectionId = null;
 
   // Create/edit
   let editingPostId = null;
@@ -1801,6 +1894,80 @@
     setTimeout(()=> $toast.classList.remove("show"), 1600);
   }
   function fmtDate(ts){ return safe(ts).replace("T"," ").slice(0,16); }
+
+  function fsShowStatus(msg, type){
+    if(!$fsStatus) return;
+    $fsStatus.style.display = msg ? "block" : "none";
+    $fsStatus.className = "status" + (type ? (" " + type) : "");
+    $fsStatus.textContent = msg || "";
+  }
+
+  function openFilmSheet(collectionId){
+    if(!$fsB) return;
+    fsCollectionId = collectionId;
+    $fsTitle.value = "";
+    $fsDesc.value = "";
+    $fsUrl.value = "";
+    fsShowStatus("", "");
+    $fsB.classList.add("open");
+    setTimeout(()=> $fsTitle.focus(), 0);
+  }
+  function closeFilmSheet(){
+    if(!$fsB) return;
+    $fsB.classList.remove("open");
+    fsCollectionId = null;
+    if($fsTip) $fsTip.style.display = "none";
+  }
+
+  function bindFilmRulesTooltip(){
+    if(!$fsRulesBtn || !$fsTip) return;
+    const text =
+`Rules:
+• No porn/nudity
+• No politics/propaganda
+• No hate/violence
+• No doxxing / personal data
+
+Duration: 20 sec – 5 min
+Quality: HD – 4K
+
+Important: make sure we can download the file from your link.`;
+
+    $fsRulesBtn.addEventListener("mouseenter", (ev)=>{
+      $fsTip.textContent = text;
+      $fsTip.style.display = "block";
+      $fsTip.style.left = `${ev.clientX + 12}px`;
+      $fsTip.style.top  = `${ev.clientY + 12}px`;
+    });
+    $fsRulesBtn.addEventListener("mousemove", (ev)=>{
+      if($fsTip.style.display === "block"){
+        $fsTip.style.left = `${ev.clientX + 12}px`;
+        $fsTip.style.top  = `${ev.clientY + 12}px`;
+      }
+    });
+    $fsRulesBtn.addEventListener("mouseleave", ()=>{
+      $fsTip.style.display = "none";
+    });
+  }
+
+  function scStatus(msg, type){
+    if(!$scStatus) return;
+    $scStatus.style.display = msg ? "block" : "none";
+    $scStatus.className = "status" + (type ? (" " + type) : "");
+    $scStatus.textContent = msg || "";
+  }
+  function openSceneSheet(mode, scene=null){
+    editingSceneId = scene ? scene.id : null;
+    $scTitle.textContent = mode === "edit" ? "Edit scene" : "New scene";
+    $scName.value = scene?.title || "";
+    $scDesc.value = scene?.description || "";
+    scStatus("", "");
+    $scB.classList.add("open");
+  }
+  function closeSceneSheet(){
+    $scB.classList.remove("open");
+    editingSceneId = null;
+  }
 
   function getFollowCache(){
     try { return JSON.parse(localStorage.getItem(LS_FOLLOW) || "{}"); } catch(e){ return {}; }
@@ -1919,17 +2086,14 @@
     const byId = new Map(libraryItems.map(it => [String(it.id), it]));
 
     let url = DEFAULT_PROFILE_COVER;
-    let isVideo = false;
 
     if(coverId && byId.has(coverId)){
       const it = byId.get(coverId);
-      url = (it.media_url || it.thumb_url || "").trim() || DEFAULT_PROFILE_COVER;
-      isVideo = isVideoUrl(url);
+      const candidate = (it.thumb_url || it.media_url || "").trim();
+      if(candidate && !isVideoUrl(candidate)) url = candidate;
     }
 
-    $pcoverBg.innerHTML = isVideo
-      ? `<video muted playsinline loop autoplay src="${escapeHtml(url)}"></video>`
-      : `<img src="${escapeHtml(url)}" alt="cover" loading="lazy" decoding="async">`;
+    $pcoverBg.innerHTML = `<img src="${escapeHtml(url)}" alt="cover" loading="lazy" decoding="async">`;
 
     $pcoverEdit.style.display = isOwnProfile ? "flex" : "none";
     $pcoverDel.style.display = isOwnProfile ? "flex" : "none";
@@ -2918,6 +3082,7 @@
     $cmeta.innerHTML = "";
     $cgrid.innerHTML = `<div class="empty" style="grid-column:1/-1">Loading…</div>`;
     $btnColEdit.style.display = "none";
+    $btnSceneNew.style.display = "none";
     $btnColReorder.style.display = "none";
     $btnColDelete.style.display = "none";
     $colReorderFooter.classList.remove("open");
@@ -2948,8 +3113,11 @@
 
       if(isOwnProfile){
         $btnColEdit.style.display = "inline-flex";
+        $btnSceneNew.style.display = "inline-flex";
         $btnColReorder.style.display = sections.length ? "none" : "inline-flex";
         $btnColDelete.style.display = "inline-flex";
+      }else{
+        $btnSceneNew.style.display = "none";
       }
 
       renderCollectionModalGrid();
@@ -3011,6 +3179,12 @@
               <div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>
               ${scene.description ? `<div class="scene-desc">${escapeHtml(scene.description)}</div>` : ``}
             </div>
+            ${isOwnProfile && scene.id ? `
+              <div class="scene-actions">
+                <button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>
+                <button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>
+              </div>
+            ` : ``}
           </div>
           <div class="scene-grid">${grid || `<div class="empty" style="grid-column:1/-1">No items.</div>`}</div>
         </div>
@@ -3033,6 +3207,31 @@
           };
         });
         openMediaViewer(viewerItems, idx, null);
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-edit]").forEach(b=>{
+      b.onclick = ()=>{
+        const id = b.getAttribute("data-sc-edit");
+        const sc = (currentCol.sections||[]).find(x=> String(x.id)===String(id));
+        if(sc) openSceneSheet("edit", sc);
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-del]").forEach(b=>{
+      b.onclick = async ()=>{
+        const id = b.getAttribute("data-sc-del");
+        const ok = await confirmUI("Delete scene", "Scene will be removed. Items will return to Default.");
+        if(!ok) return;
+        try{
+          await requireToken();
+          await api("/api/collections/sections/delete", { method:"POST", body: JSON.stringify({ section_id:id }) });
+          const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+          currentCol.sections = j.sections || [];
+          currentCol.items = j.items || [];
+          renderCollectionModalGrid();
+          toast("Deleted");
+        }catch(e){ toast(e.message||"Failed"); }
       };
     });
 
@@ -3072,52 +3271,18 @@
 
     $colFilm.style.display = "block";
     $colFilm.innerHTML = `
-      <h3>Want to share your film?</h3>
-      <p>Send it to us and if it doesn’t violate the rules, we’ll publish it within 1–2 days.</p>
-      <div class="formRow">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
         <div>
-          <div style="font-size:12px;font-weight:900;opacity:.75;margin-bottom:6px;">Film title</div>
-          <input id="filmTitle" placeholder="My short film" maxlength="80">
+          <h3 style="margin:0;">Your film</h3>
+          <p style="margin-top:6px;">You can submit a short film for review.</p>
         </div>
-        <div>
-          <div style="font-size:12px;font-weight:900;opacity:.75;margin-bottom:6px;">Cloud download link</div>
-          <input id="filmUrl" placeholder="https://drive.google.com/...">
-        </div>
-      </div>
-      <div style="margin-top:10px;">
-        <div style="font-size:12px;font-weight:900;opacity:.75;margin-bottom:6px;">Description</div>
-        <textarea id="filmDesc" placeholder="What is this film about?"></textarea>
-      </div>
-      <div class="tip">
-        <b>Rules:</b> no porn/nudity, no politics/propaganda, no hate/violence, no doxxing.<br>
-        <b>Duration:</b> 20 sec – 5 min. <b>Quality:</b> HD – 4K.<br>
-        <b>Important:</b> make sure we can download the file from your link.
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-        <button class="btn-primary" id="filmSubmitBtn">Submit film</button>
+        <button class="btn-primary" id="openFilmSubmit">Submit film</button>
       </div>
     `;
 
-    const $btn = document.getElementById("filmSubmitBtn");
-    if($btn){
-      $btn.onclick = async ()=>{
-        try{
-          await requireToken();
-          const title = (document.getElementById("filmTitle").value||"").trim();
-          const description = (document.getElementById("filmDesc").value||"").trim();
-          const source_url = (document.getElementById("filmUrl").value||"").trim();
-          if(!title || !source_url) return toast("Title and link are required");
-
-          const r = await api("/api/collections/film_submit", {
-            method:"POST",
-            body: JSON.stringify({ collection_id: collectionId, title, description, source_url })
-          });
-          toast("Submitted");
-          renderCollectionFilmBlock(r.film || { status:"pending" }, collectionId);
-        }catch(e){
-          toast(e.message || "Failed");
-        }
-      };
+    const btn = document.getElementById("openFilmSubmit");
+    if(btn){
+      btn.onclick = ()=> openFilmSheet(collectionId);
     }
   }
 
@@ -3975,6 +4140,11 @@
 
   $btnColEdit.onclick = () => { if(currentCol) openCollectionSheet("edit", currentCol.col).catch(e=>toast(e.message||"Failed")); };
 
+  $btnSceneNew.onclick = ()=>{
+    if(!currentCol) return;
+    openSceneSheet("new", null);
+  };
+
   $btnColDelete.onclick = async () => {
     if(!currentCol) return;
     if(!confirm("Delete this collection?")) return;
@@ -4057,14 +4227,22 @@
     if(!isOwnProfile) return;
     await ensureLibraryLoadedForPicker();
 
-    const items = libraryItems.slice(0, 400).map(it => ({
-      id: it.id,
-      title: it.title || "Untitled",
-      description: "",
-      thumb: (it.thumb_url || it.media_url || ""),
-      type: it.file_type || "",
-      media_url: it.media_url || ""
-    }));
+    const items = libraryItems
+      .filter(it => !isVideoUrl((it.media_url || it.thumb_url || "").trim()))
+      .slice(0, 400)
+      .map(it => ({
+        id: it.id,
+        title: it.title || "Untitled",
+        description: "",
+        thumb: (it.thumb_url || it.media_url || ""),
+        type: "image",
+        media_url: it.media_url || ""
+      }));
+
+    if(!items.length){
+      toast("No images in Library");
+      return;
+    }
 
     const picked = await openPicker("profile_cover", {
       title: "Choose profile cover",
@@ -4100,6 +4278,72 @@
     renderProfileCover(profile);
     toast("Cover reset");
   };
+
+  $scClose.onclick = closeSceneSheet;
+  $scCancel.onclick = closeSceneSheet;
+  $scB.onclick = (e)=>{ if(e.target === $scB) closeSceneSheet(); };
+
+  $scSave.onclick = async ()=>{
+    try{
+      await requireToken();
+      if(!currentCol) return;
+
+      const title = ($scName.value||"").trim();
+      const description = ($scDesc.value||"").trim();
+      if(!title) return scStatus("Title required", "err");
+
+      scStatus("Saving…", "");
+
+      if(editingSceneId){
+        await api("/api/collections/sections/update", {
+          method:"POST",
+          body: JSON.stringify({ section_id: editingSceneId, title, description })
+        });
+      } else {
+        await api("/api/collections/sections/create", {
+          method:"POST",
+          body: JSON.stringify({ collection_id: currentCol.col.id, title, description })
+        });
+      }
+
+      closeSceneSheet();
+      const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+      currentCol.sections = j.sections || [];
+      currentCol.items = j.items || [];
+      renderCollectionModalGrid();
+      toast("Saved");
+    }catch(e){
+      scStatus(e.message||"Failed", "err");
+    }
+  };
+
+  $fsSubmit.onclick = async ()=>{
+    try{
+      await requireToken();
+      const title = ($fsTitle.value||"").trim();
+      const description = ($fsDesc.value||"").trim();
+      const source_url = ($fsUrl.value||"").trim();
+      if(!fsCollectionId) return;
+      if(!title || !source_url) return fsShowStatus("Title and link are required", "err");
+
+      fsShowStatus("Submitting…", "");
+      const r = await api("/api/collections/film_submit", {
+        method:"POST",
+        body: JSON.stringify({ collection_id: fsCollectionId, title, description, source_url })
+      });
+
+      fsShowStatus("Submitted. Status: pending review.", "ok");
+      toast("Submitted");
+      renderCollectionFilmBlock(r.film || { status:"pending" }, fsCollectionId);
+      setTimeout(()=> closeFilmSheet(), 650);
+    }catch(e){
+      fsShowStatus(e.message || "Failed", "err");
+    }
+  };
+
+  $fsCancel.onclick = closeFilmSheet;
+  $fsClose.onclick = closeFilmSheet;
+  $fsB.onclick = (e)=>{ if(e.target === $fsB) closeFilmSheet(); };
 
   // Media Viewer events
   $mvClose.onclick = closeMediaViewer;
@@ -4150,6 +4394,7 @@
       await switchTab(targetTab);
     };
 
+    bindFilmRulesTooltip();
     await applyTabFromUrl();
   }
 
