@@ -37,67 +37,71 @@
   #lf-u .wrap{ max-width:1400px; margin:0 auto; padding: 26px 18px 60px; }
 
   .top{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    gap:16px;
-    flex-wrap:wrap;
-    border-bottom: 1px solid rgba(255,255,255,0.10);
-    padding-bottom: 18px;
-    margin-bottom: 18px;
-  }
+  position:relative;
+  padding-top: 10px;
+}
 
-  .pcover{
-    position:relative;
-    width:100%;
-    height:180px;
-    border-radius:22px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,0.10);
-    background: rgba(255,255,255,0.03);
-    margin:14px 0 12px;
-  }
-  .pcover-bg{
-    position:absolute; inset:0;
-    background:#000;
-  }
-  .pcover-bg img{
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    object-fit:cover;
-    object-position:50% 50%;
-    transform:scale(1.04);
-  }
-  .pcover-bg::after{
-    content:"";
-    position:absolute; inset:0;
-    background: linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.40));
-  }
-  .pcover-edit, .pcover-del{
-    position:absolute;
-    top:12px;
-    width:40px; height:40px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,0.18);
-    background: rgba(0,0,0,0.45);
-    color:#fff;
-    cursor:pointer;
-    font-weight:950;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .pcover-edit{ right:12px; }
-  .pcover-del{ right:58px; }
-  .pcover-edit:hover, .pcover-del:hover{ background:#fff; color:#000; }
+.pcover{
+  position:relative;
+  width:100%;
+  height:180px;                 /* ✅ большая */
+  border-radius:22px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.03);
+  margin-bottom:-34px;          /* ✅ “наезд” профиля на шапку как раньше */
+}
 
-  .phead{ display:flex; gap:14px; align-items:center; position:relative; }
-  .pava{
-    width:64px; height:64px; border-radius:50%;
-    background: rgba(255,255,255,0.08);
-    border:3px solid rgba(0,0,0,0.55);
-    box-shadow: 0 18px 60px rgba(0,0,0,0.45);
-    overflow:hidden; flex:0 0 auto;
-  }
-  .pava img{ width:100%; height:100%; object-fit:cover; display:block; }
+.pcover-bg{
+  position:absolute; inset:0;
+}
+.pcover-bg img{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  object-position:50% 50%;
+  transform:scale(1.05);
+}
+.pcover-bg::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.45));
+}
+
+.pcover-edit, .pcover-del{
+  position:absolute;
+  top:12px;
+  width:40px; height:40px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.45);
+  color:#fff;
+  cursor:pointer;
+  font-weight:950;
+  display:flex; align-items:center; justify-content:center;
+  z-index:5;
+}
+.pcover-edit{ right:12px; }
+.pcover-del{ right:58px; }
+.pcover-edit:hover, .pcover-del:hover{ background:#fff; color:#000; }
+
+.phead{
+  position:relative;
+  display:flex;
+  gap:14px;
+  align-items:center;
+  margin-top:-18px;             /* ✅ подтягиваем вверх */
+  margin-bottom:10px;
+}
+.pava{
+  width:76px; height:76px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  overflow:hidden;
+  flex:0 0 auto;
+}
+.pava img{ width:100%; height:100%; object-fit:cover; display:block; }
   .avatar.emoji,
   .pava.emoji{
     display:flex; align-items:center; justify-content:center; line-height:1; user-select:none;
@@ -1225,59 +1229,46 @@
 
     <div class="wrap">
       <div class="top">
-      <div>
-        <div class="phead">
-          <div class="pava" id="p-ava"></div>
-          <div>
-            <div class="pname" id="p-name">Loading…</div>
-            <div class="puser" id="p-user">@…</div>
-          </div>
-        </div>
+  <div class="pcover" id="pcover">
+    <div class="pcover-bg" id="pcoverBg"></div>
+    <button class="pcover-edit" id="pcoverEdit" type="button" style="display:none;" title="Change cover">✎</button>
+    <button class="pcover-del" id="pcoverDel" type="button" style="display:none;" title="Remove cover">✕</button>
+  </div>
 
-        <div class="pbio" id="p-bio" style="display:none;"></div>
-        <div class="links" id="p-links" style="display:none;"></div>
+  <div class="phead">
+    <div class="pava" id="p-ava"></div>
+    <div class="pmeta">
+      <div class="pname" id="p-name">Loading…</div>
+      <div class="puser" id="p-user">@…</div>
+      <div class="fcnt"><span>Followers</span><b id="p-followers">0</b></div>
+    </div>
+  </div>
 
-        <div class="pcover" id="pcover">
-          <div class="pcover-bg" id="pcoverBg"></div>
+  <div class="pbio" id="p-bio" style="display:none;"></div>
+  <div class="links" id="p-links" style="display:none;"></div>
 
-          <button class="pcover-edit" id="pcoverEdit" type="button" style="display:none;" title="Change cover">✎</button>
-          <button class="pcover-del" id="pcoverDel" type="button" style="display:none;" title="Remove cover">✕</button>
-        </div>
+  <div class="controls">
+    <button class="p-follow" id="p-follow-btn" style="display:none;">Follow</button>
 
-        <div class="fcnt"><span>Followers</span><b id="p-followers">0</b></div>
+    <div class="tabs-row">
+      <div class="seg" id="seg-tabs">
+        <button class="active" data-tab="posts">Posts</button>
+        <button data-tab="collections">Collections</button>
+        <button data-tab="library">Library</button>
       </div>
 
-      <div class="controls">
-        <button class="p-follow" id="p-follow-btn" style="display:none;">Follow</button>
+      <div class="tab-actions">
+        <button class="btn-primary" id="btn-new-post" style="display:none;">+ New post</button>
+        <button class="btn-primary" id="btn-new-col" style="display:none;">+ New collection</button>
 
-        <div class="tabs-row">
-          <div class="seg" id="seg-tabs">
-            <button class="active" data-tab="posts">Posts</button>
-            <button data-tab="collections">Collections</button>
-            <button data-tab="library">Library</button>
-          </div>
-
-          <div class="tab-actions">
-            <button class="btn-primary" id="btn-new-post" style="display:none;">+ New post</button>
-            <button class="btn-primary" id="btn-new-col" style="display:none;">+ New collection</button>
-
-            <div class="seg" id="seg-sort" style="display:none;">
-              <button class="active" data-sort="new">New</button>
-              <button data-sort="top">Top</button>
-            </div>
-
-            <div class="pill" id="pill-range" style="display:none;">
-              <span style="opacity:.8;">Range</span>
-              <select id="range">
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-              </select>
-            </div>
-          </div>
+        <div class="seg" id="seg-sort" style="display:none;">
+          <button class="active" data-sort="new">New</button>
+          <button data-sort="top">Top</button>
         </div>
-
       </div>
     </div>
+  </div>
+</div>
 
     <div class="grid-wrap" id="gridWrap">
       <div class="tab-pane active" id="gridPosts"></div>
