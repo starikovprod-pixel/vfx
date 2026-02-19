@@ -47,6 +47,49 @@
     margin-bottom: 18px;
   }
 
+  .pcover{
+    position:relative;
+    width:100%;
+    height:180px;
+    border-radius:22px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.03);
+    margin-bottom:16px;
+  }
+  .pcover-bg{
+    position:absolute; inset:0;
+    background:#000;
+  }
+  .pcover-bg img, .pcover-bg video{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    object-position: 50% 50%;
+    transform: scale(1.08);
+    filter: saturate(1.05) contrast(1.05);
+  }
+  .pcover-bg::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.55));
+  }
+  .pcover-edit, .pcover-del{
+    position:absolute;
+    top:12px;
+    width:40px; height:40px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.45);
+    color:#fff;
+    cursor:pointer;
+    font-weight:950;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pcover-edit{ right:12px; }
+  .pcover-del{ right:58px; }
+  .pcover-edit:hover, .pcover-del:hover{ background:#fff; color:#000; }
+
   .phead{ display:flex; gap:14px; align-items:center; }
   .pava{
     width:64px; height:64px; border-radius:50%;
@@ -738,6 +781,27 @@
     overflow:auto;
     flex:1;
   }
+  .col-scenes{ display:flex; flex-direction:column; gap:14px; }
+  .scene{
+    border:1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.03);
+    border-radius:18px;
+    overflow:hidden;
+  }
+  .scene-head{
+    padding:12px 14px;
+    display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .scene-title{ font-weight:950; }
+  .scene-desc{ margin-top:6px; color:rgba(255,255,255,0.72); font-size:13px; line-height:1.35; }
+  .scene-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .scene-grid{
+    padding:14px;
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap:12px;
+  }
   .col-grid{
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -805,6 +869,42 @@
     flex-wrap:wrap;
   }
   .reorder-footer.open{ display:flex; }
+  .col-film{
+    margin-top:12px;
+    padding:12px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.25);
+  }
+  .col-film h3{ margin:0; font-size:14px; font-weight:950; }
+  .col-film p{ margin:8px 0 0; color:rgba(255,255,255,0.75); font-size:13px; line-height:1.35; }
+  .col-film video{
+    width:100%;
+    border-radius:16px;
+    margin-top:10px;
+    border:1px solid rgba(255,255,255,0.10);
+    background:#000;
+  }
+  .col-film .formRow{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+  .col-film input, .col-film textarea{
+    width:100%;
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:14px;
+    padding:10px 12px;
+    color:#fff;
+    font-weight:800;
+  }
+  .col-film textarea{ min-height:90px; resize:vertical; }
+  .col-film .tip{
+    margin-top:8px;
+    font-size:12px;
+    color:rgba(255,255,255,0.65);
+    line-height:1.35;
+    border:1px dashed rgba(255,255,255,0.14);
+    border-radius:14px;
+    padding:10px 12px;
+  }
 
   .picked-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; }
   .picked-item{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.16); background:#000; cursor:pointer; }
@@ -1056,8 +1156,28 @@
   .pick-filters{ display:flex; gap:8px; }
   .pick-filter{ padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:#fff; cursor:pointer; font-weight:800; }
   .pick-filter.on{ background:#fff; color:#000; }
-  .pick-list.wide{ display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; max-height:56vh; overflow:auto; padding-right:4px; }
-  .pick-row.wide{ display:block; padding:0; overflow:hidden; }
+  .pick-list.wide{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:12px;
+    max-height: 520px;
+    overflow:auto;
+    padding-right:4px;
+  }
+  .pick-row.wide{ display:block; padding:0; overflow:hidden; position:relative; }
+  .pick-check{
+    position:absolute; top:12px; right:12px;
+    width:30px; height:30px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.45);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:950;
+  }
+  .pick-row.wide.on .pick-check{
+    background: rgba(110,168,255,0.25);
+    border-color: rgba(110,168,255,0.55);
+  }
   .pick-thumb.wide{ width:100%; height:auto; aspect-ratio:16/9; border-radius:0; border:0; }
   .pick-thumb.wide img{ width:100%; height:100%; }
   .pick-main.wide{ padding:10px 12px 12px; }
@@ -1089,6 +1209,9 @@
     .m-preview { height:46vh; }
     .col-grid{ grid-template-columns: repeat(2, 1fr); }
   }
+  @media(max-width:1180px){ .pick-list.wide{ grid-template-columns: repeat(3, 1fr); } }
+  @media(max-width:820px){ .pick-list.wide{ grid-template-columns: repeat(2, 1fr); } }
+  @media(max-width:760px){ .col-film .formRow{ grid-template-columns:1fr; } }
 </style>
 
 <div id="lf-u">
@@ -1097,6 +1220,11 @@
 
   <div class="wrap">
     <div class="top">
+      <div class="pcover" id="pcover">
+        <div class="pcover-bg" id="pcoverBg"></div>
+        <button class="pcover-edit" id="pcoverEdit" type="button" style="display:none;" title="Change cover">✎</button>
+        <button class="pcover-del" id="pcoverDel" type="button" style="display:none;" title="Remove cover">✕</button>
+      </div>
       <div>
         <div class="phead">
           <div class="pava" id="p-ava"></div>
@@ -1214,6 +1342,7 @@
           <div class="col-h-title" id="ctitle">Collection</div>
           <div class="col-h-desc" id="cdesc"></div>
           <div class="col-h-meta" id="cmeta"></div>
+          <div class="col-film" id="colFilm" style="display:none;"></div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <button class="btn-ghost" id="btn-col-edit" style="display:none;">Edit</button>
@@ -1222,7 +1351,7 @@
         </div>
       </div>
       <div class="col-body">
-        <div class="col-grid" id="cgrid"></div>
+        <div class="col-scenes" id="cScenes"></div>
         <div class="reorder-footer" id="colReorderFooter">
           <div class="muted">Reorder mode is active</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -1399,6 +1528,7 @@
 <script>
 (() => {
   const BACKEND = "https://api.lightfull.ai";
+  const DEFAULT_PROFILE_COVER = "https://fs.getcourse.ru/fileservice/file/download/a/384380/sc/439/h/fdef161860d4b1a6fbfd9ce6813dcd8b.png";
   const PAGE_SIZE = 24;
   const VERIFIED_SVG = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 2l2.6 2.1 3.3-.2.8 3.2 2.7 1.9-1.3 3 1.3 3-2.7 1.9-.8 3.2-3.3-.2L12 22l-2.6-2.1-3.3.2-.8-3.2-2.7-1.9 1.3-3-1.3-3 2.7-1.9.8-3.2 3.3.2L12 2zm-1.1 13.4l6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4 3.8 3.8z\"/></svg>";
   const VFY_TOOLTIP = "Verified — awarded at 100 followers. Helps ranking in Feed.";
@@ -1417,6 +1547,10 @@
   const $pLinks = document.getElementById("p-links");
   const $pFollowers = document.getElementById("p-followers");
   const $pFollowBtn = document.getElementById("p-follow-btn");
+  const $pcover = document.getElementById("pcover");
+  const $pcoverBg = document.getElementById("pcoverBg");
+  const $pcoverEdit = document.getElementById("pcoverEdit");
+  const $pcoverDel = document.getElementById("pcoverDel");
   const $toast = document.getElementById("toast");
 
   const $segTabs = document.getElementById("seg-tabs");
@@ -1458,7 +1592,8 @@
   const $ctitle = document.getElementById("ctitle");
   const $cdesc = document.getElementById("cdesc");
   const $cmeta = document.getElementById("cmeta");
-  const $cgrid = document.getElementById("cgrid");
+  const $cgrid = document.getElementById("cScenes");
+  const $colFilm = document.getElementById("colFilm");
   const $btnColEdit = document.getElementById("btn-col-edit");
   const $btnColReorder = document.getElementById("btn-col-reorder");
   const $btnColDelete = document.getElementById("btn-col-delete");
@@ -1778,6 +1913,28 @@
   function showLoader(v){ $loader.style.display = v ? "flex" : "none"; }
 
   // -------- Profile header ----------
+  function renderProfileCover(p){
+    if(!$pcover || !$pcoverBg) return;
+    const coverId = (p && p.header_feed_post_id) ? String(p.header_feed_post_id) : "";
+    const byId = new Map(libraryItems.map(it => [String(it.id), it]));
+
+    let url = DEFAULT_PROFILE_COVER;
+    let isVideo = false;
+
+    if(coverId && byId.has(coverId)){
+      const it = byId.get(coverId);
+      url = (it.media_url || it.thumb_url || "").trim() || DEFAULT_PROFILE_COVER;
+      isVideo = isVideoUrl(url);
+    }
+
+    $pcoverBg.innerHTML = isVideo
+      ? `<video muted playsinline loop autoplay src="${escapeHtml(url)}"></video>`
+      : `<img src="${escapeHtml(url)}" alt="cover" loading="lazy" decoding="async">`;
+
+    $pcoverEdit.style.display = isOwnProfile ? "flex" : "none";
+    $pcoverDel.style.display = isOwnProfile ? "flex" : "none";
+  }
+
   function renderProfile(p){
     profile = p || {};
     const dn = p.display_name || p.username || username;
@@ -1809,6 +1966,7 @@
     const me = await getCurrentUserId();
     isOwnProfile = !!(me && (String(me) === String((j.profile||{}).user_id)));
 
+    renderProfileCover(j.profile || {});
 
     if(isOwnProfile){
       $pFollowBtn.style.display = "none";
@@ -1977,6 +2135,7 @@
       state.loadedOnce = true;
 
       requestAnimationFrame(()=> renderLibrary());
+      if(profile) renderProfileCover(profile);
     }catch(e){
       if(e?.name !== "AbortError"){
         renderErrorForTab("library", e.message || "Failed");
@@ -2769,7 +2928,8 @@
       const j = await api(`/api/collections/get?id=${encodeURIComponent(collection_id)}`, { method:"GET" });
       const col = j.collection;
       const items = Array.isArray(j.items) ? j.items : [];
-      currentCol = { col, items };
+      const sections = Array.isArray(j.sections) ? j.sections : [];
+      currentCol = { col, items, sections };
 
       $ctitle.textContent = col.title || "Untitled collection";
       $cdesc.textContent = col.description || "";
@@ -2779,13 +2939,16 @@
         <div class="stat">${ICONS.save} ${col.save_count||0}</div>
       `;
 
+      const film = j.film || null;
+      renderCollectionFilmBlock(film, currentCol.col.id);
+
       // view count dedupe
       const client_id = (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
       api("/api/collections/view", { method:"POST", body: JSON.stringify({ collection_id: col.id, client_id }) }).catch(()=>{});
 
       if(isOwnProfile){
         $btnColEdit.style.display = "inline-flex";
-        $btnColReorder.style.display = "inline-flex";
+        $btnColReorder.style.display = sections.length ? "none" : "inline-flex";
         $btnColDelete.style.display = "inline-flex";
       }
 
@@ -2798,38 +2961,69 @@
   function renderCollectionModalGrid(){
     if(!currentCol) return;
     const items = currentCol.items || [];
+    const sections = Array.isArray(currentCol.sections) ? currentCol.sections : [];
     if(!items.length){
       $cgrid.innerHTML = `<div class="empty" style="grid-column:1/-1">Empty collection.</div>`;
       return;
     }
 
-    $cgrid.innerHTML = items.map((it, idx)=>{
-      const url = (it.media_url || it.thumb_url || "").trim();
-      const isV = isVideoUrl(url);
-      const thumb = (it.thumb_url || it.media_url || "").trim();
+    const normalizedSections = sections.map(sc => ({
+      id: sc.id == null ? null : String(sc.id),
+      title: sc.title || "Scene",
+      description: sc.description || ""
+    }));
+    const defaultItems = items.filter(it => !it.section_id);
+    const scenes = normalizedSections.map(sc => ({
+      id: sc.id,
+      title: sc.title,
+      description: sc.description,
+      items: items.filter(it => String(it.section_id || "") === String(sc.id || ""))
+    }));
+    if(defaultItems.length || !scenes.length){
+      scenes.push({ id: null, title: "Default", description: "", items: defaultItems.length ? defaultItems : items });
+    }
+
+    $cgrid.innerHTML = scenes.map((scene, sceneIdx)=>{
+      const grid = scene.items.map((it, idx)=>{
+        const url = (it.media_url || it.thumb_url || "").trim();
+        const isV = isVideoUrl(url);
+        const thumb = (it.thumb_url || it.media_url || "").trim();
+        return `
+          <div class="col-item" draggable="${(colReorderMode && !sections.length) ? "true" : "false"}" data-idx="${idx}" data-scene="${sceneIdx}">
+            ${isV
+              ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>`
+              : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />`
+            }
+            ${colReorderMode ? `
+              <div class="drag-handle" title="Drag">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+              </div>` : ``}
+          </div>
+        `;
+      }).join("");
 
       return `
-        <div class="col-item" draggable="${colReorderMode ? "true" : "false"}" data-idx="${idx}">
-          ${isV
-            ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>`
-            : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />`
-          }
-          ${colReorderMode ? `
-            <div class="drag-handle" title="Drag">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-              </svg>
-            </div>` : ``}
+        <div class="scene" data-scene="${sceneIdx}">
+          <div class="scene-head">
+            <div>
+              <div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>
+              ${scene.description ? `<div class="scene-desc">${escapeHtml(scene.description)}</div>` : ``}
+            </div>
+          </div>
+          <div class="scene-grid">${grid || `<div class="empty" style="grid-column:1/-1">No items.</div>`}</div>
         </div>
       `;
     }).join("");
 
-    // click open Media Viewer
     $cgrid.querySelectorAll(".col-item").forEach(el=>{
       el.onclick = () => {
         if(colReorderMode) return;
-        const idx = Number(el.getAttribute("data-idx"));
-        const viewerItems = currentCol.items.map(m=>{
+        const sceneIndex = Number(el.getAttribute("data-scene") || "0");
+        const idx = Number(el.getAttribute("data-idx") || "0");
+        const scene = scenes[sceneIndex] || { items: [] };
+        const viewerItems = scene.items.map(m=>{
           const url = (m.media_url || m.thumb_url || "").trim();
           return {
             title: m.title || "Untitled",
@@ -2842,9 +3036,89 @@
       };
     });
 
-    $colReorderFooter.classList.toggle("open", !!colReorderMode);
+    $colReorderFooter.classList.toggle("open", !!colReorderMode && !sections.length);
     $btnColReorder.textContent = colReorderMode ? "Exit" : "Reorder";
-    if(colReorderMode) bindDnD();
+    if(colReorderMode && !sections.length) bindDnD();
+  }
+
+  function renderCollectionFilmBlock(film, collectionId){
+    if(!$colFilm) return;
+
+    if(film && film.status === "approved" && film.published_url){
+      $colFilm.style.display = "block";
+      $colFilm.innerHTML = `
+        <h3>${escapeHtml(film.title || "Film")}</h3>
+        ${film.description ? `<p>${escapeHtml(film.description)}</p>` : ``}
+        <video controls playsinline src="${escapeHtml(film.published_url)}"></video>
+      `;
+      return;
+    }
+
+    if(film && film.status === "pending"){
+      $colFilm.style.display = "block";
+      $colFilm.innerHTML = `
+        <h3>Film submission</h3>
+        <p style="margin-top:8px;"><span class="pill">Pending review</span></p>
+        <p>We’ll review it within 1–2 days.</p>
+      `;
+      return;
+    }
+
+    if(!isOwnProfile){
+      $colFilm.style.display = "none";
+      $colFilm.innerHTML = "";
+      return;
+    }
+
+    $colFilm.style.display = "block";
+    $colFilm.innerHTML = `
+      <h3>Want to share your film?</h3>
+      <p>Send it to us and if it doesn’t violate the rules, we’ll publish it within 1–2 days.</p>
+      <div class="formRow">
+        <div>
+          <div style="font-size:12px;font-weight:900;opacity:.75;margin-bottom:6px;">Film title</div>
+          <input id="filmTitle" placeholder="My short film" maxlength="80">
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:900;opacity:.75;margin-bottom:6px;">Cloud download link</div>
+          <input id="filmUrl" placeholder="https://drive.google.com/...">
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <div style="font-size:12px;font-weight:900;opacity:.75;margin-bottom:6px;">Description</div>
+        <textarea id="filmDesc" placeholder="What is this film about?"></textarea>
+      </div>
+      <div class="tip">
+        <b>Rules:</b> no porn/nudity, no politics/propaganda, no hate/violence, no doxxing.<br>
+        <b>Duration:</b> 20 sec – 5 min. <b>Quality:</b> HD – 4K.<br>
+        <b>Important:</b> make sure we can download the file from your link.
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn-primary" id="filmSubmitBtn">Submit film</button>
+      </div>
+    `;
+
+    const $btn = document.getElementById("filmSubmitBtn");
+    if($btn){
+      $btn.onclick = async ()=>{
+        try{
+          await requireToken();
+          const title = (document.getElementById("filmTitle").value||"").trim();
+          const description = (document.getElementById("filmDesc").value||"").trim();
+          const source_url = (document.getElementById("filmUrl").value||"").trim();
+          if(!title || !source_url) return toast("Title and link are required");
+
+          const r = await api("/api/collections/film_submit", {
+            method:"POST",
+            body: JSON.stringify({ collection_id: collectionId, title, description, source_url })
+          });
+          toast("Submitted");
+          renderCollectionFilmBlock(r.film || { status:"pending" }, collectionId);
+        }catch(e){
+          toast(e.message || "Failed");
+        }
+      };
+    }
   }
 
   function bindDnD(){
@@ -3360,6 +3634,10 @@
     let filterType = "all";
     let visibleCount = layout === "wide" ? 48 : 200;
 
+    if(data.preselected && Array.isArray(data.preselected)){
+      data.preselected.forEach(id => pickSelectedSet.add(String(id)));
+    }
+
     if($pickFilters){
       $pickFilters.style.display = layout === "wide" ? "flex" : "none";
       $pickFilters.querySelectorAll("[data-type]").forEach(btn=>{
@@ -3393,17 +3671,18 @@
       $pickList.innerHTML = `
         <div class="pick-list ${layout === "wide" ? "wide" : ""}" id="pickListInner">
           ${items.map(it=>{
-            const on = data.multi ? pickSelectedSet.has(it.id) : (pickSelectedId === it.id);
+            const pid = String(it.id);
+            const on = data.multi ? pickSelectedSet.has(pid) : (String(pickSelectedId) === pid);
             const kind = resolveKind(it);
             return `
-              <div class="pick-row ${on?'on':''} ${layout === "wide" ? "wide" : ""}" data-pid="${it.id}">
+              <div class="pick-row ${on?'on':''} ${layout === "wide" ? "wide" : ""}" data-pid="${pid}">
                 <div class="pick-thumb ${layout === "wide" ? "wide" : ""}">${it.thumb ? `<img src="${it.thumb}">` : ""}</div>
                 <div class="pick-main ${layout === "wide" ? "wide" : ""}">
                   <div class="pick-name">${escapeHtml(it.title||"Untitled")}</div>
                   <div class="pick-sub">${escapeHtml(it.description||"")}</div>
                   ${layout === "wide" ? `<div class="pick-sub" style="margin-top:6px;">${kind === "video" ? "Video" : "Image"}</div>` : ``}
                 </div>
-                ${layout === "wide" ? `` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`}
+                ${layout === "wide" ? `<div class="pick-check">${on ? "✓" : ""}</div>` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`}
               </div>
             `;
           }).join("")}
@@ -3730,11 +4009,14 @@
       hint: "Select images/videos (multi-select). Upload from ПК disabled.",
       items,
       multi: true,
-      layout: "wide"
+      layout: "wide",
+      preselected: postDraftMedia
     });
 
     if(Array.isArray(picked)){
-      postDraftMedia = picked;
+      const merged = new Set(postDraftMedia.map(String));
+      picked.forEach(id => merged.add(String(id)));
+      postDraftMedia = Array.from(merged);
       $pPickedInfo.textContent = `Selected: ${postDraftMedia.length}`;
     }
   };
@@ -3758,14 +4040,65 @@
       hint: "Select items (multi-select).",
       items,
       multi: true,
-      layout: "wide"
+      layout: "wide",
+      preselected: colDraftMedia
     });
     if(Array.isArray(picked)){
-      colDraftMedia = picked;
+      const merged = new Set(colDraftMedia.map(String));
+      picked.forEach(id => merged.add(String(id)));
+      colDraftMedia = Array.from(merged);
       if(!colDraftCover || !colDraftMedia.includes(colDraftCover)) colDraftCover = colDraftMedia[0] || null;
       $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
       renderCollectionDraftSelected();
     }
+  };
+
+  $pcoverEdit.onclick = async () => {
+    if(!isOwnProfile) return;
+    await ensureLibraryLoadedForPicker();
+
+    const items = libraryItems.slice(0, 400).map(it => ({
+      id: it.id,
+      title: it.title || "Untitled",
+      description: "",
+      thumb: (it.thumb_url || it.media_url || ""),
+      type: it.file_type || "",
+      media_url: it.media_url || ""
+    }));
+
+    const picked = await openPicker("profile_cover", {
+      title: "Choose profile cover",
+      hint: "Pick one item from your Library",
+      items,
+      multi: false,
+      layout: "wide"
+    });
+
+    if(!picked) return;
+
+    await requireToken();
+    await api("/api/profile/header_set", {
+      method: "POST",
+      body: JSON.stringify({ feed_post_id: picked })
+    });
+
+    profile.header_feed_post_id = picked;
+    renderProfileCover(profile);
+    toast("Cover updated");
+  };
+
+  $pcoverDel.onclick = async () => {
+    if(!isOwnProfile) return;
+    const ok = await confirmUI("Remove cover", "Reset to default cover?");
+    if(!ok) return;
+    await requireToken();
+    await api("/api/profile/header_set", {
+      method: "POST",
+      body: JSON.stringify({ feed_post_id: null })
+    });
+    profile.header_feed_post_id = null;
+    renderProfileCover(profile);
+    toast("Cover reset");
   };
 
   // Media Viewer events
