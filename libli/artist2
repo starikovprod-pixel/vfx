@@ -224,6 +224,18 @@
   .loader{ display:none; justify-content:center; color: rgba(255,255,255,0.55); padding: 18px 0 0; font-size: 13px; }
   .empty{ padding:40px; text-align:center; color: rgba(255,255,255,0.55); border: 1px dashed rgba(255,255,255,0.18); border-radius: 18px; background: rgba(255,255,255,0.02); }
 
+  /* отступ между ссылками и табами */
+  #p-links{ margin-bottom: 18px; }
+
+  /* отступ между шапкой/метой и контролами */
+  .controls{ margin-top: 16px; }
+
+  /* отступ между табами и сетками */
+  .grid-wrap{ margin-top: 16px; }
+
+  /* чтобы табы не липли к контенту */
+  .tabs-row{ margin-bottom: 14px; }
+
   /* POSTS FEED */
   .feed{
     width: min(860px, 100%);
@@ -3146,7 +3158,7 @@ Download link:
     if(!currentCol) return;
     const items = currentCol.items || [];
     const sections = Array.isArray(currentCol.sections) ? currentCol.sections : [];
-    if(!items.length){
+    if (!items.length && !sections.length) {
       $cgrid.innerHTML = `<div class="empty" style="grid-column:1/-1">Empty collection.</div>`;
       return;
     }
