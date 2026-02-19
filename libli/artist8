@@ -3201,16 +3201,15 @@
       title: sc.title || "Scene",
       description: sc.description || ""
     }));
-    const defaultItems = items.filter(it => !it.section_id);
     const scenes = normalizedSections.map(sc => ({
       id: sc.id,
       title: sc.title,
       description: sc.description,
       items: items.filter(it => String(it.section_id || "") === String(sc.id || ""))
     }));
-    if(defaultItems.length || !scenes.length){
-      scenes.push({ id: null, title: "Default", description: "", items: defaultItems.length ? defaultItems : items });
-    }
+
+    // ❌ больше НЕ добавляем Default сцену
+    // элементы без section_id просто не показываем здесь (чтобы ничего “не переезжало”)
 
     $cgrid.innerHTML = scenes.map((scene, sceneIdx)=>{
       const grid = scene.items.map((it, idx)=>{
@@ -4500,16 +4499,29 @@
       scStatus("Saving…", "");
 
       if(editingSceneId){
+        // 1) обновляем сцену на бэке
         await api("/api/collections/sections/update", {
           method:"POST",
           body: JSON.stringify({ section_id: editingSceneId, title, description })
         });
-      } else {
-        await api("/api/collections/sections/create", {
-          method:"POST",
-          body: JSON.stringify({ collection_id: currentCol.col.id, title, description })
-        });
+
+        // 2) IMPORTANT: НЕ трогаем currentCol.items (чтобы ничего не “сбрасывалось”)
+        const idx = (currentCol.sections || []).findIndex(s => String(s.id) === String(editingSceneId));
+        if(idx >= 0){
+          currentCol.sections[idx] = Object.assign({}, currentCol.sections[idx], { title, description });
+        }
+
+        closeSceneSheet();
+        renderCollectionModalGrid();
+        toast("Saved");
+        return;
       }
+
+      // create: тут нужен рефетч, чтобы получить id новой сцены
+      await api("/api/collections/sections/create", {
+        method:"POST",
+        body: JSON.stringify({ collection_id: currentCol.col.id, title, description })
+      });
 
       closeSceneSheet();
       const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
