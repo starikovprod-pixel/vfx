@@ -44,12 +44,12 @@
 .pcover{
   position:relative;
   width:100%;
-  height:230px;          /* ✅ ниже, до уровня followers */
+  height:170px;
   border-radius:22px;
   overflow:hidden;
   border:1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.03);
-  margin-bottom:-44px;   /* ✅ сохраняем “наезд” */
+  margin-bottom:-56px;
 }
 
 .pcover-bg{
@@ -94,8 +94,8 @@
   display:flex;
   gap:14px;
   align-items:center;
-  margin-top:-18px;             /* ✅ подтягиваем вверх */
-  margin-bottom:10px;
+  margin-top:-26px;
+  margin-bottom:8px;
 }
 .pava{
   width:76px; height:76px;
@@ -117,7 +117,7 @@
   .pname{ font-weight:900; font-size:22px; letter-spacing:-.2px; display:flex; align-items:center; gap:8px; }
   .puser{ color:var(--muted); margin-top:2px; font-size:13px; }
   .pbio{ margin-top:10px; color: rgba(255,255,255,0.78); font-size:13px; max-width:720px; line-height:1.4; }
-  .fcnt{ display:inline-flex; align-items:center; gap:8px; margin-top:6px; padding:6px 10px; border-radius:999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.85); font-size:12px; font-weight:900; }
+  .fcnt{ display:inline-flex; align-items:center; gap:8px; margin-top:4px; padding:5px 10px; border-radius:999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.85); font-size:12px; font-weight:900; }
   .fcnt span{ color: rgba(255,255,255,0.55); font-weight:800; }
   .fcnt b{ color:#fff; }
 
@@ -795,13 +795,23 @@
   }
   .col-close:hover{ background:#fff; color:#000; }
   .col-header{
-    padding:18px 18px 12px;
-    padding-bottom:16px;
+    padding:18px 18px 16px;
     border-bottom:1px solid rgba(255,255,255,0.10);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .col-toprow{
     display:flex;
     align-items:flex-start;
     justify-content:space-between;
     gap:12px;
+    flex-wrap:wrap;
+  }
+  .col-h-actions{
+    display:flex;
+    gap:10px;
+    align-items:center;
     flex-wrap:wrap;
   }
   .col-header::after{
@@ -810,7 +820,7 @@
     height:1px;
     width:100%;
     background: rgba(255,255,255,0.10);
-    margin-top:14px;
+    margin-top:2px;
   }
   .col-h-left{ min-width:0; }
   .col-h-title{ font-weight:950; font-size:18px; letter-spacing:-.2px; }
@@ -979,8 +989,9 @@
   }
   .film-hero .film-title{
     font-weight:1000;
-    font-size:18px;
-    letter-spacing:-.2px;
+    font-size:20px;
+    letter-spacing:.6px;
+    text-transform:uppercase;
     margin:0;
   }
   .film-hero .film-desc{
@@ -1014,6 +1025,11 @@
   .film-hero .film-more:hover{
     background: rgba(255,255,255,0.10);
     border-color: rgba(255,255,255,0.22);
+  }
+  .film-hero .film-more svg{
+    width:18px;
+    height:18px;
+    transition: transform .18s ease;
   }
 
   .picked-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; }
@@ -1450,18 +1466,22 @@
     <button class="col-close" id="cclose">✕</button>
     <div class="col-modal" onclick="event.stopPropagation()">
       <div class="col-header">
-        <div class="col-h-left">
-          <div class="col-h-title" id="ctitle">Collection</div>
-          <div class="col-h-desc" id="cdesc"></div>
-          <div class="col-h-meta" id="cmeta"></div>
-          <div class="col-film" id="colFilm" style="display:none;"></div>
+        <div class="col-toprow">
+          <div class="col-h-left">
+            <div class="col-h-title" id="ctitle">Collection</div>
+            <div class="col-h-desc" id="cdesc"></div>
+            <div class="col-h-meta" id="cmeta"></div>
+          </div>
+
+          <div class="col-h-actions">
+            <button class="btn-ghost" id="btn-col-edit" style="display:none;">Edit</button>
+            <button class="btn-primary" id="btn-scene-new" style="display:none;">+ Scene</button>
+            <button class="btn-ghost" id="btn-col-reorder" style="display:none;">Reorder</button>
+            <button class="btn-danger" id="btn-col-delete" style="display:none;">Delete</button>
+          </div>
         </div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-ghost" id="btn-col-edit" style="display:none;">Edit</button>
-          <button class="btn-primary" id="btn-scene-new" style="display:none;">+ Scene</button>
-          <button class="btn-ghost" id="btn-col-reorder" style="display:none;">Reorder</button>
-          <button class="btn-danger" id="btn-col-delete" style="display:none;">Delete</button>
-        </div>
+
+        <div class="col-film" id="colFilm" style="display:none;"></div>
       </div>
       <div class="col-body">
         <div class="col-scenes" id="cScenes"></div>
@@ -3417,7 +3437,7 @@ Download link:
 
     $colReorderFooter.classList.toggle("open", !!colReorderMode && !sections.length);
     $btnColReorder.textContent = colReorderMode ? "Exit" : "Reorder";
-    if(colReorderMode && !sections.length) bindDnD();
+    if(colReorderMode) bindDnD(scenes);
   }
 
   function renderCollectionFilmBlock(film, collectionId){
@@ -3444,8 +3464,15 @@ Download link:
           </div>
           <div class="film-caption">
             <h3 class="film-title">${escapeHtml(t)}</h3>
-            ${d ? `<div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>
-                   <button class="film-more" id="filmMore" type="button">Read more</button>` : ``}
+            ${d ? `
+              <div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>
+              <button class="film-more" id="filmMore" type="button" aria-label="Toggle description">
+                <span>Read more</span>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            ` : ``}
           </div>
         </div>
       `;
@@ -3455,7 +3482,10 @@ Download link:
       if(more && desc){
         more.onclick = ()=>{
           const on = desc.classList.toggle("open");
-          more.textContent = on ? "Hide" : "Read more";
+          const label = more.querySelector("span");
+          const icon = more.querySelector("svg");
+          if(label) label.textContent = on ? "Hide" : "Read more";
+          if(icon) icon.style.transform = on ? "rotate(180deg)" : "rotate(0deg)";
         };
       }
       return;
@@ -3496,30 +3526,105 @@ Download link:
     if(btn) btn.onclick = ()=> openFilmSheet(collectionId);
   }
 
-  function bindDnD(){
-    const nodes = Array.from($cgrid.querySelectorAll(".col-item"));
-    nodes.forEach(el=>{
+  function bindDnD(scenes){
+    const sceneNodes = Array.from($cgrid.querySelectorAll(".scene"));
+    sceneNodes.forEach(scEl=>{
+      const sceneIdx = Number(scEl.getAttribute("data-scene"));
+      const sc = scenes?.[sceneIdx];
+      const canDragScene = !!(sc && sc.id);
+
+      scEl.setAttribute("draggable", canDragScene ? "true" : "false");
+
+      scEl.addEventListener("dragstart", (ev)=>{
+        if(!canDragScene) return ev.preventDefault();
+        scEl.classList.add("dragging");
+        ev.dataTransfer.effectAllowed = "move";
+        scEl.dataset.dragType = "scene";
+        scEl.dataset.dragFrom = String(sceneIdx);
+      });
+
+      scEl.addEventListener("dragend", ()=>{
+        scEl.classList.remove("dragging");
+        delete scEl.dataset.dragType;
+        delete scEl.dataset.dragFrom;
+      });
+
+      scEl.addEventListener("dragover", (ev)=>{
+        if(!canDragScene) return;
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+      });
+
+      scEl.addEventListener("drop", (ev)=>{
+        ev.preventDefault();
+        const fromIdx = Number(document.querySelector(".scene.dragging")?.dataset.dragFrom);
+        const toIdx = Number(scEl.getAttribute("data-scene"));
+        if(Number.isNaN(fromIdx) || Number.isNaN(toIdx) || fromIdx === toIdx) return;
+
+        const fromScene = scenes[fromIdx];
+        const toScene = scenes[toIdx];
+        if(!fromScene?.id || !toScene?.id) return;
+
+        const order = scenes
+          .filter(x=>x.id)
+          .map(x=>String(x.id));
+
+        const moved = order.splice(order.indexOf(String(fromScene.id)), 1)[0];
+        order.splice(order.indexOf(String(toScene.id)), 0, moved);
+
+        const byId = new Map((currentCol.sections||[]).map(s=>[String(s.id), s]));
+        currentCol.sections = order.map(id=>byId.get(id)).filter(Boolean);
+
+        renderCollectionModalGrid();
+      });
+    });
+
+    const itemNodes = Array.from($cgrid.querySelectorAll(".col-item"));
+    itemNodes.forEach(el=>{
+      const sceneIndex = Number(el.getAttribute("data-scene") || "0");
+
+      el.setAttribute("draggable", "true");
+
       el.addEventListener("dragstart", (ev)=>{
         el.classList.add("dragging");
-        dragFromIndex = Number(el.getAttribute("data-idx"));
+        el.dataset.dragFromIdx = el.getAttribute("data-idx");
+        el.dataset.dragFromScene = String(sceneIndex);
         ev.dataTransfer.effectAllowed = "move";
       });
+
       el.addEventListener("dragend", ()=>{
         el.classList.remove("dragging");
+        delete el.dataset.dragFromIdx;
+        delete el.dataset.dragFromScene;
       });
+
       el.addEventListener("dragover", (ev)=>{
         ev.preventDefault();
         ev.dataTransfer.dropEffect = "move";
       });
+
       el.addEventListener("drop", (ev)=>{
         ev.preventDefault();
+
+        const fromScene = Number(document.querySelector(".col-item.dragging")?.dataset.dragFromScene);
+        const fromIdx = Number(document.querySelector(".col-item.dragging")?.dataset.dragFromIdx);
+        const toScene = Number(el.getAttribute("data-scene"));
         const toIdx = Number(el.getAttribute("data-idx"));
-        if(dragFromIndex == null || Number.isNaN(toIdx) || dragFromIndex === toIdx) return;
-        const arr = currentCol.items.slice();
-        const [moved] = arr.splice(dragFromIndex, 1);
-        arr.splice(toIdx, 0, moved);
-        currentCol.items = arr;
-        dragFromIndex = toIdx;
+
+        if([fromScene,fromIdx,toScene,toIdx].some(Number.isNaN)) return;
+        if(fromScene !== toScene) return;
+
+        const sc = scenes[fromScene];
+        if(!sc) return;
+
+        const sectionId = sc.id ? String(sc.id) : "";
+        const inScene = (currentCol.items||[]).filter(x => String(x.section_id||"") === sectionId);
+        const others  = (currentCol.items||[]).filter(x => String(x.section_id||"") !== sectionId);
+
+        const [moved] = inScene.splice(fromIdx, 1);
+        inScene.splice(toIdx, 0, moved);
+
+        currentCol.items = others.concat(inScene);
         renderCollectionModalGrid();
       });
     });
@@ -3528,8 +3633,25 @@ Download link:
   async function saveCollectionOrder(){
     if(!currentCol) return;
     await requireToken();
-    const ordered = currentCol.items.map(x=> x.id);
-    await api("/api/collections/reorder", { method:"POST", body: JSON.stringify({ id: currentCol.col.id, ordered_feed_post_ids: ordered }) });
+
+    const secs = Array.isArray(currentCol.sections) ? currentCol.sections : [];
+    if(secs.length){
+      const ordered_section_ids = secs.map(s=>s.id);
+      try{
+        await api("/api/collections/sections/reorder", {
+          method:"POST",
+          body: JSON.stringify({ collection_id: currentCol.col.id, ordered_section_ids })
+        });
+      }catch(e){
+        console.warn("sections/reorder failed:", e);
+      }
+    }
+
+    const ordered = (currentCol.items || []).map(x=> x.id);
+    await api("/api/collections/reorder", {
+      method:"POST",
+      body: JSON.stringify({ id: currentCol.col.id, ordered_feed_post_ids: ordered })
+    });
   }
 
   function closeCollectionModal(){
@@ -4193,30 +4315,15 @@ Download link:
 
     if(mode === "edit" && col){
       editingColId = col.id;
-      try{
-        const j = await api(`/api/collections/get?id=${encodeURIComponent(col.id)}`, { method:"GET" });
-        const items = Array.isArray(j.items) ? j.items : [];
-        colDraftMedia = items.map(x=> x.id);
-        colDraftCover = col.cover_feed_post_id || (colDraftMedia[0] || null);
-      }catch(e){
-        toast(e.message || "Failed to load collection items");
-      }
     }
 
-    if(mode !== "edit"){
-      $kPickMedia.style.display = "none";
-      $kPickedInfo.style.display = "none";
-      $kSelectedWrap.style.display = "none";
-    } else {
-      $kPickMedia.style.display = "inline-flex";
-      $kPickedInfo.style.display = "block";
-      $kSelectedWrap.style.display = colDraftMedia.length ? "block" : "none";
-    }
-
-    $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
+    $kPickMedia.style.display = "none";
+    $kPickedInfo.style.display = "none";
+    $kSelectedWrap.style.display = "none";
     $kPickGrid.style.display = "none";
     $kPickGrid.innerHTML = "";
-    renderCollectionDraftSelected();
+    $kPickedInfo.textContent = "";
+    $kSelectedGrid.innerHTML = "";
     $kb.classList.add("open");
   }
 
@@ -4270,7 +4377,10 @@ Download link:
       const description = ($kdesc.value || "").trim();
 
       if(editingColId){
-        await api("/api/collections/update", { method:"POST", body: JSON.stringify({ id: editingColId, title, description, feed_post_ids: colDraftMedia, cover_feed_post_id: colDraftCover }) });
+        await api("/api/collections/update", {
+          method:"POST",
+          body: JSON.stringify({ id: editingColId, title, description })
+        });
         toast("Updated");
       } else {
         const r = await api("/api/collections/create", {
@@ -4439,26 +4549,8 @@ Download link:
   $ksave.onclick = saveCollectionDraft;
 
   $kPickMedia.onclick = async () => {
-    await ensureLibraryLoadedForPicker();
-    const q = ($ksearch.value||"").trim().toLowerCase();
-    const filtered = libraryItems.filter(it => !q || String(it.title||"").toLowerCase().includes(q)).slice(0, 200);
-    const items = filtered.map(it=>({ id: it.id, title: it.title||"Untitled", description:"", thumb:(it.thumb_url||it.media_url||""), type: it.file_type || "", media_url: it.media_url || "" }));
-    const picked = await openPicker("library", {
-      title: "Add items to collection",
-      hint: "Select items (multi-select).",
-      items,
-      multi: true,
-      layout: "wide",
-      preselected: colDraftMedia
-    });
-    if(Array.isArray(picked)){
-      const merged = new Set(colDraftMedia.map(String));
-      picked.forEach(id => merged.add(String(id)));
-      colDraftMedia = Array.from(merged);
-      if(!colDraftCover || !colDraftMedia.includes(colDraftCover)) colDraftCover = colDraftMedia[0] || null;
-      $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
-      renderCollectionDraftSelected();
-    }
+    toast("Add media only via Scenes");
+    return;
   };
 
   $pcoverEdit.onclick = async () => {
