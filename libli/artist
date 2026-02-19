@@ -55,7 +55,16 @@
     overflow:hidden;
     border:1px solid rgba(255,255,255,0.10);
     background: rgba(255,255,255,0.03);
-    margin-bottom:-34px;
+  }
+  .pcover-inline{
+    margin-top:14px;
+    margin-bottom:0;
+    height:150px;
+    border-radius:20px;
+  }
+  .pcover-inline .pcover-bg img{
+    transform: scale(1.02);
+    object-position: 50% 48%;
   }
   .pcover-bg{
     position:absolute; inset:0;
@@ -90,7 +99,7 @@
   .pcover-del{ right:58px; }
   .pcover-edit:hover, .pcover-del:hover{ background:#fff; color:#000; }
 
-  .phead{ display:flex; gap:14px; align-items:center; position:relative; margin-top:-18px; }
+  .phead{ display:flex; gap:14px; align-items:center; position:relative; }
   .pava{
     width:64px; height:64px; border-radius:50%;
     background: rgba(255,255,255,0.08);
@@ -134,6 +143,11 @@
   .pname .vfy{ width:20px; height:20px; }
   .pname .vfy svg{ width:20px; height:20px; }
   .vfy-tip{ position:fixed; z-index:20050; display:none; max-width:220px; background:#0b0b0b; color:#fff; border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:8px 10px; font-size:12px; line-height:1.3; pointer-events:none; }
+  #fsTip{
+    white-space:pre-line;
+    max-width:380px;
+    line-height:1.35;
+  }
 
   .links{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
   .chip{
@@ -1221,11 +1235,6 @@
 
   <div class="wrap">
     <div class="top">
-      <div class="pcover" id="pcover">
-        <div class="pcover-bg" id="pcoverBg"></div>
-        <button class="pcover-edit" id="pcoverEdit" type="button" style="display:none;" title="Change cover">✎</button>
-        <button class="pcover-del" id="pcoverDel" type="button" style="display:none;" title="Remove cover">✕</button>
-      </div>
       <div>
         <div class="phead">
           <div class="pava" id="p-ava"></div>
@@ -1234,6 +1243,11 @@
             <div class="puser" id="p-user">@…</div>
             <div class="fcnt"><span>Followers</span><b id="p-followers">0</b></div>
           </div>
+        </div>
+        <div class="pcover pcover-inline" id="pcover">
+          <div class="pcover-bg" id="pcoverBg"></div>
+          <button class="pcover-edit" id="pcoverEdit" type="button" style="display:none;" title="Change cover">✎</button>
+          <button class="pcover-del" id="pcoverDel" type="button" style="display:none;" title="Remove cover">✕</button>
         </div>
         <div class="pbio" id="p-bio" style="display:none;"></div>
         <div class="links" id="p-links" style="display:none;"></div>
@@ -1559,7 +1573,7 @@
   </div>
 
   <!-- Film rules tooltip -->
-  <div class="vfy-tip" id="fsTip" style="max-width:360px;"></div>
+  <div class="vfy-tip" id="fsTip"></div>
 
   <div class="sheet-backdrop" id="cfB">
     <div class="sheet" onclick="event.stopPropagation()" style="max-width:520px;height:auto;">
@@ -1862,9 +1876,14 @@
     });
   }
 
-  function confirmUI(title, text){
+  function confirmUI(title, text, okText="OK", danger=false){
     $cfTitle.textContent = title || "Confirm";
     $cfText.textContent = text || "";
+    $cfOk.textContent = okText;
+
+    $cfOk.classList.remove("btn-danger","btn-primary");
+    $cfOk.classList.add(danger ? "btn-danger" : "btn-primary");
+
     $cfB.classList.add("open");
     return new Promise((resolve)=>{
       const done = (v)=>{ $cfB.classList.remove("open"); resolve(v); };
@@ -1921,17 +1940,18 @@
 
   function bindFilmRulesTooltip(){
     if(!$fsRulesBtn || !$fsTip) return;
-    const text =
-`Rules:
-• No porn/nudity
-• No politics/propaganda
-• No hate/violence
+    const text = `Rules:
+• No porn / nudity
+• No politics / propaganda
+• No hate / violence
 • No doxxing / personal data
 
-Duration: 20 sec – 5 min
-Quality: HD – 4K
+Requirements:
+• Duration: 20 sec – 5 min
+• Quality: HD – 4K
 
-Important: make sure we can download the file from your link.`;
+Download link:
+• Make sure we can download the file from your link.`;
 
     $fsRulesBtn.addEventListener("mouseenter", (ev)=>{
       $fsTip.textContent = text;
@@ -3179,10 +3199,11 @@ Important: make sure we can download the file from your link.`;
               <div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>
               ${scene.description ? `<div class="scene-desc">${escapeHtml(scene.description)}</div>` : ``}
             </div>
-            ${isOwnProfile && scene.id ? `
+            ${isOwnProfile ? `
               <div class="scene-actions">
-                <button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>
-                <button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>
+                <button class="btn-ghost" data-sc-add="${escapeHtml(String(scene.id ?? ""))}">+ Add</button>
+                ${scene.id ? `<button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>` : ``}
+                ${scene.id ? `<button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>` : ``}
               </div>
             ` : ``}
           </div>
@@ -3218,10 +3239,64 @@ Important: make sure we can download the file from your link.`;
       };
     });
 
+    $cgrid.querySelectorAll("[data-sc-add]").forEach(b=>{
+      b.onclick = async ()=>{
+        try{
+          await requireToken();
+          if(!currentCol) return;
+
+          const sidRaw = b.getAttribute("data-sc-add");
+          const section_id = sidRaw ? String(sidRaw).trim() : null;
+
+          await ensureLibraryLoadedForPicker();
+
+          const items = libraryItems.slice(0, 400).map(it=>({
+            id: it.id,
+            title: it.title || "Untitled",
+            description: "",
+            thumb: (it.thumb_url || it.media_url || ""),
+            type: it.file_type || "",
+            media_url: it.media_url || ""
+          }));
+
+          const picked = await openPicker("library", {
+            title: "Add to scene",
+            hint: "Select items (multi-select).",
+            items,
+            multi: true,
+            layout: "wide",
+            preselected: []
+          });
+
+          if(!Array.isArray(picked) || !picked.length) return;
+
+          for(const fp of picked){
+            await api("/api/collections/items/move", {
+              method:"POST",
+              body: JSON.stringify({
+                collection_id: currentCol.col.id,
+                feed_post_id: fp,
+                to_section_id: section_id || null,
+                to_index: 9999
+              })
+            });
+          }
+
+          const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+          currentCol.sections = j.sections || [];
+          currentCol.items = j.items || [];
+          renderCollectionModalGrid();
+          toast("Added");
+        }catch(e){
+          toast(e.message || "Failed");
+        }
+      };
+    });
+
     $cgrid.querySelectorAll("[data-sc-del]").forEach(b=>{
       b.onclick = async ()=>{
         const id = b.getAttribute("data-sc-del");
-        const ok = await confirmUI("Delete scene", "Scene will be removed. Items will return to Default.");
+        const ok = await confirmUI("Delete scene", "Scene will be removed. Items will return to Default.", "Delete", true);
         if(!ok) return;
         try{
           await requireToken();
@@ -3797,6 +3872,10 @@ Important: make sure we can download the file from your link.`;
 
     const layout = data.layout === "wide" ? "wide" : "list";
     let filterType = "all";
+    const allowedKinds = Array.isArray(data.allowedKinds) ? data.allowedKinds : null;
+    if(allowedKinds && allowedKinds.length === 1){
+      filterType = allowedKinds[0];
+    }
     let visibleCount = layout === "wide" ? 48 : 200;
 
     if(data.preselected && Array.isArray(data.preselected)){
@@ -3804,7 +3883,8 @@ Important: make sure we can download the file from your link.`;
     }
 
     if($pickFilters){
-      $pickFilters.style.display = layout === "wide" ? "flex" : "none";
+      const show = layout === "wide" && !allowedKinds;
+      $pickFilters.style.display = show ? "flex" : "none";
       $pickFilters.querySelectorAll("[data-type]").forEach(btn=>{
         btn.classList.toggle("on", btn.getAttribute("data-type") === "all");
         btn.onclick = ()=>{
@@ -3827,6 +3907,7 @@ Important: make sure we can download the file from your link.`;
       const q = (filterText||"").toLowerCase().trim();
       const source = (data.items || []).filter(it=>{
         const kind = resolveKind(it);
+        if(allowedKinds && !allowedKinds.includes(kind)) return false;
         if(filterType !== "all" && kind !== filterType) return false;
         if(!q) return true;
         return String(it.title||"").toLowerCase().includes(q) || String(it.description||"").toLowerCase().includes(q);
@@ -4116,7 +4197,7 @@ Important: make sure we can download the file from your link.`;
 
   $btnColReorderSave.onclick = async () => {
     if(!currentCol || !colReorderMode) return;
-    const ok = await confirmUI("Save order", "Apply new order?");
+    const ok = await confirmUI("Save order", "Apply new order?", "Save", false);
     if(!ok) return;
     try{
       await saveCollectionOrder();
@@ -4246,10 +4327,11 @@ Important: make sure we can download the file from your link.`;
 
     const picked = await openPicker("profile_cover", {
       title: "Choose profile cover",
-      hint: "Pick one item from your Library",
+      hint: "Pick one image from your Library",
       items,
       multi: false,
-      layout: "wide"
+      layout: "wide",
+      allowedKinds: ["image"]
     });
 
     if(!picked) return;
