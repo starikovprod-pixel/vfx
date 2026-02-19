@@ -55,6 +55,16 @@
   margin-bottom:-56px;
 }
 
+/* Make cover visually reach avatar bottom */
+.pcover::after{
+  content:"";
+  position:absolute;
+  left:0; right:0;
+  bottom:-76px;
+  height:76px;
+  background: rgba(255,255,255,0.03);
+}
+
 .pcover-bg{
   position:absolute; inset:0;
 }
@@ -68,10 +78,9 @@
 .pcover-bg::after{
   content:"";
   position:absolute; inset:0;
-  /* ✅ снизу темнее, вверх прозрачнее */
   background: linear-gradient(to top,
-    rgba(0,0,0,.55) 0%,
-    rgba(0,0,0,.22) 45%,
+    rgba(0,0,0,.60) 0%,
+    rgba(0,0,0,.26) 55%,
     rgba(0,0,0,.06) 100%);
 }
 
@@ -946,6 +955,11 @@
     border:1px solid rgba(255,255,255,0.12);
     background: rgba(0,0,0,0.25);
   }
+  .col-film:has(.film-hero){
+    padding:0;
+    border:0;
+    background: transparent;
+  }
   .col-film h3{ margin:0; font-size:14px; font-weight:950; }
   .col-film p{ margin:8px 0 0; color:rgba(255,255,255,0.75); font-size:13px; line-height:1.35; }
   .col-film video{
@@ -976,7 +990,7 @@
     padding:10px 12px;
   }
 
-  /* ===== FILM HERO (cinema layout like reference) ===== */
+  /* ===== FILM HERO (full-width video + panel under it) ===== */
   .film-hero{
     margin-top:14px;
     border-radius:24px;
@@ -985,16 +999,10 @@
     overflow:hidden;
   }
 
-  .film-hero .film-wrap{
-    display:grid;
-    grid-template-columns: 1.65fr 1fr;
-    gap:0;
-  }
-
   .film-hero .film-media{
     position:relative;
     background:#000;
-    min-height: 320px;
+    aspect-ratio: 16 / 9;
   }
 
   .film-hero video{
@@ -1007,27 +1015,27 @@
   .film-hero .film-media::after{
     content:"";
     position:absolute; inset:0;
-    background: linear-gradient(to right,
-      rgba(0,0,0,.05) 0%,
-      rgba(0,0,0,.15) 55%,
-      rgba(0,0,0,.55) 100%);
-    pointer-events:none; /* FIX controls */
+    background: linear-gradient(to top,
+      rgba(0,0,0,.55) 0%,
+      rgba(0,0,0,.18) 45%,
+      rgba(0,0,0,.05) 100%);
+    pointer-events:none;
   }
 
-  .film-hero .film-side{
-    padding:18px 18px 18px;
-    border-left:1px solid rgba(255,255,255,0.10);
+  .film-hero .film-panel{
+    padding:16px 16px 16px;
+    border-top:1px solid rgba(255,255,255,0.10);
     background: rgba(0,0,0,0.18);
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:10px;
   }
 
   .film-hero .film-title{
     margin:0;
     font-weight:1000;
-    font-size:22px;
-    letter-spacing:.4px;
+    font-size:20px;
+    letter-spacing:.45px;
     text-transform:uppercase;
     line-height:1.1;
   }
@@ -1050,7 +1058,6 @@
     flex:0 0 auto;
     display:flex; align-items:center; justify-content:center;
   }
-
   .film-hero .by-ava img{ width:100%; height:100%; object-fit:cover; display:block; }
   .film-hero .by-name{ display:flex; align-items:center; gap:6px; }
   .film-hero .by-name a{ color:#fff; text-decoration:none; }
@@ -1063,17 +1070,14 @@
     margin:0;
 
     display:-webkit-box;
-    -webkit-line-clamp:6;
+    -webkit-line-clamp:5;
     -webkit-box-orient:vertical;
     overflow:hidden;
   }
-
-  .film-hero .film-desc.open{
-    -webkit-line-clamp:unset;
-  }
+  .film-hero .film-desc.open{ -webkit-line-clamp:unset; }
 
   .film-hero .film-more{
-    display:none; /* по умолчанию скрыто — включаем только если реально есть оверфлоу */
+    display:none;
     align-self:flex-start;
     height:34px;
     padding:0 12px;
@@ -1087,26 +1091,13 @@
     gap:8px;
     align-items:center;
   }
-
   .film-hero .film-more:hover{
     background: rgba(255,255,255,0.10);
     border-color: rgba(255,255,255,0.22);
   }
-
   .film-hero .film-more svg{
     width:18px; height:18px;
     transition: transform .18s ease;
-  }
-
-  @media(max-width: 980px){
-    .film-hero .film-wrap{
-      grid-template-columns: 1fr;
-    }
-    .film-hero .film-side{
-      border-left:0;
-      border-top:1px solid rgba(255,255,255,0.10);
-    }
-    .film-hero .film-media{ min-height:240px; }
   }
 
   .picked-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; }
@@ -3443,7 +3434,37 @@
         byAvaHTML = `<div class="by-ava"><img src="${escapeHtml(profile.avatar_url)}" alt=""></div>`;
       }
 
-      $colFilm.innerHTML = `<div class="film-hero"><div class="film-wrap"><div class="film-media"><video controls playsinline preload="metadata" crossorigin="anonymous"><source src="${escapeHtml(film.published_url)}"></video></div><div class="film-side"><h3 class="film-title">${escapeHtml(t)}</h3><div class="film-by">${byAvaHTML}<div class="by-name"><span style="opacity:.7;">Video by:</span><a href="${byLink}">${escapeHtml(byDisplay)}</a>${byVerified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}</div></div>${d ? `<div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>` : `<div class="muted">No description.</div>`}<button class="film-more" id="filmMore" type="button" aria-label="Toggle description"><span>Read more</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div></div>`;
+      $colFilm.innerHTML = `
+  <div class="film-hero">
+    <div class="film-media">
+      <video controls playsinline preload="metadata" crossorigin="anonymous">
+        <source src="${escapeHtml(film.published_url)}">
+      </video>
+    </div>
+
+    <div class="film-panel">
+      <h3 class="film-title">${escapeHtml(t)}</h3>
+
+      <div class="film-by">
+        ${byAvaHTML}
+        <div class="by-name">
+          <span style="opacity:.7;">Video by:</span>
+          <a href="${byLink}">${escapeHtml(byDisplay)}</a>
+          ${byVerified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}
+        </div>
+      </div>
+
+      ${d ? `<div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>` : `<div class="muted">No description.</div>`}
+
+      <button class="film-more" id="filmMore" type="button" aria-label="Toggle description">
+        <span>Read more</span>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+`;
 
       bindVerifiedTooltip($colFilm);
 
