@@ -47,7 +47,7 @@
   width:100%;
   height:230px;
   border-radius:22px;
-  overflow:hidden;
+  overflow:visible;
   border:1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.03);
 
@@ -67,6 +67,8 @@
 
 .pcover-bg{
   position:absolute; inset:0;
+  border-radius:22px;
+  overflow:hidden;
 }
 .pcover-bg img{
   position:absolute; inset:0;
@@ -792,7 +794,7 @@
     background: rgba(255,255,255,0.05);
     border:1px solid rgba(255,255,255,0.12);
     border-radius:24px;
-    overflow:hidden;
+    overflow:auto;
     box-shadow: var(--shadow);
     display:flex;
     flex-direction:column;
@@ -809,11 +811,16 @@
   }
   .col-close:hover{ background:#fff; color:#000; }
   .col-header{
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(15,15,15,0.72);
+    backdrop-filter: blur(14px);
     padding:18px 18px 16px;
     border-bottom:1px solid rgba(255,255,255,0.10);
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:14px;
   }
   .col-toprow{
     display:flex;
@@ -843,7 +850,7 @@
   .col-h-meta .stat{ background: rgba(0,0,0,0.35); border-color: rgba(255,255,255,0.10); }
   .col-body{
     padding:18px;
-    overflow:auto;
+    overflow:visible;
     flex:1;
   }
 
@@ -950,15 +957,15 @@
   .reorder-footer.open{ display:flex; }
   .col-film{
     margin-top:12px;
-    padding:12px;
-    border-radius:18px;
+    padding:14px;
+    border-radius:20px;
     border:1px solid rgba(255,255,255,0.12);
-    background: rgba(0,0,0,0.25);
+    background: rgba(0,0,0,0.22);
   }
   .col-film:has(.film-hero){
-    padding:0;
-    border:0;
-    background: transparent;
+    padding:14px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.22);
   }
   .col-film h3{ margin:0; font-size:14px; font-weight:950; }
   .col-film p{ margin:8px 0 0; color:rgba(255,255,255,0.75); font-size:13px; line-height:1.35; }
@@ -992,11 +999,13 @@
 
   /* ===== FILM HERO (full-width video + panel under it) ===== */
   .film-hero{
-    margin-top:14px;
-    border-radius:24px;
-    border:1px solid rgba(255,255,255,0.12);
+    margin:0 auto;
+    width: min(980px, 100%);
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,0.14);
     background: rgba(0,0,0,0.30);
     overflow:hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
   }
 
   .film-hero .film-media{
