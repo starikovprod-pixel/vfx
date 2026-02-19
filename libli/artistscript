@@ -846,64 +846,13 @@
             if(part.type === "text"){
               return `<span>${escapeHtml(part.value)}</span>`;
             }
-            return `<div class="embed-collection" data-embed-col="${escapeHtml(part.id)}">
-                      <div class="embed-bg" data-embed-bg="${escapeHtml(part.id)}"></div>
-                      <div class="embed-overlay">
-                        <div class="embed-title">Collection</div>
-                        <div class="embed-desc">Loading…</div>
-                      </div>
-                    </div>`;
+            return `<div class="embed-collection" data-embed-col="${escapeHtml(part.id)}"><div class="embed-bg" data-embed-bg="${escapeHtml(part.id)}"></div><div class="embed-overlay"><div class="embed-title">Collection</div><div class="embed-desc">Loading…</div></div></div>`;
           }).join("");
 
           const hasSlider = media.length > 0;
           const sliderId = `ps_${p.id.replaceAll("-","")}`;
 
-          return `
-            <div class="post" data-post="${escapeHtml(p.id)}">
-              <div class="post-head">
-                <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
-                <div class="post-meta">
-                  <div class="post-name">${escapeHtml(p.display_name || p.username || username)} ${verifiedBadgeHTML(p.verified === true)}</div>
-                  <div class="post-time">${escapeHtml(fmtDate(p.created_at))}</div>
-                </div>
-              </div>
-
-              <div class="post-body">${bodyHtml}</div>
-
-              ${hasSlider ? `
-                <div class="pslider" data-slider="${sliderId}">
-                  <div class="pslide" data-slide></div>
-                  ${media.length > 1 ? `<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button>` : ``}
-                  ${media.length > 1 ? `<div class="pdots" data-dots></div>` : ``}
-                </div>
-              ` : ``}
-
-              <div class="post-actions">
-                <button class="mini ${p._liked ? "on like" : ""}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button>
-                <button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button>
-                <button class="mini ${p._saved ? "on save" : ""}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button>
-                <div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div>
-
-                ${isOwnProfile ? `
-                  <button class="mini" data-act="edit" data-post="${escapeHtml(p.id)}">${ICONS.edit}<span>Edit</span></button>
-                  <button class="mini danger" data-act="delete" data-post="${escapeHtml(p.id)}">${ICONS.trash}<span>Delete</span></button>
-                ` : ``}
-              </div>
-
-              <div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0 ? "flex" : "none"};">
-                <div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="empty" style="padding:18px">Loading…</div></div>
-                <button class="btn-ghost" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button>
-                <div class="pc-form">
-                  ${myAvatarHTML()}
-                  <textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea>
-                  <button class="mini" type="button" data-emo="${escapeHtml(p.id)}">Emoji</button>
-                  <button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button>
-                </div>
-              </div>
-
-              ${idx < postItems.length-1 ? `<div class="feed-sep"></div>` : ``}
-            </div>
-          `;
+          return `<div class="post" data-post="${escapeHtml(p.id)}"><div class="post-head"><div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div><div class="post-meta"><div class="post-name">${escapeHtml(p.display_name || p.username || username)} ${verifiedBadgeHTML(p.verified === true)}</div><div class="post-time">${escapeHtml(fmtDate(p.created_at))}</div></div></div><div class="post-body">${bodyHtml}</div>${hasSlider ? `<div class="pslider" data-slider="${sliderId}"><div class="pslide" data-slide></div>${media.length > 1 ? `<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button>` : ``}${media.length > 1 ? `<div class="pdots" data-dots></div>` : ``}</div>` : ``}<div class="post-actions"><button class="mini ${p._liked ? "on like" : ""}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button><button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button><button class="mini ${p._saved ? "on save" : ""}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button><div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div>${isOwnProfile ? `<button class="mini" data-act="edit" data-post="${escapeHtml(p.id)}">${ICONS.edit}<span>Edit</span></button><button class="mini danger" data-act="delete" data-post="${escapeHtml(p.id)}">${ICONS.trash}<span>Delete</span></button>` : ``}</div><div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0 ? "flex" : "none"};"><div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="empty" style="padding:18px">Loading…</div></div><button class="btn-ghost" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button><div class="pc-form">${myAvatarHTML()}<textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea><button class="mini" type="button" data-emo="${escapeHtml(p.id)}">Emoji</button><button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button></div></div>${idx < postItems.length-1 ? `<div class="feed-sep"></div>` : ``}</div>`;
         }).join("")}</div>`;
 
     bindVerifiedTooltip($grid);
@@ -1056,42 +1005,7 @@
         const isMine = myId && String(c.user_id) === myId;
         const canDelete = isMine || (isOwnProfile === true);
         const canEdit = isMine;
-        return `
-          <div class="pc-item" id="c-${escapeHtml(c.id)}" data-reply-to="${escapeHtml(c.reply_to_comment_id || "")}">
-            <a href="/artist?username=${encodeURIComponent(c.username||"")}" class="pc-ava-link"><div class="avatar ${avEmoji ? "emoji" : ""}">${avHtml}</div></a>
-            <div class="pc-bubble">
-              <div class="pc-top">
-                <a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||"")}">
-                  ${escapeHtml(c.display_name||c.username||"user")}
-                  ${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}
-                </a>
-                <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
-                  <button class="cic ${c.liked_by_me ? "on" : ""}" data-clike="${escapeHtml(c.id)}" title="Like">
-                    ${ICONS.like}<span>${c.like_count||0}</span>
-                  </button>
-                </div>
-              </div>
-              <div class="pc-body" data-body="${c.id}">${linkifyMentions(c.body||"")}</div>
-              <div class="pc-edit" data-editbox="${c.id}" style="display:none; margin-top:10px;">
-                <textarea class="pc-edit-ta" data-ta="${c.id}"></textarea>
-                <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:8px;">
-                  <button class="mini" data-emo-edit="${c.id}">Emoji</button>
-                  <button class="mini" data-c-cancel="${c.id}">Cancel</button>
-                  <button class="mini on save" data-c-save="${c.id}">Save</button>
-                </div>
-              </div>
-              <div class="pc-footer">
-                <div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div>
-
-                <div class="pc-actions">
-                  ${canEdit ? `<button class="cact" data-c-edit="${escapeHtml(c.id)}" title="Edit">${ICONS.edit}</button>` : ""}
-                  <button class="cact" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
-                  ${canDelete ? `<button class="cact danger" data-c-del="${escapeHtml(c.id)}" title="Delete">${ICONS.trash}</button>` : ""}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
+        return `<div class="pc-item" id="c-${escapeHtml(c.id)}" data-reply-to="${escapeHtml(c.reply_to_comment_id || "")}"><a href="/artist?username=${encodeURIComponent(c.username||"")}" class="pc-ava-link"><div class="avatar ${avEmoji ? "emoji" : ""}">${avHtml}</div></a><div class="pc-bubble"><div class="pc-top"><a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||"")}">${escapeHtml(c.display_name||c.username||"user")}${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}</a><div style="margin-left:auto;display:flex;gap:8px;align-items:center;"><button class="cic ${c.liked_by_me ? "on" : ""}" data-clike="${escapeHtml(c.id)}" title="Like">${ICONS.like}<span>${c.like_count||0}</span></button></div></div><div class="pc-body" data-body="${c.id}">${linkifyMentions(c.body||"")}</div><div class="pc-edit" data-editbox="${c.id}" style="display:none; margin-top:10px;"><textarea class="pc-edit-ta" data-ta="${c.id}"></textarea><div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:8px;"><button class="mini" data-emo-edit="${c.id}">Emoji</button><button class="mini" data-c-cancel="${c.id}">Cancel</button><button class="mini on save" data-c-save="${c.id}">Save</button></div></div><div class="pc-footer"><div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div><div class="pc-actions">${canEdit ? `<button class="cact" data-c-edit="${escapeHtml(c.id)}" title="Edit">${ICONS.edit}</button>` : ""}<button class="cact" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>${canDelete ? `<button class="cact danger" data-c-del="${escapeHtml(c.id)}" title="Delete">${ICONS.trash}</button>` : ""}</div></div></div></div>`;
       }).join("");
 
       bindVerifiedTooltip(listEl);
@@ -1338,24 +1252,7 @@
             .filter(Boolean)
             .slice(0, 10);
 
-          return `
-            <div class="ccard" data-col="${escapeHtml(c.id)}">
-              <div class="cc-bg" data-ccbg="${escapeHtml(c.id)}">
-                ${imgs.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>` : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("")}
-              </div>
-              <div class="cc-glass">
-                <div>
-                  <div class="cc-title">${escapeHtml(c.title || "Untitled collection")}</div>
-                  <div class="cc-desc">${escapeHtml(c.description || "")}</div>
-                </div>
-                <div class="cc-meta">
-                  <div class="cc-pill" data-clike="${escapeHtml(c.id)}">${ICONS.like} <b>${c.like_count||0}</b></div>
-                  <div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div>
-                  <div class="cc-pill ${c._saved ? "mini on save" : ""}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div>
-                </div>
-              </div>
-            </div>
-          `;
+          return `<div class="ccard" data-col="${escapeHtml(c.id)}"><div class="cc-bg" data-ccbg="${escapeHtml(c.id)}">${imgs.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>` : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("")}</div><div class="cc-glass"><div><div class="cc-title">${escapeHtml(c.title || "Untitled collection")}</div><div class="cc-desc">${escapeHtml(c.description || "")}</div></div><div class="cc-meta"><div class="cc-pill" data-clike="${escapeHtml(c.id)}">${ICONS.like} <b>${c.like_count||0}</b></div><div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div><div class="cc-pill ${c._saved ? "mini on save" : ""}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div></div></div></div>`;
         }).join("")}</div>`;
 
     $grid.querySelectorAll("[data-col]").forEach(el=>{
@@ -1512,41 +1409,10 @@
         const url = (it.media_url || it.thumb_url || "").trim();
         const isV = isVideoUrl(url);
         const thumb = (it.thumb_url || it.media_url || "").trim();
-        return `
-          <div class="col-item" draggable="${(colReorderMode && !sections.length) ? "true" : "false"}" data-idx="${idx}" data-scene="${sceneIdx}">
-            ${isV
-              ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>`
-              : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />`
-            }
-            ${colReorderMode ? `
-              <div class="drag-handle" title="Drag">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-                </svg>
-              </div>` : ``}
-          </div>
-        `;
+        return `<div class="col-item" draggable="${(colReorderMode && !sections.length) ? "true" : "false"}" data-idx="${idx}" data-scene="${sceneIdx}">${isV ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>` : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />`}${colReorderMode ? `<div class="drag-handle" title="Drag"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>` : ``}</div>`;
       }).join("");
 
-      return `
-        <div class="scene" data-scene="${sceneIdx}">
-          <div class="scene-head">
-            <div>
-              <div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>
-              ${scene.description ? `<div class="scene-desc">${escapeHtml(scene.description)}</div>` : ``}
-            </div>
-            ${isOwnProfile ? `
-              <div class="scene-actions">
-                <button class="btn-ghost" data-sc-add="${escapeHtml(String(scene.id ?? ""))}">+ Add</button>
-                ${scene.id ? `<button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>` : ``}
-                ${scene.id ? `<button class="btn-ghost" data-sc-media="${escapeHtml(scene.id)}">Manage</button>` : ``}
-                ${scene.id ? `<button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>` : ``}
-              </div>
-            ` : ``}
-          </div>
-          <div class="scene-grid">${grid || `<div class="empty" style="grid-column:1/-1">No items.</div>`}</div>
-        </div>
-      `;
+      return `<div class="scene" data-scene="${sceneIdx}"><div class="scene-head"><div><div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>${scene.description ? `<div class="scene-desc">${escapeHtml(scene.description)}</div>` : ``}</div>${isOwnProfile ? `<div class="scene-actions"><button class="btn-ghost" data-sc-add="${escapeHtml(String(scene.id ?? ""))}">+ Add</button>${scene.id ? `<button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>` : ``}${scene.id ? `<button class="btn-ghost" data-sc-media="${escapeHtml(scene.id)}">Manage</button>` : ``}${scene.id ? `<button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>` : ``}</div>` : ``}</div><div class="scene-grid">${grid || `<div class="empty" style="grid-column:1/-1">No items.</div>`}</div></div>`;
     }).join("");
 
     $cgrid.querySelectorAll(".col-item").forEach(el=>{
@@ -1771,39 +1637,7 @@
         byAvaHTML = `<div class="by-ava"><img src="${escapeHtml(profile.avatar_url)}" alt=""></div>`;
       }
 
-      $colFilm.innerHTML = `
-        <div class="film-hero">
-          <div class="film-wrap">
-            <div class="film-media">
-              <video controls playsinline preload="metadata" crossorigin="anonymous">
-                <source src="${escapeHtml(film.published_url)}">
-              </video>
-            </div>
-
-            <div class="film-side">
-              <h3 class="film-title">${escapeHtml(t)}</h3>
-
-              <div class="film-by">
-                ${byAvaHTML}
-                <div class="by-name">
-                  <span style="opacity:.7;">Video by:</span>
-                  <a href="${byLink}">${escapeHtml(byDisplay)}</a>
-                  ${byVerified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}
-                </div>
-              </div>
-
-              ${d ? `<div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>` : `<div class="muted">No description.</div>`}
-
-              <button class="film-more" id="filmMore" type="button" aria-label="Toggle description">
-                <span>Read more</span>
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
+      $colFilm.innerHTML = `<div class="film-hero"><div class="film-wrap"><div class="film-media"><video controls playsinline preload="metadata" crossorigin="anonymous"><source src="${escapeHtml(film.published_url)}"></video></div><div class="film-side"><h3 class="film-title">${escapeHtml(t)}</h3><div class="film-by">${byAvaHTML}<div class="by-name"><span style="opacity:.7;">Video by:</span><a href="${byLink}">${escapeHtml(byDisplay)}</a>${byVerified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}</div></div>${d ? `<div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>` : `<div class="muted">No description.</div>`}<button class="film-more" id="filmMore" type="button" aria-label="Toggle description"><span>Read more</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div></div>`;
 
       bindVerifiedTooltip($colFilm);
 
@@ -1829,13 +1663,7 @@
 
     if(isOwnProfile && film && film.status === "pending"){
       $colFilm.style.display = "block";
-      $colFilm.innerHTML = `
-        <div class="col-film">
-          <h3 style="margin:0;">Film submission</h3>
-          <p style="margin-top:8px;"><span class="pill">Pending review</span></p>
-          <p>We’ll review it within 1–2 days.</p>
-        </div>
-      `;
+      $colFilm.innerHTML = `<div class="col-film"><h3 style="margin:0;">Film submission</h3><p style="margin-top:8px;"><span class="pill">Pending review</span></p><p>We’ll review it within 1–2 days.</p></div>`;
       return;
     }
 
@@ -1846,15 +1674,7 @@
     }
 
     $colFilm.style.display = "block";
-    $colFilm.innerHTML = `
-      <div class="col-film" style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
-        <div>
-          <h3 style="margin:0;">Your film</h3>
-          <p style="margin-top:6px;">You can submit a short film for review.</p>
-        </div>
-        <button class="btn-primary" id="openFilmSubmit">Submit film</button>
-      </div>
-    `;
+    $colFilm.innerHTML = `<div class="col-film" style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;"><div><h3 style="margin:0;">Your film</h3><p style="margin-top:6px;">You can submit a short film for review.</p></div><button class="btn-primary" id="openFilmSubmit">Submit film</button></div>`;
 
     const btn = document.getElementById("openFilmSubmit");
     if(btn) btn.onclick = ()=> openFilmSheet(collectionId);
@@ -2016,39 +1836,10 @@
           const media = (it.media_url || it.thumb_url || "").trim();
 
           const mediaHtml = video
-            ? `
-              <video class="lf-poster-video" muted playsinline preload="metadata" src="${escapeHtml(media)}"></video>
-              <video class="lf-hover-video" muted playsinline preload="none">
-                <source src="${escapeHtml(media)}" type="video/mp4">
-              </video>
-            `
-            : `
-              <img class="lf-thumb" src="${escapeHtml(it.thumb_url || it.media_url || "")}" loading="lazy" decoding="async" />
-            `;
+            ? `<video class="lf-poster-video" muted playsinline preload="metadata" src="${escapeHtml(media)}"></video><video class="lf-hover-video" muted playsinline preload="none"><source src="${escapeHtml(media)}" type="video/mp4"></video>`
+            : `<img class="lf-thumb" src="${escapeHtml(it.thumb_url || it.media_url || "")}" loading="lazy" decoding="async" />`;
 
-          return `
-            <div class="lf-card" data-id="${escapeHtml(it.id)}">
-              <div class="lf-media">
-                ${mediaHtml}
-                <div class="card-bottom">
-                  <div class="card-author">
-                    <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
-                    <div class="author-txt">
-                      <div class="author-name">${escapeHtml(displayName)} ${verifiedBadgeHTML(profile?.verified === true)}</div>
-                      <div class="author-username">@${escapeHtml(userName)}</div>
-                    </div>
-                  </div>
-                  <div class="card-title">${escapeHtml(it.title||"Untitled")}</div>
-                  <div class="card-stats">
-                    <div class="stat">${ICONS.like} ${it.like_count||0}</div>
-                    <div class="stat">${ICONS.comm} ${it.comment_count||0}</div>
-                    <div class="stat">${ICONS.save} ${it.save_count||0}</div>
-                    <div class="stat">${ICONS.view} ${it.view_count||0}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
+          return `<div class="lf-card" data-id="${escapeHtml(it.id)}"><div class="lf-media">${mediaHtml}<div class="card-bottom"><div class="card-author"><div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div><div class="author-txt"><div class="author-name">${escapeHtml(displayName)} ${verifiedBadgeHTML(profile?.verified === true)}</div><div class="author-username">@${escapeHtml(userName)}</div></div></div><div class="card-title">${escapeHtml(it.title||"Untitled")}</div><div class="card-stats"><div class="stat">${ICONS.like} ${it.like_count||0}</div><div class="stat">${ICONS.comm} ${it.comment_count||0}</div><div class="stat">${ICONS.save} ${it.save_count||0}</div><div class="stat">${ICONS.view} ${it.view_count||0}</div></div></div></div></div>`;
         }).join("")}</div>`;
 
     bindVerifiedTooltip($grid);
@@ -2288,12 +2079,7 @@
   }
 
   function setWorkModalStats(it){
-    $mstats.innerHTML = `
-      <div class="stat">${ICONS.like} ${it.like_count||0}</div>
-      <div class="stat">${ICONS.comm} ${it.comment_count||0}</div>
-      <div class="stat">${ICONS.save} ${it.save_count||0}</div>
-      <div class="stat">${ICONS.view} ${it.view_count||0}</div>
-    `;
+    $mstats.innerHTML = `<div class="stat">${ICONS.like} ${it.like_count||0}</div><div class="stat">${ICONS.comm} ${it.comment_count||0}</div><div class="stat">${ICONS.save} ${it.save_count||0}</div><div class="stat">${ICONS.view} ${it.view_count||0}</div>`;
   }
 
   function setWorkActionButtons(){
@@ -2343,17 +2129,7 @@
       const j = await api(`/api/feed/comments?post_id=${encodeURIComponent(currentWork.id)}&limit=80&offset=0`, { method:"GET" });
       const arr = Array.isArray(j.items) ? j.items : [];
       if(!arr.length){ $clist.innerHTML = `<div class="empty" style="padding:18px">No comments yet.</div>`; return; }
-      $clist.innerHTML = arr.map(c=>`
-        <div class="c-item">
-          <div class="avatar ${((c.avatar_type === "emoji" && c.avatar_emoji) ? "emoji" : "")}">
-            ${(c.avatar_type === "emoji" && c.avatar_emoji) ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "")}
-          </div>
-          <div class="c-bubble">
-            <div class="c-top"><div class="c-name">${escapeHtml(c.display_name||c.username||"user")}</div><div class="c-time">${escapeHtml(fmtDate(c.created_at))}</div></div>
-            <div class="c-body">${escapeHtml(c.body)}</div>
-          </div>
-        </div>
-      `).join("");
+      $clist.innerHTML = arr.map(c=>`<div class="c-item"><div class="avatar ${((c.avatar_type === "emoji" && c.avatar_emoji) ? "emoji" : "")}">${(c.avatar_type === "emoji" && c.avatar_emoji) ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "")}</div><div class="c-bubble"><div class="c-top"><div class="c-name">${escapeHtml(c.display_name||c.username||"user")}</div><div class="c-time">${escapeHtml(fmtDate(c.created_at))}</div></div><div class="c-body">${escapeHtml(c.body)}</div></div></div>`).join("");
       $clist.scrollTop = $clist.scrollHeight;
     }catch(e){
       $clist.innerHTML = `<div class="empty" style="padding:18px;color:#ff98a2">Error: ${escapeHtml(e.message)}</div>`;
@@ -2493,17 +2269,7 @@
             const pid = String(it.id);
             const on = data.multi ? pickSelectedSet.has(pid) : (String(pickSelectedId) === pid);
             const kind = resolveKind(it);
-            return `
-              <div class="pick-row ${on?'on':''} ${layout === "wide" ? "wide" : ""}" data-pid="${pid}">
-                <div class="pick-thumb ${layout === "wide" ? "wide" : ""}">${it.thumb ? `<img src="${it.thumb}">` : ""}</div>
-                <div class="pick-main ${layout === "wide" ? "wide" : ""}">
-                  <div class="pick-name">${escapeHtml(it.title||"Untitled")}</div>
-                  <div class="pick-sub">${escapeHtml(it.description||"")}</div>
-                  ${layout === "wide" ? `<div class="pick-sub" style="margin-top:6px;">${kind === "video" ? "Video" : "Image"}</div>` : ``}
-                </div>
-                ${layout === "wide" ? `<div class="pick-check">${on ? "✓" : ""}</div>` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`}
-              </div>
-            `;
+            return `<div class="pick-row ${on?'on':''} ${layout === "wide" ? "wide" : ""}" data-pid="${pid}"><div class="pick-thumb ${layout === "wide" ? "wide" : ""}">${it.thumb ? `<img src="${it.thumb}">` : ""}</div><div class="pick-main ${layout === "wide" ? "wide" : ""}"><div class="pick-name">${escapeHtml(it.title||"Untitled")}</div><div class="pick-sub">${escapeHtml(it.description||"")}</div>${layout === "wide" ? `<div class="pick-sub" style="margin-top:6px;">${kind === "video" ? "Video" : "Image"}</div>` : ``}</div>${layout === "wide" ? `<div class="pick-check">${on ? "✓" : ""}</div>` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`}</div>`;
           }).join("")}</div>`;
 
       $pickList.querySelectorAll("[data-pid]").forEach(row=>{
@@ -2651,11 +2417,7 @@
       const thumb = (it.thumb_url || it.media_url || "").trim();
       const title = it.title || "Untitled";
       const isCover = String(colDraftCover||"") === String(id);
-      return `<div class="picked-item ${isCover?"is-cover":""}" data-picked="${escapeHtml(String(id))}" title="Set as cover">
-        ${thumb ? `<img src="${escapeHtml(thumb)}" alt="">` : ``}
-        <button type="button" class="picked-remove" data-remove-picked="${escapeHtml(String(id))}">×</button>
-        ${isCover ? `<div class="picked-cover">Cover</div>` : ``}
-      </div>`;
+      return `<div class="picked-item ${isCover?"is-cover":""}" data-picked="${escapeHtml(String(id))}" title="Set as cover">${thumb ? `<img src="${escapeHtml(thumb)}" alt="">` : ``}<button type="button" class="picked-remove" data-remove-picked="${escapeHtml(String(id))}">×</button>${isCover ? `<div class="picked-cover">Cover</div>` : ``}</div>`;
     }).join("");
 
     $kSelectedGrid.querySelectorAll("[data-picked]").forEach(el=>{
