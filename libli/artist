@@ -50,38 +50,28 @@
   .pcover{
     position:relative;
     width:100%;
-    height:170px;
+    height:180px;
     border-radius:22px;
     overflow:hidden;
     border:1px solid rgba(255,255,255,0.10);
     background: rgba(255,255,255,0.03);
-  }
-  .pcover-inline{
-    margin-top:14px;
-    margin-bottom:0;
-    height:150px;
-    border-radius:20px;
-  }
-  .pcover-inline .pcover-bg img{
-    transform: scale(1.02);
-    object-position: 50% 48%;
+    margin:14px 0 12px;
   }
   .pcover-bg{
     position:absolute; inset:0;
     background:#000;
   }
-  .pcover-bg img, .pcover-bg video{
+  .pcover-bg img{
     position:absolute; inset:0;
     width:100%; height:100%;
     object-fit:cover;
-    object-position: 50% 45%;
-    transform: scale(1.03);
-    filter: saturate(1.05) contrast(1.05);
+    object-position:50% 50%;
+    transform:scale(1.04);
   }
   .pcover-bg::after{
     content:"";
     position:absolute; inset:0;
-    background: linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.55));
+    background: linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.40));
   }
   .pcover-edit, .pcover-del{
     position:absolute;
@@ -98,21 +88,6 @@
   .pcover-edit{ right:12px; }
   .pcover-del{ right:58px; }
   .pcover-edit:hover, .pcover-del:hover{ background:#fff; color:#000; }
-
-  .pcover-overlay{
-    position:absolute; inset:0;
-    display:flex;
-    align-items:flex-end;
-    padding:14px;
-    z-index:3;
-  }
-  .pcover-overlay .phead{
-    background: rgba(0,0,0,0.35);
-    border:1px solid rgba(255,255,255,0.12);
-    border-radius:18px;
-    padding:10px 12px;
-    backdrop-filter: blur(10px);
-  }
 
   .phead{ display:flex; gap:14px; align-items:center; position:relative; }
   .pava{
@@ -1251,26 +1226,25 @@
     <div class="wrap">
       <div class="top">
       <div>
+        <div class="phead">
+          <div class="pava" id="p-ava"></div>
+          <div>
+            <div class="pname" id="p-name">Loading…</div>
+            <div class="puser" id="p-user">@…</div>
+          </div>
+        </div>
+
         <div class="pbio" id="p-bio" style="display:none;"></div>
         <div class="links" id="p-links" style="display:none;"></div>
 
-        <div class="pcover pcover-inline" id="pcover">
+        <div class="pcover" id="pcover">
           <div class="pcover-bg" id="pcoverBg"></div>
-
-          <div class="pcover-overlay">
-            <div class="phead">
-              <div class="pava" id="p-ava"></div>
-              <div>
-                <div class="pname" id="p-name">Loading…</div>
-                <div class="puser" id="p-user">@…</div>
-                <div class="fcnt"><span>Followers</span><b id="p-followers">0</b></div>
-              </div>
-            </div>
-          </div>
 
           <button class="pcover-edit" id="pcoverEdit" type="button" style="display:none;" title="Change cover">✎</button>
           <button class="pcover-del" id="pcoverDel" type="button" style="display:none;" title="Remove cover">✕</button>
         </div>
+
+        <div class="fcnt"><span>Followers</span><b id="p-followers">0</b></div>
       </div>
 
       <div class="controls">
@@ -3905,7 +3879,7 @@ Download link:
     }
 
     if($pickFilters){
-      const show = layout === "wide" && !allowedKinds;
+      const show = layout === "wide" && !allowedKinds && !data.hideTypeTabs;
       $pickFilters.style.display = show ? "flex" : "none";
       $pickFilters.querySelectorAll("[data-type]").forEach(btn=>{
         btn.classList.toggle("on", btn.getAttribute("data-type") === "all");
@@ -4353,15 +4327,15 @@ Download link:
     await ensureLibraryLoadedForPicker();
 
     const items = libraryItems
-      .filter(it => !isVideoUrl((it.media_url || it.thumb_url || "").trim()))
+      .filter(it => {
+        const u = (it.thumb_url || it.media_url || "").trim();
+        return u && !isVideoUrl(u);
+      })
       .slice(0, 400)
       .map(it => ({
         id: it.id,
         title: it.title || "Untitled",
-        description: "",
-        thumb: (it.thumb_url || it.media_url || ""),
-        type: "image",
-        media_url: it.media_url || ""
+        thumb: (it.thumb_url || it.media_url || "")
       }));
 
     if(!items.length){
@@ -4375,7 +4349,7 @@ Download link:
       items,
       multi: false,
       layout: "wide",
-      allowedKinds: ["image"]
+      hideTypeTabs: true
     });
 
     if(!picked) return;
