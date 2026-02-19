@@ -1,0 +1,2854 @@
+(() => {
+  const S = window.__LF_ARTIST__;
+  if(!S || !S.__booted){ console.error("boot missing"); return; }
+  const { api, qs, escapeHtml, fmtDate, isVideoUrl, verifiedBadgeHTML, requireToken, getSessionToken, getCurrentUserId, cacheGet, cacheSet, cacheHas, READ_BACKEND, WRITE_BACKEND, DEFAULT_PROFILE_COVER, PAGE_SIZE, VFY_TOOLTIP, LS_FOLLOW } = S;
+
+  with (S.state) {
+
+
+  const $gridWrap = document.getElementById("gridWrap");
+  const $gridPosts = document.getElementById("gridPosts");
+  const $gridCollections = document.getElementById("gridCollections");
+  const $gridLibrary = document.getElementById("gridLibrary");
+
+  const $loader = document.getElementById("loader");
+  const $pAva = document.getElementById("p-ava");
+  const $pName = document.getElementById("p-name");
+  const $pUser = document.getElementById("p-user");
+  const $pBio = document.getElementById("p-bio");
+  const $pLinks = document.getElementById("p-links");
+  const $pFollowers = document.getElementById("p-followers");
+  const $pFollowBtn = document.getElementById("p-follow-btn");
+  const $pcover = document.getElementById("pcover");
+  const $pcoverBg = document.getElementById("pcoverBg");
+  const $pcoverEdit = document.getElementById("pcoverEdit");
+  const $pcoverDel = document.getElementById("pcoverDel");
+  const $toast = document.getElementById("toast");
+
+  const $segTabs = document.getElementById("seg-tabs");
+  const $btnNewPost = document.getElementById("btn-new-post");
+  const $btnNewCol = document.getElementById("btn-new-col");
+
+  const $segSort = document.getElementById("seg-sort");
+  const $pillRange = document.getElementById("pill-range");
+  const $range = document.getElementById("range");
+
+  // Work modal (library)
+  const $mb = document.getElementById("mb");
+  const $mclose = document.getElementById("mclose");
+  const $mp = document.getElementById("mp");
+  const $mAvatar = document.getElementById("m-avatar");
+  const $mUserlink = document.getElementById("m-userlink");
+  const $mUserline = document.getElementById("m-userline");
+  const $mmeta = document.getElementById("mmeta");
+  const $mFollowers = document.getElementById("m-followers");
+  const $mtitle = document.getElementById("mtitle");
+  const $mstats = document.getElementById("mstats");
+  const $likeBtn = document.getElementById("likeBtn");
+  const $saveBtn = document.getElementById("saveBtn");
+  const $dlBtn = document.getElementById("dlBtn");
+  const $clist = document.getElementById("clist");
+  const $cinput = document.getElementById("cinput");
+  const $csend = document.getElementById("csend");
+  const $reloadComments = document.getElementById("reloadComments");
+  const $titleEditBtn = document.getElementById("title-edit-btn");
+  const $titleEdit = document.getElementById("title-edit");
+  const $titleInput = document.getElementById("title-input");
+  const $titleSave = document.getElementById("title-save");
+  const $titleCancel = document.getElementById("title-cancel");
+  const $vfyTip = document.getElementById("vfyTip");
+
+  // Collection modal
+  const $cb = document.getElementById("cb");
+  const $cclose = document.getElementById("cclose");
+  const $ctitle = document.getElementById("ctitle");
+  const $cdesc = document.getElementById("cdesc");
+  const $cmeta = document.getElementById("cmeta");
+  const $cgrid = document.getElementById("cScenes");
+  const $colFilm = document.getElementById("colFilm");
+  const $btnColEdit = document.getElementById("btn-col-edit");
+  const $btnSceneNew = document.getElementById("btn-scene-new");
+  const $btnColReorder = document.getElementById("btn-col-reorder");
+  const $btnColDelete = document.getElementById("btn-col-delete");
+  const $colReorderFooter = document.getElementById("colReorderFooter");
+  const $btnColReorderSave = document.getElementById("btn-col-reorder-save");
+  const $btnColReorderCancel = document.getElementById("btn-col-reorder-cancel");
+
+  // Media viewer
+  const $mvb = document.getElementById("mvb");
+  const $mvClose = document.getElementById("mvClose");
+  const $mvPrev = document.getElementById("mvPrev");
+  const $mvNext = document.getElementById("mvNext");
+  const $mvHost = document.getElementById("mvMediaHost");
+  const $mvTitle = document.getElementById("mvTitle");
+  const $mvDots = document.getElementById("mvDots");
+
+  // Post sheet
+  const $pb = document.getElementById("pb");
+  const $pclose = document.getElementById("pclose");
+  const $ptitle = document.getElementById("ptitle");
+  const $ptext = document.getElementById("ptext");
+  const $pPickMedia = document.getElementById("pPickMedia");
+  const $pPickCollection = document.getElementById("pPickCollection");
+  const $pPickGrid = document.getElementById("pPickGrid");
+  const $pPickedInfo = document.getElementById("pPickedInfo");
+  const $psave = document.getElementById("psave");
+  const $pcancel = document.getElementById("pcancel");
+
+  // Collection sheet
+  const $kb = document.getElementById("kb");
+  const $kclose = document.getElementById("kclose");
+  const $ktitle = document.getElementById("ktitle");
+  const $kname = document.getElementById("kname");
+  const $kdesc = document.getElementById("kdesc");
+  const $ksearch = document.getElementById("ksearch");
+  const $ksort = document.getElementById("ksort");
+  const $kPickMedia = document.getElementById("kPickMedia");
+  const $kPickGrid = document.getElementById("kPickGrid");
+  const $kPickedInfo = document.getElementById("kPickedInfo");
+  const $kSelectedWrap = document.getElementById("kSelectedWrap");
+  const $kSelectedGrid = document.getElementById("kSelectedGrid");
+  const $ksave = document.getElementById("ksave");
+  const $kcancel = document.getElementById("kcancel");
+
+
+  // Universal picker
+  const $pickB = document.getElementById("pickB");
+  const $pickTitle = document.getElementById("pickTitle");
+  const $pickClose = document.getElementById("pickClose");
+  const $pickOk = document.getElementById("pickOk");
+  const $pickCancel = document.getElementById("pickCancel");
+  const $pickList = document.getElementById("pickList");
+  const $pickSearch = document.getElementById("pickSearch");
+  const $pickHint = document.getElementById("pickHint");
+  const $pickFilters = document.getElementById("pickFilters");
+
+  const $scB = document.getElementById("scB");
+  const $scTitle = document.getElementById("scTitle");
+  const $scClose = document.getElementById("scClose");
+  const $scCancel = document.getElementById("scCancel");
+  const $scSave = document.getElementById("scSave");
+  const $scName = document.getElementById("scName");
+  const $scDesc = document.getElementById("scDesc");
+  const $scStatus = document.getElementById("scStatus");
+
+  const $fsB = document.getElementById("fsB");
+  const $fsClose = document.getElementById("fsClose");
+  const $fsCancel = document.getElementById("fsCancel");
+  const $fsSubmit = document.getElementById("fsSubmit");
+  const $fsTitle = document.getElementById("fsTitle");
+  const $fsDesc = document.getElementById("fsDesc");
+  const $fsUrl = document.getElementById("fsUrl");
+  const $fsStatus = document.getElementById("fsStatus");
+  const $fsRulesBtn = document.getElementById("fsRulesBtn");
+  const $fsTip = document.getElementById("fsTip");
+
+  const $cfB = document.getElementById("cfB");
+  const $cfTitle = document.getElementById("cfTitle");
+  const $cfText = document.getElementById("cfText");
+  const $cfClose = document.getElementById("cfClose");
+  const $cfCancel = document.getElementById("cfCancel");
+  const $cfOk = document.getElementById("cfOk");
+
+  const $emoB = document.getElementById("emoB");
+  const $emoClose = document.getElementById("emoClose");
+  const $emoSearch = document.getElementById("emoSearch");
+  const $emoGrid = document.getElementById("emoGrid");
+  const ICONS = {
+    like: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.6-9.5-9C.6 8.6 2.6 5 6.5 5c2.1 0 3.6 1.2 4.5 2.4C11.9 6.2 13.4 5 15.5 5 19.4 5 21.4 8.6 21.5 12c-2.5 4.4-9.5 9-9.5 9z"/></svg>',
+    comm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>',
+    view: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7.5 11-7.5S23 12 23 12s-4 7.5-11 7.5S1 12 1 12z"/><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>',
+    dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
+    link: `<svg viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+    youtube: `<svg viewBox="0 0 24 24"><path fill="#ff0000" d="M23.5 6.2s-.2-1.6-.9-2.3c-.8-.9-1.7-.9-2.1-1C17.4 2.6 12 2.6 12 2.6h0s-5.4 0-8.5.3c-.4 0-1.3 0-2.1 1C.7 4.6.5 6.2.5 6.2S.3 8 .3 9.8v1.6C.3 13.2.5 15 .5 15s.2 1.6.9 2.3c.8.9 1.9.9 2.4 1C5.7 18.6 12 18.6 12 18.6s5.4 0 8.5-.3c.4 0 1.3 0 2.1-1 .7-.7.9-2.3.9-2.3s.2-1.8.2-3.6V9.8c0-1.8-.2-3.6-.2-3.6zM9.8 14.7V7.9l6.2 3.4-6.2 3.4z"/></svg>`,
+    send: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.6"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="2"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="currentColor" stroke-width="2"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18" stroke="currentColor" stroke-width="2"/><path d="M8 6V4h8v2" stroke="currentColor" stroke-width="2"/><path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="2"/><path d="M10 11v6" stroke="currentColor" stroke-width="2"/><path d="M14 11v6" stroke="currentColor" stroke-width="2"/></svg>'
+  };
+
+  const EMOJI_CPS = [
+    0x1F600,0x1F604,0x1F601,0x1F60E,0x1F913,0x1F978,0x1F607,0x1F642,0x1F609,0x1F60D,0x1F618,0x1F929,0x1F624,0x1F608,0x1F47B,0x1F916,
+    0x1F525,0x26A1,0x1F48E,0x2728,0x1F319,0x2B50,0x2600,0x1F308,0x2601,0x2744,0x1F480,0x1F9E0,0x1F441,0x1F3AC,0x1F3A5,0x1F39E,
+    0x1F3AE,0x1F579,0x1F3A8,0x1F58C,0x1F9E9,0x1F3A7,0x1F3B5,0x1F977,0x1F98A,0x1F431,0x1F436,0x1F43C,0x1F984,0x1F438,0x1F435,0x1F989,
+    0x1F33F,0x2618,0x1F344,0x1F30A,0x1F3DD,0x1F3D4,0x1F3D9,0x1F680,0x1F6F8,0x1F6F0,0x1F9EA,0x2699,0x1F9F0,0x1F527,0x1F52E,0x1F4CC,
+    0x2764,0x1F5A4,0x1F499,0x1F49C,0x1F90D,0x1F49B,0x1F49A,0x1F4A5,0x1F4AB,0x1FAE7,0x1F9FF,0x1F3C6,0x1F4BC,0x1F4F7,0x1F4A1,0x1F9CA
+  ];
+  const EMOJIS = EMOJI_CPS.map(cp => String.fromCodePoint(cp));
+
+
+
+  function openEmojiPicker(inputEl){
+    if(!$emoB || !$emoSearch || !$emoGrid) return;
+    emoTargetInput = inputEl;
+    $emoSearch.value = "";
+    renderEmojiGrid("");
+    $emoB.classList.add("open");
+    setTimeout(()=> $emoSearch.focus(), 0);
+  }
+  function closeEmojiPicker(){
+    if(!$emoB) return;
+    $emoB.classList.remove("open");
+    emoTargetInput = null;
+  }
+  function renderEmojiGrid(q){
+    if(!$emoGrid) return;
+    const query = (q||"").trim().toLowerCase();
+    const list = EMOJIS.filter(e => !query || e.includes(query));
+    $emoGrid.innerHTML = list.map(e=> `<button type="button" data-em="${e}">${e}</button>`).join("");
+    $emoGrid.querySelectorAll("[data-em]").forEach(b=>{
+      b.onclick = ()=>{
+        if(!emoTargetInput) return;
+        emoTargetInput.value = (emoTargetInput.value || "") + b.getAttribute("data-em");
+        emoTargetInput.focus();
+        closeEmojiPicker();
+      };
+    });
+  }
+
+  function confirmUI(title, text, okText="OK", danger=false){
+    $cfTitle.textContent = title || "Confirm";
+    $cfText.textContent = text || "";
+    $cfOk.textContent = okText;
+
+    $cfOk.classList.remove("btn-danger","btn-primary");
+    $cfOk.classList.add(danger ? "btn-danger" : "btn-primary");
+
+    $cfB.classList.add("open");
+    return new Promise((resolve)=>{
+      const done = (v)=>{ $cfB.classList.remove("open"); resolve(v); };
+      $cfClose.onclick = ()=> done(false);
+      $cfCancel.onclick = ()=> done(false);
+      $cfB.onclick = (e)=>{ if(e.target === $cfB) done(false); };
+      $cfOk.onclick = ()=> done(true);
+    });
+  }
+  function linkifyMentions(text){
+    const safeTxt = escapeHtml(text);
+    return safeTxt.replace(/(^|\s)@([a-zA-Z0-9_\.]{2,32})/g, (m, p1, u)=> {
+      return `${p1}<a class="pc-mention" href="/artist?username=${encodeURIComponent(u)}">@${u}</a>`;
+    });
+  }
+  function toast(msg){
+    $toast.textContent = String(msg || "");
+    $toast.classList.add("show");
+    setTimeout(()=> $toast.classList.remove("show"), 1600);
+  }
+
+  function fsShowStatus(msg, type){
+    if(!$fsStatus) return;
+    $fsStatus.style.display = msg ? "block" : "none";
+    $fsStatus.className = "status" + (type ? (" " + type) : "");
+    $fsStatus.textContent = msg || "";
+  }
+
+  function openFilmSheet(collectionId){
+    if(!$fsB) return;
+    fsCollectionId = collectionId;
+    $fsTitle.value = "";
+    $fsDesc.value = "";
+    $fsUrl.value = "";
+    fsShowStatus("", "");
+    $fsB.classList.add("open");
+    setTimeout(()=> $fsTitle.focus(), 0);
+  }
+  function closeFilmSheet(){
+    if(!$fsB) return;
+    $fsB.classList.remove("open");
+    fsCollectionId = null;
+    if($fsTip) $fsTip.style.display = "none";
+  }
+
+  function bindFilmRulesTooltip(){
+    if(!$fsRulesBtn || !$fsTip) return;
+    const text = `Rules:
+• No porn / nudity
+• No politics / propaganda
+• No hate / violence
+• No doxxing / personal data
+
+Requirements:
+• Duration: 20 sec – 5 min
+• Quality: HD – 4K
+
+Download link:
+• Make sure we can download the file from your link.`;
+
+    $fsRulesBtn.addEventListener("mouseenter", (ev)=>{
+      $fsTip.textContent = text;
+      $fsTip.style.display = "block";
+      $fsTip.style.left = `${ev.clientX + 12}px`;
+      $fsTip.style.top  = `${ev.clientY + 12}px`;
+    });
+    $fsRulesBtn.addEventListener("mousemove", (ev)=>{
+      if($fsTip.style.display === "block"){
+        $fsTip.style.left = `${ev.clientX + 12}px`;
+        $fsTip.style.top  = `${ev.clientY + 12}px`;
+      }
+    });
+    $fsRulesBtn.addEventListener("mouseleave", ()=>{
+      $fsTip.style.display = "none";
+    });
+  }
+
+  function scStatus(msg, type){
+    if(!$scStatus) return;
+    $scStatus.style.display = msg ? "block" : "none";
+    $scStatus.className = "status" + (type ? (" " + type) : "");
+    $scStatus.textContent = msg || "";
+  }
+  function openSceneSheet(mode, scene=null){
+    editingSceneId = scene ? scene.id : null;
+    $scTitle.textContent = mode === "edit" ? "Edit scene" : "New scene";
+    $scName.value = scene?.title || "";
+    $scDesc.value = scene?.description || "";
+    scStatus("", "");
+    $scB.classList.add("open");
+  }
+  function closeSceneSheet(){
+    $scB.classList.remove("open");
+    editingSceneId = null;
+  }
+  function bindVerifiedTooltip(root=document){
+    root.querySelectorAll('.vfy[data-tip="verified"]').forEach((el)=>{
+      if(el.dataset.tipBound) return;
+      el.dataset.tipBound = "1";
+      const host = el.closest('.post-name, .author-name, .pname, .m-head') || el;
+      host.addEventListener('mouseenter', (ev)=>{ $vfyTip.textContent = VFY_TOOLTIP; $vfyTip.style.display='block'; $vfyTip.style.left=`${ev.clientX+12}px`; $vfyTip.style.top=`${ev.clientY+12}px`; });
+      host.addEventListener('mousemove', (ev)=>{ if($vfyTip.style.display==='block'){ $vfyTip.style.left=`${ev.clientX+12}px`; $vfyTip.style.top=`${ev.clientY+12}px`; } });
+      host.addEventListener('mouseleave', ()=>{ $vfyTip.style.display='none'; });
+    });
+  }
+
+  function renderAvatarInto(el, avatar_type, avatar_url, avatar_emoji, fallbackLetter){
+    const t = String(avatar_type || "image").toLowerCase();
+    const em = (avatar_emoji || "").trim();
+    const url = (avatar_url || "").trim();
+
+    el.classList.remove("emoji");
+    el.innerHTML = "";
+
+    if(t === "emoji" && em){
+      el.classList.add("emoji");
+      el.innerHTML = `<span aria-label="avatar emoji">${escapeHtml(em)}</span>`;
+      return;
+    }
+    if(url){
+      el.innerHTML = `<img src="${escapeHtml(url)}" alt="" />`;
+      return;
+    }
+    if(fallbackLetter){
+      el.textContent = String(fallbackLetter).slice(0,1).toUpperCase();
+    }
+  }
+  async function fetchMyPublicProfile(accessToken){
+    try{
+      const r = await fetch(READ_BACKEND + "/api/profile_public", {
+        method:"GET",
+        headers:{ Authorization: "Bearer " + accessToken }
+      });
+      const j = await r.json().catch(()=> ({}));
+      if(!r.ok) return null;
+      return j?.profile || null;
+    }catch(e){
+      return null;
+    }
+  }
+
+  async function syncFollowState(userId){
+    if(!userId) return false;
+    let value = false;
+    if(cacheHas(userId)) value = cacheGet(userId);
+
+    const token = await getSessionToken();
+    if(!token) return value;
+
+    try{
+      const st = await api(`/api/social/state?user_id=${encodeURIComponent(userId)}`, { method:"GET" });
+      value = !!st.following;
+      cacheSet(userId, value);
+      return value;
+    }catch(e){
+      return value;
+    }
+  }
+
+  function showLoader(v){ $loader.style.display = v ? "flex" : "none"; }
+
+  // -------- Profile header ----------
+  function renderProfileCover(p){
+    if(!$pcover || !$pcoverBg) return;
+    const coverId = (p && p.header_feed_post_id) ? String(p.header_feed_post_id) : "";
+    const byId = new Map(libraryItems.map(it => [String(it.id), it]));
+
+    let url = DEFAULT_PROFILE_COVER;
+
+    if(coverId && byId.has(coverId)){
+      const it = byId.get(coverId);
+      const candidate = (it.thumb_url || it.media_url || "").trim();
+      if(candidate && !isVideoUrl(candidate)) url = candidate;
+    }
+
+    $pcoverBg.innerHTML = `<img src="${escapeHtml(url)}" alt="cover" loading="lazy" decoding="async">`;
+
+    $pcoverEdit.style.display = isOwnProfile ? "flex" : "none";
+    $pcoverDel.style.display = isOwnProfile ? "flex" : "none";
+  }
+
+  function renderProfile(p){
+    profile = p || {};
+    const dn = p.display_name || p.username || username;
+    $pName.innerHTML = `${escapeHtml(dn || "User")} ${verifiedBadgeHTML(p.verified === true)}`;
+    bindVerifiedTooltip($pName);
+    $pUser.textContent = "@" + (p.username || username);
+    $pFollowers.textContent = p.follower_count ?? 0;
+    renderAvatarInto($pAva, p.avatar_type, p.avatar_url, p.avatar_emoji, (dn||"U").slice(0,1));
+
+    const bio = (p.bio||"").trim();
+    $pBio.style.display = bio ? "block" : "none";
+    $pBio.textContent = bio;
+
+    const links = p.links || {};
+    const chips = [];
+    if(links.youtube) chips.push(`<a class="chip" href="${links.youtube}" target="_blank" rel="noopener">${ICONS.youtube}<span>YouTube</span></a>`);
+    if(links.site){
+      const host = (()=>{ try{ return new URL(links.site).hostname.replace("www.",""); }catch(e){ return "Website"; } })();
+      chips.push(`<a class="chip" href="${links.site}" target="_blank" rel="noopener">${ICONS.link}<span>${escapeHtml(host)}</span></a>`);
+    }
+    $pLinks.style.display = chips.length ? "flex" : "none";
+    $pLinks.innerHTML = chips.join("");
+  }
+
+  async function loadProfileHeaderOnce(){
+    const j = await api(`/api/u/${encodeURIComponent(username)}?limit=1&offset=0`, { method:"GET" });
+    renderProfile(j.profile || {});
+
+    const me = await getCurrentUserId();
+    isOwnProfile = !!(me && (String(me) === String((j.profile||{}).user_id)));
+
+    renderProfileCover(j.profile || {});
+
+    if(isOwnProfile){
+      $pFollowBtn.style.display = "none";
+    }else{
+      const pid = (j.profile||{}).user_id;
+      $pFollowBtn.style.display = "inline-flex";
+      $pFollowBtn.disabled = true;
+
+      if(pid && cacheHas(pid)){
+        followState = cacheGet(pid);
+        $pFollowBtn.textContent = followState ? "Following" : "Follow";
+        $pFollowBtn.classList.toggle("on", followState);
+      } else {
+        $pFollowBtn.textContent = "…";
+        $pFollowBtn.classList.remove("on");
+      }
+
+      followState = await syncFollowState(pid);
+      $pFollowBtn.disabled = false;
+      $pFollowBtn.textContent = followState ? "Following" : "Follow";
+      $pFollowBtn.classList.toggle("on", followState);
+    }
+  }
+
+  async function toggleFollow(){
+    if(isOwnProfile || !profile?.user_id) return;
+    const token = await getSessionToken();
+    if(!token){ toast("Login required"); return; }
+
+    try{
+      const path = followState ? "/api/social/unfollow" : "/api/social/follow";
+      const payload = { following_id: profile.user_id };
+      const j = await api(path, { method:"POST", body: JSON.stringify(payload) });
+      followState = !followState;
+      cacheSet(profile.user_id, followState);
+      $pFollowBtn.textContent = followState ? "Following" : "Follow";
+      $pFollowBtn.classList.toggle("on", followState);
+
+      if(j && typeof j.follower_count !== "undefined") {
+        profile.follower_count = j.follower_count;
+        profile.verified = !!j.verified;
+        $pFollowers.textContent = profile.follower_count ?? 0;
+        $pName.innerHTML = `${escapeHtml(profile.display_name || profile.username || username)} ${verifiedBadgeHTML(profile.verified === true)}`;
+        bindVerifiedTooltip($pName);
+      }
+    }catch(e){
+      console.error("FOLLOW ERROR:", e);
+      alert(e?.message || String(e));
+    }
+  }
+
+  // -------- Tab state ----------
+  function renderTabControls(){
+    $segSort.style.display = (tab === "collections") ? "flex" : (tab === "library" ? "flex" : "none");
+    $pillRange.style.display = (tab === "library") ? "flex" : "none";
+    $btnNewPost.style.display = (isOwnProfile && tab === "posts") ? "inline-flex" : "none";
+    $btnNewCol.style.display = (isOwnProfile && tab === "collections") ? "inline-flex" : "none";
+  }
+
+  function getPaneByTab(name){
+    if(name === "collections") return $gridCollections;
+    if(name === "library") return $gridLibrary;
+    return $gridPosts;
+  }
+
+  function setActivePane(name){
+    ["posts","collections","library"].forEach(t=>{
+      const pane = getPaneByTab(t);
+      pane.classList.toggle("active", t === name);
+    });
+    $grid = getPaneByTab(name);
+    const activePane = $grid;
+    requestAnimationFrame(()=>{
+      const h = Math.max(activePane.offsetHeight || 240, 240);
+      $gridWrap.style.minHeight = h + "px";
+    });
+  }
+
+  function renderErrorForTab(name, message){
+    const pane = getPaneByTab(name);
+    pane.innerHTML = `<div class="empty" style="color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(message)}</div>`;
+  }
+
+  async function switchTab(newTab){
+    if(newTab === tab || isSwitching) return;
+    isSwitching = true;
+    setTimeout(()=>{ isSwitching = false; }, 180);
+
+    if(activeAbort) activeAbort.abort();
+    activeAbort = new AbortController();
+
+    tab = newTab;
+    $segTabs.querySelectorAll("button").forEach(b=> b.classList.toggle("active", b.dataset.tab === tab));
+    renderTabControls();
+    setActivePane(tab);
+
+    const state = tabState[tab];
+    if(state.loadedOnce){
+      if(tab === "posts") renderPosts();
+      else if(tab === "collections") renderCollections();
+      else renderLibrary();
+      return;
+    }
+
+    if(tab === "posts") return loadPosts(true, { signal: activeAbort.signal });
+    if(tab === "collections") return loadCollections(true, { signal: activeAbort.signal });
+    return loadLibrary(true, { signal: activeAbort.signal });
+  }
+
+  function getQS(name){
+    try { return new URLSearchParams(location.search).get(name); }
+    catch(e){ return null; }
+  }
+
+  async function applyTabFromUrl(){
+  const tabFromUrl = (getQS("tab") || "").toLowerCase();
+  const wanted = (tabFromUrl === "collections" || tabFromUrl === "library" || tabFromUrl === "posts")
+    ? tabFromUrl
+    : "posts";
+
+  // ✅ ВАЖНО: ищем кнопку ТОЛЬКО в табах artist, НЕ в документе (чтобы не кликать header)
+  const btn = $segTabs?.querySelector(`button[data-tab="${wanted}"]`);
+
+  if(btn) btn.click();
+  else await switchTab(wanted);
+}
+
+
+  window.addEventListener("DOMContentLoaded", () => {
+    applyTabFromUrl().catch(e => console.error(e));
+  });
+
+  window.addEventListener("popstate", () => {
+    applyTabFromUrl().catch(e => console.error(e));
+  });
+
+  // -------- Data loaders ----------
+  async function loadLibrary(reset=false, opts={}){
+    const state = tabState.library;
+    if(state.loading) return;
+    state.loading = true;
+    showLoader(true);
+
+    try{
+      if(reset){ state.offset = 0; state.hasMore = true; libraryItems = []; }
+
+      const j = await api(`/api/u/${encodeURIComponent(username)}?limit=${PAGE_SIZE}&offset=${state.offset}`, { method:"GET", signal: opts.signal });
+      let page = Array.isArray(j.works) ? j.works : [];
+
+      // apply sort/range like before
+      if(sort === "top"){
+        page.sort((a,b)=> (b.like_count||0) - (a.like_count||0));
+      } else {
+        page.sort((a,b)=> String(b.published_at||"").localeCompare(String(a.published_at||"")));
+      }
+      if(range === "oldest") page.reverse();
+
+      const seen = new Set(libraryItems.map(x=> String(x.id)));
+      for(const it of page){
+        const k = String(it.id);
+        if(!seen.has(k)){ seen.add(k); libraryItems.push(it); }
+      }
+
+      state.offset = (j.nextOffset != null) ? j.nextOffset : (state.offset + page.length);
+      state.hasMore = !!j.hasMore;
+      state.loadedOnce = true;
+
+      requestAnimationFrame(()=> renderLibrary());
+      if(profile) renderProfileCover(profile);
+    }catch(e){
+      if(e?.name !== "AbortError"){
+        renderErrorForTab("library", e.message || "Failed");
+        state.hasMore = false;
+      }
+    }finally{
+      state.loading = false;
+      showLoader(false);
+    }
+  }
+
+  async function loadPosts(reset=false, opts={}){
+    const state = tabState.posts;
+    if(state.loading) return;
+    state.loading = true;
+    showLoader(true);
+
+    try{
+      if(reset){ state.offset = 0; state.hasMore = true; postItems = []; }
+
+      const j = await api(`/api/posts/list?username=${encodeURIComponent(username)}&limit=${PAGE_SIZE}&offset=${state.offset}&sort=new`, { method:"GET", signal: opts.signal });
+      const page = Array.isArray(j.items) ? j.items : [];
+
+      const seen = new Set(postItems.map(x=> String(x.id)));
+      for(const it of page){
+        const k = String(it.id);
+        if(!seen.has(k)){ seen.add(k); postItems.push(it); }
+      }
+
+      state.offset = j.nextOffset != null ? j.nextOffset : (state.offset + page.length);
+      state.hasMore = !!j.hasMore;
+      state.loadedOnce = true;
+
+      const token = await getSessionToken();
+      if(token){
+        for(const p of page){
+          try{
+            const st = await api(`/api/posts/state?post_id=${encodeURIComponent(p.id)}`, { method:"GET" });
+            p._liked = !!st.liked;
+            p._saved = !!st.saved;
+          }catch(e){}
+        }
+      }
+
+      // preload library first page if empty (so media viewer can open)
+      if(!libraryItems.length){
+        try{ await loadLibrary(true); }catch(e){}
+      }
+
+      requestAnimationFrame(()=> renderPosts());
+    }catch(e){
+      if(e?.name !== "AbortError"){
+        renderErrorForTab("posts", e.message || "Failed");
+        state.hasMore = false;
+      }
+    }finally{
+      state.loading = false;
+      showLoader(false);
+    }
+  }
+
+  async function loadCollections(reset=false, opts={}){
+    const state = tabState.collections;
+    if(state.loading) return;
+    state.loading = true;
+    showLoader(true);
+
+    try{
+      if(reset){ state.offset = 0; state.hasMore = true; collectionItems = []; }
+
+      const j = await api(`/api/collections/list?username=${encodeURIComponent(username)}&limit=${PAGE_SIZE}&offset=${state.offset}&sort=${encodeURIComponent(sort)}&preview_limit=10`, { method:"GET", signal: opts.signal });
+      const page = Array.isArray(j.items) ? j.items : [];
+
+      const seen = new Set(collectionItems.map(x=> String(x.id)));
+      for(const it of page){
+        const k = String(it.id);
+        if(!seen.has(k)){ seen.add(k); collectionItems.push(it); }
+      }
+
+      const token = await getSessionToken();
+      if(token){
+        for(const c of collectionItems){
+          try{
+            const st = await api(`/api/collections/state?collection_id=${encodeURIComponent(c.id)}`, { method:"GET" });
+            c._liked = !!st.liked;
+            c._saved = !!st.saved;
+          }catch(e){}
+        }
+      }
+
+      state.offset = j.nextOffset != null ? j.nextOffset : (state.offset + page.length);
+      state.hasMore = !!j.hasMore;
+      state.loadedOnce = true;
+
+      renderCollections();
+      startCollectionsSlideshows();
+    }catch(e){
+      if(e?.name !== "AbortError"){
+        renderErrorForTab("collections", e.message || "Failed");
+        state.hasMore = false;
+      }
+    }finally{
+      state.loading = false;
+      showLoader(false);
+    }
+  }
+
+  // -------- Render: POSTS ----------
+  // marker: [[collection:UUID]]
+  function parseBodyWithEmbeds(text){
+    const s = String(text||"");
+    const re = /\[\[collection:([0-9a-fA-F-]{36})\]\]/g;
+    const parts = [];
+    let last = 0;
+    let m;
+    while((m = re.exec(s))){
+      const idx = m.index;
+      if(idx > last) parts.push({ type:"text", value: s.slice(last, idx) });
+      parts.push({ type:"collection", id: m[1] });
+      last = idx + m[0].length;
+    }
+    if(last < s.length) parts.push({ type:"text", value: s.slice(last) });
+    return parts;
+  }
+
+
+  function myAvatarHTML(){
+    const letter = ((myProfile?.display_name || myProfile?.username || "U").trim().slice(0,1) || "U").toUpperCase();
+    if(!myProfile){
+      return `<div class="avatar" style="display:flex;align-items:center;justify-content:center;font-weight:950;color:#fff">${letter}</div>`;
+    }
+    const em = myProfile.avatar_type === "emoji" && myProfile.avatar_emoji;
+    if(em) return `<div class="avatar emoji"><span>${escapeHtml(myProfile.avatar_emoji)}</span></div>`;
+    if(myProfile.avatar_url) return `<div class="avatar"><img src="${escapeHtml(myProfile.avatar_url)}"></div>`;
+    return `<div class="avatar" style="display:flex;align-items:center;justify-content:center;font-weight:950;color:#fff">${letter}</div>`;
+  }
+
+
+  function autoGrow(ta){
+    if(!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 180) + "px";
+  }
+
+  function renderPosts(){
+    if(!postItems.length){
+      $grid.innerHTML = `<div class="empty">No posts yet.</div>`;
+      return;
+    }
+
+    const avIsEmoji = (profile?.avatar_type === "emoji" && profile?.avatar_emoji);
+    const avatarHtml = avIsEmoji
+      ? `<span>${escapeHtml(profile?.avatar_emoji || "")}</span>`
+      : (profile?.avatar_url ? `<img src="${escapeHtml(profile.avatar_url)}" />` : "");
+
+    $grid.innerHTML = `
+      <div class="feed" id="feed">
+        ${postItems.map((p, idx)=>{
+          const media = Array.isArray(p.media) ? p.media : [];
+          const parts = parseBodyWithEmbeds(p.body || "");
+
+          const bodyHtml = parts.map(part=>{
+            if(part.type === "text"){
+              return `<span>${escapeHtml(part.value)}</span>`;
+            }
+            // collection embed placeholder; will hydrate after render
+            return `<div class="embed-collection" data-embed-col="${escapeHtml(part.id)}">
+                      <div class="embed-bg" data-embed-bg="${escapeHtml(part.id)}"></div>
+                      <div class="embed-overlay">
+                        <div class="embed-title">Collection</div>
+                        <div class="embed-desc">Loading…</div>
+                      </div>
+                    </div>`;
+          }).join("");
+
+          const hasSlider = media.length > 0;
+          const sliderId = `ps_${p.id.replaceAll("-","")}`;
+
+          return `
+            <div class="post" data-post="${escapeHtml(p.id)}">
+              <div class="post-head">
+                <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
+                <div class="post-meta">
+                  <div class="post-name">${escapeHtml(p.display_name || p.username || username)} ${verifiedBadgeHTML(p.verified === true)}</div>
+                  <div class="post-time">${escapeHtml(fmtDate(p.created_at))}</div>
+                </div>
+              </div>
+
+              <div class="post-body">${bodyHtml}</div>
+
+              ${hasSlider ? `
+                <div class="pslider" data-slider="${sliderId}">
+                  <div class="pslide" data-slide></div>
+                  ${media.length > 1 ? `<button class="pnav prev" data-prev>‹</button><button class="pnav next" data-next>›</button>` : ``}
+                  ${media.length > 1 ? `<div class="pdots" data-dots></div>` : ``}
+                </div>
+              ` : ``}
+
+              <div class="post-actions">
+                <button class="mini ${p._liked ? "on like" : ""}" data-act="like" data-post="${escapeHtml(p.id)}">${ICONS.like}<span>${p.like_count||0}</span></button>
+                <button class="mini" data-act="toggle-comments" data-post="${escapeHtml(p.id)}">${ICONS.comm}<span>${p.comment_count||0}</span></button>
+                <button class="mini ${p._saved ? "on save" : ""}" data-act="save" data-post="${escapeHtml(p.id)}">${ICONS.save}<span>${p.save_count||0}</span></button>
+                <div class="mini" style="pointer-events:none;opacity:.9">${ICONS.view}<span>${p.view_count||0}</span></div>
+
+                ${isOwnProfile ? `
+                  <button class="mini" data-act="edit" data-post="${escapeHtml(p.id)}">${ICONS.edit}<span>Edit</span></button>
+                  <button class="mini danger" data-act="delete" data-post="${escapeHtml(p.id)}">${ICONS.trash}<span>Delete</span></button>
+                ` : ``}
+              </div>
+
+              <div class="pc" data-comments="${escapeHtml(p.id)}" style="display:${(p.comment_count||0)>0 ? "flex" : "none"};">
+                <div class="pc-list" id="pc-list-${escapeHtml(p.id)}"><div class="empty" style="padding:18px">Loading…</div></div>
+                <button class="btn-ghost" data-viewall="${escapeHtml(p.id)}" style="align-self:flex-start;">View all comments</button>
+                <div class="pc-form">
+                  ${myAvatarHTML()}
+                  <textarea class="pc-input pc-ta" id="pc-in-${escapeHtml(p.id)}" rows="1" placeholder="Write a comment…"></textarea>
+                  <button class="mini" type="button" data-emo="${escapeHtml(p.id)}">Emoji</button>
+                  <button class="pc-send" data-send="${escapeHtml(p.id)}">${ICONS.send}</button>
+                </div>
+              </div>
+
+              ${idx < postItems.length-1 ? `<div class="feed-sep"></div>` : ``}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    bindVerifiedTooltip($grid);
+
+    // init sliders for each post
+    postItems.forEach(p=>{
+      const media = Array.isArray(p.media) ? p.media : [];
+      if(!media.length) return;
+      initPostSlider(p.id, media);
+    });
+
+    // hydrate collection embeds
+    hydrateCollectionEmbeds();
+
+    // actions
+    $grid.querySelectorAll("[data-act]").forEach(btn=>{
+      btn.onclick = async ()=>{
+        const act = btn.getAttribute("data-act");
+        const pid = btn.getAttribute("data-post");
+        const post = postItems.find(x=> String(x.id)===String(pid));
+        if(!post) return;
+
+        if(act === "like"){
+          try{
+            await requireToken();
+            const endpoint = post._liked ? "/api/posts/unlike" : "/api/posts/like";
+            const j = await api(endpoint, { method:"POST", body: JSON.stringify({ post_id: pid }) });
+            post._liked = !post._liked;
+            if(j?.counts){
+              post.like_count = j.counts.like_count;
+              post.comment_count = j.counts.comment_count;
+              post.save_count = j.counts.save_count;
+              post.view_count = j.counts.view_count;
+            }
+            renderPosts();
+          }catch(e){ toast(e.message||"Failed"); }
+        }
+
+        if(act === "save") {
+          try{
+            await requireToken();
+            const endpoint = post._saved ? "/api/posts/unsave" : "/api/posts/save";
+            const j = await api(endpoint, { method:"POST", body: JSON.stringify({ post_id: pid }) });
+            post._saved = !post._saved;
+            if(j?.counts){
+              post.like_count = j.counts.like_count;
+              post.comment_count = j.counts.comment_count;
+              post.save_count = j.counts.save_count;
+              post.view_count = j.counts.view_count;
+            }
+            renderPosts();
+          }catch(e){ toast(e.message||"Failed"); }
+        }
+
+        if(act === "toggle-comments"){
+          const box = $grid.querySelector(`[data-comments="${CSS.escape(pid)}"]`);
+          if(!box) return;
+          const willShow = box.style.display === "none";
+          box.style.display = willShow ? "flex" : "none";
+          if(willShow){
+            await loadPostComments(pid);
+          }
+        }
+
+        if(act === "edit"){
+          openPostSheet("edit", post);
+        }
+
+        if(act === "delete"){
+          if(!confirm("Delete this post?")) return;
+          try{
+            await requireToken();
+            await api("/api/posts/delete", { method:"POST", body: JSON.stringify({ post_id: pid }) });
+            postItems = postItems.filter(x=> String(x.id) !== String(pid));
+            renderPosts();
+            toast("Deleted");
+          }catch(e){ toast(e.message||"Failed"); }
+        }
+      };
+    });
+
+    // send comment buttons
+    $grid.querySelectorAll("[data-send]").forEach(btn=>{
+      btn.onclick = () => sendPostComment(btn.getAttribute("data-send"));
+    });
+
+    $grid.querySelectorAll("[data-emo]").forEach(b=>{
+      b.onclick = ()=>{
+        const pid = b.getAttribute("data-emo");
+        const inp = document.getElementById("pc-in-" + pid);
+        if(inp) openEmojiPicker(inp);
+      };
+    });
+
+    document.querySelectorAll(".pc-ta").forEach(ta=>{
+      if(ta.dataset.growBound==="1") return;
+      ta.dataset.growBound="1";
+
+      ta.addEventListener("focus", ()=> autoGrow(ta));
+      ta.addEventListener("input", ()=> autoGrow(ta));
+
+      ta.addEventListener("keydown", (e)=>{
+        if(e.key==="Enter" && !e.shiftKey){
+          e.preventDefault();
+          const pid = ta.id.replace("pc-in-","");
+          sendPostComment(pid);
+        }
+      });
+    });
+
+    $grid.querySelectorAll("[data-viewall]").forEach(b=>{
+      const pid = b.getAttribute("data-viewall");
+      const post = postItems.find(x=> String(x.id) === String(pid));
+      if(!post || (post.comment_count||0) <= 3) b.style.display = "none";
+      b.onclick = async ()=>{
+        postCommentsMode.set(pid, "all");
+        await loadPostComments(pid);
+        b.style.display = "none";
+      };
+    });
+
+    postItems.forEach(p=>{
+      if((p.comment_count||0) > 0){
+        loadPostComments(p.id);
+      }
+    });
+
+    // count views once per post render (dedupe server-side)
+    postItems.forEach(p=>{
+      if(p._viewed) return;
+      p._viewed = true;
+      const client_id = (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+      api("/api/posts/view", { method:"POST", body: JSON.stringify({ post_id: p.id, client_id }) }).catch(()=>{});
+    });
+  }
+
+  async function loadPostComments(post_id){
+    const listEl = document.getElementById("pc-list-" + post_id);
+    if(!listEl) return;
+    listEl.innerHTML = `<div class="empty" style="padding:18px">Loading…</div>`;
+    try{
+      const mode = postCommentsMode.get(post_id) || "preview";
+      const limit = mode === "all" ? 80 : 3;
+      const j = await api(`/api/posts/comments?post_id=${encodeURIComponent(post_id)}&limit=${limit}&offset=0`, { method:"GET" });
+      const arr = Array.isArray(j.items) ? j.items : [];
+      if(!arr.length){
+        listEl.innerHTML = `<div class="empty" style="padding:18px">No comments yet.</div>`;
+        return;
+      }
+
+      const myId = myUserId ? String(myUserId) : "";
+      listEl.innerHTML = arr.map(c=>{
+        const avEmoji = (c.avatar_type === "emoji" && c.avatar_emoji);
+        const avHtml = avEmoji ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "");
+        const isMine = myId && String(c.user_id) === myId;
+        const canDelete = isMine || (isOwnProfile === true);
+        const canEdit = isMine;
+        return `
+          <div class="pc-item" id="c-${escapeHtml(c.id)}" data-reply-to="${escapeHtml(c.reply_to_comment_id || "")}">
+            <a href="/artist?username=${encodeURIComponent(c.username||"")}" class="pc-ava-link"><div class="avatar ${avEmoji ? "emoji" : ""}">${avHtml}</div></a>
+            <div class="pc-bubble">
+              <div class="pc-top">
+                <a class="pc-name" href="/artist?username=${encodeURIComponent(c.username||"")}">
+                  ${escapeHtml(c.display_name||c.username||"user")}
+                  ${c.verified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}
+                </a>
+                <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+                  <button class="cic ${c.liked_by_me ? "on" : ""}" data-clike="${escapeHtml(c.id)}" title="Like">
+                    ${ICONS.like}<span>${c.like_count||0}</span>
+                  </button>
+                </div>
+              </div>
+              <div class="pc-body" data-body="${c.id}">${linkifyMentions(c.body||"")}</div>
+              <div class="pc-edit" data-editbox="${c.id}" style="display:none; margin-top:10px;">
+                <textarea class="pc-edit-ta" data-ta="${c.id}"></textarea>
+                <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:8px;">
+                  <button class="mini" data-emo-edit="${c.id}">Emoji</button>
+                  <button class="mini" data-c-cancel="${c.id}">Cancel</button>
+                  <button class="mini on save" data-c-save="${c.id}">Save</button>
+                </div>
+              </div>
+              <div class="pc-footer">
+                <div class="pc-time">${escapeHtml(fmtDate(c.created_at))}</div>
+
+                <div class="pc-actions">
+                  ${canEdit ? `<button class="cact" data-c-edit="${escapeHtml(c.id)}" title="Edit">${ICONS.edit}</button>` : ""}
+                  <button class="cact" data-c-reply="${escapeHtml(c.id)}" data-u="${escapeHtml(c.username||"")}" title="Reply">${ICONS.comm}</button>
+                  ${canDelete ? `<button class="cact danger" data-c-del="${escapeHtml(c.id)}" title="Delete">${ICONS.trash}</button>` : ""}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      bindVerifiedTooltip(listEl);
+
+      listEl.querySelectorAll("[data-clike]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-clike");
+          const row = arr.find(x=> String(x.id)===String(cid));
+          if(!row) return;
+          try{
+            await requireToken();
+            const endpoint = row.liked_by_me ? "/api/posts/comment_unlike" : "/api/posts/comment_like";
+            const r = await api(endpoint, { method:"POST", body: JSON.stringify({ comment_id: cid }) });
+            row.liked_by_me = !row.liked_by_me;
+            row.like_count = r.like_count ?? row.like_count;
+            await loadPostComments(post_id);
+          }catch(e){
+            toast(e.message||"Failed");
+          }
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-del]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-c-del");
+          if(!cid) return;
+          const ok = await confirmUI("Delete comment", "Are you sure you want to delete this comment?");
+          if(!ok) return;
+          try{
+            await requireToken();
+            await api("/api/posts/comment_delete", { method:"POST", body: JSON.stringify({ comment_id: cid }) });
+            const p = postItems.find(x=> String(x.id)===String(post_id));
+            if(p) p.comment_count = Math.max((p.comment_count||0) - 1, 0);
+            const commentsBtn = $grid.querySelector(`[data-act="toggle-comments"][data-post="${CSS.escape(String(post_id))}"] span`);
+            if(commentsBtn && p) commentsBtn.textContent = String(p.comment_count||0);
+            await loadPostComments(post_id);
+            toast("Deleted");
+          }catch(e){
+            toast(e.message||"Failed");
+          }
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-edit]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-c-edit");
+          const bodyEl = listEl.querySelector(`[data-body="${CSS.escape(cid)}"]`);
+          const boxEl = listEl.querySelector(`[data-editbox="${CSS.escape(cid)}"]`);
+          const ta = listEl.querySelector(`[data-ta="${CSS.escape(cid)}"]`);
+          if(!bodyEl || !boxEl || !ta) return;
+          ta.value = bodyEl.textContent || "";
+          boxEl.style.display = "block";
+          ta.focus();
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-cancel]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-c-cancel");
+          const boxEl = listEl.querySelector(`[data-editbox="${CSS.escape(cid)}"]`);
+          if(boxEl) boxEl.style.display = "none";
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-save]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const cid = btn.getAttribute("data-c-save");
+          const ta = listEl.querySelector(`[data-ta="${CSS.escape(cid)}"]`);
+          if(!ta) return;
+          const text = (ta.value||"").trim();
+          if(!text) return toast("Empty");
+          try{
+            await requireToken();
+            await api("/api/posts/comment_edit", { method:"POST", body: JSON.stringify({ comment_id: cid, body: text }) });
+            await loadPostComments(post_id);
+            toast("Updated");
+          }catch(e){
+            toast(e.message||"Failed");
+          }
+        };
+      });
+
+      listEl.querySelectorAll("[data-emo-edit]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-emo-edit");
+          const ta = listEl.querySelector(`[data-ta="${CSS.escape(cid)}"]`);
+          if(ta) openEmojiPicker(ta);
+        };
+      });
+
+      listEl.querySelectorAll("[data-c-reply]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const cid = btn.getAttribute("data-c-reply");
+          const uname = btn.getAttribute("data-u") || "";
+          replyToByPost.set(post_id, { comment_id: cid, username: uname });
+          const inp = document.getElementById("pc-in-" + post_id);
+          if(!inp) return;
+          inp.value = (inp.value||"") + `@${uname} `;
+          inp.focus();
+          autoGrow(inp);
+        };
+      });
+
+      const post = postItems.find(x=> String(x.id) === String(post_id));
+      const viewAllBtn = $grid.querySelector(`[data-viewall="${CSS.escape(post_id)}"]`);
+      if(viewAllBtn){
+        if(mode === "all") viewAllBtn.style.display = "none";
+        else if(arr.length < 3 || (post?.comment_count||0) <= 3) viewAllBtn.style.display = "none";
+        else viewAllBtn.style.display = "inline-flex";
+      }
+      listEl.scrollTop = listEl.scrollHeight;
+    }catch(e){
+      listEl.innerHTML = `<div class="empty" style="padding:18px;color:#ff98a2">Error: ${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+
+  async function sendPostComment(post_id){
+    try{
+      await requireToken();
+      const inp = document.getElementById("pc-in-" + post_id);
+      if(!inp) return;
+      const text = (inp.value||"").trim();
+      if(!text) return;
+      inp.disabled = true;
+      const rt = replyToByPost.get(post_id);
+      await api("/api/posts/comment", {
+        method:"POST",
+        body: JSON.stringify({
+          post_id,
+          body:text,
+          reply_to_comment_id: rt?.comment_id || null
+        })
+      });
+      replyToByPost.delete(post_id);
+      inp.value = "";
+      autoGrow(inp);
+      await loadPostComments(post_id);
+
+      // refresh counts locally
+      const p = postItems.find(x=> String(x.id)===String(post_id));
+      if(p) p.comment_count = (p.comment_count||0) + 1;
+      const commentsBtn = $grid.querySelector(`[data-act="toggle-comments"][data-post="${CSS.escape(String(post_id))}"] span`);
+      if(commentsBtn && p) commentsBtn.textContent = String(p.comment_count||0);
+    }catch(e){
+      replyToByPost.delete(post_id);
+      toast(e.message||"Failed");
+    }finally{
+      const inp = document.getElementById("pc-in-" + post_id);
+      if(inp) inp.disabled = false;
+    }
+  }
+
+  // Post slider init
+  function initPostSlider(postId, mediaArr){
+    const sliderId = `ps_${postId.replaceAll("-","")}`;
+    const host = $grid.querySelector(`[data-slider="${CSS.escape(sliderId)}"]`);
+    if(!host) return;
+
+    let idx = 0;
+    const $slide = host.querySelector("[data-slide]");
+    const $prev = host.querySelector("[data-prev]");
+    const $next = host.querySelector("[data-next]");
+    const $dots = host.querySelector("[data-dots]");
+    const imgEl = document.createElement("img");
+    imgEl.loading = "lazy";
+    imgEl.decoding = "async";
+    const vidEl = document.createElement("video");
+    vidEl.setAttribute("playsinline", "");
+    vidEl.controls = true;
+    $slide.innerHTML = "";
+    $slide.appendChild(imgEl);
+    $slide.appendChild(vidEl);
+
+    function set(i){
+      idx = (i + mediaArr.length) % mediaArr.length;
+      const item = mediaArr[idx];
+      const url = (item.media_url || item.thumb_url || "").trim();
+      const isV = isVideoUrl(url);
+
+      if(isV){
+        imgEl.style.display = "none";
+        vidEl.style.display = "block";
+        if(vidEl.getAttribute("src") !== url){
+          vidEl.pause();
+          vidEl.setAttribute("src", url);
+          vidEl.load();
+        }
+      } else {
+        vidEl.pause();
+        vidEl.style.display = "none";
+        imgEl.style.display = "block";
+        const nextSrc = (item.thumb_url || item.media_url || "").trim();
+        if(imgEl.getAttribute("src") !== nextSrc){
+          imgEl.setAttribute("src", nextSrc);
+        }
+      }
+
+      // click opens Media Viewer slider for whole post
+      $slide.onclick = () => {
+        openMediaViewer(
+          mediaArr.map(m => ({
+            title: m.title || "Untitled",
+            url: (m.media_url || m.thumb_url || "").trim(),
+            thumb: (m.thumb_url || m.media_url || "").trim(),
+            isVideo: isVideoUrl((m.media_url || m.thumb_url || "").trim())
+          })),
+          idx,
+          (newIndex)=>{ set(newIndex); }
+        );
+      };
+
+      if($dots){
+        $dots.innerHTML = mediaArr.map((_,k)=> `<button class="${k===idx?'on':''}" data-dot="${k}"></button>`).join("");
+        $dots.querySelectorAll("[data-dot]").forEach(b=>{
+          b.onclick = (e)=>{ e.stopPropagation(); set(Number(b.getAttribute("data-dot"))); };
+        });
+      }
+    }
+
+    if($prev) $prev.onclick = (e)=>{ e.stopPropagation(); set(idx-1); };
+    if($next) $next.onclick = (e)=>{ e.stopPropagation(); set(idx+1); };
+
+    // basic swipe
+    let startX = null;
+    $slide.addEventListener("touchstart", (e)=>{ startX = e.touches[0].clientX; }, {passive:true});
+    $slide.addEventListener("touchend", (e)=>{
+      if(startX==null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      startX = null;
+      if(Math.abs(dx) < 40) return;
+      if(dx < 0) set(idx+1); else set(idx-1);
+    }, {passive:true});
+
+    set(0);
+  }
+
+  // -------- Render: COLLECTIONS ----------
+  function renderCollections(){
+    if(!collectionItems.length){
+      $grid.innerHTML = `<div class="empty">No collections yet.</div>`;
+      return;
+    }
+
+    $grid.innerHTML = `
+      <div class="cgrid" id="cgridRoot">
+        ${collectionItems.map(c=>{
+          const prev = Array.isArray(c.preview_items) ? c.preview_items : [];
+          // Use thumbs only for slideshow
+          const imgs = prev
+            .map(x => (x.thumb_url || x.media_url || "").trim())
+            .filter(Boolean)
+            .slice(0, 10);
+
+          return `
+            <div class="ccard" data-col="${escapeHtml(c.id)}">
+              <div class="cc-bg" data-ccbg="${escapeHtml(c.id)}">
+                ${imgs.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>` : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("")}
+              </div>
+              <div class="cc-glass">
+                <div>
+                  <div class="cc-title">${escapeHtml(c.title || "Untitled collection")}</div>
+                  <div class="cc-desc">${escapeHtml(c.description || "")}</div>
+                </div>
+                <div class="cc-meta">
+                  <div class="cc-pill" data-clike="${escapeHtml(c.id)}">${ICONS.like} <b>${c.like_count||0}</b></div>
+                  <div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div>
+                  <div class="cc-pill ${c._saved ? "mini on save" : ""}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    $grid.querySelectorAll("[data-col]").forEach(el=>{
+      el.onclick = () => openCollectionModal(el.getAttribute("data-col"));
+    });
+
+    $grid.querySelectorAll("[data-clike]").forEach(el=>{
+      el.onclick = async (e)=>{
+        e.stopPropagation();
+        const id = el.getAttribute("data-clike");
+        const col = collectionItems.find(x=> String(x.id)===String(id));
+        if(!col) return;
+        try{
+          await requireToken();
+          const endpoint = col._liked ? "/api/collections/unlike" : "/api/collections/like";
+          const j = await api(endpoint, { method:"POST", body: JSON.stringify({ collection_id:id }) });
+          col._liked = !col._liked;
+          if(j?.counts){
+            col.like_count = j.counts.like_count;
+            col.save_count = j.counts.save_count;
+            col.view_count = j.counts.view_count;
+          }
+          renderCollections();
+          startCollectionsSlideshows();
+        }catch(e){
+          toast(e.message||"Failed");
+        }
+      };
+    });
+
+    $grid.querySelectorAll("[data-csave]").forEach(el=>{
+      el.onclick = async (e)=>{
+        e.stopPropagation();
+        const id = el.getAttribute("data-csave");
+        const col = collectionItems.find(x=> String(x.id)===String(id));
+        if(!col) return;
+
+        try{
+          await requireToken();
+          const endpoint = col._saved ? "/api/collections/unsave" : "/api/collections/save";
+          const j = await api(endpoint, { method:"POST", body: JSON.stringify({ collection_id: id }) });
+          col._saved = !col._saved;
+          if(j?.counts){
+            col.save_count = j.counts.save_count;
+            col.like_count = j.counts.like_count;
+            col.view_count = j.counts.view_count;
+          }
+          renderCollections();
+          startCollectionsSlideshows();
+        }catch(err){
+          toast(err.message || "Failed");
+        }
+      };
+    });
+
+    bindVerifiedTooltip($grid);
+  }
+
+  function startCollectionsSlideshows(){
+    document.querySelectorAll("[data-ccbg]").forEach(bg=>{
+      if(bg.dataset.slBound === "1") return;
+      bg.dataset.slBound = "1";
+      const slides = Array.from(bg.querySelectorAll("img,video"));
+      if(slides.length <= 1) return;
+
+      let i = 0;
+      setInterval(()=>{
+        const prev = slides[i];
+        prev.classList.remove("on");
+        if(prev.tagName === "VIDEO"){ try{ prev.pause(); prev.currentTime = 0; }catch(e){} }
+        i = (i+1) % slides.length;
+        const cur = slides[i];
+        cur.classList.add("on");
+        if(cur.tagName === "VIDEO"){ try{ cur.play(); }catch(e){} }
+      }, 1400);
+    });
+  }
+
+  async function openCollectionModal(collection_id){
+    currentCol = null;
+    colReorderMode = false;
+    sceneReorderMode = false;
+    dragFromIndex = null;
+
+    $cb.classList.add("open");
+    $ctitle.textContent = "Loading…";
+    $cdesc.textContent = "";
+    $cmeta.innerHTML = "";
+    $cgrid.innerHTML = `<div class="empty" style="grid-column:1/-1">Loading…</div>`;
+    $btnColEdit.style.display = "none";
+    $btnSceneNew.style.display = "none";
+    $btnColReorder.style.display = "none";
+    $btnColDelete.style.display = "none";
+    $colReorderFooter.classList.remove("open");
+    colOriginalOrderIds = [];
+    sceneOriginalOrderIds = [];
+    $btnColReorder.textContent = "Reorder";
+
+    try{
+      const j = await api(`/api/collections/get?id=${encodeURIComponent(collection_id)}`, { method:"GET" });
+      const col = j.collection;
+      const items = Array.isArray(j.items) ? j.items : [];
+      const sections = Array.isArray(j.sections) ? j.sections : [];
+      currentCol = { col, items, sections };
+
+      $ctitle.textContent = col.title || "Untitled collection";
+      $cdesc.textContent = col.description || "";
+      $cmeta.innerHTML = `
+        <div class="stat">${ICONS.like} ${col.like_count||0}</div>
+        <div class="stat">${ICONS.view} ${col.view_count||0}</div>
+        <div class="stat">${ICONS.save} ${col.save_count||0}</div>
+      `;
+
+      const film = j.film || null;
+      renderCollectionFilmBlock(film, currentCol.col.id);
+
+      // view count dedupe
+      const client_id = (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+      api("/api/collections/view", { method:"POST", body: JSON.stringify({ collection_id: col.id, client_id }) }).catch(()=>{});
+
+      if(isOwnProfile){
+        $btnColEdit.style.display = "inline-flex";
+        $btnSceneNew.style.display = "inline-flex";
+        $btnColReorder.style.display = "inline-flex";
+        $btnColDelete.style.display = "inline-flex";
+      }else{
+        $btnSceneNew.style.display = "none";
+      }
+
+      renderCollectionModalGrid();
+    }catch(e){
+      $cgrid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+  function renderCollectionModalGrid(){
+    if(!currentCol) return;
+    const items = currentCol.items || [];
+    const sections = Array.isArray(currentCol.sections) ? currentCol.sections : [];
+    if (!items.length && !sections.length) {
+      $cgrid.innerHTML = `<div class="empty" style="grid-column:1/-1">Empty collection.</div>`;
+      return;
+    }
+
+    const normalizedSections = sections.map(sc => ({
+      id: sc.id == null ? null : String(sc.id),
+      title: sc.title || "Scene",
+      description: sc.description || ""
+    }));
+    const defaultItems = items.filter(it => !it.section_id);
+    const scenes = normalizedSections.map(sc => ({
+      id: sc.id,
+      title: sc.title,
+      description: sc.description,
+      items: items.filter(it => String(it.section_id || "") === String(sc.id || ""))
+    }));
+    if(defaultItems.length || !scenes.length){
+      scenes.push({ id: null, title: "Default", description: "", items: defaultItems.length ? defaultItems : items });
+    }
+
+    $cgrid.innerHTML = scenes.map((scene, sceneIdx)=>{
+      const grid = scene.items.map((it, idx)=>{
+        const url = (it.media_url || it.thumb_url || "").trim();
+        const isV = isVideoUrl(url);
+        const thumb = (it.thumb_url || it.media_url || "").trim();
+        return `
+          <div class="col-item" draggable="${(colReorderMode && !sections.length) ? "true" : "false"}" data-idx="${idx}" data-scene="${sceneIdx}">
+            ${isV
+              ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>`
+              : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />`
+            }
+            ${sceneReorderMode ? `
+              <div class="drag-handle" title="Drag">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+              </div>` : ``}
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div class="scene" draggable="${sceneReorderMode ? "true" : "false"}" data-scene="${sceneIdx}">
+          <div class="scene-head">
+            <div>
+              <div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>
+              ${scene.description ? `<div class="scene-desc">${escapeHtml(scene.description)}</div>` : ``}
+            </div>
+            ${isOwnProfile ? `
+              <div class="scene-actions">
+                <button class="btn-ghost" data-sc-add="${escapeHtml(String(scene.id ?? ""))}">+ Add</button>
+                ${scene.id ? `<button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>` : ``}
+                ${scene.id ? `<button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>` : ``}
+              </div>
+            ` : ``}
+          </div>
+          <div class="scene-grid">${grid || `<div class="empty" style="grid-column:1/-1">No items.</div>`}</div>
+        </div>
+      `;
+    }).join("");
+
+    $cgrid.querySelectorAll(".col-item").forEach(el=>{
+      el.onclick = () => {
+        if(colReorderMode || sceneReorderMode) return;
+        const sceneIndex = Number(el.getAttribute("data-scene") || "0");
+        const idx = Number(el.getAttribute("data-idx") || "0");
+        const scene = scenes[sceneIndex] || { items: [] };
+        const viewerItems = scene.items.map(m=>{
+          const url = (m.media_url || m.thumb_url || "").trim();
+          return {
+            title: m.title || "Untitled",
+            url,
+            thumb: (m.thumb_url || m.media_url || "").trim(),
+            isVideo: isVideoUrl(url)
+          };
+        });
+        openMediaViewer(viewerItems, idx, null);
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-edit]").forEach(b=>{
+      b.onclick = ()=>{
+        const id = b.getAttribute("data-sc-edit");
+        const sc = (currentCol.sections||[]).find(x=> String(x.id)===String(id));
+        if(sc) openSceneSheet("edit", sc);
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-add]").forEach(b=>{
+      b.onclick = async ()=>{
+        try{
+          await requireToken();
+          if(!currentCol) return;
+
+          const sidRaw = b.getAttribute("data-sc-add");
+          const section_id = sidRaw ? String(sidRaw).trim() : null;
+
+          await ensureLibraryLoadedForPicker();
+
+          const items = libraryItems.slice(0, 400).map(it=>({
+            id: it.id,
+            title: it.title || "Untitled",
+            description: "",
+            thumb: (it.thumb_url || it.media_url || ""),
+            type: it.file_type || "",
+            media_url: it.media_url || ""
+          }));
+
+          const picked = await openPicker("library", {
+            title: "Add to scene",
+            hint: "Select items (multi-select).",
+            items,
+            multi: true,
+            layout: "wide",
+            preselected: []
+          });
+
+          if(!Array.isArray(picked) || !picked.length) return;
+
+          for(const fp of picked){
+            await api("/api/collections/items/move", {
+              method:"POST",
+              body: JSON.stringify({
+                collection_id: currentCol.col.id,
+                feed_post_id: fp,
+                to_section_id: section_id || null,
+                to_index: 9999
+              })
+            });
+          }
+
+          const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+          currentCol.sections = j.sections || [];
+          currentCol.items = j.items || [];
+          renderCollectionModalGrid();
+          toast("Added");
+        }catch(e){
+          toast(e.message || "Failed");
+        }
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-del]").forEach(b=>{
+      b.onclick = async ()=>{
+        const id = b.getAttribute("data-sc-del");
+        const ok = await confirmUI("Delete scene", "Scene will be removed. Items will return to Default.", "Delete", true);
+        if(!ok) return;
+        try{
+          await requireToken();
+          await api("/api/collections/sections/delete", { method:"POST", body: JSON.stringify({ section_id:id }) });
+          const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+          currentCol.sections = j.sections || [];
+          currentCol.items = j.items || [];
+          renderCollectionModalGrid();
+          toast("Deleted");
+        }catch(e){ toast(e.message||"Failed"); }
+      };
+    });
+
+    $colReorderFooter.classList.toggle("open", !!colReorderMode || !!sceneReorderMode);
+    $btnColReorder.textContent = (colReorderMode || sceneReorderMode) ? "Exit" : "Reorder";
+    if(colReorderMode && !sections.length) bindDnD();
+    if(sceneReorderMode) bindSceneDnD();
+  }
+
+  function renderCollectionFilmBlock(film, collectionId){
+    if(!$colFilm) return;
+
+    if(film && film.status === "approved" && film.published_url){
+      $colFilm.style.display = "block";
+      $colFilm.innerHTML = `
+        <h3>${escapeHtml(film.title || "Film")}</h3>
+        ${film.description ? `<p>${escapeHtml(film.description)}</p>` : ``}
+        <video controls playsinline src="${escapeHtml(film.published_url)}"></video>
+      `;
+      return;
+    }
+
+    if(film && film.status === "pending"){
+      $colFilm.style.display = "block";
+      $colFilm.innerHTML = `
+        <h3>Film submission</h3>
+        <p style="margin-top:8px;"><span class="pill">Pending review</span></p>
+        <p>We’ll review it within 1–2 days.</p>
+      `;
+      return;
+    }
+
+    if(!isOwnProfile){
+      $colFilm.style.display = "none";
+      $colFilm.innerHTML = "";
+      return;
+    }
+
+    $colFilm.style.display = "block";
+    $colFilm.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+        <div>
+          <h3 style="margin:0;">Your film</h3>
+          <p style="margin-top:6px;">You can submit a short film for review.</p>
+        </div>
+        <button class="btn-primary" id="openFilmSubmit">Submit film</button>
+      </div>
+    `;
+
+    const btn = document.getElementById("openFilmSubmit");
+    if(btn){
+      btn.onclick = ()=> openFilmSheet(collectionId);
+    }
+  }
+
+  function bindDnD(){
+    const nodes = Array.from($cgrid.querySelectorAll(".col-item"));
+    nodes.forEach(el=>{
+      el.addEventListener("dragstart", (ev)=>{
+        el.classList.add("dragging");
+        dragFromIndex = Number(el.getAttribute("data-idx"));
+        ev.dataTransfer.effectAllowed = "move";
+      });
+      el.addEventListener("dragend", ()=>{
+        el.classList.remove("dragging");
+      });
+      el.addEventListener("dragover", (ev)=>{
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+      });
+      el.addEventListener("drop", (ev)=>{
+        ev.preventDefault();
+        const toIdx = Number(el.getAttribute("data-idx"));
+        if(dragFromIndex == null || Number.isNaN(toIdx) || dragFromIndex === toIdx) return;
+        const arr = currentCol.items.slice();
+        const [moved] = arr.splice(dragFromIndex, 1);
+        arr.splice(toIdx, 0, moved);
+        currentCol.items = arr;
+        dragFromIndex = toIdx;
+        renderCollectionModalGrid();
+      });
+    });
+  }
+
+  function bindSceneDnD(){
+    const nodes = Array.from($cgrid.querySelectorAll(".scene"));
+    nodes.forEach(el=>{
+      el.addEventListener("dragstart", (ev)=>{
+        el.classList.add("dragging");
+        dragFromIndex = Number(el.getAttribute("data-scene"));
+        ev.dataTransfer.effectAllowed = "move";
+      });
+      el.addEventListener("dragend", ()=>{
+        el.classList.remove("dragging");
+      });
+      el.addEventListener("dragover", (ev)=>{
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+      });
+      el.addEventListener("drop", (ev)=>{
+        ev.preventDefault();
+        const toIdx = Number(el.getAttribute("data-scene"));
+        if(dragFromIndex == null || Number.isNaN(toIdx) || dragFromIndex === toIdx) return;
+        const arr = (currentCol.sections || []).slice();
+        const [moved] = arr.splice(dragFromIndex, 1);
+        arr.splice(toIdx, 0, moved);
+        currentCol.sections = arr;
+        dragFromIndex = toIdx;
+        renderCollectionModalGrid();
+      });
+    });
+  }
+
+  async function saveCollectionOrder(){
+    if(!currentCol) return;
+    await requireToken();
+
+    if(sceneReorderMode){
+      const ordered = (currentCol.sections || []).map(x=> x.id).filter(Boolean);
+      await api("/api/collections/sections/reorder", {
+        method:"POST",
+        body: JSON.stringify({ collection_id: currentCol.col.id, ordered_section_ids: ordered })
+      });
+      return;
+    }
+
+    const ordered = currentCol.items.map(x=> x.id);
+    await api("/api/collections/reorder", { method:"POST", body: JSON.stringify({ id: currentCol.col.id, ordered_feed_post_ids: ordered }) });
+  }
+
+  function closeCollectionModal(){
+    $cb.classList.remove("open");
+    currentCol = null;
+    colReorderMode = false;
+    sceneReorderMode = false;
+    colOriginalOrderIds = [];
+    sceneOriginalOrderIds = [];
+    $colReorderFooter.classList.remove("open");
+    $btnColReorder.textContent = "Reorder";
+    dragFromIndex = null;
+  }
+
+  // -------- Render: LIBRARY ----------
+  function renderLibrary(){
+    const items = libraryItems;
+    if(!items.length){
+      $grid.innerHTML = `<div class="empty">No published works yet.</div>`;
+      return;
+    }
+
+    const displayName = profile?.display_name || profile?.username || username;
+    const userName = profile?.username || username;
+    const avIsEmoji = (profile?.avatar_type === "emoji" && profile?.avatar_emoji);
+    const avatarHtml = avIsEmoji
+      ? `<span>${escapeHtml(profile?.avatar_emoji || "")}</span>`
+      : (profile?.avatar_url ? `<img src="${escapeHtml(profile.avatar_url)}" />` : "");
+
+    $grid.innerHTML = `
+      <div class="lf-grid">
+        ${items.map(it=>{
+          const video = isVideoUrl(it.media_url || it.thumb_url);
+          const media = (it.media_url || it.thumb_url || "").trim();
+
+          const mediaHtml = video
+            ? `
+              <video class="lf-poster-video" muted playsinline preload="metadata" src="${escapeHtml(media)}"></video>
+              <video class="lf-hover-video" muted playsinline preload="none">
+                <source src="${escapeHtml(media)}" type="video/mp4">
+              </video>
+            `
+            : `
+              <img class="lf-thumb" src="${escapeHtml(it.thumb_url || it.media_url || "")}" loading="lazy" decoding="async" />
+            `;
+
+          return `
+            <div class="lf-card" data-id="${escapeHtml(it.id)}">
+              <div class="lf-media">
+                ${mediaHtml}
+                <div class="card-bottom">
+                  <div class="card-author">
+                    <div class="avatar ${avIsEmoji ? "emoji" : ""}">${avatarHtml}</div>
+                    <div class="author-txt">
+                      <div class="author-name">${escapeHtml(displayName)} ${verifiedBadgeHTML(profile?.verified === true)}</div>
+                      <div class="author-username">@${escapeHtml(userName)}</div>
+                    </div>
+                  </div>
+                  <div class="card-title">${escapeHtml(it.title||"Untitled")}</div>
+                  <div class="card-stats">
+                    <div class="stat">${ICONS.like} ${it.like_count||0}</div>
+                    <div class="stat">${ICONS.comm} ${it.comment_count||0}</div>
+                    <div class="stat">${ICONS.save} ${it.save_count||0}</div>
+                    <div class="stat">${ICONS.view} ${it.view_count||0}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    bindVerifiedTooltip($grid);
+
+    $grid.querySelectorAll(".lf-card").forEach(c=>{
+      c.onclick = () => {
+        const id = c.getAttribute("data-id");
+        const it = libraryItems.find(x=> String(x.id)===String(id));
+        if(it) openWorkModal(it);
+      };
+    });
+
+    wireHoverVideos();
+    primePosterVideos();
+  }
+
+  function wireHoverVideos(){
+    document.querySelectorAll(".lf-card").forEach(card=>{
+      if(card.dataset.hoverBound === "1") return;
+      card.dataset.hoverBound = "1";
+
+      const v = card.querySelector("video.lf-hover-video");
+      if(!v) return;
+
+      card.addEventListener("mouseenter", async () => {
+        try{ v.load(); await v.play(); }catch(e){}
+      });
+      card.addEventListener("mouseleave", () => {
+        try{ v.pause(); v.currentTime = 0; }catch(e){}
+      });
+    });
+  }
+  function primePosterVideos(){
+    document.querySelectorAll("video.lf-poster-video").forEach(v=>{
+      if(v.dataset.primed === "1") return;
+      v.dataset.primed = "1";
+      v.addEventListener("loadeddata", () => {}, { once:true });
+      v.load();
+    });
+  }
+
+  // -------- Collection embeds inside posts ----------
+  const embedCache = new Map(); // id -> {collection, items}
+  async function hydrateCollectionEmbeds(){
+    const nodes = Array.from(document.querySelectorAll("[data-embed-col]"));
+    for(const el of nodes){
+      const id = el.getAttribute("data-embed-col");
+      if(!id) continue;
+      if(el.dataset.hydrated === "1") continue;
+      el.dataset.hydrated = "1";
+
+      try{
+        let data = embedCache.get(id);
+        if(!data){
+          const j = await api(`/api/collections/get?id=${encodeURIComponent(id)}`, { method:"GET" });
+          data = j;
+          embedCache.set(id, data);
+        }
+        const col = data.collection;
+        const items = Array.isArray(data.items) ? data.items : [];
+        el.querySelector(".embed-title").textContent = col.title || "Collection";
+        el.querySelector(".embed-desc").textContent = col.description || "";
+
+        // build bg slideshow
+        const bg = el.querySelector("[data-embed-bg]");
+        const thumbs = items
+          .map(x => (x.thumb_url || x.media_url || "").trim())
+          .filter(Boolean)
+          .slice(0, 8);
+
+        bg.innerHTML = thumbs.map((u,i)=> isVideoUrl(u)
+          ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>`
+          : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("");
+        if(thumbs.length > 1){
+          const slides = Array.from(bg.querySelectorAll("img,video"));
+          let i = 0;
+          setInterval(()=>{
+            const prev = slides[i];
+            prev.classList.remove("on");
+            if(prev.tagName === "VIDEO"){ try{ prev.pause(); prev.currentTime = 0; }catch(e){} }
+            i = (i+1) % slides.length;
+            const cur = slides[i];
+            cur.classList.add("on");
+            if(cur.tagName === "VIDEO"){ try{ cur.play(); }catch(e){} }
+          }, 1300);
+        }
+
+        el.onclick = () => openCollectionModal(id);
+      }catch(e){
+        el.querySelector(".embed-title").textContent = "Collection";
+        el.querySelector(".embed-desc").textContent = "Failed to load";
+      }
+    }
+  }
+
+  // -------- Media Viewer ----------
+  function openMediaViewer(items, startIndex=0, onChange=null){
+    mvItems = Array.isArray(items) ? items : [];
+    if(!mvItems.length) return;
+    mvIndex = Math.max(0, Math.min(startIndex, mvItems.length-1));
+    mvOnChange = (typeof onChange === "function") ? onChange : null;
+
+    $mb.classList.remove("open");
+    $mvb.classList.add("open");
+    renderMediaViewer();
+  }
+
+  function closeMediaViewer(){
+    $mvb.classList.remove("open");
+    $mvHost.innerHTML = "";
+    $mvDots.innerHTML = "";
+    mvItems = [];
+    mvIndex = 0;
+    mvOnChange = null;
+  }
+
+  function renderMediaViewer(){
+    const item = mvItems[mvIndex];
+    if(!item) return;
+
+    $mvTitle.textContent = (item.title || "—") + `  •  ${mvIndex+1}/${mvItems.length}`;
+
+    // render media
+    $mvHost.innerHTML = "";
+    if(item.isVideo){
+      const v = document.createElement("video");
+      v.src = item.url;
+      v.controls = true;
+      v.playsInline = true;
+      v.autoplay = true;
+      v.className = "mv-media";
+      $mvHost.appendChild(v);
+    } else {
+      const img = document.createElement("img");
+      img.src = item.url || item.thumb;
+      img.className = "mv-media";
+      $mvHost.appendChild(img);
+    }
+
+    // dots
+    $mvDots.innerHTML = mvItems.map((_,i)=> `<button class="${i===mvIndex?'on':''}" data-mvdot="${i}"></button>`).join("");
+    $mvDots.querySelectorAll("[data-mvdot]").forEach(b=>{
+      b.onclick = ()=> setMediaIndex(Number(b.getAttribute("data-mvdot")));
+    });
+
+    // nav visible?
+    $mvPrev.style.display = mvItems.length > 1 ? "flex" : "none";
+    $mvNext.style.display = mvItems.length > 1 ? "flex" : "none";
+  }
+
+  function setMediaIndex(i){
+    if(!mvItems.length) return;
+    mvIndex = (i + mvItems.length) % mvItems.length;
+    renderMediaViewer();
+    if(mvOnChange) mvOnChange(mvIndex);
+  }
+
+  // swipe for viewer
+  function bindViewerSwipe(){
+    let startX = null;
+    $mvHost.addEventListener("touchstart", (e)=>{ startX = e.touches[0].clientX; }, {passive:true});
+    $mvHost.addEventListener("touchend", (e)=>{
+      if(startX==null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      startX = null;
+      if(Math.abs(dx) < 40) return;
+      if(dx < 0) setMediaIndex(mvIndex+1);
+      else setMediaIndex(mvIndex-1);
+    }, {passive:true});
+  }
+
+  // -------- Work modal (Library item) ----------
+  async function openWorkModal(it){
+    currentWork = Object.assign({}, it);
+    liked = false;
+    saved = false;
+
+    try{
+      const token = await getSessionToken();
+      if(token){
+        const st = await api(`/api/feed/state?post_id=${encodeURIComponent(currentWork.id)}`, { method:"GET" });
+        liked = !!st.liked;
+        saved = !!st.saved;
+      }
+    }catch(e){}
+
+    const avatarType = it.avatar_type || profile?.avatar_type || "image";
+    const av = it.avatar_url || profile?.avatar_url || "";
+    const avatarEmoji = it.avatar_emoji || profile?.avatar_emoji || "";
+    const uname = it.username || profile?.username || username;
+    const dname = it.display_name || profile?.display_name || uname;
+
+    renderAvatarInto($mAvatar, avatarType, av, avatarEmoji);
+    document.getElementById("m-userline").textContent = "@" + uname;
+    $mUserlink.innerHTML = `${escapeHtml(dname)} ${verifiedBadgeHTML((it.verified ?? profile?.verified) === true)}`;
+    bindVerifiedTooltip($mUserlink.parentElement);
+    $mUserlink.href = "/artist?username=" + encodeURIComponent(uname);
+
+    $mmeta.textContent = fmtDate(it.published_at);
+    $mFollowers.style.display = "inline-flex";
+    $mFollowers.innerHTML = `<span>Followers</span><b>${it.follower_count ?? profile?.follower_count ?? 0}</b>`;
+    $mtitle.textContent = it.title || "Untitled";
+    $titleEditBtn.style.display = isOwnProfile ? "inline-flex" : "none";
+
+    setWorkModalStats(it);
+    setWorkActionButtons();
+    renderWorkModalMedia(it);
+
+    $dlBtn.onclick = async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const url = (it.media_url || it.thumb_url || "").trim();
+      if(!url) return;
+      const resp = await fetch(url, { mode:"cors" });
+      const blob = await resp.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = (it.title || "download").replace(/[^\w\- ]+/g, "").slice(0,40) + (isVideoUrl(url) ? ".mp4" : ".png");
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
+    };
+
+    $mb.classList.add("open");
+
+    try{
+      const token = await getSessionToken();
+      const headers = { "Content-Type":"application/json" };
+      if(token) headers.Authorization = "Bearer " + token;
+      await fetch(WRITE_BACKEND + "/api/feed/view", {
+        method:"POST", headers,
+        body: JSON.stringify({ post_id: it.id, client_id: (crypto?.randomUUID?crypto.randomUUID():String(Date.now()) + Math.random()) })
+      });
+    }catch(e){}
+
+    await loadWorkComments();
+  }
+
+  function closeWorkModal(){
+    $mb.classList.remove("open");
+    currentWork = null;
+    $mp.innerHTML = "";
+    $clist.innerHTML = "";
+    $cinput.value = "";
+    $titleEdit.style.display = "none";
+    $titleEditBtn.style.display = "none";
+  }
+
+  function setWorkModalStats(it){
+    $mstats.innerHTML = `
+      <div class="stat">${ICONS.like} ${it.like_count||0}</div>
+      <div class="stat">${ICONS.comm} ${it.comment_count||0}</div>
+      <div class="stat">${ICONS.save} ${it.save_count||0}</div>
+      <div class="stat">${ICONS.view} ${it.view_count||0}</div>
+    `;
+  }
+
+  function setWorkActionButtons(){
+    $likeBtn.classList.add("like");
+    $saveBtn.classList.add("save");
+    $likeBtn.classList.toggle("on", liked);
+    $saveBtn.classList.toggle("on", saved);
+    $likeBtn.innerHTML = `${ICONS.like} <span>${liked ? "Liked" : "Like"}</span>`;
+    $saveBtn.innerHTML = `${ICONS.save} <span>${saved ? "Saved" : "Save"}</span>`;
+    $dlBtn.innerHTML = ICONS.dl;
+  }
+
+  function renderWorkModalMedia(it){
+    const media = (it.media_url || "").trim();
+    const thumb = (it.thumb_url || "").trim();
+    const url = media || thumb;
+    if(isVideoUrl(url)){
+      $mp.innerHTML = `<video src="${escapeHtml(url)}" controls autoplay playsinline loop style="width:100%;height:100%;object-fit:contain"></video>`;
+    } else {
+      $mp.innerHTML = `<img src="${escapeHtml(url)}" />`;
+    }
+  }
+
+  function startTitleEdit(){
+    if(!currentWork || !isOwnProfile) return;
+    $titleInput.value = currentWork.title || "";
+    $titleEdit.style.display = "flex";
+    $titleInput.focus();
+  }
+
+  async function saveTitle(){
+    if(!currentWork || !isOwnProfile) return;
+    const title = ($titleInput.value||"").trim();
+    const j = await api("/api/feed/update_title", { method:"POST", body: JSON.stringify({ post_id: currentWork.id, title }) });
+    currentWork.title = j?.title ?? title;
+    $mtitle.textContent = currentWork.title || "Untitled";
+    const idx = libraryItems.findIndex(x=> String(x.id)===String(currentWork.id));
+    if(idx>=0){ libraryItems[idx].title = currentWork.title; }
+    $titleEdit.style.display = "none";
+    if(tab === "library") renderLibrary();
+  }
+
+  async function loadWorkComments(){
+    if(!currentWork) return;
+    $clist.innerHTML = `<div class="empty" style="padding:18px">Loading…</div>`;
+    try{
+      const j = await api(`/api/feed/comments?post_id=${encodeURIComponent(currentWork.id)}&limit=80&offset=0`, { method:"GET" });
+      const arr = Array.isArray(j.items) ? j.items : [];
+      if(!arr.length){ $clist.innerHTML = `<div class="empty" style="padding:18px">No comments yet.</div>`; return; }
+      $clist.innerHTML = arr.map(c=>`
+        <div class="c-item">
+          <div class="avatar ${((c.avatar_type === "emoji" && c.avatar_emoji) ? "emoji" : "")}">
+            ${(c.avatar_type === "emoji" && c.avatar_emoji) ? `<span>${escapeHtml(c.avatar_emoji)}</span>` : (c.avatar_url ? `<img src="${escapeHtml(c.avatar_url)}" />` : "")}
+          </div>
+          <div class="c-bubble">
+            <div class="c-top"><div class="c-name">${escapeHtml(c.display_name||c.username||"user")}</div><div class="c-time">${escapeHtml(fmtDate(c.created_at))}</div></div>
+            <div class="c-body">${escapeHtml(c.body)}</div>
+          </div>
+        </div>
+      `).join("");
+      $clist.scrollTop = $clist.scrollHeight;
+    }catch(e){
+      $clist.innerHTML = `<div class="empty" style="padding:18px;color:#ff98a2">Error: ${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+  async function toggleWorkLike(){
+    if(!currentWork) return;
+    await requireToken();
+    const path = liked ? "/api/feed/unlike" : "/api/feed/like";
+    const j = await api(path, { method:"POST", body: JSON.stringify({ post_id: currentWork.id }) });
+    if(j?.counts){
+      currentWork.like_count = j.counts.like_count;
+      currentWork.comment_count = j.counts.comment_count;
+      currentWork.save_count = j.counts.save_count;
+      currentWork.view_count = j.counts.view_count;
+      setWorkModalStats(currentWork);
+      const idx = libraryItems.findIndex(x=> String(x.id)===String(currentWork.id));
+      if(idx>=0){ libraryItems[idx] = Object.assign({}, libraryItems[idx], currentWork); }
+    }
+    liked = !liked;
+    setWorkActionButtons();
+  }
+
+  async function toggleWorkSave(){
+    if(!currentWork) return;
+    await requireToken();
+    const path = saved ? "/api/feed/unsave" : "/api/feed/save";
+    const j = await api(path, { method:"POST", body: JSON.stringify({ post_id: currentWork.id }) });
+    if(j?.counts){
+      currentWork.like_count = j.counts.like_count;
+      currentWork.comment_count = j.counts.comment_count;
+      currentWork.save_count = j.counts.save_count;
+      currentWork.view_count = j.counts.view_count;
+      setWorkModalStats(currentWork);
+      const idx = libraryItems.findIndex(x=> String(x.id)===String(currentWork.id));
+      if(idx>=0){ libraryItems[idx] = Object.assign({}, libraryItems[idx], currentWork); }
+    }
+    saved = !saved;
+    setWorkActionButtons();
+  }
+
+  async function sendWorkComment(){
+    if(!currentWork) return;
+    await requireToken();
+    const text = ($cinput.value||"").trim();
+    if(!text) return;
+    $csend.disabled = true;
+    try{
+      await api("/api/feed/comment", { method:"POST", body: JSON.stringify({ post_id: currentWork.id, body: text }) });
+      $cinput.value = "";
+      await loadWorkComments();
+    } finally {
+      $csend.disabled = false;
+    }
+  }
+
+  // -------- Sheets: Post ----------
+  function openPostSheet(mode, post=null){
+    editingPostId = null;
+    postDraftMedia = [];
+
+    $ptitle.textContent = mode === "edit" ? "Edit post" : "New post";
+    $ptext.value = post?.body || "";
+
+    if(mode === "edit" && post){ editingPostId = post.id; }
+    const media = Array.isArray(post?.media) ? post.media : [];
+    postDraftMedia = media.map(m => m.id);
+
+    $pPickedInfo.textContent = `Selected: ${postDraftMedia.length}`;
+    $pPickGrid.style.display = "none";
+    $pPickGrid.innerHTML = "";
+
+    $pb.classList.add("open");
+  }
+
+  function closePostSheet(){ $pb.classList.remove("open"); editingPostId = null; postDraftMedia = []; }
+
+  async function ensureLibraryLoadedForPicker(){
+    if(libraryItems.length) return;
+    await loadLibrary(true);
+  }
+
+  function openPicker(mode, data){
+    pickMode = mode;
+    pickSelectedId = null;
+    pickSelectedSet = new Set();
+    $pickTitle.textContent = data.title || "Pick";
+    $pickHint.textContent = data.hint || "";
+    $pickSearch.value = "";
+    $pickList.innerHTML = `<div class="empty" style="padding:18px">Loading…</div>`;
+    $pickB.classList.add("open");
+
+    const layout = data.layout === "wide" ? "wide" : "list";
+    let filterType = "all";
+    const allowedKinds = Array.isArray(data.allowedKinds) ? data.allowedKinds : null;
+    if(allowedKinds && allowedKinds.length === 1){
+      filterType = allowedKinds[0];
+    }
+    let visibleCount = layout === "wide" ? 48 : 200;
+
+    if(data.preselected && Array.isArray(data.preselected)){
+      data.preselected.forEach(id => pickSelectedSet.add(String(id)));
+    }
+
+    if($pickFilters){
+      const show = layout === "wide" && !allowedKinds && !data.hideTypeTabs;
+      $pickFilters.style.display = show ? "flex" : "none";
+      $pickFilters.querySelectorAll("[data-type]").forEach(btn=>{
+        btn.classList.toggle("on", btn.getAttribute("data-type") === "all");
+        btn.onclick = ()=>{
+          filterType = btn.getAttribute("data-type") || "all";
+          $pickFilters.querySelectorAll("[data-type]").forEach(x=> x.classList.toggle("on", x===btn));
+          visibleCount = layout === "wide" ? 48 : 200;
+          renderList($pickSearch.value);
+        };
+      });
+    }
+
+    function resolveKind(it){
+      const type = String(it.type || "").toLowerCase();
+      if(type.includes("video")) return "video";
+      const u = String(it.media_url || it.thumb || "").toLowerCase();
+      return /\.(mp4|mov|webm|m3u8)(\?|$)/.test(u) ? "video" : "image";
+    }
+
+    function renderList(filterText=""){
+      const q = (filterText||"").toLowerCase().trim();
+      const source = (data.items || []).filter(it=>{
+        const kind = resolveKind(it);
+        if(allowedKinds && !allowedKinds.includes(kind)) return false;
+        if(filterType !== "all" && kind !== filterType) return false;
+        if(!q) return true;
+        return String(it.title||"").toLowerCase().includes(q) || String(it.description||"").toLowerCase().includes(q);
+      });
+      const items = source.slice(0, visibleCount);
+
+      $pickList.innerHTML = `
+        <div class="pick-list ${layout === "wide" ? "wide" : ""}" id="pickListInner">
+          ${items.map(it=>{
+            const pid = String(it.id);
+            const on = data.multi ? pickSelectedSet.has(pid) : (String(pickSelectedId) === pid);
+            const kind = resolveKind(it);
+            return `
+              <div class="pick-row ${on?'on':''} ${layout === "wide" ? "wide" : ""}" data-pid="${pid}">
+                <div class="pick-thumb ${layout === "wide" ? "wide" : ""}">${it.thumb ? `<img src="${it.thumb}">` : ""}</div>
+                <div class="pick-main ${layout === "wide" ? "wide" : ""}">
+                  <div class="pick-name">${escapeHtml(it.title||"Untitled")}</div>
+                  <div class="pick-sub">${escapeHtml(it.description||"")}</div>
+                  ${layout === "wide" ? `<div class="pick-sub" style="margin-top:6px;">${kind === "video" ? "Video" : "Image"}</div>` : ``}
+                </div>
+                ${layout === "wide" ? `<div class="pick-check">${on ? "✓" : ""}</div>` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`}
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      $pickList.querySelectorAll("[data-pid]").forEach(row=>{
+        row.onclick = ()=>{
+          const id = row.getAttribute("data-pid");
+          if(data.multi){
+            if(pickSelectedSet.has(id)) pickSelectedSet.delete(id);
+            else pickSelectedSet.add(id);
+            renderList($pickSearch.value);
+          }else{
+            pickSelectedId = id;
+            renderList($pickSearch.value);
+          }
+        };
+      });
+
+      const inner = document.getElementById("pickListInner");
+      if(layout === "wide" && inner){
+        inner.onscroll = ()=>{
+          if(visibleCount >= source.length) return;
+          const nearBottom = inner.scrollTop + inner.clientHeight >= inner.scrollHeight - 120;
+          if(!nearBottom) return;
+          visibleCount += 48;
+          renderList($pickSearch.value);
+        };
+      }
+    }
+
+    renderList("");
+
+    $pickSearch.oninput = ()=> {
+      visibleCount = layout === "wide" ? 48 : 200;
+      renderList($pickSearch.value);
+    };
+
+    return new Promise((resolve)=>{
+      pickResolve = resolve;
+      $pickOk.onclick = ()=>{
+        const result = data.multi ? Array.from(pickSelectedSet) : pickSelectedId;
+        closePicker();
+        resolve(result);
+      };
+      $pickCancel.onclick = ()=>{ closePicker(); resolve(data.multi ? [] : null); };
+      $pickClose.onclick = ()=>{ closePicker(); resolve(data.multi ? [] : null); };
+      $pickB.onclick = (e)=>{ if(e.target === $pickB){ closePicker(); resolve(data.multi ? [] : null); } };
+    });
+  }
+
+  function closePicker(){
+    $pickB.classList.remove("open");
+    if($pickFilters) $pickFilters.style.display = "none";
+    pickMode = null;
+    pickSelectedId = null;
+    pickSelectedSet = new Set();
+    pickResolve = null;
+  }
+
+  async function savePostDraft(){
+    try{
+      await requireToken();
+      const body = ($ptext.value || "").trim();
+
+      if(editingPostId){
+        await api("/api/posts/update", { method:"POST", body: JSON.stringify({ post_id: editingPostId, body, feed_post_ids: postDraftMedia }) });
+        toast("Updated");
+      } else {
+        await api("/api/posts/create", { method:"POST", body: JSON.stringify({ body, feed_post_ids: postDraftMedia }) });
+        toast("Created");
+      }
+
+      closePostSheet();
+      await loadPosts(true);
+    }catch(e){
+      toast(e.message || "Failed");
+    }
+  }
+
+  // Attach collection into post body via marker
+  async function attachCollectionMarker(){
+    try{
+      if(!collectionItems.length){
+        const oldTab = tab;
+        await loadCollections(true);
+        tab = oldTab;
+        if(oldTab === "posts") renderPosts();
+      }
+      if(!collectionItems.length){ toast("No collections"); return; }
+
+      const items = collectionItems.map(c=>{
+        const prev = Array.isArray(c.preview_items) ? c.preview_items : [];
+        const thumb = (prev[0]?.thumb_url || prev[0]?.media_url || "") || "";
+        return { id: c.id, title: c.title || "Untitled", description: c.description || "", thumb };
+      });
+
+      const picked = await openPicker("collection", {
+        title: "Attach collection",
+        hint: "Choose a collection to attach to the post",
+        items,
+        multi: false
+      });
+
+      if(!picked) return;
+
+      const marker = `[[collection:${picked}]]`;
+      $ptext.value = ($ptext.value || "") + ($ptext.value ? "\n\n" : "") + marker;
+      toast("Collection attached");
+    }catch(e){
+      toast("Failed");
+    }
+  }
+
+  // -------- Sheets: Collection ----------
+  async function openCollectionSheet(mode, col=null){
+    editingColId = null;
+    colDraftMedia = [];
+    colDraftCover = null;
+
+    $ktitle.textContent = mode === "edit" ? "Edit collection" : "New collection";
+    $kname.value = col?.title || "";
+    $kdesc.value = col?.description || "";
+
+    await ensureLibraryLoadedForPicker();
+
+    if(mode === "edit" && col){
+      editingColId = col.id;
+      try{
+        const j = await api(`/api/collections/get?id=${encodeURIComponent(col.id)}`, { method:"GET" });
+        const items = Array.isArray(j.items) ? j.items : [];
+        colDraftMedia = items.map(x=> x.id);
+        colDraftCover = col.cover_feed_post_id || (colDraftMedia[0] || null);
+      }catch(e){
+        toast(e.message || "Failed to load collection items");
+      }
+    }
+
+    if(mode !== "edit"){
+      $kPickMedia.style.display = "none";
+      $kPickedInfo.style.display = "none";
+      $kSelectedWrap.style.display = "none";
+    } else {
+      $kPickMedia.style.display = "inline-flex";
+      $kPickedInfo.style.display = "block";
+      $kSelectedWrap.style.display = colDraftMedia.length ? "block" : "none";
+    }
+
+    $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
+    $kPickGrid.style.display = "none";
+    $kPickGrid.innerHTML = "";
+    renderCollectionDraftSelected();
+    $kb.classList.add("open");
+  }
+
+
+  function renderCollectionDraftSelected(){
+    if(!colDraftMedia.length){
+      $kSelectedWrap.style.display = "none";
+      $kSelectedGrid.innerHTML = "";
+      return;
+    }
+    $kSelectedWrap.style.display = "block";
+    const byId = new Map(libraryItems.map(it=> [String(it.id), it]));
+    if(!colDraftCover || !colDraftMedia.includes(colDraftCover)) colDraftCover = colDraftMedia[0] || null;
+    $kSelectedGrid.innerHTML = colDraftMedia.map(id=>{
+      const it = byId.get(String(id)) || {};
+      const thumb = (it.thumb_url || it.media_url || "").trim();
+      const title = it.title || "Untitled";
+      const isCover = String(colDraftCover||"") === String(id);
+      return `<div class="picked-item ${isCover?"is-cover":""}" data-picked="${escapeHtml(String(id))}" title="Set as cover">
+        ${thumb ? `<img src="${escapeHtml(thumb)}" alt="">` : ``}
+        <button type="button" class="picked-remove" data-remove-picked="${escapeHtml(String(id))}">×</button>
+        ${isCover ? `<div class="picked-cover">Cover</div>` : ``}
+      </div>`;
+    }).join("");
+
+    $kSelectedGrid.querySelectorAll("[data-picked]").forEach(el=>{
+      el.onclick = (e)=>{
+        if(e.target.closest("[data-remove-picked]")) return;
+        colDraftCover = el.getAttribute("data-picked");
+        renderCollectionDraftSelected();
+      };
+    });
+    $kSelectedGrid.querySelectorAll("[data-remove-picked]").forEach(btn=>{
+      btn.onclick = (e)=>{
+        e.stopPropagation();
+        const id = btn.getAttribute("data-remove-picked");
+        colDraftMedia = colDraftMedia.filter(x=> String(x)!==String(id));
+        if(String(colDraftCover||"")===String(id)) colDraftCover = colDraftMedia[0] || null;
+        $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
+        renderCollectionDraftSelected();
+      };
+    });
+  }
+
+  function closeCollectionSheet(){ $kb.classList.remove("open"); editingColId = null; colDraftMedia = []; colDraftCover = null; $kSelectedGrid.innerHTML = ""; $kSelectedWrap.style.display = "none"; }
+
+  async function saveCollectionDraft(){
+    try{
+      await requireToken();
+      const title = ($kname.value || "").trim();
+      const description = ($kdesc.value || "").trim();
+
+      if(editingColId){
+        await api("/api/collections/update", { method:"POST", body: JSON.stringify({ id: editingColId, title, description, feed_post_ids: colDraftMedia, cover_feed_post_id: colDraftCover }) });
+        toast("Updated");
+      } else {
+        const r = await api("/api/collections/create", {
+          method:"POST",
+          body: JSON.stringify({ title, description, feed_post_ids: [], cover_feed_post_id: null })
+        });
+
+        closeCollectionSheet();
+        await loadCollections(true);
+
+        const newColId = r?.id || r?.collection_id || r?.collection?.id;
+        if(newColId) await openCollectionModal(newColId);
+        openSceneSheet("new", null);
+        toast("Now create a scene");
+        return;
+      }
+
+      closeCollectionSheet();
+      await loadCollections(true);
+    }catch(e){
+      toast(e.message || "Failed");
+    }
+  }
+
+  // -------- Events ----------
+  $segTabs.querySelectorAll("button").forEach(b=>{
+    b.onclick = () => switchTab(b.dataset.tab).catch(e=>toast(e.message||"Failed"));
+  });
+
+  $segSort.querySelectorAll("button").forEach(b=>{
+    b.onclick = () => {
+      $segSort.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      sort = b.dataset.sort || "new";
+      if(tab === "collections") loadCollections(true);
+      if(tab === "library") loadLibrary(true);
+    };
+  });
+
+  $range.onchange = () => { range = $range.value; if(tab === "library") loadLibrary(true); };
+
+  window.addEventListener("scroll", () => {
+    const state = tabState[tab];
+    if(!state || !state.hasMore || state.loading) return;
+    const nearBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900);
+    if(!nearBottom) return;
+
+    if(tab === "posts") loadPosts(false);
+    else if(tab === "collections") loadCollections(false);
+    else loadLibrary(false);
+  });
+
+  $pFollowBtn.onclick = () => toggleFollow().catch(e=>toast(e.message||"Failed"));
+
+  // Work modal events
+  $mclose.onclick = closeWorkModal;
+  $mb.onclick = (e) => { if(e.target === $mb) closeWorkModal(); };
+  $likeBtn.onclick = () => toggleWorkLike().catch(e=>toast(e.message||"Failed"));
+  $saveBtn.onclick = () => toggleWorkSave().catch(e=>toast(e.message||"Failed"));
+  $reloadComments.onclick = loadWorkComments;
+  $csend.onclick = sendWorkComment;
+  $titleEditBtn.onclick = startTitleEdit;
+  $titleCancel.onclick = () => { $titleEdit.style.display = "none"; };
+  $titleSave.onclick = async () => { try{ await saveTitle(); }catch(e){ toast(e.message || "Save failed"); } };
+
+  // Collection modal events
+  $cclose.onclick = closeCollectionModal;
+  $cb.onclick = (e) => { if(e.target === $cb) closeCollectionModal(); };
+
+  $btnColReorder.onclick = () => {
+    if(!currentCol) return;
+    const hasSections = Array.isArray(currentCol.sections) && currentCol.sections.length > 0;
+
+    if(hasSections){
+      if(!sceneReorderMode){
+        sceneReorderMode = true;
+        sceneOriginalOrderIds = (currentCol.sections || []).map(x=> x.id);
+        toast("Drag scenes and press Save order");
+      }else{
+        sceneReorderMode = false;
+      }
+      colReorderMode = false;
+    }else{
+      if(!colReorderMode){
+        colReorderMode = true;
+        colOriginalOrderIds = (currentCol.items || []).map(x=> x.id);
+        toast("Drag items and press Save order");
+      } else {
+        colReorderMode = false;
+      }
+      sceneReorderMode = false;
+    }
+
+    renderCollectionModalGrid();
+  };
+
+  $btnColReorderSave.onclick = async () => {
+    if(!currentCol || (!colReorderMode && !sceneReorderMode)) return;
+    const ok = await confirmUI("Save order", "Apply new order?", "Save", false);
+    if(!ok) return;
+    try{
+      await saveCollectionOrder();
+      colReorderMode = false;
+      sceneReorderMode = false;
+      renderCollectionModalGrid();
+      toast("Order saved");
+      tabState.collections.loadedOnce = false;
+      await loadCollections(true);
+    }catch(e){
+      toast(e.message || "Failed");
+    }
+  };
+
+  $btnColReorderCancel.onclick = () => {
+    if(!currentCol) return;
+
+    if(sceneReorderMode){
+      const map = new Map((currentCol.sections || []).map(it=> [String(it.id), it]));
+      currentCol.sections = (sceneOriginalOrderIds || []).map(id=> map.get(String(id))).filter(Boolean);
+    }else if(colReorderMode){
+      const map = new Map((currentCol.items || []).map(it=> [String(it.id), it]));
+      currentCol.items = (colOriginalOrderIds || []).map(id=> map.get(String(id))).filter(Boolean);
+    }
+
+    colReorderMode = false;
+    sceneReorderMode = false;
+    renderCollectionModalGrid();
+  };
+
+  $btnColEdit.onclick = () => { if(currentCol) openCollectionSheet("edit", currentCol.col).catch(e=>toast(e.message||"Failed")); };
+
+  $btnSceneNew.onclick = ()=>{
+    if(!currentCol) return;
+    openSceneSheet("new", null);
+  };
+
+  $btnColDelete.onclick = async () => {
+    if(!currentCol) return;
+    if(!confirm("Delete this collection?")) return;
+    try{
+      await requireToken();
+      await api("/api/collections/delete", { method:"POST", body: JSON.stringify({ id: currentCol.col.id }) });
+      toast("Deleted");
+      closeCollectionModal();
+      await loadCollections(true);
+    }catch(e){
+      toast(e.message||"Failed");
+    }
+  };
+
+  // Post sheet
+  $btnNewPost.onclick = () => openPostSheet("new", null);
+  $pclose.onclick = closePostSheet;
+  $pb.onclick = (e)=>{ if(e.target === $pb) closePostSheet(); };
+  $pcancel.onclick = closePostSheet;
+  $psave.onclick = savePostDraft;
+
+  $pPickMedia.onclick = async () => {
+    await ensureLibraryLoadedForPicker();
+
+    const items = libraryItems.slice(0, 200).map(it=>{
+      const thumb = (it.thumb_url || it.media_url || "") || "";
+      return { id: it.id, title: it.title || "Untitled", description: "", thumb, type: it.file_type || "", media_url: it.media_url || "" };
+    });
+
+    const picked = await openPicker("library", {
+      title: "Add media from Library",
+      hint: "Select images/videos (multi-select). Upload from ПК disabled.",
+      items,
+      multi: true,
+      layout: "wide",
+      preselected: postDraftMedia
+    });
+
+    if(Array.isArray(picked)){
+      const merged = new Set(postDraftMedia.map(String));
+      picked.forEach(id => merged.add(String(id)));
+      postDraftMedia = Array.from(merged);
+      $pPickedInfo.textContent = `Selected: ${postDraftMedia.length}`;
+    }
+  };
+
+  $pPickCollection.onclick = attachCollectionMarker;
+
+  // Collection sheet
+  $btnNewCol.onclick = () => openCollectionSheet("new", null).catch(e=>toast(e.message||"Failed"));
+  $kclose.onclick = closeCollectionSheet;
+  $kb.onclick = (e)=>{ if(e.target === $kb) closeCollectionSheet(); };
+  $kcancel.onclick = closeCollectionSheet;
+  $ksave.onclick = saveCollectionDraft;
+
+  $kPickMedia.onclick = async () => {
+    await ensureLibraryLoadedForPicker();
+    const q = ($ksearch.value||"").trim().toLowerCase();
+    const filtered = libraryItems.filter(it => !q || String(it.title||"").toLowerCase().includes(q)).slice(0, 200);
+    const items = filtered.map(it=>({ id: it.id, title: it.title||"Untitled", description:"", thumb:(it.thumb_url||it.media_url||""), type: it.file_type || "", media_url: it.media_url || "" }));
+    const picked = await openPicker("library", {
+      title: "Add items to collection",
+      hint: "Select items (multi-select).",
+      items,
+      multi: true,
+      layout: "wide",
+      preselected: colDraftMedia
+    });
+    if(Array.isArray(picked)){
+      const merged = new Set(colDraftMedia.map(String));
+      picked.forEach(id => merged.add(String(id)));
+      colDraftMedia = Array.from(merged);
+      if(!colDraftCover || !colDraftMedia.includes(colDraftCover)) colDraftCover = colDraftMedia[0] || null;
+      $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
+      renderCollectionDraftSelected();
+    }
+  };
+
+  $pcoverEdit.onclick = async () => {
+    if(!isOwnProfile) return;
+    await ensureLibraryLoadedForPicker();
+
+    const items = libraryItems
+      .filter(it => {
+        const u = (it.thumb_url || it.media_url || "").trim();
+        return u && !isVideoUrl(u);
+      })
+      .slice(0, 400)
+      .map(it => ({
+        id: it.id,
+        title: it.title || "Untitled",
+        thumb: (it.thumb_url || it.media_url || "")
+      }));
+
+    if(!items.length){
+      toast("No images in Library");
+      return;
+    }
+
+    const picked = await openPicker("profile_cover", {
+      title: "Choose profile cover",
+      hint: "Pick one image from your Library",
+      items,
+      multi: false,
+      layout: "wide",
+      hideTypeTabs: true
+    });
+
+    if(!picked) return;
+
+    await requireToken();
+    await api("/api/profile/header_set", {
+      method: "POST",
+      body: JSON.stringify({ feed_post_id: picked })
+    });
+
+    profile.header_feed_post_id = picked;
+    renderProfileCover(profile);
+    toast("Cover updated");
+  };
+
+  $pcoverDel.onclick = async () => {
+    if(!isOwnProfile) return;
+    const ok = await confirmUI("Remove cover", "Reset to default cover?");
+    if(!ok) return;
+    await requireToken();
+    await api("/api/profile/header_set", {
+      method: "POST",
+      body: JSON.stringify({ feed_post_id: null })
+    });
+    profile.header_feed_post_id = null;
+    renderProfileCover(profile);
+    toast("Cover reset");
+  };
+
+  $scClose.onclick = closeSceneSheet;
+  $scCancel.onclick = closeSceneSheet;
+  $scB.onclick = (e)=>{ if(e.target === $scB) closeSceneSheet(); };
+
+  $scSave.onclick = async ()=>{
+    try{
+      await requireToken();
+      if(!currentCol) return;
+
+      const title = ($scName.value||"").trim();
+      const description = ($scDesc.value||"").trim();
+      if(!title) return scStatus("Title required", "err");
+
+      scStatus("Saving…", "");
+
+      if(editingSceneId){
+        await api("/api/collections/sections/update", {
+          method:"POST",
+          body: JSON.stringify({ section_id: editingSceneId, title, description })
+        });
+      } else {
+        await api("/api/collections/sections/create", {
+          method:"POST",
+          body: JSON.stringify({ collection_id: currentCol.col.id, title, description })
+        });
+      }
+
+      closeSceneSheet();
+      const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+      currentCol.sections = j.sections || [];
+      currentCol.items = j.items || [];
+      renderCollectionModalGrid();
+      toast("Saved");
+    }catch(e){
+      scStatus(e.message||"Failed", "err");
+    }
+  };
+
+  $fsSubmit.onclick = async ()=>{
+    try{
+      await requireToken();
+      const title = ($fsTitle.value||"").trim();
+      const description = ($fsDesc.value||"").trim();
+      const source_url = ($fsUrl.value||"").trim();
+      if(!fsCollectionId) return;
+      if(!title || !source_url) return fsShowStatus("Title and link are required", "err");
+
+      fsShowStatus("Submitting…", "");
+      const r = await api("/api/collections/film_submit", {
+        method:"POST",
+        body: JSON.stringify({ collection_id: fsCollectionId, title, description, source_url })
+      });
+
+      fsShowStatus("Submitted. Status: pending review.", "ok");
+      toast("Submitted");
+      renderCollectionFilmBlock(r.film || { status:"pending" }, fsCollectionId);
+      setTimeout(()=> closeFilmSheet(), 650);
+    }catch(e){
+      fsShowStatus(e.message || "Failed", "err");
+    }
+  };
+
+  $fsCancel.onclick = closeFilmSheet;
+  $fsClose.onclick = closeFilmSheet;
+  $fsB.onclick = (e)=>{ if(e.target === $fsB) closeFilmSheet(); };
+
+  // Media Viewer events
+  $mvClose.onclick = closeMediaViewer;
+  $mvb.onclick = (e)=>{ if(e.target === $mvb) closeMediaViewer(); };
+  $mvPrev.onclick = ()=> setMediaIndex(mvIndex-1);
+  $mvNext.onclick = ()=> setMediaIndex(mvIndex+1);
+  bindViewerSwipe();
+
+  $emoClose.onclick = closeEmojiPicker;
+  $emoB.onclick = (e)=>{ if(e.target === $emoB) closeEmojiPicker(); };
+  $emoSearch.oninput = ()=> renderEmojiGrid($emoSearch.value);
+  $cfClose.onclick = ()=> $cfB.classList.remove("open");
+  $cfCancel.onclick = ()=> $cfB.classList.remove("open");
+  $cfB.onclick = (e)=>{ if(e.target === $cfB) $cfB.classList.remove("open"); };
+
+  // -------- Init ----------
+  async function init(){
+    username = (qs("username") || "").trim();
+    if(!username){
+      $pName.textContent = "No username";
+      $pUser.textContent = "Add ?username=...";
+      $gridPosts.innerHTML = `<div class="empty">Open like: /artist?username=username</div>`;
+      return;
+    }
+
+    await loadProfileHeaderOnce();
+    myUserId = await getCurrentUserId();
+
+    try{
+      const { data } = await window.sb.auth.getSession();
+      const token = data?.session?.access_token;
+      if(token){
+        myProfile = await fetchMyPublicProfile(token);
+      }
+    }catch(e){}
+
+    if(!myProfile){
+      myProfile = { display_name:"User", username:"", avatar_type:"image", avatar_url:"", avatar_emoji:"" };
+    }
+    tab = "";
+    setActivePane("posts");
+    renderTabControls();
+
+    window.setArtistTab = async (nextTab) => {
+      const allowed = new Set(["posts", "collections", "library"]);
+      const normalized = String(nextTab || "").toLowerCase();
+      const targetTab = allowed.has(normalized) ? normalized : "posts";
+      await switchTab(targetTab);
+    };
+
+    bindFilmRulesTooltip();
+    await applyTabFromUrl();
+  }
+
+  init().catch(e=>{
+    console.error(e);
+    $grid.innerHTML = `<div class="empty" style="color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(e.message)}</div>`;
+  });
+  }
+})();
