@@ -233,6 +233,13 @@
   /* отступ между табами и сетками */
   .grid-wrap{ margin-top: 16px; }
 
+  .panel-sep{
+    height:1px;
+    width:100%;
+    background: rgba(255,255,255,0.10);
+    margin: 14px 0 18px;
+  }
+
   /* чтобы табы не липли к контенту */
   .tabs-row{ margin-bottom: 14px; }
 
@@ -1291,6 +1298,8 @@
   </div>
 </div>
 
+    <div class="panel-sep"></div>
+
     <div class="grid-wrap" id="gridWrap">
       <div class="tab-pane active" id="gridPosts"></div>
       <div class="tab-pane" id="gridCollections"></div>
@@ -1806,7 +1815,9 @@
   // Collection modal state
   let currentCol = null;
   let colReorderMode = false;
+  let sceneReorderMode = false;
   let colOriginalOrderIds = [];
+  let sceneOriginalOrderIds = [];
   let dragFromIndex = null;
   let editingSceneId = null;
   let fsCollectionId = null;
@@ -2069,23 +2080,35 @@ Download link:
   async function api(path, opts={}){
     const method = (opts.method || "GET").toUpperCase();
     const token = await getSessionToken();
-    const headers = Object.assign({}, opts.headers || {});
-    if(opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
 
-    // auth GET only for feed/state
-    const needsAuthGet = method === "GET" && path.startsWith("/api/feed/state");
-    if(token && (method !== "GET" || needsAuthGet)) headers.Authorization = "Bearer " + token;
-
-    const base = (method === "GET") ? READ_BACKEND : WRITE_BACKEND;
-    const r = await fetch(base + path, Object.assign({}, opts, { headers, signal: opts.signal }));
-    const j = await r.json().catch(()=> ({}));
-    if(!r.ok) {
-      const msg = j?.error || j?.details || ("HTTP " + r.status);
-      console.error("API FAIL:", path, { status: r.status, body: j });
-      throw new Error(msg);
+    // GET оставляем как есть (READ_BACKEND)
+    if(method === "GET"){
+      const r = await fetch(READ_BACKEND + path, Object.assign({}, opts, { method:"GET", signal: opts.signal }));
+      const j = await r.json().catch(()=> ({}));
+      if(!r.ok) throw new Error(j?.error || j?.details || ("HTTP " + r.status));
+      return j;
     }
+
+    // WRITE: NO Authorization header, Content-Type text/plain, token inside body
+    let bodyObj = {};
+    if (opts.body) {
+      try { bodyObj = JSON.parse(opts.body); } catch(e) { bodyObj = {}; }
+    }
+
+    const payload = { ...bodyObj, access_token: token };
+
+    const r = await fetch(WRITE_BACKEND + path, {
+      method,
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(payload),
+      signal: opts.signal
+    });
+
+    const j = await r.json().catch(()=> ({}));
+    if(!r.ok) throw new Error(j?.error || j?.details || ("HTTP " + r.status));
     return j;
   }
+
 
   async function syncFollowState(userId){
     if(!userId) return false;
@@ -3102,6 +3125,7 @@ Download link:
   async function openCollectionModal(collection_id){
     currentCol = null;
     colReorderMode = false;
+    sceneReorderMode = false;
     dragFromIndex = null;
 
     $cb.classList.add("open");
@@ -3115,6 +3139,7 @@ Download link:
     $btnColDelete.style.display = "none";
     $colReorderFooter.classList.remove("open");
     colOriginalOrderIds = [];
+    sceneOriginalOrderIds = [];
     $btnColReorder.textContent = "Reorder";
 
     try{
@@ -3142,7 +3167,7 @@ Download link:
       if(isOwnProfile){
         $btnColEdit.style.display = "inline-flex";
         $btnSceneNew.style.display = "inline-flex";
-        $btnColReorder.style.display = sections.length ? "none" : "inline-flex";
+        $btnColReorder.style.display = "inline-flex";
         $btnColDelete.style.display = "inline-flex";
       }else{
         $btnSceneNew.style.display = "none";
@@ -3190,7 +3215,7 @@ Download link:
               ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>`
               : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />`
             }
-            ${colReorderMode ? `
+            ${sceneReorderMode ? `
               <div class="drag-handle" title="Drag">
                 <svg viewBox="0 0 24 24" fill="none">
                   <path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
@@ -3201,7 +3226,7 @@ Download link:
       }).join("");
 
       return `
-        <div class="scene" data-scene="${sceneIdx}">
+        <div class="scene" draggable="${sceneReorderMode ? "true" : "false"}" data-scene="${sceneIdx}">
           <div class="scene-head">
             <div>
               <div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>
@@ -3222,7 +3247,7 @@ Download link:
 
     $cgrid.querySelectorAll(".col-item").forEach(el=>{
       el.onclick = () => {
-        if(colReorderMode) return;
+        if(colReorderMode || sceneReorderMode) return;
         const sceneIndex = Number(el.getAttribute("data-scene") || "0");
         const idx = Number(el.getAttribute("data-idx") || "0");
         const scene = scenes[sceneIndex] || { items: [] };
@@ -3318,9 +3343,10 @@ Download link:
       };
     });
 
-    $colReorderFooter.classList.toggle("open", !!colReorderMode && !sections.length);
-    $btnColReorder.textContent = colReorderMode ? "Exit" : "Reorder";
+    $colReorderFooter.classList.toggle("open", !!colReorderMode || !!sceneReorderMode);
+    $btnColReorder.textContent = (colReorderMode || sceneReorderMode) ? "Exit" : "Reorder";
     if(colReorderMode && !sections.length) bindDnD();
+    if(sceneReorderMode) bindSceneDnD();
   }
 
   function renderCollectionFilmBlock(film, collectionId){
@@ -3398,9 +3424,48 @@ Download link:
     });
   }
 
+  function bindSceneDnD(){
+    const nodes = Array.from($cgrid.querySelectorAll(".scene"));
+    nodes.forEach(el=>{
+      el.addEventListener("dragstart", (ev)=>{
+        el.classList.add("dragging");
+        dragFromIndex = Number(el.getAttribute("data-scene"));
+        ev.dataTransfer.effectAllowed = "move";
+      });
+      el.addEventListener("dragend", ()=>{
+        el.classList.remove("dragging");
+      });
+      el.addEventListener("dragover", (ev)=>{
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+      });
+      el.addEventListener("drop", (ev)=>{
+        ev.preventDefault();
+        const toIdx = Number(el.getAttribute("data-scene"));
+        if(dragFromIndex == null || Number.isNaN(toIdx) || dragFromIndex === toIdx) return;
+        const arr = (currentCol.sections || []).slice();
+        const [moved] = arr.splice(dragFromIndex, 1);
+        arr.splice(toIdx, 0, moved);
+        currentCol.sections = arr;
+        dragFromIndex = toIdx;
+        renderCollectionModalGrid();
+      });
+    });
+  }
+
   async function saveCollectionOrder(){
     if(!currentCol) return;
     await requireToken();
+
+    if(sceneReorderMode){
+      const ordered = (currentCol.sections || []).map(x=> x.id).filter(Boolean);
+      await api("/api/collections/sections/reorder", {
+        method:"POST",
+        body: JSON.stringify({ collection_id: currentCol.col.id, ordered_section_ids: ordered })
+      });
+      return;
+    }
+
     const ordered = currentCol.items.map(x=> x.id);
     await api("/api/collections/reorder", { method:"POST", body: JSON.stringify({ id: currentCol.col.id, ordered_feed_post_ids: ordered }) });
   }
@@ -3409,7 +3474,9 @@ Download link:
     $cb.classList.remove("open");
     currentCol = null;
     colReorderMode = false;
+    sceneReorderMode = false;
     colOriginalOrderIds = [];
+    sceneOriginalOrderIds = [];
     $colReorderFooter.classList.remove("open");
     $btnColReorder.textContent = "Reorder";
     dragFromIndex = null;
@@ -4215,23 +4282,39 @@ Download link:
 
   $btnColReorder.onclick = () => {
     if(!currentCol) return;
-    if(!colReorderMode){
-      colReorderMode = true;
-      colOriginalOrderIds = (currentCol.items || []).map(x=> x.id);
-      toast("Drag items and press Save order");
-    } else {
+    const hasSections = Array.isArray(currentCol.sections) && currentCol.sections.length > 0;
+
+    if(hasSections){
+      if(!sceneReorderMode){
+        sceneReorderMode = true;
+        sceneOriginalOrderIds = (currentCol.sections || []).map(x=> x.id);
+        toast("Drag scenes and press Save order");
+      }else{
+        sceneReorderMode = false;
+      }
       colReorderMode = false;
+    }else{
+      if(!colReorderMode){
+        colReorderMode = true;
+        colOriginalOrderIds = (currentCol.items || []).map(x=> x.id);
+        toast("Drag items and press Save order");
+      } else {
+        colReorderMode = false;
+      }
+      sceneReorderMode = false;
     }
+
     renderCollectionModalGrid();
   };
 
   $btnColReorderSave.onclick = async () => {
-    if(!currentCol || !colReorderMode) return;
+    if(!currentCol || (!colReorderMode && !sceneReorderMode)) return;
     const ok = await confirmUI("Save order", "Apply new order?", "Save", false);
     if(!ok) return;
     try{
       await saveCollectionOrder();
       colReorderMode = false;
+      sceneReorderMode = false;
       renderCollectionModalGrid();
       toast("Order saved");
       tabState.collections.loadedOnce = false;
@@ -4243,9 +4326,17 @@ Download link:
 
   $btnColReorderCancel.onclick = () => {
     if(!currentCol) return;
-    const map = new Map((currentCol.items || []).map(it=> [String(it.id), it]));
-    currentCol.items = (colOriginalOrderIds || []).map(id=> map.get(String(id))).filter(Boolean);
+
+    if(sceneReorderMode){
+      const map = new Map((currentCol.sections || []).map(it=> [String(it.id), it]));
+      currentCol.sections = (sceneOriginalOrderIds || []).map(id=> map.get(String(id))).filter(Boolean);
+    }else if(colReorderMode){
+      const map = new Map((currentCol.items || []).map(it=> [String(it.id), it]));
+      currentCol.items = (colOriginalOrderIds || []).map(id=> map.get(String(id))).filter(Boolean);
+    }
+
     colReorderMode = false;
+    sceneReorderMode = false;
     renderCollectionModalGrid();
   };
 
