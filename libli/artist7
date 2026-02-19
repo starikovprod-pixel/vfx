@@ -41,14 +41,17 @@
   padding-top: 10px;
 }
 
+/* ===== PROFILE HEADER: cover reaches avatar bottom ===== */
 .pcover{
   position:relative;
   width:100%;
-  height:170px;
+  height:230px;
   border-radius:22px;
   overflow:hidden;
   border:1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.03);
+
+  /* перехлёст = 76px (высота аватарки) */
   margin-bottom:-56px;
 }
 
@@ -94,7 +97,9 @@
   display:flex;
   gap:14px;
   align-items:center;
-  margin-top:-26px;
+
+  /* было -26px, делаем -20px чтобы суммарный перехлёст был 56+20=76 */
+  margin-top:-20px;
   margin-bottom:8px;
 }
 .pava{
@@ -832,6 +837,20 @@
     overflow:auto;
     flex:1;
   }
+
+
+  /* ===== Lock background scroll when any modal open ===== */
+  html.lf-lock, body.lf-lock{
+    overflow:hidden !important;
+    height:100%;
+  }
+
+  /* не отдаём скролл “наружу” (чтобы колёсико не уезжало в фон) */
+  .col-backdrop,
+  .col-modal,
+  .col-body{
+    overscroll-behavior: contain;
+  }
   .col-scenes{ display:flex; flex-direction:column; gap:14px; }
   .scene{
     border:1px solid rgba(255,255,255,0.10);
@@ -957,61 +976,105 @@
     padding:10px 12px;
   }
 
-  /* ===== Film hero inside collection header ===== */
+  /* ===== FILM HERO (cinema layout like reference) ===== */
   .film-hero{
-    margin-top:12px;
-    border-radius:22px;
+    margin-top:14px;
+    border-radius:24px;
     border:1px solid rgba(255,255,255,0.12);
-    background: rgba(0,0,0,0.28);
+    background: rgba(0,0,0,0.30);
     overflow:hidden;
   }
+
+  .film-hero .film-wrap{
+    display:grid;
+    grid-template-columns: 1.65fr 1fr;
+    gap:0;
+  }
+
   .film-hero .film-media{
     position:relative;
-    aspect-ratio: 16/9;
     background:#000;
+    min-height: 320px;
   }
+
   .film-hero video{
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    object-fit:cover;
+    width:100%;
+    height:100%;
     display:block;
+    object-fit:cover;
   }
+
   .film-hero .film-media::after{
     content:"";
     position:absolute; inset:0;
-    background: linear-gradient(to top,
-      rgba(0,0,0,.70) 0%,
-      rgba(0,0,0,.25) 45%,
-      rgba(0,0,0,.05) 100%);
+    background: linear-gradient(to right,
+      rgba(0,0,0,.05) 0%,
+      rgba(0,0,0,.15) 55%,
+      rgba(0,0,0,.55) 100%);
+    pointer-events:none; /* FIX controls */
   }
-  .film-hero .film-caption{
-    padding:14px 14px 16px;
+
+  .film-hero .film-side{
+    padding:18px 18px 18px;
+    border-left:1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.18);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
   }
+
   .film-hero .film-title{
-    font-weight:1000;
-    font-size:20px;
-    letter-spacing:.6px;
-    text-transform:uppercase;
     margin:0;
+    font-weight:1000;
+    font-size:22px;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    line-height:1.1;
   }
-  .film-hero .film-desc{
-    margin-top:8px;
-    color:rgba(255,255,255,0.78);
+
+  .film-hero .film-by{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color: rgba(255,255,255,0.78);
+    font-weight:850;
     font-size:13px;
-    line-height:1.45;
+  }
+
+  .film-hero .by-ava{
+    width:28px; height:28px;
+    border-radius:999px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .film-hero .by-ava img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .film-hero .by-name{ display:flex; align-items:center; gap:6px; }
+  .film-hero .by-name a{ color:#fff; text-decoration:none; }
+  .film-hero .by-name a:hover{ text-decoration:underline; }
+
+  .film-hero .film-desc{
+    color: rgba(255,255,255,0.72);
+    font-size:13px;
+    line-height:1.55;
+    margin:0;
+
     display:-webkit-box;
-    -webkit-line-clamp:3;
+    -webkit-line-clamp:6;
     -webkit-box-orient:vertical;
     overflow:hidden;
   }
+
   .film-hero .film-desc.open{
     -webkit-line-clamp:unset;
   }
+
   .film-hero .film-more{
-    margin-top:10px;
-    display:inline-flex;
-    gap:8px;
-    align-items:center;
+    display:none; /* по умолчанию скрыто — включаем только если реально есть оверфлоу */
+    align-self:flex-start;
     height:34px;
     padding:0 12px;
     border-radius:999px;
@@ -1021,15 +1084,29 @@
     cursor:pointer;
     font-weight:900;
     font-size:12px;
+    gap:8px;
+    align-items:center;
   }
+
   .film-hero .film-more:hover{
     background: rgba(255,255,255,0.10);
     border-color: rgba(255,255,255,0.22);
   }
+
   .film-hero .film-more svg{
-    width:18px;
-    height:18px;
+    width:18px; height:18px;
     transition: transform .18s ease;
+  }
+
+  @media(max-width: 980px){
+    .film-hero .film-wrap{
+      grid-template-columns: 1fr;
+    }
+    .film-hero .film-side{
+      border-left:0;
+      border-top:1px solid rgba(255,255,255,0.10);
+    }
+    .film-hero .film-media{ min-height:240px; }
   }
 
   .picked-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; }
@@ -2017,6 +2094,14 @@
     $toast.textContent = String(msg || "");
     $toast.classList.add("show");
     setTimeout(()=> $toast.classList.remove("show"), 1600);
+  }
+  function lockPageScroll(){
+    document.documentElement.classList.add("lf-lock");
+    document.body.classList.add("lf-lock");
+  }
+  function unlockPageScroll(){
+    document.documentElement.classList.remove("lf-lock");
+    document.body.classList.remove("lf-lock");
   }
   function fmtDate(ts){ return safe(ts).replace("T"," ").slice(0,16); }
 
@@ -3181,6 +3266,7 @@ Download link:
     dragFromIndex = null;
 
     $cb.classList.add("open");
+    lockPageScroll();
     $ctitle.textContent = "Loading…";
     $cdesc.textContent = "";
     $cmeta.innerHTML = "";
@@ -3291,6 +3377,7 @@ Download link:
               <div class="scene-actions">
                 <button class="btn-ghost" data-sc-add="${escapeHtml(String(scene.id ?? ""))}">+ Add</button>
                 ${scene.id ? `<button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>` : ``}
+                ${scene.id ? `<button class="btn-ghost" data-sc-media="${escapeHtml(scene.id)}">Manage</button>` : ``}
                 ${scene.id ? `<button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>` : ``}
               </div>
             ` : ``}
@@ -3324,6 +3411,98 @@ Download link:
         const id = b.getAttribute("data-sc-edit");
         const sc = (currentCol.sections||[]).find(x=> String(x.id)===String(id));
         if(sc) openSceneSheet("edit", sc);
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-media]").forEach(b=>{
+      b.onclick = async ()=>{
+        try{
+          await requireToken();
+          if(!currentCol) return;
+
+          const sid = b.getAttribute("data-sc-media");
+          if(!sid) return;
+
+          await ensureLibraryLoadedForPicker();
+
+          const src = new Map();
+
+          libraryItems.slice(0, 600).forEach(it=>{
+            src.set(String(it.id), {
+              id: it.id,
+              title: it.title || "Untitled",
+              description: "",
+              thumb: (it.thumb_url || it.media_url || ""),
+              type: it.file_type || "",
+              media_url: it.media_url || ""
+            });
+          });
+
+          for(const it of (currentCol.items||[])){
+            const id = String(it.id);
+            if(src.has(id)) continue;
+            src.set(id, {
+              id: it.id,
+              title: it.title || "Untitled",
+              description: "",
+              thumb: (it.thumb_url || it.media_url || ""),
+              type: it.file_type || "",
+              media_url: it.media_url || ""
+            });
+          }
+
+          const sceneItems = (currentCol.items||[]).filter(x=> String(x.section_id||"") === String(sid));
+          const preselected = sceneItems.map(x=> String(x.id));
+
+          const picked = await openPicker("scene_media", {
+            title: "Scene media",
+            hint: "Select what should stay in this scene. Unselect to remove from scene.",
+            items: Array.from(src.values()),
+            multi: true,
+            layout: "wide",
+            preselected
+          });
+
+          if(!Array.isArray(picked)) return;
+
+          const newSet = new Set(picked.map(String));
+          const oldSet = new Set(preselected.map(String));
+
+          const toAdd = [...newSet].filter(id=> !oldSet.has(id));
+          const toRemove = [...oldSet].filter(id=> !newSet.has(id));
+
+          for(const fp of toAdd){
+            await api("/api/collections/items/move", {
+              method:"POST",
+              body: JSON.stringify({
+                collection_id: currentCol.col.id,
+                feed_post_id: fp,
+                to_section_id: sid,
+                to_index: 9999
+              })
+            });
+          }
+
+          for(const fp of toRemove){
+            await api("/api/collections/items/move", {
+              method:"POST",
+              body: JSON.stringify({
+                collection_id: currentCol.col.id,
+                feed_post_id: fp,
+                to_section_id: null,
+                to_index: 9999
+              })
+            });
+          }
+
+          const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+          currentCol.sections = j.sections || [];
+          currentCol.items = j.items || [];
+          renderCollectionModalGrid();
+          toast("Scene updated");
+        }catch(e){
+          toast(e.message || "Failed");
+        }
       };
     });
 
@@ -3418,37 +3597,71 @@ Download link:
       const t = (film.title || "Film").trim();
       const d = (film.description || "").trim();
 
+      const byUsername = (profile?.username || username || "").trim();
+      const byDisplay  = (profile?.display_name || byUsername || "Author").trim();
+      const byVerified = (profile?.verified === true);
+      const byLink = byUsername ? `/artist?username=${encodeURIComponent(byUsername)}` : "#";
+
+      let byAvaHTML = `<div class="by-ava"></div>`;
+      if(profile?.avatar_type === "emoji" && profile?.avatar_emoji){
+        byAvaHTML = `<div class="by-ava emoji" style="font-size:16px;"><span>${escapeHtml(profile.avatar_emoji)}</span></div>`;
+      } else if(profile?.avatar_url){
+        byAvaHTML = `<div class="by-ava"><img src="${escapeHtml(profile.avatar_url)}" alt=""></div>`;
+      }
+
       $colFilm.innerHTML = `
         <div class="film-hero">
-          <div class="film-media">
-            <video controls playsinline preload="metadata" src="${escapeHtml(film.published_url)}"></video>
-          </div>
-          <div class="film-caption">
-            <h3 class="film-title">${escapeHtml(t)}</h3>
-            ${d ? `
-              <div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>
+          <div class="film-wrap">
+            <div class="film-media">
+              <video controls playsinline preload="metadata" crossorigin="anonymous">
+                <source src="${escapeHtml(film.published_url)}">
+              </video>
+            </div>
+
+            <div class="film-side">
+              <h3 class="film-title">${escapeHtml(t)}</h3>
+
+              <div class="film-by">
+                ${byAvaHTML}
+                <div class="by-name">
+                  <span style="opacity:.7;">Video by:</span>
+                  <a href="${byLink}">${escapeHtml(byDisplay)}</a>
+                  ${byVerified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}
+                </div>
+              </div>
+
+              ${d ? `<div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>` : `<div class="muted">No description.</div>`}
+
               <button class="film-more" id="filmMore" type="button" aria-label="Toggle description">
                 <span>Read more</span>
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </button>
-            ` : ``}
+            </div>
           </div>
         </div>
       `;
 
-      const more = document.getElementById("filmMore");
-      const desc = document.getElementById("filmDesc");
-      if(more && desc){
-        more.onclick = ()=>{
-          const on = desc.classList.toggle("open");
-          const label = more.querySelector("span");
-          const icon = more.querySelector("svg");
+      bindVerifiedTooltip($colFilm);
+
+      const descEl = document.getElementById("filmDesc");
+      const moreEl = document.getElementById("filmMore");
+      if(descEl && moreEl){
+        requestAnimationFrame(()=>{
+          const isOverflow = descEl.scrollHeight > (descEl.clientHeight + 2);
+          moreEl.style.display = isOverflow ? "inline-flex" : "none";
+        });
+
+        moreEl.onclick = ()=>{
+          const on = descEl.classList.toggle("open");
+          const label = moreEl.querySelector("span");
+          const icon = moreEl.querySelector("svg");
           if(label) label.textContent = on ? "Hide" : "Read more";
           if(icon) icon.style.transform = on ? "rotate(180deg)" : "rotate(0deg)";
         };
       }
+
       return;
     }
 
@@ -3614,6 +3827,7 @@ Download link:
 
   function closeCollectionModal(){
     $cb.classList.remove("open");
+    unlockPageScroll();
     currentCol = null;
     colReorderMode = false;
     colOriginalOrderIds = [];
