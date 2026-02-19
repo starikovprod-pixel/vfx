@@ -158,6 +158,17 @@
   }
   .btn-ghost:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
 
+  .grid-wrap{ position:relative; min-height:240px; }
+  .tab-pane{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transform: translateY(6px);
+    pointer-events:none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .tab-pane.active{ opacity:1; transform:none; pointer-events:auto; position:relative; }
+
   .loader{ display:none; justify-content:center; color: rgba(255,255,255,0.55); padding: 18px 0 0; font-size: 13px; }
   .empty{ padding:40px; text-align:center; color: rgba(255,255,255,0.55); border: 1px dashed rgba(255,255,255,0.18); border-radius: 18px; background: rgba(255,255,255,0.02); }
 
@@ -778,6 +789,29 @@
     transform: scale(.98);
     box-shadow: 0 20px 50px rgba(0,0,0,0.35);
   }
+  .reorder-footer{
+    position:sticky;
+    bottom:0;
+    z-index:3;
+    margin-top:14px;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(12,12,12,0.92);
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .reorder-footer.open{ display:flex; }
+
+  .picked-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; }
+  .picked-item{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.16); background:#000; cursor:pointer; }
+  .picked-item img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .picked-item.is-cover{ border-color: rgba(110,168,255,0.9); box-shadow: 0 0 0 2px rgba(110,168,255,0.35) inset; }
+  .picked-remove{ position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:999px; border:1px solid rgba(255,255,255,0.22); background:rgba(0,0,0,0.62); color:#fff; cursor:pointer; font-weight:900; display:flex; align-items:center; justify-content:center; }
+  .picked-cover{ position:absolute; left:8px; bottom:8px; padding:4px 7px; border-radius:10px; background: rgba(0,0,0,0.65); border:1px solid rgba(255,255,255,0.14); font-size:10px; font-weight:900; }
 
   /* Media Viewer (super top) */
   .mv-backdrop{
@@ -1018,6 +1052,15 @@
   .pick-main{ min-width:0; flex:1; }
   .pick-name{ font-weight:950; }
   .pick-sub{ color:rgba(255,255,255,0.65); font-size:12px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pick-topbar{ position:sticky; top:0; z-index:2; display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background: rgba(10,10,10,0.95); margin-bottom:12px; }
+  .pick-filters{ display:flex; gap:8px; }
+  .pick-filter{ padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:#fff; cursor:pointer; font-weight:800; }
+  .pick-filter.on{ background:#fff; color:#000; }
+  .pick-list.wide{ display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; max-height:56vh; overflow:auto; padding-right:4px; }
+  .pick-row.wide{ display:block; padding:0; overflow:hidden; }
+  .pick-thumb.wide{ width:100%; height:auto; aspect-ratio:16/9; border-radius:0; border:0; }
+  .pick-thumb.wide img{ width:100%; height:100%; }
+  .pick-main.wide{ padding:10px 12px 12px; }
 
   #pickB{ z-index:14500; }
   .lib-item .kind{
@@ -1099,7 +1142,11 @@
       </div>
     </div>
 
-    <div id="grid"></div>
+    <div class="grid-wrap" id="gridWrap">
+      <div class="tab-pane active" id="gridPosts"></div>
+      <div class="tab-pane" id="gridCollections"></div>
+      <div class="tab-pane" id="gridLibrary"></div>
+    </div>
     <div class="loader" id="loader">Loading…</div>
   </div>
 
@@ -1176,6 +1223,13 @@
       </div>
       <div class="col-body">
         <div class="col-grid" id="cgrid"></div>
+        <div class="reorder-footer" id="colReorderFooter">
+          <div class="muted">Reorder mode is active</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-primary" id="btn-col-reorder-save">Save order</button>
+            <button class="btn-ghost" id="btn-col-reorder-cancel">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1262,7 +1316,11 @@
           <button class="btn-ghost" id="kPickMedia">+ Add from Library</button>
         </div>
 
-        <div class="muted" id="kPickedInfo">Selected: 0 (reorder inside collection modal)</div>
+        <div class="muted" id="kPickedInfo">Selected: 0</div>
+        <div id="kSelectedWrap" style="display:none;">
+          <div class="muted" style="margin-bottom:8px;">Selected items (click card to set cover)</div>
+          <div class="picked-grid" id="kSelectedGrid"></div>
+        </div>
         <div class="lib-grid" id="kPickGrid" style="display:none;"></div>
 
         <div class="sheet-actions">
@@ -1288,6 +1346,11 @@
             <input id="pickSearch" placeholder="Search…" />
           </div>
           <div class="muted" id="pickHint"></div>
+          <div class="pick-filters" id="pickFilters" style="display:none;">
+            <button class="pick-filter on" data-type="all">All</button>
+            <button class="pick-filter" data-type="image">Image</button>
+            <button class="pick-filter" data-type="video">Video</button>
+          </div>
         </div>
         <div id="pickList"></div>
         <div class="sheet-actions">
@@ -1341,7 +1404,11 @@
   const VFY_TOOLTIP = "Verified — awarded at 100 followers. Helps ranking in Feed.";
   const LS_FOLLOW = "lf_follow_cache_v1";
 
-  const $grid = document.getElementById("grid");
+  const $gridWrap = document.getElementById("gridWrap");
+  const $gridPosts = document.getElementById("gridPosts");
+  const $gridCollections = document.getElementById("gridCollections");
+  const $gridLibrary = document.getElementById("gridLibrary");
+  let $grid = $gridPosts;
   const $loader = document.getElementById("loader");
   const $pAva = document.getElementById("p-ava");
   const $pName = document.getElementById("p-name");
@@ -1395,6 +1462,9 @@
   const $btnColEdit = document.getElementById("btn-col-edit");
   const $btnColReorder = document.getElementById("btn-col-reorder");
   const $btnColDelete = document.getElementById("btn-col-delete");
+  const $colReorderFooter = document.getElementById("colReorderFooter");
+  const $btnColReorderSave = document.getElementById("btn-col-reorder-save");
+  const $btnColReorderCancel = document.getElementById("btn-col-reorder-cancel");
 
   // Media viewer
   const $mvb = document.getElementById("mvb");
@@ -1428,6 +1498,8 @@
   const $kPickMedia = document.getElementById("kPickMedia");
   const $kPickGrid = document.getElementById("kPickGrid");
   const $kPickedInfo = document.getElementById("kPickedInfo");
+  const $kSelectedWrap = document.getElementById("kSelectedWrap");
+  const $kSelectedGrid = document.getElementById("kSelectedGrid");
   const $ksave = document.getElementById("ksave");
   const $kcancel = document.getElementById("kcancel");
 
@@ -1441,6 +1513,7 @@
   const $pickList = document.getElementById("pickList");
   const $pickSearch = document.getElementById("pickSearch");
   const $pickHint = document.getElementById("pickHint");
+  const $pickFilters = document.getElementById("pickFilters");
 
   const $cfB = document.getElementById("cfB");
   const $cfTitle = document.getElementById("cfTitle");
@@ -1466,9 +1539,13 @@
   let sort = "new";
   let range = "newest";
 
-  let offset = 0;
-  let loading = false;
-  let hasMore = true;
+  const tabState = {
+    posts: { offset:0, loading:false, hasMore:true, loadedOnce:false },
+    collections: { offset:0, loading:false, hasMore:true, loadedOnce:false },
+    library: { offset:0, loading:false, hasMore:true, loadedOnce:false }
+  };
+  let isSwitching = false;
+  let activeAbort = null;
 
   let libraryItems = [];      // works
   let postItems = [];         // profile posts
@@ -1482,6 +1559,7 @@
   // Collection modal state
   let currentCol = null;
   let colReorderMode = false;
+  let colOriginalOrderIds = [];
   let dragFromIndex = null;
 
   // Create/edit
@@ -1669,7 +1747,7 @@
     const needsAuthGet = method === "GET" && path.startsWith("/api/feed/state");
     if(token && (method !== "GET" || needsAuthGet)) headers.Authorization = "Bearer " + token;
 
-    const r = await fetch(BACKEND + path, Object.assign({}, opts, { headers }));
+    const r = await fetch(BACKEND + path, Object.assign({}, opts, { headers, signal: opts.signal }));
     const j = await r.json().catch(()=> ({}));
     if(!r.ok) {
       const msg = j?.error || j?.details || ("HTTP " + r.status);
@@ -1790,17 +1868,54 @@
     $btnNewCol.style.display = (isOwnProfile && tab === "collections") ? "inline-flex" : "none";
   }
 
-  async function switchTab(newTab){
-    tab = newTab;
-    offset = 0;
-    hasMore = true;
+  function getPaneByTab(name){
+    if(name === "collections") return $gridCollections;
+    if(name === "library") return $gridLibrary;
+    return $gridPosts;
+  }
 
+  function setActivePane(name){
+    ["posts","collections","library"].forEach(t=>{
+      const pane = getPaneByTab(t);
+      pane.classList.toggle("active", t === name);
+    });
+    $grid = getPaneByTab(name);
+    const activePane = $grid;
+    requestAnimationFrame(()=>{
+      const h = Math.max(activePane.offsetHeight || 240, 240);
+      $gridWrap.style.minHeight = h + "px";
+    });
+  }
+
+  function renderErrorForTab(name, message){
+    const pane = getPaneByTab(name);
+    pane.innerHTML = `<div class="empty" style="color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(message)}</div>`;
+  }
+
+  async function switchTab(newTab){
+    if(newTab === tab || isSwitching) return;
+    isSwitching = true;
+    setTimeout(()=>{ isSwitching = false; }, 180);
+
+    if(activeAbort) activeAbort.abort();
+    activeAbort = new AbortController();
+
+    tab = newTab;
     $segTabs.querySelectorAll("button").forEach(b=> b.classList.toggle("active", b.dataset.tab === tab));
     renderTabControls();
+    setActivePane(tab);
 
-    if(tab === "posts") return loadPosts(true);
-    if(tab === "collections") return loadCollections(true);
-    return loadLibrary(true);
+    const state = tabState[tab];
+    if(state.loadedOnce){
+      if(tab === "posts") renderPosts();
+      else if(tab === "collections") renderCollections();
+      else renderLibrary();
+      return;
+    }
+
+    if(tab === "posts") return loadPosts(true, { signal: activeAbort.signal });
+    if(tab === "collections") return loadCollections(true, { signal: activeAbort.signal });
+    return loadLibrary(true, { signal: activeAbort.signal });
   }
 
   function getQS(name){
@@ -1831,15 +1946,16 @@
   });
 
   // -------- Data loaders ----------
-  async function loadLibrary(reset=false){
-    if(loading) return;
-    loading = true;
+  async function loadLibrary(reset=false, opts={}){
+    const state = tabState.library;
+    if(state.loading) return;
+    state.loading = true;
     showLoader(true);
 
     try{
-      if(reset){ offset = 0; hasMore = true; libraryItems = []; }
+      if(reset){ state.offset = 0; state.hasMore = true; libraryItems = []; }
 
-      const j = await api(`/api/u/${encodeURIComponent(username)}?limit=${PAGE_SIZE}&offset=${offset}`, { method:"GET" });
+      const j = await api(`/api/u/${encodeURIComponent(username)}?limit=${PAGE_SIZE}&offset=${state.offset}`, { method:"GET", signal: opts.signal });
       let page = Array.isArray(j.works) ? j.works : [];
 
       // apply sort/range like before
@@ -1856,28 +1972,32 @@
         if(!seen.has(k)){ seen.add(k); libraryItems.push(it); }
       }
 
-      offset = (j.nextOffset != null) ? j.nextOffset : (offset + page.length);
-      hasMore = !!j.hasMore;
+      state.offset = (j.nextOffset != null) ? j.nextOffset : (state.offset + page.length);
+      state.hasMore = !!j.hasMore;
+      state.loadedOnce = true;
 
-      renderLibrary();
+      requestAnimationFrame(()=> renderLibrary());
     }catch(e){
-      $grid.innerHTML = `<div class="empty" style="color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(e.message)}</div>`;
-      hasMore = false;
+      if(e?.name !== "AbortError"){
+        renderErrorForTab("library", e.message || "Failed");
+        state.hasMore = false;
+      }
     }finally{
-      loading = false;
+      state.loading = false;
       showLoader(false);
     }
   }
 
-  async function loadPosts(reset=false){
-    if(loading) return;
-    loading = true;
+  async function loadPosts(reset=false, opts={}){
+    const state = tabState.posts;
+    if(state.loading) return;
+    state.loading = true;
     showLoader(true);
 
     try{
-      if(reset){ offset = 0; hasMore = true; postItems = []; }
+      if(reset){ state.offset = 0; state.hasMore = true; postItems = []; }
 
-      const j = await api(`/api/posts/list?username=${encodeURIComponent(username)}&limit=${PAGE_SIZE}&offset=${offset}&sort=new`, { method:"GET" });
+      const j = await api(`/api/posts/list?username=${encodeURIComponent(username)}&limit=${PAGE_SIZE}&offset=${state.offset}&sort=new`, { method:"GET", signal: opts.signal });
       const page = Array.isArray(j.items) ? j.items : [];
 
       const seen = new Set(postItems.map(x=> String(x.id)));
@@ -1886,8 +2006,9 @@
         if(!seen.has(k)){ seen.add(k); postItems.push(it); }
       }
 
-      offset = j.nextOffset != null ? j.nextOffset : (offset + page.length);
-      hasMore = !!j.hasMore;
+      state.offset = j.nextOffset != null ? j.nextOffset : (state.offset + page.length);
+      state.hasMore = !!j.hasMore;
+      state.loadedOnce = true;
 
       const token = await getSessionToken();
       if(token){
@@ -1905,25 +2026,28 @@
         try{ await loadLibrary(true); }catch(e){}
       }
 
-      renderPosts();
+      requestAnimationFrame(()=> renderPosts());
     }catch(e){
-      $grid.innerHTML = `<div class="empty" style="color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(e.message)}</div>`;
-      hasMore = false;
+      if(e?.name !== "AbortError"){
+        renderErrorForTab("posts", e.message || "Failed");
+        state.hasMore = false;
+      }
     }finally{
-      loading = false;
+      state.loading = false;
       showLoader(false);
     }
   }
 
-  async function loadCollections(reset=false){
-    if(loading) return;
-    loading = true;
+  async function loadCollections(reset=false, opts={}){
+    const state = tabState.collections;
+    if(state.loading) return;
+    state.loading = true;
     showLoader(true);
 
     try{
-      if(reset){ offset = 0; hasMore = true; collectionItems = []; }
+      if(reset){ state.offset = 0; state.hasMore = true; collectionItems = []; }
 
-      const j = await api(`/api/collections/list?username=${encodeURIComponent(username)}&limit=${PAGE_SIZE}&offset=${offset}&sort=${encodeURIComponent(sort)}&preview_limit=10`, { method:"GET" });
+      const j = await api(`/api/collections/list?username=${encodeURIComponent(username)}&limit=${PAGE_SIZE}&offset=${state.offset}&sort=${encodeURIComponent(sort)}&preview_limit=10`, { method:"GET", signal: opts.signal });
       const page = Array.isArray(j.items) ? j.items : [];
 
       const seen = new Set(collectionItems.map(x=> String(x.id)));
@@ -1943,16 +2067,19 @@
         }
       }
 
-      offset = j.nextOffset != null ? j.nextOffset : (offset + page.length);
-      hasMore = !!j.hasMore;
+      state.offset = j.nextOffset != null ? j.nextOffset : (state.offset + page.length);
+      state.hasMore = !!j.hasMore;
+      state.loadedOnce = true;
 
       renderCollections();
       startCollectionsSlideshows();
     }catch(e){
-      $grid.innerHTML = `<div class="empty" style="color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(e.message)}</div>`;
-      hasMore = false;
+      if(e?.name !== "AbortError"){
+        renderErrorForTab("collections", e.message || "Failed");
+        state.hasMore = false;
+      }
     }finally{
-      loading = false;
+      state.loading = false;
       showLoader(false);
     }
   }
@@ -2634,6 +2761,9 @@
     $btnColEdit.style.display = "none";
     $btnColReorder.style.display = "none";
     $btnColDelete.style.display = "none";
+    $colReorderFooter.classList.remove("open");
+    colOriginalOrderIds = [];
+    $btnColReorder.textContent = "Reorder";
 
     try{
       const j = await api(`/api/collections/get?id=${encodeURIComponent(collection_id)}`, { method:"GET" });
@@ -2712,6 +2842,8 @@
       };
     });
 
+    $colReorderFooter.classList.toggle("open", !!colReorderMode);
+    $btnColReorder.textContent = colReorderMode ? "Exit" : "Reorder";
     if(colReorderMode) bindDnD();
   }
 
@@ -2749,13 +2881,15 @@
     await requireToken();
     const ordered = currentCol.items.map(x=> x.id);
     await api("/api/collections/reorder", { method:"POST", body: JSON.stringify({ id: currentCol.col.id, ordered_feed_post_ids: ordered }) });
-    toast("Order saved");
   }
 
   function closeCollectionModal(){
     $cb.classList.remove("open");
     currentCol = null;
     colReorderMode = false;
+    colOriginalOrderIds = [];
+    $colReorderFooter.classList.remove("open");
+    $btnColReorder.textContent = "Reorder";
     dragFromIndex = null;
   }
 
@@ -3222,25 +3356,54 @@
     $pickList.innerHTML = `<div class="empty" style="padding:18px">Loading…</div>`;
     $pickB.classList.add("open");
 
+    const layout = data.layout === "wide" ? "wide" : "list";
+    let filterType = "all";
+    let visibleCount = layout === "wide" ? 48 : 200;
+
+    if($pickFilters){
+      $pickFilters.style.display = layout === "wide" ? "flex" : "none";
+      $pickFilters.querySelectorAll("[data-type]").forEach(btn=>{
+        btn.classList.toggle("on", btn.getAttribute("data-type") === "all");
+        btn.onclick = ()=>{
+          filterType = btn.getAttribute("data-type") || "all";
+          $pickFilters.querySelectorAll("[data-type]").forEach(x=> x.classList.toggle("on", x===btn));
+          visibleCount = layout === "wide" ? 48 : 200;
+          renderList($pickSearch.value);
+        };
+      });
+    }
+
+    function resolveKind(it){
+      const type = String(it.type || "").toLowerCase();
+      if(type.includes("video")) return "video";
+      const u = String(it.media_url || it.thumb || "").toLowerCase();
+      return /\.(mp4|mov|webm|m3u8)(\?|$)/.test(u) ? "video" : "image";
+    }
+
     function renderList(filterText=""){
       const q = (filterText||"").toLowerCase().trim();
-      const items = (data.items || []).filter(it=>{
+      const source = (data.items || []).filter(it=>{
+        const kind = resolveKind(it);
+        if(filterType !== "all" && kind !== filterType) return false;
         if(!q) return true;
         return String(it.title||"").toLowerCase().includes(q) || String(it.description||"").toLowerCase().includes(q);
       });
+      const items = source.slice(0, visibleCount);
 
       $pickList.innerHTML = `
-        <div class="pick-list">
+        <div class="pick-list ${layout === "wide" ? "wide" : ""}" id="pickListInner">
           ${items.map(it=>{
             const on = data.multi ? pickSelectedSet.has(it.id) : (pickSelectedId === it.id);
+            const kind = resolveKind(it);
             return `
-              <div class="pick-row ${on?'on':''}" data-pid="${it.id}">
-                <div class="pick-thumb">${it.thumb ? `<img src="${it.thumb}">` : ""}</div>
-                <div class="pick-main">
+              <div class="pick-row ${on?'on':''} ${layout === "wide" ? "wide" : ""}" data-pid="${it.id}">
+                <div class="pick-thumb ${layout === "wide" ? "wide" : ""}">${it.thumb ? `<img src="${it.thumb}">` : ""}</div>
+                <div class="pick-main ${layout === "wide" ? "wide" : ""}">
                   <div class="pick-name">${escapeHtml(it.title||"Untitled")}</div>
                   <div class="pick-sub">${escapeHtml(it.description||"")}</div>
+                  ${layout === "wide" ? `<div class="pick-sub" style="margin-top:6px;">${kind === "video" ? "Video" : "Image"}</div>` : ``}
                 </div>
-                <div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>
+                ${layout === "wide" ? `` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`}
               </div>
             `;
           }).join("")}
@@ -3260,11 +3423,25 @@
           }
         };
       });
+
+      const inner = document.getElementById("pickListInner");
+      if(layout === "wide" && inner){
+        inner.onscroll = ()=>{
+          if(visibleCount >= source.length) return;
+          const nearBottom = inner.scrollTop + inner.clientHeight >= inner.scrollHeight - 120;
+          if(!nearBottom) return;
+          visibleCount += 48;
+          renderList($pickSearch.value);
+        };
+      }
     }
 
     renderList("");
 
-    $pickSearch.oninput = ()=> renderList($pickSearch.value);
+    $pickSearch.oninput = ()=> {
+      visibleCount = layout === "wide" ? 48 : 200;
+      renderList($pickSearch.value);
+    };
 
     return new Promise((resolve)=>{
       pickResolve = resolve;
@@ -3281,6 +3458,7 @@
 
   function closePicker(){
     $pickB.classList.remove("open");
+    if($pickFilters) $pickFilters.style.display = "none";
     pickMode = null;
     pickSelectedId = null;
     pickSelectedSet = new Set();
@@ -3342,7 +3520,7 @@
   }
 
   // -------- Sheets: Collection ----------
-  function openCollectionSheet(mode, col=null){
+  async function openCollectionSheet(mode, col=null){
     editingColId = null;
     colDraftMedia = [];
     colDraftCover = null;
@@ -3351,14 +3529,68 @@
     $kname.value = col?.title || "";
     $kdesc.value = col?.description || "";
 
-    if(mode === "edit" && col){ editingColId = col.id; }
+    await ensureLibraryLoadedForPicker();
+
+    if(mode === "edit" && col){
+      editingColId = col.id;
+      try{
+        const j = await api(`/api/collections/get?id=${encodeURIComponent(col.id)}`, { method:"GET" });
+        const items = Array.isArray(j.items) ? j.items : [];
+        colDraftMedia = items.map(x=> x.id);
+        colDraftCover = col.cover_feed_post_id || (colDraftMedia[0] || null);
+      }catch(e){
+        toast(e.message || "Failed to load collection items");
+      }
+    }
     $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
     $kPickGrid.style.display = "none";
     $kPickGrid.innerHTML = "";
+    renderCollectionDraftSelected();
     $kb.classList.add("open");
   }
 
-  function closeCollectionSheet(){ $kb.classList.remove("open"); editingColId = null; colDraftMedia = []; colDraftCover = null; }
+
+  function renderCollectionDraftSelected(){
+    if(!colDraftMedia.length){
+      $kSelectedWrap.style.display = "none";
+      $kSelectedGrid.innerHTML = "";
+      return;
+    }
+    $kSelectedWrap.style.display = "block";
+    const byId = new Map(libraryItems.map(it=> [String(it.id), it]));
+    if(!colDraftCover || !colDraftMedia.includes(colDraftCover)) colDraftCover = colDraftMedia[0] || null;
+    $kSelectedGrid.innerHTML = colDraftMedia.map(id=>{
+      const it = byId.get(String(id)) || {};
+      const thumb = (it.thumb_url || it.media_url || "").trim();
+      const title = it.title || "Untitled";
+      const isCover = String(colDraftCover||"") === String(id);
+      return `<div class="picked-item ${isCover?"is-cover":""}" data-picked="${escapeHtml(String(id))}" title="Set as cover">
+        ${thumb ? `<img src="${escapeHtml(thumb)}" alt="">` : ``}
+        <button type="button" class="picked-remove" data-remove-picked="${escapeHtml(String(id))}">×</button>
+        ${isCover ? `<div class="picked-cover">Cover</div>` : ``}
+      </div>`;
+    }).join("");
+
+    $kSelectedGrid.querySelectorAll("[data-picked]").forEach(el=>{
+      el.onclick = (e)=>{
+        if(e.target.closest("[data-remove-picked]")) return;
+        colDraftCover = el.getAttribute("data-picked");
+        renderCollectionDraftSelected();
+      };
+    });
+    $kSelectedGrid.querySelectorAll("[data-remove-picked]").forEach(btn=>{
+      btn.onclick = (e)=>{
+        e.stopPropagation();
+        const id = btn.getAttribute("data-remove-picked");
+        colDraftMedia = colDraftMedia.filter(x=> String(x)!==String(id));
+        if(String(colDraftCover||"")===String(id)) colDraftCover = colDraftMedia[0] || null;
+        $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
+        renderCollectionDraftSelected();
+      };
+    });
+  }
+
+  function closeCollectionSheet(){ $kb.classList.remove("open"); editingColId = null; colDraftMedia = []; colDraftCover = null; $kSelectedGrid.innerHTML = ""; $kSelectedWrap.style.display = "none"; }
 
   async function saveCollectionDraft(){
     try{
@@ -3399,7 +3631,8 @@
   $range.onchange = () => { range = $range.value; if(tab === "library") loadLibrary(true); };
 
   window.addEventListener("scroll", () => {
-    if(!hasMore || loading) return;
+    const state = tabState[tab];
+    if(!state || !state.hasMore || state.loading) return;
     const nearBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 900);
     if(!nearBottom) return;
 
@@ -3425,25 +3658,43 @@
   $cclose.onclick = closeCollectionModal;
   $cb.onclick = (e) => { if(e.target === $cb) closeCollectionModal(); };
 
-  $btnColReorder.onclick = async () => {
+  $btnColReorder.onclick = () => {
     if(!currentCol) return;
-    colReorderMode = !colReorderMode;
     if(!colReorderMode){
-      try{
-        await saveCollectionOrder();
-        toast("Order saved");
-        // refresh list cache
-        await loadCollections(true);
-      }catch(e){
-        toast(e.message || "Failed");
-      }
+      colReorderMode = true;
+      colOriginalOrderIds = (currentCol.items || []).map(x=> x.id);
+      toast("Drag items and press Save order");
     } else {
-      toast("Drag items, press Reorder again to save");
+      colReorderMode = false;
     }
     renderCollectionModalGrid();
   };
 
-  $btnColEdit.onclick = () => { if(currentCol) openCollectionSheet("edit", currentCol.col); };
+  $btnColReorderSave.onclick = async () => {
+    if(!currentCol || !colReorderMode) return;
+    const ok = await confirmUI("Save order", "Apply new order?");
+    if(!ok) return;
+    try{
+      await saveCollectionOrder();
+      colReorderMode = false;
+      renderCollectionModalGrid();
+      toast("Order saved");
+      tabState.collections.loadedOnce = false;
+      await loadCollections(true);
+    }catch(e){
+      toast(e.message || "Failed");
+    }
+  };
+
+  $btnColReorderCancel.onclick = () => {
+    if(!currentCol) return;
+    const map = new Map((currentCol.items || []).map(it=> [String(it.id), it]));
+    currentCol.items = (colOriginalOrderIds || []).map(id=> map.get(String(id))).filter(Boolean);
+    colReorderMode = false;
+    renderCollectionModalGrid();
+  };
+
+  $btnColEdit.onclick = () => { if(currentCol) openCollectionSheet("edit", currentCol.col).catch(e=>toast(e.message||"Failed")); };
 
   $btnColDelete.onclick = async () => {
     if(!currentCol) return;
@@ -3471,14 +3722,15 @@
 
     const items = libraryItems.slice(0, 200).map(it=>{
       const thumb = (it.thumb_url || it.media_url || "") || "";
-      return { id: it.id, title: it.title || "Untitled", description: "", thumb };
+      return { id: it.id, title: it.title || "Untitled", description: "", thumb, type: it.file_type || "", media_url: it.media_url || "" };
     });
 
     const picked = await openPicker("library", {
       title: "Add media from Library",
       hint: "Select images/videos (multi-select). Upload from ПК disabled.",
       items,
-      multi: true
+      multi: true,
+      layout: "wide"
     });
 
     if(Array.isArray(picked)){
@@ -3490,7 +3742,7 @@
   $pPickCollection.onclick = attachCollectionMarker;
 
   // Collection sheet
-  $btnNewCol.onclick = () => openCollectionSheet("new", null);
+  $btnNewCol.onclick = () => openCollectionSheet("new", null).catch(e=>toast(e.message||"Failed"));
   $kclose.onclick = closeCollectionSheet;
   $kb.onclick = (e)=>{ if(e.target === $kb) closeCollectionSheet(); };
   $kcancel.onclick = closeCollectionSheet;
@@ -3500,16 +3752,19 @@
     await ensureLibraryLoadedForPicker();
     const q = ($ksearch.value||"").trim().toLowerCase();
     const filtered = libraryItems.filter(it => !q || String(it.title||"").toLowerCase().includes(q)).slice(0, 200);
-    const items = filtered.map(it=>({ id: it.id, title: it.title||"Untitled", description:"", thumb:(it.thumb_url||it.media_url||"") }));
+    const items = filtered.map(it=>({ id: it.id, title: it.title||"Untitled", description:"", thumb:(it.thumb_url||it.media_url||""), type: it.file_type || "", media_url: it.media_url || "" }));
     const picked = await openPicker("library", {
       title: "Add items to collection",
       hint: "Select items (multi-select).",
       items,
-      multi: true
+      multi: true,
+      layout: "wide"
     });
     if(Array.isArray(picked)){
       colDraftMedia = picked;
+      if(!colDraftCover || !colDraftMedia.includes(colDraftCover)) colDraftCover = colDraftMedia[0] || null;
       $kPickedInfo.textContent = `Selected: ${colDraftMedia.length}`;
+      renderCollectionDraftSelected();
     }
   };
 
@@ -3533,7 +3788,7 @@
     if(!username){
       $pName.textContent = "No username";
       $pUser.textContent = "Add ?username=...";
-      $grid.innerHTML = `<div class="empty">Open like: /artist?username=username</div>`;
+      $gridPosts.innerHTML = `<div class="empty">Open like: /artist?username=username</div>`;
       return;
     }
 
@@ -3551,6 +3806,8 @@
     if(!myProfile){
       myProfile = { display_name:"User", username:"", avatar_type:"image", avatar_url:"", avatar_emoji:"" };
     }
+    tab = "";
+    setActivePane("posts");
     renderTabControls();
 
     window.setArtistTab = async (nextTab) => {
