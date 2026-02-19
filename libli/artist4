@@ -44,12 +44,12 @@
 .pcover{
   position:relative;
   width:100%;
-  height:180px;                 /* ✅ большая */
+  height:230px;          /* ✅ ниже, до уровня followers */
   border-radius:22px;
   overflow:hidden;
   border:1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.03);
-  margin-bottom:-34px;          /* ✅ “наезд” профиля на шапку как раньше */
+  margin-bottom:-44px;   /* ✅ сохраняем “наезд” */
 }
 
 .pcover-bg{
@@ -65,7 +65,11 @@
 .pcover-bg::after{
   content:"";
   position:absolute; inset:0;
-  background: linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.45));
+  /* ✅ снизу темнее, вверх прозрачнее */
+  background: linear-gradient(to top,
+    rgba(0,0,0,.55) 0%,
+    rgba(0,0,0,.22) 45%,
+    rgba(0,0,0,.06) 100%);
 }
 
 .pcover-edit, .pcover-del{
@@ -792,12 +796,21 @@
   .col-close:hover{ background:#fff; color:#000; }
   .col-header{
     padding:18px 18px 12px;
+    padding-bottom:16px;
     border-bottom:1px solid rgba(255,255,255,0.10);
     display:flex;
     align-items:flex-start;
     justify-content:space-between;
     gap:12px;
     flex-wrap:wrap;
+  }
+  .col-header::after{
+    content:"";
+    display:block;
+    height:1px;
+    width:100%;
+    background: rgba(255,255,255,0.10);
+    margin-top:14px;
   }
   .col-h-left{ min-width:0; }
   .col-h-title{ font-weight:950; font-size:18px; letter-spacing:-.2px; }
@@ -932,6 +945,75 @@
     border:1px dashed rgba(255,255,255,0.14);
     border-radius:14px;
     padding:10px 12px;
+  }
+
+  /* ===== Film hero inside collection header ===== */
+  .film-hero{
+    margin-top:12px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.28);
+    overflow:hidden;
+  }
+  .film-hero .film-media{
+    position:relative;
+    aspect-ratio: 16/9;
+    background:#000;
+  }
+  .film-hero video{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .film-hero .film-media::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(to top,
+      rgba(0,0,0,.70) 0%,
+      rgba(0,0,0,.25) 45%,
+      rgba(0,0,0,.05) 100%);
+  }
+  .film-hero .film-caption{
+    padding:14px 14px 16px;
+  }
+  .film-hero .film-title{
+    font-weight:1000;
+    font-size:18px;
+    letter-spacing:-.2px;
+    margin:0;
+  }
+  .film-hero .film-desc{
+    margin-top:8px;
+    color:rgba(255,255,255,0.78);
+    font-size:13px;
+    line-height:1.45;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .film-hero .film-desc.open{
+    -webkit-line-clamp:unset;
+  }
+  .film-hero .film-more{
+    margin-top:10px;
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+    height:34px;
+    padding:0 12px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+    cursor:pointer;
+    font-weight:900;
+    font-size:12px;
+  }
+  .film-hero .film-more:hover{
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.22);
   }
 
   .picked-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; }
@@ -3151,10 +3233,16 @@ Download link:
       if(isOwnProfile){
         $btnColEdit.style.display = "inline-flex";
         $btnSceneNew.style.display = "inline-flex";
-        $btnColReorder.style.display = sections.length ? "none" : "inline-flex";
+        $btnColReorder.style.display = "inline-flex";
         $btnColDelete.style.display = "inline-flex";
-      }else{
-        $btnSceneNew.style.display = "none";
+      }
+
+      // страховка: кнопки владельца всегда видны
+      if(isOwnProfile){
+        $btnColEdit.style.display = "inline-flex";
+        $btnSceneNew.style.display = "inline-flex";
+        $btnColReorder.style.display = "inline-flex";
+        $btnColDelete.style.display = "inline-flex";
       }
 
       renderCollectionModalGrid();
@@ -3335,26 +3423,58 @@ Download link:
   function renderCollectionFilmBlock(film, collectionId){
     if(!$colFilm) return;
 
+    // 2) Публичным зрителям НЕ показываем статус отправки/пендинг
+    if(!isOwnProfile && film && film.status !== "approved"){
+      $colFilm.style.display = "none";
+      $colFilm.innerHTML = "";
+      return;
+    }
+
+    // APPROVED: красивая кинематографичная шапка
     if(film && film.status === "approved" && film.published_url){
       $colFilm.style.display = "block";
+
+      const t = (film.title || "Film").trim();
+      const d = (film.description || "").trim();
+
       $colFilm.innerHTML = `
-        <h3>${escapeHtml(film.title || "Film")}</h3>
-        ${film.description ? `<p>${escapeHtml(film.description)}</p>` : ``}
-        <video controls playsinline src="${escapeHtml(film.published_url)}"></video>
+        <div class="film-hero">
+          <div class="film-media">
+            <video controls playsinline preload="metadata" src="${escapeHtml(film.published_url)}"></video>
+          </div>
+          <div class="film-caption">
+            <h3 class="film-title">${escapeHtml(t)}</h3>
+            ${d ? `<div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>
+                   <button class="film-more" id="filmMore" type="button">Read more</button>` : ``}
+          </div>
+        </div>
       `;
+
+      const more = document.getElementById("filmMore");
+      const desc = document.getElementById("filmDesc");
+      if(more && desc){
+        more.onclick = ()=>{
+          const on = desc.classList.toggle("open");
+          more.textContent = on ? "Hide" : "Read more";
+        };
+      }
       return;
     }
 
-    if(film && film.status === "pending"){
+    // PENDING: показываем ТОЛЬКО владельцу (isOwnProfile)
+    if(isOwnProfile && film && film.status === "pending"){
       $colFilm.style.display = "block";
       $colFilm.innerHTML = `
-        <h3>Film submission</h3>
-        <p style="margin-top:8px;"><span class="pill">Pending review</span></p>
-        <p>We’ll review it within 1–2 days.</p>
+        <div class="col-film">
+          <h3 style="margin:0;">Film submission</h3>
+          <p style="margin-top:8px;"><span class="pill">Pending review</span></p>
+          <p>We’ll review it within 1–2 days.</p>
+        </div>
       `;
       return;
     }
 
+    // Нет фильма: показываем кнопку submit ТОЛЬКО владельцу
     if(!isOwnProfile){
       $colFilm.style.display = "none";
       $colFilm.innerHTML = "";
@@ -3363,7 +3483,7 @@ Download link:
 
     $colFilm.style.display = "block";
     $colFilm.innerHTML = `
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div class="col-film" style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
         <div>
           <h3 style="margin:0;">Your film</h3>
           <p style="margin-top:6px;">You can submit a short film for review.</p>
@@ -3373,9 +3493,7 @@ Download link:
     `;
 
     const btn = document.getElementById("openFilmSubmit");
-    if(btn){
-      btn.onclick = ()=> openFilmSheet(collectionId);
-    }
+    if(btn) btn.onclick = ()=> openFilmSheet(collectionId);
   }
 
   function bindDnD(){
