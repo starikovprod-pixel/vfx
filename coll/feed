@@ -462,6 +462,650 @@
   }#lf-collections /* artist-like posts/collections */
   .feed{ width:min(860px,100%); margin:0; display:flex; flex-direction:column; gap:0; }#lf-collections .feed-sep{ height:1px; background:rgba(255,255,255,0.10); margin:18px 0; }#lf-collections .post{ width:100%; display:flex; flex-direction:column; gap:12px; }#lf-collections .post-head{ display:flex; gap:10px; align-items:center; }#lf-collections .post-meta{ min-width:0; display:flex; flex-direction:column; gap:2px; }#lf-collections .post-name{ font-weight:950; font-size:14px; display:flex; align-items:center; gap:6px; }#lf-collections .post-time{ font-size:12px; color:rgba(255,255,255,0.6); }#lf-collections .post-body{ font-size:15px; line-height:1.5; color:rgba(255,255,255,0.92); white-space:pre-wrap; word-break:break-word; }#lf-collections .embed-collection{ margin-top:10px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); overflow:hidden; cursor:pointer; position:relative; }#lf-collections .embed-bg{ position:absolute; inset:0; background:#000; }#lf-collections .embed-bg img, #lf-collections .embed-bg video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .6s ease; }#lf-collections .embed-bg img.on, #lf-collections .embed-bg video.on{ opacity:.85; }#lf-collections .embed-overlay{ position:relative; padding:16px; background:linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.1)); }#lf-collections .embed-title{ font-weight:950; font-size:14px; }#lf-collections .embed-desc{ margin-top:6px; font-size:13px; color:rgba(255,255,255,.75); }#lf-collections .pslider{ width:fit-content; max-width:100%; margin:0 auto; position:relative; }#lf-collections .pslide img, #lf-collections .pslide video{ display:block; width:auto; height:auto; max-width:100%; max-height:420px; object-fit:contain; margin:0 auto; border-radius:22px; border:1px solid rgba(255,255,255,.10); }#lf-collections .pnav{ position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.45); color:#fff; }#lf-collections .pnav.prev{ left:10px; }#lf-collections .pnav.next{ right:10px; }#lf-collections .pdots{ position:absolute; left:50%; transform:translateX(-50%); bottom:10px; display:flex; gap:6px; padding:7px 10px; border-radius:999px; background:rgba(0,0,0,.45); }#lf-collections .pdots button{ width:7px; height:7px; border-radius:99px; border:0; background:rgba(255,255,255,.35); }#lf-collections .pdots button.on{ background:#fff; }#lf-collections .post-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }#lf-collections .mini{ padding:8px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#fff; display:inline-flex; align-items:center; gap:8px; }#lf-collections .mini.on.like{ color:var(--danger); border-color:rgba(255,70,90,.45); background:rgba(255,70,90,.14); }#lf-collections .mini.on.save{ color:#2b6cff; border-color:rgba(43,108,255,.45); background:rgba(43,108,255,.18); }#lf-collections .pc{ border-top:1px solid rgba(255,255,255,.10); padding-top:12px; margin-top:6px; display:flex; flex-direction:column; gap:10px; }#lf-collections .pc-list{ display:flex; flex-direction:column; gap:10px; max-height:320px; overflow:auto; }#lf-collections .pc-item{ display:flex; gap:10px; align-items:flex-start; }#lf-collections .pc-bubble{ flex:1; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); padding:8px 12px; }#lf-collections .pc-top{ display:flex; gap:8px; align-items:center; margin-bottom:4px; }#lf-collections .pc-footer{ margin-top:6px; display:flex; align-items:center; justify-content:space-between; }#lf-collections .pc-name{ font-weight:950; font-size:12px; color:#fff; text-decoration:none; }#lf-collections .pc-time{ font-size:11px; color:rgba(255,255,255,.55); }#lf-collections .pc-body{ font-size:13px; line-height:1.3; white-space:pre-wrap; overflow-wrap:anywhere; }#lf-collections .pc-form{ display:flex; gap:10px; align-items:flex-start; }#lf-collections .pc-input{ flex:1; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:14px; color:#fff; padding:10px 12px; }#lf-collections .pc-ta{ width:100%; resize:none; min-height:44px; max-height:180px; overflow:hidden; }#lf-collections .pc-send{ width:44px; height:44px; border:0; border-radius:14px; background:#fff; color:#000; }#lf-collections .cgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; padding-top:18px; }#lf-collections .ccard{ position:relative; border-radius:22px; overflow:hidden; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); min-height:320px; }#lf-collections .cc-bg{ position:absolute; inset:0; background:#000; }#lf-collections .cc-bg img, #lf-collections .cc-bg video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .8s ease; }#lf-collections .cc-bg img.on, #lf-collections .cc-bg video.on{ opacity:.85; }#lf-collections .cc-glass{ position:relative; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:20px; background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.14)); }#lf-collections .cc-title{ font-weight:1000; font-size:18px; }#lf-collections .cc-desc{ margin-top:10px; font-size:13px; color:rgba(255,255,255,.75); }#lf-collections .cc-meta{ position:absolute; left:14px; right:14px; bottom:14px; display:flex; gap:8px; justify-content:center; }#lf-collections .cc-pill{ padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.35); font-size:12px; display:inline-flex; gap:6px; }#lf-collections .pc-mention{ color:#7db4ff; text-decoration:none; font-weight:900; }#lf-collections .pc-mention:hover{ text-decoration:underline; }#lf-collections .pc-actions{ display:flex; gap:6px; align-items:center; }#lf-collections .cic{ border:0; background:transparent; color:rgba(255,255,255,.7); display:inline-flex; align-items:center; gap:4px; cursor:pointer; padding:0; }#lf-collections .cic.on{ color:var(--danger); }#lf-collections .pc-edit-ta{ width:100%; min-height:74px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.14); border-radius:12px; color:#fff; padding:8px 10px; }#lf-collections .pc-form-actions{ display:flex; gap:8px; }#lf-collections .sheet-backdrop{ position:fixed; inset:0; z-index:14000; background:rgba(0,0,0,0.86); backdrop-filter: blur(5px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:.18s; }#lf-collections .sheet-backdrop.open{ opacity:1; pointer-events:auto; }#lf-collections .sheet{ width:92%; max-width:980px; height:88vh; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:24px; overflow:hidden; position:relative; display:flex; flex-direction:column; backdrop-filter: blur(14px);}#lf-collections .sheet-head{ padding:16px 16px 12px; border-bottom:1px solid rgba(255,255,255,0.10); display:flex; justify-content:space-between; gap:10px; align-items:center; }#lf-collections .sheet-title{ font-weight:950; font-size:16px; }#lf-collections .sheet-close{ width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.45); color:#fff; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; }#lf-collections .sheet-body{ padding:14px 16px 16px; overflow:auto; flex:1; display:flex; flex-direction:column; gap:12px; }#lf-collections #emoGrid button{ height:44px; border-radius:14px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); cursor:pointer; font-size:22px; }#lf-collections @media(max-width: 980px){#lf-collections .feed-layout{ grid-template-columns:1fr; }#lf-collections .feed-right{ position:relative; top:0; height:auto; }#lf-collections .lf-modal{ flex-direction: column; height: 92vh; }#lf-collections .m-sidebar{ width: 100%; height: 46vh; border-left: none; border-top: 1px solid var(--border); }#lf-collections .m-preview{ height: 46vh; }
   }
+
+  #lf-collections .empty{
+    padding:40px;
+    text-align:center;
+    color: rgba(255,255,255,0.55);
+    border: 1px dashed rgba(255,255,255,0.18);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.02);
+  }
+  #lf-collections .btn-primary{
+    height:38px;
+    padding:0 14px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:#fff;
+    color:#000;
+    cursor:pointer;
+    font-weight:950;
+    transition:.15s;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  #lf-collections .btn-primary:hover{ transform: translateY(-1px); }
+  #lf-collections .btn-ghost{
+    height:38px;
+    padding:0 14px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+    cursor:pointer;
+    font-weight:900;
+    transition:.15s;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  #lf-collections .btn-ghost:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+  #lf-collections .btn-danger{
+    height:38px;
+    padding:0 14px;
+    border-radius:999px;
+    border:1px solid rgba(255,70,90,0.40);
+    background: rgba(255,70,90,0.16);
+    color: #ffd3d8;
+    cursor:pointer;
+    font-weight:950;
+    transition:.15s;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  #lf-collections .btn-danger:hover{ border-color: rgba(255,70,90,0.65); }
+  #lf-collections .field{ display:flex; flex-direction:column; gap:8px; }
+  #lf-collections .field label{ font-size:12px; color: rgba(255,255,255,0.65); font-weight:800; }
+  #lf-collections .field input, #lf-collections .field textarea{
+    background: rgba(255,255,255,0.05);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:14px;
+    padding:10px 12px;
+    outline:none;
+    font-weight:800;
+    font-size:14px;
+  }
+  #lf-collections .field textarea{ min-height:110px; resize:vertical; }
+  #lf-collections .sheet-actions{ display:flex; gap:10px; flex-wrap:wrap; padding-top:8px; }
+  #lf-collections .search{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    padding:8px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color:#fff;
+  }
+  #lf-collections .search input{ border:0; outline:none; background:transparent; color:#fff; font-weight:850; min-width:220px; }
+  #lf-collections .pickbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  #lf-collections .pick-list{ display:flex; flex-direction:column; gap:10px; }
+  #lf-collections .pick-row{
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    border-radius:16px;
+    padding:12px;
+    cursor:pointer;
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  #lf-collections .pick-row:hover{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.22); }
+  #lf-collections .pick-row.on{ border-color: rgba(110,168,255,0.55); box-shadow: 0 0 0 2px rgba(110,168,255,0.16) inset; }
+  #lf-collections .pick-thumb{
+    width:64px;
+    height:64px;
+    border-radius:14px;
+    overflow:hidden;
+    background:#000;
+    border:1px solid rgba(255,255,255,0.10);
+    flex:0 0 auto;
+  }
+  #lf-collections .pick-thumb img, #lf-collections .pick-thumb video{ width:100%; height:100%; object-fit:cover; display:block; }
+  #lf-collections .pick-main{ min-width:0; flex:1; }
+  #lf-collections .pick-name{ font-weight:950; }
+  #lf-collections .pick-sub{ color:rgba(255,255,255,0.65); font-size:12px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #lf-collections .pick-filters{ display:flex; gap:8px; }
+  #lf-collections .pick-filter{ padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:#fff; cursor:pointer; font-weight:800; }
+  #lf-collections .pick-filter.on{ background:#fff; color:#000; }
+  #lf-collections .pick-list.wide{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:12px;
+    max-height:520px;
+    overflow:auto;
+    padding-right:4px;
+  }
+  #lf-collections .pick-row.wide{ display:block; padding:0; overflow:hidden; position:relative; }
+  #lf-collections .pick-check{
+    position:absolute;
+    top:12px;
+    right:12px;
+    width:30px;
+    height:30px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:950;
+  }
+  #lf-collections .pick-row.wide.on .pick-check{ background: rgba(110,168,255,0.25); border-color: rgba(110,168,255,0.55); }
+  #lf-collections .pick-thumb.wide{ width:100%; height:auto; aspect-ratio:16/9; border-radius:0; border:0; }
+  #lf-collections .pick-main.wide{ padding:10px 12px 12px; }
+
+  #lf-collections .col-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:10500;
+    background:rgba(0,0,0,0.86);
+    backdrop-filter: blur(5px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transition:.18s;
+  }
+  #lf-collections .col-backdrop.open{ opacity:1; pointer-events:auto; }
+  #lf-collections .col-modal{
+    width:92%;
+    max-width:1200px;
+    height:88vh;
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow: var(--shadow);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    backdrop-filter: blur(14px);
+  }
+  #lf-collections .col-close{
+    position:absolute;
+    top:16px;
+    right:16px;
+    background: rgba(0,0,0,0.5);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.2);
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:10;
+  }
+  #lf-collections .col-close:hover{ background:#fff; color:#000; }
+  #lf-collections .col-header{
+    padding:18px 18px 16px;
+    border-bottom:1px solid rgba(255,255,255,0.10);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  #lf-collections .col-toprow{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  #lf-collections .col-h-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  #lf-collections .col-header::after{
+    content:"";
+    display:block;
+    height:1px;
+    width:100%;
+    background: rgba(255,255,255,0.10);
+    margin-top:2px;
+  }
+  #lf-collections .col-h-left{ min-width:0; }
+  #lf-collections .col-h-title{ font-weight:950; font-size:18px; letter-spacing:-.2px; }
+  #lf-collections .col-h-desc{ margin-top:6px; color: rgba(255,255,255,0.75); font-size:13px; line-height:1.4; max-width:820px; }
+  #lf-collections .col-h-meta{ margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; }
+  #lf-collections .col-h-meta .stat{ background: rgba(0,0,0,0.35); border-color: rgba(255,255,255,0.10); }
+  #lf-collections .col-body{ padding:18px; overflow:auto; flex:1; }
+  html.lf-lock, body.lf-lock{ overflow:hidden !important; height:100%; }
+  #lf-collections .col-backdrop, #lf-collections .col-modal, #lf-collections .col-body{ overscroll-behavior: contain; }
+  #lf-collections .col-scenes{ display:flex; flex-direction:column; gap:14px; }
+  #lf-collections .scene{
+    border:1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.03);
+    border-radius:18px;
+    overflow:hidden;
+  }
+  #lf-collections .scene-head{
+    padding:12px 14px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:flex-start;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  #lf-collections .scene-title{ font-weight:950; }
+  #lf-collections .scene-desc{ margin-top:6px; color:rgba(255,255,255,0.72); font-size:13px; line-height:1.35; }
+  #lf-collections .scene-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  #lf-collections .scene-grid{
+    padding:14px;
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap:12px;
+  }
+  #lf-collections .col-item{
+    position:relative;
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.10);
+    background:#000;
+    aspect-ratio:1 / 1;
+    cursor:pointer;
+    transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  }
+  #lf-collections .col-item img, #lf-collections .col-item video{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  #lf-collections .drag-handle{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    width:42px;
+    height:42px;
+    border-radius:14px;
+    background: rgba(0,0,0,0.55);
+    border:1px solid rgba(255,255,255,0.12);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    cursor:grab;
+    user-select:none;
+  }
+  #lf-collections .drag-handle svg{ width:20px; height:20px; stroke:#fff; opacity:.9; }
+  #lf-collections .col-item.dragging{
+    opacity:.6;
+    transform: scale(.98);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  }
+  #lf-collections .reorder-footer{
+    position:sticky;
+    bottom:0;
+    z-index:3;
+    margin-top:14px;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(12,12,12,0.92);
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  #lf-collections .reorder-footer.open{ display:flex; }
+  #lf-collections .col-film{
+    margin-top:12px;
+    padding:12px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.25);
+  }
+  #lf-collections .muted{ color: rgba(255,255,255,0.65); font-size:12px; line-height:1.4; }
+  #lf-collections .status{
+    margin-top:8px;
+    font-size:12px;
+    border-radius:12px;
+    padding:8px 10px;
+    border:1px solid rgba(255,255,255,0.14);
+    color:rgba(255,255,255,0.8);
+    display:none;
+  }
+  #lf-collections .status.err{ color:#ffb5be; border-color:rgba(255,70,90,0.35); background:rgba(255,70,90,0.12); display:block; }
+  #lf-collections .status.ok{ color:#b6ffd7; border-color:rgba(61,219,132,0.35); background:rgba(61,219,132,0.12); display:block; }
+
+  #lf-collections .mv-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:15000;
+    background: rgba(0,0,0,0.90);
+    backdrop-filter: blur(6px);
+    opacity:0;
+    pointer-events:none;
+    transition:.18s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  #lf-collections .mv-backdrop.open{ opacity:1; pointer-events:auto; }
+  #lf-collections .mv{
+    width:92%;
+    max-width:1320px;
+    height:90vh;
+    border-radius:24px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    box-shadow: var(--shadow);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    backdrop-filter: blur(10px);
+  }
+  #lf-collections .mv-close{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:40px;
+    height:40px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.45);
+    color:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:10;
+    font-size:20px;
+  }
+  #lf-collections .mv-close:hover{ background:#fff; color:#000; }
+  #lf-collections .mv-stage{
+    flex:1;
+    position:relative;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  #lf-collections .mv-media{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    max-width:100%;
+    max-height:100%;
+  }
+  #lf-collections .mv-nav{
+    position:absolute;
+    top:50%;
+    transform: translateY(-50%);
+    width:54px;
+    height:54px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.45);
+    color:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    backdrop-filter: blur(6px);
+    transition:.15s;
+    z-index:5;
+  }
+  #lf-collections .mv-nav:hover{ background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.28); }
+  #lf-collections .mv-nav.prev{ left:14px; }
+  #lf-collections .mv-nav.next{ right:14px; }
+  #lf-collections .mv-bar{
+    padding:12px 14px;
+    border-top:1px solid rgba(255,255,255,0.10);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(10px);
+  }
+  #lf-collections .mv-title{
+    font-weight:950;
+    font-size:13px;
+    color: rgba(255,255,255,0.9);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:60ch;
+  }
+  #lf-collections .mv-dots{
+    display:flex;
+    gap:6px;
+    padding:7px 10px;
+    border-radius:999px;
+    background: rgba(0,0,0,0.40);
+    border:1px solid rgba(255,255,255,0.14);
+  }
+  #lf-collections .mv-dots button{
+    width:7px;
+    height:7px;
+    border-radius:99px;
+    border:0;
+    cursor:pointer;
+    background: rgba(255,255,255,0.35);
+  }
+  #lf-collections .mv-dots button.on{ background:#fff; }
+
+  /* Exact Collections Card Parity (from ar) */
+  #lf-collections .cgrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:16px;
+    padding-top:18px;
+  }
+  #lf-collections .ccard{
+    position:relative;
+    border-radius:22px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    cursor:pointer;
+    transition:.18s;
+    min-height:320px;
+  }
+  #lf-collections .ccard:hover{ transform: translateY(-4px); border-color: rgba(255,255,255,0.25); }
+  #lf-collections .cc-bg{
+    position:absolute;
+    inset:0;
+    background:#000;
+  }
+  #lf-collections .cc-bg img,
+  #lf-collections .cc-bg video{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    opacity:0;
+    transition: opacity .8s ease;
+    filter: saturate(1.05) contrast(1.05);
+  }
+  #lf-collections .cc-bg img.on,
+  #lf-collections .cc-bg video.on{ opacity:0.85; }
+  #lf-collections .cc-glass{
+    position:relative;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:20px;
+    backdrop-filter:none;
+    background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0.14));
+  }
+  #lf-collections .cc-title{
+    font-weight:1000;
+    font-size:18px;
+    letter-spacing:-.2px;
+  }
+  #lf-collections .cc-desc{
+    margin-top:10px;
+    font-size:13px;
+    color: rgba(255,255,255,0.75);
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    max-width:520px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  #lf-collections .cc-meta{
+    position:absolute;
+    left:14px;
+    right:14px;
+    bottom:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  #lf-collections .cc-pill{
+    padding:7px 10px;
+    border-radius:999px;
+    background: rgba(0,0,0,0.40);
+    border:1px solid rgba(255,255,255,0.14);
+    backdrop-filter:none;
+    font-weight:900;
+    font-size:12px;
+    color:#fff;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  #lf-collections .cc-pill[data-csave], #lf-collections .cc-pill[data-clike]{ cursor:pointer; }
+  #lf-collections .cc-pill svg{ width:14px; height:14px; fill: currentColor; }
+
+  /* Exact Film Hero Block Parity (from ar) */
+  #lf-collections .film-hero{
+    margin-top:14px;
+    border-radius:24px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.30);
+    overflow:hidden;
+  }
+  #lf-collections .film-hero .film-wrap{
+    display:grid;
+    grid-template-columns: 1.9fr 0.75fr;
+    gap:0;
+  }
+  #lf-collections .film-hero .film-media{
+    position:relative;
+    padding:12px;
+    background:transparent;
+    min-height:320px;
+  }
+  #lf-collections .film-hero .film-media video{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+    border-radius:18px;
+  }
+  #lf-collections .film-hero .film-media::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: linear-gradient(to right, rgba(0,0,0,.05) 0%, rgba(0,0,0,.15) 55%, rgba(0,0,0,.55) 100%);
+    pointer-events:none;
+  }
+  #lf-collections .film-hero .film-side{
+    padding:18px;
+    border-left:1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.18);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  #lf-collections .film-hero .film-title{
+    margin:0;
+    font-weight:1000;
+    font-size:22px;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    line-height:1.1;
+  }
+  #lf-collections .film-hero .film-by{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color: rgba(255,255,255,0.78);
+    font-weight:850;
+    font-size:13px;
+  }
+  #lf-collections .film-hero .by-ava{
+    width:28px;
+    height:28px;
+    border-radius:999px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  #lf-collections .film-hero .by-ava img{ width:100%; height:100%; object-fit:cover; display:block; }
+  #lf-collections .film-hero .by-name{ display:flex; align-items:center; gap:6px; }
+  #lf-collections .film-hero .by-name a{ color:#fff; text-decoration:none; }
+  #lf-collections .film-hero .by-name a:hover{ text-decoration:underline; }
+  #lf-collections .film-hero .film-desc{
+    color: rgba(255,255,255,0.72);
+    font-size:13px;
+    line-height:1.55;
+    margin:0;
+    display:-webkit-box;
+    -webkit-line-clamp:6;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  #lf-collections .film-hero .film-desc.open{ -webkit-line-clamp:unset; }
+  #lf-collections .film-hero .film-more{
+    display:none;
+    align-self:flex-start;
+    height:34px;
+    padding:0 12px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+    cursor:pointer;
+    font-weight:900;
+    font-size:12px;
+    gap:8px;
+    align-items:center;
+  }
+  #lf-collections .film-hero .film-more:hover{
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.22);
+  }
+  #lf-collections .film-hero .film-more svg{
+    width:18px;
+    height:18px;
+    transition: transform .18s ease;
+  }
+
+  @media(max-width:1180px){ #lf-collections .pick-list.wide{ grid-template-columns: repeat(3, 1fr); } }
+  @media(max-width:820px){ #lf-collections .pick-list.wide{ grid-template-columns: repeat(2, 1fr); } }
+  @media(max-width:980px){
+    #lf-collections .col-grid{ grid-template-columns: repeat(2, 1fr); }
+    #lf-collections .film-hero .film-wrap{ grid-template-columns:1fr; }
+    #lf-collections .film-hero .film-side{ border-left:0; border-top:1px solid rgba(255,255,255,0.10); }
+    #lf-collections .film-hero .film-media{ min-height:240px; }
+  }
 </style>
 
 <div id="lf-collections">
@@ -564,6 +1208,144 @@
     </div>
   </div>
 
+  <div class="col-backdrop" id="cb">
+    <button class="col-close" id="cclose">✕</button>
+    <div class="col-modal" onclick="event.stopPropagation()">
+      <div class="col-header">
+        <div class="col-toprow">
+          <div class="col-h-left">
+            <div class="col-h-title" id="ctitle">Collection</div>
+            <div class="col-h-desc" id="cdesc"></div>
+            <div class="col-h-meta" id="cmeta"></div>
+          </div>
+          <div class="col-h-actions">
+            <button class="btn-ghost" id="btn-col-edit" style="display:none;">Edit</button>
+            <button class="btn-primary" id="btn-scene-new" style="display:none;">+ Scene</button>
+            <button class="btn-ghost" id="btn-col-reorder" style="display:none;">Reorder</button>
+            <button class="btn-danger" id="btn-col-delete" style="display:none;">Delete</button>
+          </div>
+        </div>
+        <div class="col-film" id="colFilm" style="display:none;"></div>
+      </div>
+      <div class="col-body">
+        <div class="col-scenes" id="cScenes"></div>
+        <div class="reorder-footer" id="colReorderFooter">
+          <div class="muted">Reorder mode is active</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-primary" id="btn-col-reorder-save">Save order</button>
+            <button class="btn-ghost" id="btn-col-reorder-cancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mv-backdrop" id="mvb">
+    <div class="mv" onclick="event.stopPropagation()">
+      <button class="mv-close" id="mvClose">✕</button>
+      <div class="mv-stage" id="mvStage">
+        <button class="mv-nav prev" id="mvPrev">‹</button>
+        <button class="mv-nav next" id="mvNext">›</button>
+        <div id="mvMediaHost" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
+      </div>
+      <div class="mv-bar">
+        <div class="mv-title" id="mvTitle">—</div>
+        <div class="mv-dots" id="mvDots"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="kb">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-head">
+        <div class="sheet-title" id="ktitle">Edit collection</div>
+        <button class="sheet-close" id="kclose">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="field">
+          <label>Title</label>
+          <input id="kname" maxlength="80" placeholder="Untitled collection" />
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea id="kdesc" placeholder="Short description…"></textarea>
+        </div>
+        <div class="sheet-actions">
+          <button class="btn-primary" id="ksave">Save collection</button>
+          <button class="btn-ghost" id="kcancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="pickB">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-head">
+        <div class="sheet-title" id="pickTitle">Pick</div>
+        <button class="sheet-close" id="pickClose">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="pickbar">
+          <div class="search" id="pickSearchWrap">
+            <span style="opacity:.75;font-weight:900;">Search</span>
+            <input id="pickSearch" placeholder="Search…" />
+          </div>
+          <div class="muted" id="pickHint"></div>
+          <div class="pick-filters" id="pickFilters" style="display:none;">
+            <button class="pick-filter on" data-type="all">All</button>
+            <button class="pick-filter" data-type="image">Image</button>
+            <button class="pick-filter" data-type="video">Video</button>
+          </div>
+        </div>
+        <div id="pickList"></div>
+        <div class="sheet-actions">
+          <button class="btn-primary" id="pickOk">OK</button>
+          <button class="btn-ghost" id="pickCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="scB">
+    <div class="sheet" onclick="event.stopPropagation()" style="max-width:640px;height:auto;max-height:80vh;">
+      <div class="sheet-head">
+        <div class="sheet-title" id="scTitle">New scene</div>
+        <button class="sheet-close" id="scClose">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="field">
+          <label>Scene title</label>
+          <input id="scName" maxlength="80" placeholder="Scene 1" />
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea id="scDesc" placeholder="Short description…"></textarea>
+        </div>
+        <div class="sheet-actions">
+          <button class="btn-primary" id="scSave">Save</button>
+          <button class="btn-ghost" id="scCancel">Cancel</button>
+        </div>
+        <div class="status" id="scStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop" id="cfB">
+    <div class="sheet" onclick="event.stopPropagation()" style="max-width:520px;height:auto;">
+      <div class="sheet-head">
+        <div class="sheet-title" id="cfTitle">Confirm</div>
+        <button class="sheet-close" id="cfClose">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="muted" id="cfText">—</div>
+        <div class="sheet-actions" style="justify-content:flex-end">
+          <button class="btn-ghost" id="cfCancel">Cancel</button>
+          <button class="btn-danger" id="cfOk">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="sheet-backdrop" id="emoB">
     <div class="sheet" onclick="event.stopPropagation()" style="max-width:560px;height:auto;max-height:80vh;">
       <div class="sheet-head">
@@ -591,10 +1373,10 @@
 
   const ICONS = {
     like: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.6-9.5-9C.6 8.6 2.6 5 6.5 5c2.1 0 3.6 1.2 4.5 2.4C11.9 6.2 13.4 5 15.5 5 19.4 5 21.4 8.6 21.5 12c-2.5 4.4-9.5 9-9.5 9z"/></svg>',
-    comm: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-    save: '<svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>',
+    comm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>',
     saveBtn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>',
-    view: '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>',
+    view: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7.5 11-7.5S23 12 23 12s-4 7.5-11 7.5S1 12 1 12z"/><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>',
     dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
     send: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.6"/></svg>',
     edit: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 20h9" stroke="currentColor" stroke-width="2"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="currentColor" stroke-width="2"/></svg>',
@@ -626,6 +1408,19 @@
   let followState = false;
   let myUserId = null;
   let followingIds = new Set();
+  let currentCol = null;
+  let colReorderMode = false;
+  let colOriginalOrderIds = [];
+  let editingSceneId = null;
+  let isCurrentColOwner = false;
+  let editingColId = null;
+  let libraryItems = [];
+  let myPublicProfile = null;
+  let pickSelectedId = null;
+  let pickSelectedSet = new Set();
+  let mvItems = [];
+  let mvIndex = 0;
+  let mvOnChange = null;
 
   // elements
   const $grid = document.getElementById("grid");
@@ -660,6 +1455,57 @@
   const $toast = document.getElementById("toast");
   const $mFollowers = document.getElementById("m-followers");
   const $vfyTip = document.getElementById("vfyTip");
+  const $cb = document.getElementById("cb");
+  const $cclose = document.getElementById("cclose");
+  const $ctitle = document.getElementById("ctitle");
+  const $cdesc = document.getElementById("cdesc");
+  const $cmeta = document.getElementById("cmeta");
+  const $cgrid = document.getElementById("cScenes");
+  const $colFilm = document.getElementById("colFilm");
+  const $btnColEdit = document.getElementById("btn-col-edit");
+  const $btnSceneNew = document.getElementById("btn-scene-new");
+  const $btnColReorder = document.getElementById("btn-col-reorder");
+  const $btnColDelete = document.getElementById("btn-col-delete");
+  const $colReorderFooter = document.getElementById("colReorderFooter");
+  const $btnColReorderSave = document.getElementById("btn-col-reorder-save");
+  const $btnColReorderCancel = document.getElementById("btn-col-reorder-cancel");
+  const $mvb = document.getElementById("mvb");
+  const $mvClose = document.getElementById("mvClose");
+  const $mvPrev = document.getElementById("mvPrev");
+  const $mvNext = document.getElementById("mvNext");
+  const $mvHost = document.getElementById("mvMediaHost");
+  const $mvTitle = document.getElementById("mvTitle");
+  const $mvDots = document.getElementById("mvDots");
+  const $kb = document.getElementById("kb");
+  const $kclose = document.getElementById("kclose");
+  const $ktitle = document.getElementById("ktitle");
+  const $kname = document.getElementById("kname");
+  const $kdesc = document.getElementById("kdesc");
+  const $ksave = document.getElementById("ksave");
+  const $kcancel = document.getElementById("kcancel");
+  const $pickB = document.getElementById("pickB");
+  const $pickTitle = document.getElementById("pickTitle");
+  const $pickClose = document.getElementById("pickClose");
+  const $pickOk = document.getElementById("pickOk");
+  const $pickCancel = document.getElementById("pickCancel");
+  const $pickList = document.getElementById("pickList");
+  const $pickSearch = document.getElementById("pickSearch");
+  const $pickHint = document.getElementById("pickHint");
+  const $pickFilters = document.getElementById("pickFilters");
+  const $scB = document.getElementById("scB");
+  const $scTitle = document.getElementById("scTitle");
+  const $scClose = document.getElementById("scClose");
+  const $scCancel = document.getElementById("scCancel");
+  const $scSave = document.getElementById("scSave");
+  const $scName = document.getElementById("scName");
+  const $scDesc = document.getElementById("scDesc");
+  const $scStatus = document.getElementById("scStatus");
+  const $cfB = document.getElementById("cfB");
+  const $cfTitle = document.getElementById("cfTitle");
+  const $cfText = document.getElementById("cfText");
+  const $cfClose = document.getElementById("cfClose");
+  const $cfCancel = document.getElementById("cfCancel");
+  const $cfOk = document.getElementById("cfOk");
   const $emoB = document.getElementById("emoB");
   const $emoClose = document.getElementById("emoClose");
   const $emoSearch = document.getElementById("emoSearch");
@@ -1172,12 +2018,66 @@
   }
 
   function renderCollections(){
-    if(!items.length){ $grid.innerHTML = `<div class="lf-empty">No collections yet.</div>`; return; }
-    $grid.className='';
-    $grid.innerHTML = `<div class="cgrid" id="cgridRoot">${items.map(c=>{ const prev=Array.isArray(c.preview_items)?c.preview_items:[]; const media=prev.map(x=>(x.thumb_url||x.media_url||'').trim()).filter(Boolean).slice(0,10); return `<div class="ccard" data-col="${escapeHtml(c.id)}"><div class="cc-bg" data-ccbg="${escapeHtml(c.id)}">${media.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>` : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join('')}</div><div class="cc-glass"><div><div class="cc-title">${escapeHtml(c.title||'Untitled collection')}</div><div class="cc-desc">${escapeHtml(c.description||'')}</div></div><div class="cc-meta"><div class="cc-pill" data-clike="${escapeHtml(c.id)}">${ICONS.like} <b>${c.like_count||0}</b></div><div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div><div class="cc-pill ${c._saved ? 'mini on save' : ''}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div></div></div></div>`; }).join('')}</div>`;
-    $grid.querySelectorAll('[data-col]').forEach(el=> el.onclick=()=> openCollectionModal(el.getAttribute('data-col')));
-    $grid.querySelectorAll('[data-clike]').forEach(el=> el.onclick=async(e)=>{ e.stopPropagation(); const id=el.getAttribute('data-clike'); const col=items.find(x=>String(x.id)===String(id)); if(!col) return; const t=await requireLoginOrWarn(); if(!t) return; const ep=col._liked?'/api/collections/unlike':'/api/collections/like'; await api(ep,{method:'POST',body:JSON.stringify({collection_id:id})}); col._liked=!col._liked; renderCollections(); startCollectionsSlideshows(); });
-    $grid.querySelectorAll('[data-csave]').forEach(el=> el.onclick=async(e)=>{ e.stopPropagation(); const id=el.getAttribute('data-csave'); const col=items.find(x=>String(x.id)===String(id)); if(!col) return; const t=await requireLoginOrWarn(); if(!t) return; const ep=col._saved?'/api/collections/unsave':'/api/collections/save'; await api(ep,{method:'POST',body:JSON.stringify({collection_id:id})}); col._saved=!col._saved; renderCollections(); startCollectionsSlideshows(); });
+    if(!items.length){
+      $grid.innerHTML = `<div class="lf-empty">No collections yet.</div>`;
+      return;
+    }
+    $grid.className = "";
+    $grid.innerHTML = `<div class="cgrid" id="cgridRoot">${items.map(c=>{
+      const prev = Array.isArray(c.preview_items) ? c.preview_items : [];
+      const media = prev.map(x => (x.thumb_url || x.media_url || "").trim()).filter(Boolean).slice(0, 10);
+      return `<div class="ccard" data-col="${escapeHtml(c.id)}"><div class="cc-bg" data-ccbg="${escapeHtml(c.id)}">${media.map((u,i)=> isVideoUrl(u) ? `<video muted playsinline preload="metadata" src="${escapeHtml(u)}" class="${i===0?'on':''}"></video>` : `<img src="${escapeHtml(u)}" class="${i===0?'on':''}" />`).join("")}</div><div class="cc-glass"><div><div class="cc-title">${escapeHtml(c.title||"Untitled collection")}</div><div class="cc-desc">${escapeHtml(c.description||"")}</div></div><div class="cc-meta"><div class="cc-pill" data-clike="${escapeHtml(c.id)}">${ICONS.like} <b>${c.like_count||0}</b></div><div class="cc-pill">${ICONS.view} <b>${c.view_count||0}</b></div><div class="cc-pill ${c._saved ? "mini on save" : ""}" data-csave="${escapeHtml(c.id)}">${ICONS.save} <b>${c.save_count||0}</b></div></div></div></div>`;
+    }).join("")}</div>`;
+
+    $grid.querySelectorAll("[data-col]").forEach(el=>{
+      el.onclick = ()=> openCollectionModal(el.getAttribute("data-col"));
+    });
+    $grid.querySelectorAll("[data-clike]").forEach(el=>{
+      el.onclick = async (e)=>{
+        e.stopPropagation();
+        const id = el.getAttribute("data-clike");
+        const col = items.find(x=> String(x.id)===String(id));
+        if(!col) return;
+        try{
+          await requireToken();
+          const ep = col._liked ? "/api/collections/unlike" : "/api/collections/like";
+          const j = await api(ep, { method:"POST", body: JSON.stringify({ collection_id:id }) });
+          col._liked = !col._liked;
+          if(j?.counts){
+            col.like_count = j.counts.like_count;
+            col.save_count = j.counts.save_count;
+            col.view_count = j.counts.view_count;
+          }
+          renderCollections();
+          startCollectionsSlideshows();
+        }catch(err){
+          toast(err.message || "Failed");
+        }
+      };
+    });
+    $grid.querySelectorAll("[data-csave]").forEach(el=>{
+      el.onclick = async (e)=>{
+        e.stopPropagation();
+        const id = el.getAttribute("data-csave");
+        const col = items.find(x=> String(x.id)===String(id));
+        if(!col) return;
+        try{
+          await requireToken();
+          const ep = col._saved ? "/api/collections/unsave" : "/api/collections/save";
+          const j = await api(ep, { method:"POST", body: JSON.stringify({ collection_id:id }) });
+          col._saved = !col._saved;
+          if(j?.counts){
+            col.like_count = j.counts.like_count;
+            col.save_count = j.counts.save_count;
+            col.view_count = j.counts.view_count;
+          }
+          renderCollections();
+          startCollectionsSlideshows();
+        }catch(err){
+          toast(err.message || "Failed");
+        }
+      };
+    });
   }
 
   function startCollectionsSlideshows(){
@@ -1185,7 +2085,753 @@
   }
 
   async function openCollectionModal(collection_id){
-    window.location.href = `/artist?collection=${encodeURIComponent(collection_id)}`;
+    currentCol = null;
+    colReorderMode = false;
+    isCurrentColOwner = false;
+    if(!$cb || !$cgrid) return;
+
+    $cb.classList.add("open");
+    lockPageScroll();
+    $ctitle.textContent = "Loading…";
+    $cdesc.textContent = "";
+    $cmeta.innerHTML = "";
+    $cgrid.innerHTML = `<div class="empty" style="grid-column:1/-1">Loading…</div>`;
+    if($colFilm){ $colFilm.style.display = "none"; $colFilm.innerHTML = ""; }
+    if($btnColEdit) $btnColEdit.style.display = "none";
+    if($btnSceneNew) $btnSceneNew.style.display = "none";
+    if($btnColReorder) $btnColReorder.style.display = "none";
+    if($btnColDelete) $btnColDelete.style.display = "none";
+    if($colReorderFooter) $colReorderFooter.classList.remove("open");
+    colOriginalOrderIds = [];
+    if($btnColReorder) $btnColReorder.textContent = "Reorder";
+
+    try{
+      const j = await api(`/api/collections/get?id=${encodeURIComponent(collection_id)}`, { method:"GET" });
+      const col = j.collection || {};
+      const colItems = Array.isArray(j.items) ? j.items : [];
+      const sections = Array.isArray(j.sections) ? j.sections : [];
+      if(!myUserId) myUserId = await getMyUserId();
+      currentCol = { col, items: colItems, sections };
+      isCurrentColOwner = canManageCollection(col);
+
+      $ctitle.textContent = col.title || "Untitled collection";
+      $cdesc.textContent = col.description || "";
+      renderCollectionMeta(col);
+
+      if(isCurrentColOwner){
+        if($btnColEdit) $btnColEdit.style.display = "inline-flex";
+        if($btnSceneNew) $btnSceneNew.style.display = "inline-flex";
+        if($btnColReorder) $btnColReorder.style.display = "inline-flex";
+        if($btnColDelete) $btnColDelete.style.display = "inline-flex";
+      }
+
+      renderCollectionFilmBlock(j.film || null);
+      renderCollectionModalGrid();
+
+      const client_id = (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+      api("/api/collections/view", {
+        method:"POST",
+        body: JSON.stringify({ collection_id: col.id, client_id })
+      }).then((v)=>{
+        if(v?.counts){
+          col.like_count = v.counts.like_count;
+          col.save_count = v.counts.save_count;
+          col.view_count = v.counts.view_count;
+          if(currentCol && String(currentCol.col.id) === String(col.id)){
+            currentCol.col = Object.assign({}, currentCol.col, v.counts);
+          }
+          patchCollectionInItems(col.id, v.counts);
+          renderCollectionMeta(col);
+          if(mainTab==="collections" || (mainTab==="saved" && savedType==="collection")){
+            renderCollections();
+            startCollectionsSlideshows();
+          }
+        }
+      }).catch(()=>{});
+    }catch(e){
+      $cgrid.innerHTML = `<div class="empty" style="grid-column:1/-1;color:#ff98a2;border-color:rgba(255,70,90,0.3)">Error: ${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+  function renderCollectionMeta(col){
+    if(!$cmeta) return;
+    $cmeta.innerHTML = `<div class="stat">${ICONS.like} ${col?.like_count||0}</div><div class="stat">${ICONS.view} ${col?.view_count||0}</div><div class="stat">${ICONS.save} ${col?.save_count||0}</div>`;
+  }
+
+  function patchCollectionInItems(collectionId, counts){
+    if(!counts) return;
+    const idx = items.findIndex(x=> String(x.id) === String(collectionId));
+    if(idx < 0) return;
+    items[idx] = Object.assign({}, items[idx], counts);
+  }
+
+  function canManageCollection(col){
+    if(!col) return false;
+    if(col.is_owner === true || col.owned_by_me === true) return true;
+    return !!(myUserId && col.user_id && String(myUserId) === String(col.user_id));
+  }
+
+  function renderCollectionFilmBlock(film){
+    if(!$colFilm) return;
+    const col = currentCol?.col || {};
+
+    if(!isCurrentColOwner && film && film.status !== "approved"){
+      $colFilm.style.display = "none";
+      $colFilm.innerHTML = "";
+      return;
+    }
+
+    if(film && film.status === "approved" && film.published_url){
+      $colFilm.style.display = "block";
+
+      const t = (film.title || "Film").trim();
+      const d = (film.description || "").trim();
+
+      const byUsername = (col.username || "").trim();
+      const byDisplay = (col.display_name || byUsername || "Author").trim();
+      const byVerified = (col.verified === true);
+      const byLink = byUsername ? `/artist?username=${encodeURIComponent(byUsername)}` : "#";
+
+      let byAvaHTML = `<div class="by-ava"></div>`;
+      if(col.avatar_type === "emoji" && col.avatar_emoji){
+        byAvaHTML = `<div class="by-ava emoji" style="font-size:16px;"><span>${escapeHtml(col.avatar_emoji)}</span></div>`;
+      } else if(col.avatar_url){
+        byAvaHTML = `<div class="by-ava"><img src="${escapeHtml(col.avatar_url)}" alt=""></div>`;
+      }
+
+      $colFilm.innerHTML = `<div class="film-hero"><div class="film-wrap"><div class="film-media"><video controls playsinline preload="metadata" crossorigin="anonymous"><source src="${escapeHtml(film.published_url)}"></video></div><div class="film-side"><h3 class="film-title">${escapeHtml(t)}</h3><div class="film-by">${byAvaHTML}<div class="by-name"><span style="opacity:.7;">Video by:</span><a href="${byLink}">${escapeHtml(byDisplay)}</a>${byVerified ? `<span class="vfy" data-tip="verified">${VERIFIED_SVG}</span>` : ``}</div></div>${d ? `<div class="film-desc" id="filmDesc">${escapeHtml(d)}</div>` : `<div class="muted">No description.</div>`}<button class="film-more" id="filmMore" type="button" aria-label="Toggle description"><span>Read more</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div></div>`;
+
+      bindVerifiedTooltip($colFilm);
+
+      const descEl = document.getElementById("filmDesc");
+      const moreEl = document.getElementById("filmMore");
+      if(descEl && moreEl){
+        requestAnimationFrame(()=>{
+          const isOverflow = descEl.scrollHeight > (descEl.clientHeight + 2);
+          moreEl.style.display = isOverflow ? "inline-flex" : "none";
+        });
+        moreEl.onclick = ()=>{
+          const on = descEl.classList.toggle("open");
+          const label = moreEl.querySelector("span");
+          const icon = moreEl.querySelector("svg");
+          if(label) label.textContent = on ? "Hide" : "Read more";
+          if(icon) icon.style.transform = on ? "rotate(180deg)" : "rotate(0deg)";
+        };
+      }
+
+      return;
+    }
+
+    if(isCurrentColOwner && film && film.status === "pending"){
+      $colFilm.style.display = "block";
+      $colFilm.innerHTML = `<div class="col-film"><h3 style="margin:0;">Film submission</h3><p style="margin-top:8px;"><span class="pill">Pending review</span></p><p>We’ll review it within 1–2 days.</p></div>`;
+      return;
+    }
+
+    if(!isCurrentColOwner){
+      $colFilm.style.display = "none";
+      $colFilm.innerHTML = "";
+      return;
+    }
+
+    $colFilm.style.display = "none";
+    $colFilm.innerHTML = "";
+  }
+
+  function renderCollectionModalGrid(){
+    if(!currentCol || !$cgrid) return;
+    const colItems = currentCol.items || [];
+    const sections = Array.isArray(currentCol.sections) ? currentCol.sections : [];
+    if(!colItems.length && !sections.length){
+      $cgrid.innerHTML = `<div class="empty" style="grid-column:1/-1">Empty collection.</div>`;
+      return;
+    }
+
+    const normalizedSections = sections.map(sc=>({
+      id: sc.id == null ? null : String(sc.id),
+      title: sc.title || "Scene",
+      description: sc.description || ""
+    }));
+    const scenes = normalizedSections.map(sc=>({
+      id: sc.id,
+      title: sc.title,
+      description: sc.description,
+      items: colItems.filter(it => String(it.section_id || "") === String(sc.id || ""))
+    }));
+
+    $cgrid.innerHTML = scenes.map((scene, sceneIdx)=>{
+      const grid = scene.items.map((it, idx)=>{
+        const url = (it.media_url || it.thumb_url || "").trim();
+        const isV = isVideoUrl(url);
+        const thumb = (it.thumb_url || it.media_url || "").trim();
+        return `<div class="col-item" draggable="${(colReorderMode && !sections.length) ? "true" : "false"}" data-idx="${idx}" data-scene="${sceneIdx}">${isV ? `<video muted playsinline preload="metadata" src="${escapeHtml(url)}"></video>` : `<img src="${escapeHtml(thumb)}" loading="lazy" decoding="async" />`}${colReorderMode ? `<div class="drag-handle" title="Drag"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>` : ``}</div>`;
+      }).join("");
+      return `<div class="scene" data-scene="${sceneIdx}"><div class="scene-head"><div><div class="scene-title">${escapeHtml(scene.title || "Scene")}</div>${scene.description ? `<div class="scene-desc">${escapeHtml(scene.description)}</div>` : ``}</div>${isCurrentColOwner ? `<div class="scene-actions"><button class="btn-ghost" data-sc-add="${escapeHtml(String(scene.id ?? ""))}">+ Add</button>${scene.id ? `<button class="btn-ghost" data-sc-edit="${escapeHtml(scene.id)}">Edit</button>` : ``}${scene.id ? `<button class="btn-ghost" data-sc-media="${escapeHtml(scene.id)}">Manage</button>` : ``}${scene.id ? `<button class="btn-danger" data-sc-del="${escapeHtml(scene.id)}">Delete</button>` : ``}</div>` : ``}</div><div class="scene-grid">${grid || `<div class="empty" style="grid-column:1/-1">No items.</div>`}</div></div>`;
+    }).join("");
+
+    $cgrid.querySelectorAll(".col-item").forEach(el=>{
+      el.onclick = ()=>{
+        if(colReorderMode) return;
+        const sceneIndex = Number(el.getAttribute("data-scene") || "0");
+        const idx = Number(el.getAttribute("data-idx") || "0");
+        const scene = scenes[sceneIndex] || { items: [] };
+        const viewerItems = scene.items.map(m=>{
+          const url = (m.media_url || m.thumb_url || "").trim();
+          return { title: m.title || "Untitled", url, thumb: (m.thumb_url || m.media_url || "").trim(), isVideo: isVideoUrl(url) };
+        });
+        openMediaViewer(viewerItems, idx, null);
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-edit]").forEach(btn=>{
+      btn.onclick = ()=>{
+        const id = btn.getAttribute("data-sc-edit");
+        const sc = (currentCol.sections || []).find(x=> String(x.id) === String(id));
+        if(sc) openSceneSheet("edit", sc);
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-media]").forEach(btn=>{
+      btn.onclick = async ()=>{
+        try{
+          await requireToken();
+          if(!currentCol) return;
+          const sid = btn.getAttribute("data-sc-media");
+          if(!sid) return;
+          await ensureLibraryLoadedForPicker();
+
+          const src = new Map();
+          libraryItems.slice(0, 600).forEach(it=>{
+            src.set(String(it.id), {
+              id: it.id,
+              title: it.title || "Untitled",
+              description: "",
+              thumb: (it.thumb_url || it.media_url || ""),
+              type: it.file_type || "",
+              media_url: it.media_url || ""
+            });
+          });
+          for(const it of (currentCol.items || [])){
+            const id = String(it.id);
+            if(src.has(id)) continue;
+            src.set(id, {
+              id: it.id,
+              title: it.title || "Untitled",
+              description: "",
+              thumb: (it.thumb_url || it.media_url || ""),
+              type: it.file_type || "",
+              media_url: it.media_url || ""
+            });
+          }
+
+          const sceneItems = (currentCol.items || []).filter(x=> String(x.section_id || "") === String(sid));
+          const preselected = sceneItems.map(x=> String(x.id));
+          const picked = await openPicker("scene_media", {
+            title: "Scene media",
+            hint: "Select what should stay in this scene. Unselect to remove from scene.",
+            items: Array.from(src.values()),
+            multi: true,
+            layout: "wide",
+            preselected
+          });
+          if(!Array.isArray(picked)) return;
+
+          const newSet = new Set(picked.map(String));
+          const oldSet = new Set(preselected.map(String));
+          const toAdd = [...newSet].filter(id=> !oldSet.has(id));
+          const toRemove = [...oldSet].filter(id=> !newSet.has(id));
+
+          for(const fp of toAdd){
+            await api("/api/collections/items/move", {
+              method:"POST",
+              body: JSON.stringify({ collection_id: currentCol.col.id, feed_post_id: fp, to_section_id: sid, to_index: 9999 })
+            });
+          }
+          for(const fp of toRemove){
+            await api("/api/collections/items/move", {
+              method:"POST",
+              body: JSON.stringify({ collection_id: currentCol.col.id, feed_post_id: fp, to_section_id: null, to_index: 9999 })
+            });
+          }
+
+          const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+          currentCol.sections = j.sections || [];
+          currentCol.items = j.items || [];
+          renderCollectionModalGrid();
+          toast("Scene updated");
+        }catch(err){
+          toast(err.message || "Failed");
+        }
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-add]").forEach(btn=>{
+      btn.onclick = async ()=>{
+        try{
+          await requireToken();
+          if(!currentCol) return;
+          const sidRaw = btn.getAttribute("data-sc-add");
+          const section_id = sidRaw ? String(sidRaw).trim() : null;
+          await ensureLibraryLoadedForPicker();
+          const pickerItems = libraryItems.slice(0, 400).map(it=>({
+            id: it.id,
+            title: it.title || "Untitled",
+            description: "",
+            thumb: (it.thumb_url || it.media_url || ""),
+            type: it.file_type || "",
+            media_url: it.media_url || ""
+          }));
+          const picked = await openPicker("library", {
+            title: "Add to scene",
+            hint: "Select items (multi-select).",
+            items: pickerItems,
+            multi: true,
+            layout: "wide",
+            preselected: []
+          });
+          if(!Array.isArray(picked) || !picked.length) return;
+          for(const fp of picked){
+            await api("/api/collections/items/move", {
+              method:"POST",
+              body: JSON.stringify({ collection_id: currentCol.col.id, feed_post_id: fp, to_section_id: section_id || null, to_index: 9999 })
+            });
+          }
+          const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+          currentCol.sections = j.sections || [];
+          currentCol.items = j.items || [];
+          renderCollectionModalGrid();
+          toast("Added");
+        }catch(err){
+          toast(err.message || "Failed");
+        }
+      };
+    });
+
+    $cgrid.querySelectorAll("[data-sc-del]").forEach(btn=>{
+      btn.onclick = async ()=>{
+        const id = btn.getAttribute("data-sc-del");
+        const ok = await confirmUI("Delete scene", "Scene will be removed. Items will return to Default.", "Delete", true);
+        if(!ok) return;
+        try{
+          await requireToken();
+          await api("/api/collections/sections/delete", { method:"POST", body: JSON.stringify({ section_id:id }) });
+          const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+          currentCol.sections = j.sections || [];
+          currentCol.items = j.items || [];
+          renderCollectionModalGrid();
+          toast("Deleted");
+        }catch(err){
+          toast(err.message || "Failed");
+        }
+      };
+    });
+
+    if($colReorderFooter) $colReorderFooter.classList.toggle("open", !!colReorderMode);
+    if($btnColReorder) $btnColReorder.textContent = colReorderMode ? "Exit" : "Reorder";
+    if(colReorderMode) bindDnD(scenes);
+  }
+
+  function bindDnD(scenes){
+    const sceneNodes = Array.from($cgrid.querySelectorAll(".scene"));
+    sceneNodes.forEach(scEl=>{
+      const sceneIdx = Number(scEl.getAttribute("data-scene"));
+      const sc = scenes?.[sceneIdx];
+      const canDragScene = !!(sc && sc.id);
+      scEl.setAttribute("draggable", canDragScene ? "true" : "false");
+      scEl.addEventListener("dragstart", (ev)=>{
+        if(!canDragScene) return ev.preventDefault();
+        scEl.classList.add("dragging");
+        ev.dataTransfer.effectAllowed = "move";
+        scEl.dataset.dragFrom = String(sceneIdx);
+      });
+      scEl.addEventListener("dragend", ()=>{
+        scEl.classList.remove("dragging");
+        delete scEl.dataset.dragFrom;
+      });
+      scEl.addEventListener("dragover", (ev)=>{
+        if(!canDragScene) return;
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+      });
+      scEl.addEventListener("drop", (ev)=>{
+        ev.preventDefault();
+        const fromIdx = Number(document.querySelector(".scene.dragging")?.dataset.dragFrom);
+        const toIdx = Number(scEl.getAttribute("data-scene"));
+        if(Number.isNaN(fromIdx) || Number.isNaN(toIdx) || fromIdx === toIdx) return;
+        const fromScene = scenes[fromIdx];
+        const toScene = scenes[toIdx];
+        if(!fromScene?.id || !toScene?.id) return;
+        const order = scenes.filter(x=>x.id).map(x=>String(x.id));
+        const moved = order.splice(order.indexOf(String(fromScene.id)), 1)[0];
+        order.splice(order.indexOf(String(toScene.id)), 0, moved);
+        const byId = new Map((currentCol.sections || []).map(s=> [String(s.id), s]));
+        currentCol.sections = order.map(id=> byId.get(id)).filter(Boolean);
+        renderCollectionModalGrid();
+      });
+    });
+
+    const itemNodes = Array.from($cgrid.querySelectorAll(".col-item"));
+    itemNodes.forEach(el=>{
+      const sceneIndex = Number(el.getAttribute("data-scene") || "0");
+      el.setAttribute("draggable", "true");
+      el.addEventListener("dragstart", (ev)=>{
+        el.classList.add("dragging");
+        el.dataset.dragFromIdx = el.getAttribute("data-idx");
+        el.dataset.dragFromScene = String(sceneIndex);
+        ev.dataTransfer.effectAllowed = "move";
+      });
+      el.addEventListener("dragend", ()=>{
+        el.classList.remove("dragging");
+        delete el.dataset.dragFromIdx;
+        delete el.dataset.dragFromScene;
+      });
+      el.addEventListener("dragover", (ev)=>{
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+      });
+      el.addEventListener("drop", (ev)=>{
+        ev.preventDefault();
+        const fromScene = Number(document.querySelector(".col-item.dragging")?.dataset.dragFromScene);
+        const fromIdx = Number(document.querySelector(".col-item.dragging")?.dataset.dragFromIdx);
+        const toScene = Number(el.getAttribute("data-scene"));
+        const toIdx = Number(el.getAttribute("data-idx"));
+        if([fromScene, fromIdx, toScene, toIdx].some(Number.isNaN)) return;
+        if(fromScene !== toScene) return;
+        const sc = scenes[fromScene];
+        if(!sc) return;
+        const sectionId = sc.id ? String(sc.id) : "";
+        const inScene = (currentCol.items || []).filter(x=> String(x.section_id || "") === sectionId);
+        const others = (currentCol.items || []).filter(x=> String(x.section_id || "") !== sectionId);
+        const [moved] = inScene.splice(fromIdx, 1);
+        inScene.splice(toIdx, 0, moved);
+        currentCol.items = others.concat(inScene);
+        renderCollectionModalGrid();
+      });
+    });
+  }
+
+  async function saveCollectionOrder(){
+    if(!currentCol) return;
+    await requireToken();
+    const secs = Array.isArray(currentCol.sections) ? currentCol.sections : [];
+    if(secs.length){
+      const ordered_section_ids = secs.map(s=> s.id);
+      try{
+        await api("/api/collections/sections/reorder", {
+          method:"POST",
+          body: JSON.stringify({ collection_id: currentCol.col.id, ordered_section_ids })
+        });
+      }catch(e){}
+    }
+    const ordered = (currentCol.items || []).map(x=> x.id);
+    await api("/api/collections/reorder", {
+      method:"POST",
+      body: JSON.stringify({ id: currentCol.col.id, ordered_feed_post_ids: ordered })
+    });
+  }
+
+  function closeCollectionModal(){
+    if($cb) $cb.classList.remove("open");
+    unlockPageScroll();
+    currentCol = null;
+    colReorderMode = false;
+    isCurrentColOwner = false;
+    colOriginalOrderIds = [];
+    if($colReorderFooter) $colReorderFooter.classList.remove("open");
+    if($btnColReorder) $btnColReorder.textContent = "Reorder";
+  }
+
+  function openMediaViewer(viewItems, startIndex=0, onChange=null){
+    mvItems = Array.isArray(viewItems) ? viewItems : [];
+    if(!mvItems.length) return;
+    mvIndex = Math.max(0, Math.min(startIndex, mvItems.length - 1));
+    mvOnChange = (typeof onChange === "function") ? onChange : null;
+    if($modal) $modal.classList.remove("open");
+    if($mvb) $mvb.classList.add("open");
+    renderMediaViewer();
+  }
+
+  function closeMediaViewer(){
+    if($mvb) $mvb.classList.remove("open");
+    if($mvHost) $mvHost.innerHTML = "";
+    if($mvDots) $mvDots.innerHTML = "";
+    mvItems = [];
+    mvIndex = 0;
+    mvOnChange = null;
+  }
+
+  function renderMediaViewer(){
+    const item = mvItems[mvIndex];
+    if(!item || !$mvHost) return;
+    if($mvTitle) $mvTitle.textContent = (item.title || "—") + `  •  ${mvIndex+1}/${mvItems.length}`;
+    $mvHost.innerHTML = "";
+    if(item.isVideo){
+      const v = document.createElement("video");
+      v.src = item.url;
+      v.controls = true;
+      v.playsInline = true;
+      v.autoplay = true;
+      v.className = "mv-media";
+      $mvHost.appendChild(v);
+    }else{
+      const img = document.createElement("img");
+      img.src = item.url || item.thumb;
+      img.className = "mv-media";
+      $mvHost.appendChild(img);
+    }
+    if($mvDots){
+      $mvDots.innerHTML = mvItems.map((_,i)=> `<button class="${i===mvIndex?'on':''}" data-mvdot="${i}"></button>`).join("");
+      $mvDots.querySelectorAll("[data-mvdot]").forEach(b=>{
+        b.onclick = ()=> setMediaIndex(Number(b.getAttribute("data-mvdot")));
+      });
+    }
+    if($mvPrev) $mvPrev.style.display = mvItems.length > 1 ? "flex" : "none";
+    if($mvNext) $mvNext.style.display = mvItems.length > 1 ? "flex" : "none";
+  }
+
+  function setMediaIndex(i){
+    if(!mvItems.length) return;
+    mvIndex = (i + mvItems.length) % mvItems.length;
+    renderMediaViewer();
+    if(mvOnChange) mvOnChange(mvIndex);
+  }
+
+  function bindViewerSwipe(){
+    if(!$mvHost || $mvHost.dataset.swipeBound === "1") return;
+    $mvHost.dataset.swipeBound = "1";
+    let startX = null;
+    $mvHost.addEventListener("touchstart", (e)=>{ startX = e.touches[0].clientX; }, { passive:true });
+    $mvHost.addEventListener("touchend", (e)=>{
+      if(startX == null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      startX = null;
+      if(Math.abs(dx) < 40) return;
+      if(dx < 0) setMediaIndex(mvIndex + 1);
+      else setMediaIndex(mvIndex - 1);
+    }, { passive:true });
+  }
+
+  async function getMyPublicProfile(){
+    if(myPublicProfile) return myPublicProfile;
+    const token = await requireToken();
+    const r = await fetch(BACKEND + "/api/profile_public", { method:"GET", headers:{ Authorization:"Bearer " + token } });
+    const j = await r.json().catch(()=> ({}));
+    if(!r.ok) throw new Error(j?.error || j?.details || ("HTTP " + r.status));
+    myPublicProfile = j?.profile || null;
+    return myPublicProfile;
+  }
+
+  async function ensureLibraryLoadedForPicker(){
+    if(libraryItems.length) return;
+    const me = await getMyPublicProfile();
+    const uname = (me?.username || "").trim();
+    if(!uname) throw new Error("Profile username not found");
+
+    let nextOffset = 0;
+    let hasMore = true;
+    const seen = new Set();
+    while(hasMore && libraryItems.length < 600){
+      const j = await api(`/api/u/${encodeURIComponent(uname)}?limit=120&offset=${nextOffset}`, { method:"GET" });
+      const page = Array.isArray(j.works) ? j.works : [];
+      for(const it of page){
+        const key = String(it.id);
+        if(seen.has(key)) continue;
+        seen.add(key);
+        libraryItems.push(it);
+      }
+      const prevOffset = nextOffset;
+      nextOffset = (j.nextOffset != null) ? j.nextOffset : (nextOffset + page.length);
+      hasMore = !!j.hasMore && page.length > 0 && nextOffset !== prevOffset;
+      if(!page.length) break;
+    }
+  }
+
+  function openPicker(mode, data){
+    if(!$pickB || !$pickTitle || !$pickHint || !$pickSearch || !$pickList) return Promise.resolve(data.multi ? [] : null);
+    pickSelectedId = null;
+    pickSelectedSet = new Set();
+    $pickTitle.textContent = data.title || "Pick";
+    $pickHint.textContent = data.hint || "";
+    $pickSearch.value = "";
+    $pickList.innerHTML = `<div class="empty" style="padding:18px">Loading…</div>`;
+    $pickB.classList.add("open");
+
+    const layout = data.layout === "wide" ? "wide" : "list";
+    let filterType = "all";
+    const allowedKinds = Array.isArray(data.allowedKinds) ? data.allowedKinds : null;
+    if(allowedKinds && allowedKinds.length === 1) filterType = allowedKinds[0];
+    let visibleCount = layout === "wide" ? 48 : 200;
+    if(Array.isArray(data.preselected)) data.preselected.forEach(id=> pickSelectedSet.add(String(id)));
+
+    if($pickFilters){
+      const show = layout === "wide" && !allowedKinds && !data.hideTypeTabs;
+      $pickFilters.style.display = show ? "flex" : "none";
+      $pickFilters.querySelectorAll("[data-type]").forEach(btn=>{
+        btn.classList.toggle("on", btn.getAttribute("data-type") === "all");
+        btn.onclick = ()=>{
+          filterType = btn.getAttribute("data-type") || "all";
+          $pickFilters.querySelectorAll("[data-type]").forEach(x=> x.classList.toggle("on", x===btn));
+          visibleCount = layout === "wide" ? 48 : 200;
+          renderList($pickSearch.value);
+        };
+      });
+    }
+
+    function resolveKind(it){
+      const type = String(it.type || "").toLowerCase();
+      if(type.includes("video")) return "video";
+      const u = String(it.media_url || it.thumb || "").toLowerCase();
+      return /\.(mp4|mov|webm|m3u8)(\?|$)/.test(u) ? "video" : "image";
+    }
+
+    function renderList(filterText=""){
+      const q = (filterText || "").toLowerCase().trim();
+      const source = (data.items || []).filter(it=>{
+        const kind = resolveKind(it);
+        if(allowedKinds && !allowedKinds.includes(kind)) return false;
+        if(filterType !== "all" && kind !== filterType) return false;
+        if(!q) return true;
+        return String(it.title||"").toLowerCase().includes(q) || String(it.description||"").toLowerCase().includes(q);
+      });
+      const pageItems = source.slice(0, visibleCount);
+
+      $pickList.innerHTML = `<div class="pick-list ${layout === "wide" ? "wide" : ""}" id="pickListInner">${pageItems.map(it=>{
+        const pid = String(it.id);
+        const on = data.multi ? pickSelectedSet.has(pid) : (String(pickSelectedId) === pid);
+        const kind = resolveKind(it);
+        return `<div class="pick-row ${on ? "on" : ""} ${layout === "wide" ? "wide" : ""}" data-pid="${escapeHtml(pid)}"><div class="pick-thumb ${layout === "wide" ? "wide" : ""}">${it.thumb ? (isVideoUrl(it.thumb) ? `<video muted playsinline preload="metadata" src="${escapeHtml(it.thumb)}"></video>` : `<img src="${escapeHtml(it.thumb)}">`) : ""}</div><div class="pick-main ${layout === "wide" ? "wide" : ""}"><div class="pick-name">${escapeHtml(it.title||"Untitled")}</div><div class="pick-sub">${escapeHtml(it.description||"")}</div>${layout === "wide" ? `<div class="pick-sub" style="margin-top:6px;">${kind === "video" ? "Video" : "Image"}</div>` : ``}</div>${layout === "wide" ? `<div class="pick-check">${on ? "✓" : ""}</div>` : `<div style="font-weight:950;opacity:.9">${on ? "✓" : ""}</div>`}</div>`;
+      }).join("")}</div>`;
+
+      $pickList.querySelectorAll("[data-pid]").forEach(row=>{
+        row.onclick = ()=>{
+          const id = row.getAttribute("data-pid");
+          if(data.multi){
+            if(pickSelectedSet.has(id)) pickSelectedSet.delete(id);
+            else pickSelectedSet.add(id);
+            renderList($pickSearch.value);
+          }else{
+            pickSelectedId = id;
+            renderList($pickSearch.value);
+          }
+        };
+      });
+
+      const inner = document.getElementById("pickListInner");
+      if(layout === "wide" && inner){
+        inner.onscroll = ()=>{
+          if(visibleCount >= source.length) return;
+          const nearBottom = inner.scrollTop + inner.clientHeight >= inner.scrollHeight - 120;
+          if(!nearBottom) return;
+          visibleCount += 48;
+          renderList($pickSearch.value);
+        };
+      }
+    }
+
+    renderList("");
+    $pickSearch.oninput = ()=>{ visibleCount = layout === "wide" ? 48 : 200; renderList($pickSearch.value); };
+    return new Promise((resolve)=>{
+      if($pickOk) $pickOk.onclick = ()=>{ const result = data.multi ? Array.from(pickSelectedSet) : pickSelectedId; closePicker(); resolve(result); };
+      if($pickCancel) $pickCancel.onclick = ()=>{ closePicker(); resolve(data.multi ? [] : null); };
+      if($pickClose) $pickClose.onclick = ()=>{ closePicker(); resolve(data.multi ? [] : null); };
+      $pickB.onclick = (e)=>{ if(e.target === $pickB){ closePicker(); resolve(data.multi ? [] : null); } };
+    });
+  }
+
+  function closePicker(){
+    if(!$pickB) return;
+    $pickB.classList.remove("open");
+    if($pickFilters) $pickFilters.style.display = "none";
+    pickSelectedId = null;
+    pickSelectedSet = new Set();
+  }
+
+  async function openCollectionSheet(mode, col=null){
+    if(!$kb || !$kname || !$kdesc) return;
+    editingColId = null;
+    $ktitle.textContent = mode === "edit" ? "Edit collection" : "New collection";
+    $kname.value = col?.title || "";
+    $kdesc.value = col?.description || "";
+    if(mode === "edit" && col) editingColId = col.id;
+    $kb.classList.add("open");
+  }
+
+  function closeCollectionSheet(){
+    if(!$kb) return;
+    $kb.classList.remove("open");
+    editingColId = null;
+  }
+
+  async function saveCollectionDraft(){
+    try{
+      await requireToken();
+      const title = ($kname.value || "").trim();
+      const description = ($kdesc.value || "").trim();
+      if(editingColId){
+        await api("/api/collections/update", { method:"POST", body: JSON.stringify({ id: editingColId, title, description }) });
+        if(currentCol && String(currentCol.col.id) === String(editingColId)){
+          currentCol.col.title = title;
+          currentCol.col.description = description;
+          $ctitle.textContent = title || "Untitled collection";
+          $cdesc.textContent = description || "";
+        }
+        const idx = items.findIndex(x=> String(x.id) === String(editingColId));
+        if(idx >= 0) items[idx] = Object.assign({}, items[idx], { title, description });
+        if(mainTab === "collections" || (mainTab === "saved" && savedType === "collection")){
+          renderCollections();
+          startCollectionsSlideshows();
+        }
+      }else{
+        const j = await api("/api/collections/create", { method:"POST", body: JSON.stringify({ title, description, feed_post_ids: [], cover_feed_post_id: null }) });
+        const newColId = j?.id || j?.collection_id || j?.collection?.id;
+        if(mainTab === "collections" || (mainTab === "saved" && savedType === "collection")) await fetchPage(true);
+        if(newColId) await openCollectionModal(newColId);
+      }
+      closeCollectionSheet();
+      toast("Saved");
+    }catch(err){
+      toast(err.message || "Failed");
+    }
+  }
+
+  function scStatus(msg, type){
+    if(!$scStatus) return;
+    $scStatus.style.display = msg ? "block" : "none";
+    $scStatus.className = "status" + (type ? (" " + type) : "");
+    $scStatus.textContent = msg || "";
+  }
+
+  function openSceneSheet(mode, scene=null){
+    if(!$scB || !$scName || !$scDesc) return;
+    editingSceneId = scene ? scene.id : null;
+    $scTitle.textContent = mode === "edit" ? "Edit scene" : "New scene";
+    $scName.value = scene?.title || "";
+    $scDesc.value = scene?.description || "";
+    scStatus("", "");
+    $scB.classList.add("open");
+  }
+
+  function closeSceneSheet(){
+    if(!$scB) return;
+    $scB.classList.remove("open");
+    editingSceneId = null;
+  }
+
+  function confirmUI(title, text, okText="OK", danger=false){
+    if(!$cfB || !$cfTitle || !$cfText || !$cfOk) return Promise.resolve(confirm(text || title || "Confirm?"));
+    $cfTitle.textContent = title || "Confirm";
+    $cfText.textContent = text || "";
+    $cfOk.textContent = okText;
+    $cfOk.classList.remove("btn-danger", "btn-primary");
+    $cfOk.classList.add(danger ? "btn-danger" : "btn-primary");
+    $cfB.classList.add("open");
+    return new Promise((resolve)=>{
+      const done = (v)=>{ $cfB.classList.remove("open"); resolve(v); };
+      if($cfClose) $cfClose.onclick = ()=> done(false);
+      if($cfCancel) $cfCancel.onclick = ()=> done(false);
+      $cfB.onclick = (e)=>{ if(e.target === $cfB) done(false); };
+      $cfOk.onclick = ()=> done(true);
+    });
   }
 
   async function hydrateCollectionEmbeds(){
@@ -1477,6 +3123,22 @@ const json = await api(getListPath(), { method:"GET", auth: needAuth });
     return token;
   }
 
+  async function requireToken(){
+    const token = await getSessionToken();
+    if(!token) throw new Error("Login required");
+    return token;
+  }
+
+  function lockPageScroll(){
+    document.documentElement.classList.add("lf-lock");
+    document.body.classList.add("lf-lock");
+  }
+
+  function unlockPageScroll(){
+    document.documentElement.classList.remove("lf-lock");
+    document.body.classList.remove("lf-lock");
+  }
+
   async function loadComments(){
     if(!current) return;
     $cList.innerHTML = `<div class="lf-empty" style="padding:18px;">Loading…</div>`;
@@ -1653,6 +3315,113 @@ const json = await api(getListPath(), { method:"GET", auth: needAuth });
   $cSend.onclick = sendComment;
   $cInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter"){ e.preventDefault(); sendComment(); } });
   $btnReloadComments.onclick = loadComments;
+
+  if($cclose) $cclose.onclick = closeCollectionModal;
+  if($cb) $cb.onclick = (e)=>{ if(e.target === $cb) closeCollectionModal(); };
+  if($btnColReorder) $btnColReorder.onclick = ()=>{
+    if(!currentCol) return;
+    if(!colReorderMode){
+      colReorderMode = true;
+      colOriginalOrderIds = (currentCol.items || []).map(x=> x.id);
+      toast("Drag items and press Save order");
+    }else{
+      colReorderMode = false;
+    }
+    renderCollectionModalGrid();
+  };
+  if($btnColReorderSave) $btnColReorderSave.onclick = async ()=>{
+    if(!currentCol || !colReorderMode) return;
+    const ok = await confirmUI("Save order", "Apply new order?", "Save", false);
+    if(!ok) return;
+    try{
+      await saveCollectionOrder();
+      colReorderMode = false;
+      renderCollectionModalGrid();
+      toast("Order saved");
+      if(mainTab === "collections" || (mainTab === "saved" && savedType === "collection")){
+        await fetchPage(true);
+      }
+    }catch(e){
+      toast(e.message || "Failed");
+    }
+  };
+  if($btnColReorderCancel) $btnColReorderCancel.onclick = ()=>{
+    if(!currentCol) return;
+    const map = new Map((currentCol.items || []).map(it=> [String(it.id), it]));
+    currentCol.items = (colOriginalOrderIds || []).map(id=> map.get(String(id))).filter(Boolean);
+    colReorderMode = false;
+    renderCollectionModalGrid();
+  };
+  if($btnColEdit) $btnColEdit.onclick = ()=>{ if(currentCol) openCollectionSheet("edit", currentCol.col); };
+  if($btnSceneNew) $btnSceneNew.onclick = ()=>{ if(currentCol) openSceneSheet("new", null); };
+  if($btnColDelete) $btnColDelete.onclick = async ()=>{
+    if(!currentCol) return;
+    const ok = await confirmUI("Delete collection", "Delete this collection?", "Delete", true);
+    if(!ok) return;
+    try{
+      await requireToken();
+      await api("/api/collections/delete", { method:"POST", body: JSON.stringify({ id: currentCol.col.id }) });
+      toast("Deleted");
+      closeCollectionModal();
+      if(mainTab === "collections" || (mainTab === "saved" && savedType === "collection")) await fetchPage(true);
+    }catch(e){
+      toast(e.message || "Failed");
+    }
+  };
+
+  if($kclose) $kclose.onclick = closeCollectionSheet;
+  if($kcancel) $kcancel.onclick = closeCollectionSheet;
+  if($kb) $kb.onclick = (e)=>{ if(e.target === $kb) closeCollectionSheet(); };
+  if($ksave) $ksave.onclick = saveCollectionDraft;
+
+  if($scClose) $scClose.onclick = closeSceneSheet;
+  if($scCancel) $scCancel.onclick = closeSceneSheet;
+  if($scB) $scB.onclick = (e)=>{ if(e.target === $scB) closeSceneSheet(); };
+  if($scSave) $scSave.onclick = async ()=>{
+    try{
+      await requireToken();
+      if(!currentCol) return;
+      const title = ($scName.value || "").trim();
+      const description = ($scDesc.value || "").trim();
+      if(!title) return scStatus("Title required", "err");
+      scStatus("Saving…", "");
+      if(editingSceneId){
+        await api("/api/collections/sections/update", {
+          method:"POST",
+          body: JSON.stringify({ section_id: editingSceneId, title, description })
+        });
+        const idx = (currentCol.sections || []).findIndex(s=> String(s.id) === String(editingSceneId));
+        if(idx >= 0) currentCol.sections[idx] = Object.assign({}, currentCol.sections[idx], { title, description });
+        closeSceneSheet();
+        renderCollectionModalGrid();
+        toast("Saved");
+        return;
+      }
+      await api("/api/collections/sections/create", {
+        method:"POST",
+        body: JSON.stringify({ collection_id: currentCol.col.id, title, description })
+      });
+      closeSceneSheet();
+      const j = await api(`/api/collections/get?id=${encodeURIComponent(currentCol.col.id)}`, { method:"GET" });
+      currentCol.sections = j.sections || [];
+      currentCol.items = j.items || [];
+      renderCollectionModalGrid();
+      toast("Saved");
+    }catch(e){
+      scStatus(e.message || "Failed", "err");
+    }
+  };
+
+  if($mvClose) $mvClose.onclick = closeMediaViewer;
+  if($mvb) $mvb.onclick = (e)=>{ if(e.target === $mvb) closeMediaViewer(); };
+  if($mvPrev) $mvPrev.onclick = ()=> setMediaIndex(mvIndex - 1);
+  if($mvNext) $mvNext.onclick = ()=> setMediaIndex(mvIndex + 1);
+  bindViewerSwipe();
+
+  if($cfClose) $cfClose.onclick = ()=> $cfB.classList.remove("open");
+  if($cfCancel) $cfCancel.onclick = ()=> $cfB.classList.remove("open");
+  if($cfB) $cfB.onclick = (e)=>{ if(e.target === $cfB) $cfB.classList.remove("open"); };
+
   $segSort?.querySelectorAll("button").forEach(btn=>{
     btn.onclick = async ()=>{
       $segSort.querySelectorAll("button").forEach(b=> b.classList.remove("active"));
