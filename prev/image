@@ -45,7 +45,10 @@
     min-height: calc(100vh - 74px - 44px);
   }
 
+  #lf-workspace > * { min-width: 0; }
+
   /* LEFT */
+
   .lf-side{
     background: #0b0b0b;
     border-right: 1px solid var(--border);
@@ -371,6 +374,7 @@
 
   /* RIGHT MAIN */
   .lf-main{
+    min-width: 0;
     position: relative;
     background: #050505;
     padding: 14px;
@@ -439,7 +443,8 @@
 
   .lf-canvasWrap{
     position: relative;
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 520px;
     border-radius: 18px;
     overflow:hidden;
     border: 1px solid #1f1f1f;
@@ -651,6 +656,53 @@
         </div>
       </div>
 
+      <!-- RIGHT -->
+      <div class="lf-main">
+        <div class="lf-topbar">
+          <div class="left">
+            <div class="lf-pill"><span>Canvas:</span> <b id="canvasLabel">16:9</b></div>
+            <div class="lf-pill"><span>Selected:</span> <b id="selLabel">none</b></div>
+            <div class="lf-pill"><span>Tip:</span> <b>drag / scale / rotate</b></div>
+          </div>
+          <div class="lf-zoom">
+            <button class="zbtn" id="zoomOut" type="button">–</button>
+            <div class="zval" id="zoomVal">100%</div>
+            <button class="zbtn" id="zoomIn" type="button">+</button>
+            <button class="zbtn" id="zoomFit" type="button" title="Fit">⤢</button>
+          </div>
+        </div>
+
+        <div class="lf-canvasWrap" id="canvasWrap">
+          <div id="stageHost"></div>
+
+          <div class="lf-hint">
+            <b>How it works:</b> build your layout here (multiple photos + text). We send the <b>final canvas</b> to Nano Banana.
+            Double-click text to edit. Use Layers to reorder like Photoshop.
+          </div>
+
+          <div id="textEditOverlay"><textarea id="textEditArea"></textarea></div>
+
+          <div class="lf-loader" id="loader">
+            <div class="lf-spin"></div>
+            <div class="lf-wait">PROCESSING</div>
+            <div class="lf-time" id="loaderTime">01:00</div>
+            <div class="lf-time" id="loaderSub" style="opacity:.7">Sending task…</div>
+          </div>
+
+          <div class="lf-result" id="result">
+            <img id="outImg" alt="result" />
+            <div class="lf-resbar">
+              <div style="color:#666;font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;" id="meta">done</div>
+              <div style="display:flex;gap:8px;">
+                <a id="download" href="#" download>Download</a>
+                <button id="closeResult" type="button" class="dlbtn ghost">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
       <div class="lf-sideR">
         <div class="lf-card">
           <div class="lf-field">
@@ -778,52 +830,7 @@
         </div>
       </div>
 
-      <!-- RIGHT -->
-      <div class="lf-main">
-        <div class="lf-topbar">
-          <div class="left">
-            <div class="lf-pill"><span>Canvas:</span> <b id="canvasLabel">16:9</b></div>
-            <div class="lf-pill"><span>Selected:</span> <b id="selLabel">none</b></div>
-            <div class="lf-pill"><span>Tip:</span> <b>drag / scale / rotate</b></div>
-          </div>
-          <div class="lf-zoom">
-            <button class="zbtn" id="zoomOut" type="button">–</button>
-            <div class="zval" id="zoomVal">100%</div>
-            <button class="zbtn" id="zoomIn" type="button">+</button>
-            <button class="zbtn" id="zoomFit" type="button" title="Fit">⤢</button>
-          </div>
-        </div>
 
-        <div class="lf-canvasWrap" id="canvasWrap">
-          <div id="stageHost"></div>
-
-          <div class="lf-hint">
-            <b>How it works:</b> build your layout here (multiple photos + text). We send the <b>final canvas</b> to Nano Banana.
-            Double-click text to edit. Use Layers to reorder like Photoshop.
-          </div>
-
-          <div id="textEditOverlay"><textarea id="textEditArea"></textarea></div>
-
-          <div class="lf-loader" id="loader">
-            <div class="lf-spin"></div>
-            <div class="lf-wait">PROCESSING</div>
-            <div class="lf-time" id="loaderTime">01:00</div>
-            <div class="lf-time" id="loaderSub" style="opacity:.7">Sending task…</div>
-          </div>
-
-          <div class="lf-result" id="result">
-            <img id="outImg" alt="result" />
-            <div class="lf-resbar">
-              <div style="color:#666;font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;" id="meta">done</div>
-              <div style="display:flex;gap:8px;">
-                <a id="download" href="#" download>Download</a>
-                <button id="closeResult" type="button" class="dlbtn ghost">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
 
     </div>
   </div>
