@@ -37,7 +37,7 @@
   #lf-wrap{ padding: 22px 18px 40px; max-width: 1500px; margin:0 auto; }
   #lf-workspace{
     display:grid;
-    grid-template-columns: 420px 1fr;
+    grid-template-columns: 360px 1fr 360px;
     border:1px solid var(--border);
     border-radius: 22px;
     overflow:hidden;
@@ -53,6 +53,17 @@
     display:flex;
     flex-direction:column;
     gap: 14px;
+    overflow:auto;
+    max-height: calc(100vh - 74px - 44px);
+  }
+
+  .lf-sideR{
+    background:#0b0b0b;
+    border-left:1px solid var(--border);
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
     overflow:auto;
     max-height: calc(100vh - 74px - 44px);
   }
@@ -206,9 +217,13 @@
 
   /* Tools + Layers */
   .lf-tools{
-    display:grid;
-    grid-template-columns: repeat(5, 1fr);
+    display:flex;
+    flex-wrap:wrap;
     gap: 8px;
+  }
+  .lf-tools .lf-tool{
+    flex: 1 1 calc(33.333% - 8px);
+    min-width: 110px;
   }
   .lf-tool{
     background: #121212;
@@ -264,7 +279,7 @@
   .lf-layers::-webkit-scrollbar-thumb:hover{ background:#3a3a3a; }
   .lf-layer{
     display:grid;
-    grid-template-columns: 28px 1fr 28px;
+    grid-template-columns: 40px 1fr 28px;
     gap: 8px;
     align-items:center;
     padding: 10px;
@@ -287,7 +302,7 @@
     white-space:nowrap;
     text-overflow:ellipsis;
   }
-  .lf-eye, .lf-grip{
+  .lf-eye{
     width: 28px; height: 28px;
     border-radius: 10px;
     display:flex;
@@ -297,9 +312,31 @@
     border:1px solid #222;
     cursor:pointer;
   }
-  .lf-eye:hover, .lf-grip:hover{ background:#171717; }
-  .lf-grip{ cursor: grab; }
+  .lf-eye:hover{ background:#171717; }
   .lf-eye.off{ opacity:.35; }
+
+  .lf-thumbbox{
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #121212;
+    border: 1px solid #232323;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .lf-thumbbox img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    display:block;
+  }
+  .lf-thumbbox .t{
+    font-weight: 900;
+    font-size: 12px;
+    color:#bdbdbd;
+  }
 
   .lf-props{
     display:grid;
@@ -315,20 +352,22 @@
   .lf-hint { display:none !important; }
 
 
-  .lf-palette{
-    display:flex;
-    gap: 8px;
-    flex-wrap: wrap;
+  .lf-swrow{ display:flex; gap:8px; margin-top:8px; }
+  .lf-swrow .sw{
+    width:18px;
+    height:18px;
+    border-radius:7px;
+    border:1px solid rgba(255,255,255,.18);
+    background: var(--c);
+    cursor:pointer;
   }
-  .lf-swatch{
-    width: 26px;
-    height: 26px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.14);
-    cursor: pointer;
-    box-shadow: 0 10px 22px rgba(0,0,0,0.35);
+
+  .lf-rval{
+    margin-top:6px;
+    font-size:11px;
+    color:#9a9a9a;
+    font-weight:900;
   }
-  .lf-swatch:hover{ transform: translateY(-1px); }
 
   /* RIGHT MAIN */
   .lf-main{
@@ -537,9 +576,14 @@
   @media(max-width: 1100px){
     #lf-workspace{ grid-template-columns: 1fr; }
     .lf-side{ border-right:0; border-bottom: 1px solid var(--border); max-height:none; }
+    .lf-sideR{ border-left:0; border-top: 1px solid var(--border); max-height:none; }
     .lf-canvasWrap{ min-height: 440px; }
     .lf-topbar{ flex-direction:column; align-items:stretch; }
     .lf-topbar .left{ justify-content:space-between; }
+  }
+
+  @media (max-width: 520px){
+    .lf-tools .lf-tool{ flex: 1 1 calc(50% - 8px); }
   }
 </style>
 
@@ -593,6 +637,21 @@
           </div>
         </div>
 
+        <div class="lf-actions">
+          <button class="lf-btn" id="run" type="button">
+            Generate Thumbnail <span class="lf-cost" id="cost">1 Cr</span>
+          </button>
+          <button class="lf-btn secondary" id="exportPng" type="button">
+            Export PNG (preview)
+          </button>
+          <button class="lf-btn danger" id="stop" type="button" style="display:none">
+            Stop
+          </button>
+          <div class="lf-status" id="statusText"></div>
+        </div>
+      </div>
+
+      <div class="lf-sideR">
         <div class="lf-card">
           <div class="lf-field">
             <label>Tools</label>
@@ -637,6 +696,7 @@
                 Clear
               </button>
             </div>
+            <button class="lf-btn secondary" id="fitScreen" type="button" style="margin-top:10px;">Fit to Screen</button>
           </div>
 
           <input type="file" id="imgFiles" accept="image/png,image/jpeg,image/webp" hidden multiple />
@@ -646,11 +706,6 @@
           <div class="lf-field">
             <label>Layers</label>
             <div class="lf-layers" id="layers"></div>
-          </div>
-
-          <div class="lf-field">
-            <label>Palette</label>
-            <div class="lf-palette" id="palette"></div>
           </div>
 
           <div class="lf-props">
@@ -671,15 +726,30 @@
             </div>
             <div class="lf-field">
               <label>Font Size</label>
-              <input type="number" id="fontSize" min="8" max="420" value="96" />
+              <input type="range" id="fontSize" min="12" max="420" value="96" />
+              <div class="lf-rval"><span id="fontSizeVal">96</span> px</div>
             </div>
             <div class="lf-field">
               <label>Text Fill</label>
               <input type="color" id="textFill" value="#ffffff" />
+              <div class="lf-swrow">
+                <button class="sw" type="button" data-c="#ffffff"></button>
+                <button class="sw" type="button" data-c="#000000"></button>
+                <button class="sw" type="button" data-c="#ff465a"></button>
+                <button class="sw" type="button" data-c="#2b6cff"></button>
+                <button class="sw" type="button" data-c="#ffd166"></button>
+              </div>
             </div>
             <div class="lf-field">
               <label>Stroke</label>
               <input type="color" id="textStroke" value="#000000" />
+              <div class="lf-swrow">
+                <button class="sw" type="button" data-c="#ffffff"></button>
+                <button class="sw" type="button" data-c="#000000"></button>
+                <button class="sw" type="button" data-c="#ff465a"></button>
+                <button class="sw" type="button" data-c="#2b6cff"></button>
+                <button class="sw" type="button" data-c="#ffd166"></button>
+              </div>
             </div>
           </div>
           <div class="lf-row2" style="margin-top:10px;">
@@ -705,19 +775,6 @@
               <input type="color" id="brushColor" value="#ffffff" />
             </div>
           </div>
-        </div>
-
-        <div class="lf-actions">
-          <button class="lf-btn" id="run" type="button">
-            Generate Thumbnail <span class="lf-cost" id="cost">1 Cr</span>
-          </button>
-          <button class="lf-btn secondary" id="exportPng" type="button">
-            Export PNG (preview)
-          </button>
-          <button class="lf-btn danger" id="stop" type="button" style="display:none">
-            Stop
-          </button>
-          <div class="lf-status" id="statusText"></div>
         </div>
       </div>
 
@@ -813,7 +870,7 @@
   const textShadowEl  = $("textShadow");
   const brushSizeEl   = $("brushSize");
   const brushColorEl  = $("brushColor");
-  const paletteEl     = $("palette");
+  const fontSizeVal   = $("fontSizeVal");
 
   const result        = $("result");
   const outImg        = $("outImg");
@@ -828,6 +885,7 @@
   const zoomOutBtn    = $("zoomOut");
   const zoomInBtn     = $("zoomIn");
   const zoomFitBtn    = $("zoomFit");
+  const fitScreenBtn  = $("fitScreen");
   const zoomValEl     = $("zoomVal");
   const canvasWrap    = $("canvasWrap");
 
@@ -1053,17 +1111,16 @@ Blockbuster YouTube thumbnail aesthetic.`;
   let isPainting = false;
   let currentLine = null;
 
-  const PALETTE = [
-    "#ffffff","#000000","#ff465a","#2b6cff","#39ff14",
-    "#ffd166","#00d4ff","#a855f7","#ff7a00","#00ffb3",
-    "#ff3dff","#bdbdbd"
-  ];
 
   function setToolActive(btn){
     [toolSelectBtn, toolImageBtn, toolTextBtn, toolLayerBtn, toolDrawBtn].forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
   }
   let currentTool = "select";
+
+  function syncFontSizeVal(){
+    if (fontSizeVal) fontSizeVal.textContent = String(fontSizeEl.value || 96);
+  }
 
   function initStage(){
     const host = $("stageHost");
@@ -1553,13 +1610,18 @@ Blockbuster YouTube thumbnail aesthetic.`;
       row.className = "lf-layer" + (it.id === selectedId ? " sel" : "");
       row.dataset.id = it.id;
 
-      const grip = document.createElement("div");
-      grip.className = "lf-grip";
-      grip.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M8 6h.01M8 12h.01M8 18h.01M16 6h.01M16 12h.01M16 18h.01"/>
-        </svg>
-      `;
+      const thumb = document.createElement("div");
+      thumb.className = "lf-thumbbox";
+
+      if (it.type === "image" && it._imgSrc){
+        const im = document.createElement("img");
+        im.src = it._imgSrc;
+        thumb.appendChild(im);
+      } else if (it.type === "text"){
+        thumb.innerHTML = `<div class="t">T</div>`;
+      } else if (it.type === "paint"){
+        thumb.innerHTML = `<div class="t">✎</div>`;
+      }
 
       const name = document.createElement("div");
       name.className = "name";
@@ -1572,13 +1634,13 @@ Blockbuster YouTube thumbnail aesthetic.`;
         ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`
         : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18"/><path d="M10.6 10.6A2 2 0 0 0 12 15a2 2 0 0 0 1.4-.6"/><path d="M9.9 5.1A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a18 18 0 0 1-4 5"/><path d="M6.5 6.5C3.9 8.6 2 12 2 12s4 7 10 7c1 0 1.9-.2 2.8-.4"/></svg>`;
 
-      row.appendChild(grip);
+      row.appendChild(thumb);
       row.appendChild(name);
       row.appendChild(eye);
       layersEl.appendChild(row);
 
       row.addEventListener("click", (e)=>{
-        if (e.target === eye) return;
+        if (e.target && e.target.closest && e.target.closest(".lf-eye")) return;
         selectById(it.id);
       });
 
@@ -1594,9 +1656,9 @@ Blockbuster YouTube thumbnail aesthetic.`;
 
       let dragId = null;
 
-      grip.addEventListener("pointerdown", (e)=>{
-        e.preventDefault();
-        e.stopPropagation();
+      row.addEventListener("pointerdown", (e)=>{
+        if (e.target && (e.target.closest && e.target.closest(".lf-eye"))) return;
+
         dragId = it.id;
         row.style.opacity = "0.7";
         row.setPointerCapture(e.pointerId);
@@ -1656,6 +1718,7 @@ Blockbuster YouTube thumbnail aesthetic.`;
     // keep UI aligned
     fontFamilyEl.value = t.fontFamily() || "Russo One";
     fontSizeEl.value = Math.round(t.fontSize() || 96);
+    syncFontSizeVal();
     textFillEl.value = t.fill() || "#ffffff";
     textStrokeEl.value = t.stroke() || "#000000";
     textStrokeWEl.value = Math.round(t.strokeWidth() || 0);
@@ -1688,32 +1751,6 @@ Blockbuster YouTube thumbnail aesthetic.`;
     it._text = t.text();
     saveGeom(it);
     rootLayer.draw();
-  }
-
-  function setActiveColor(hex){
-    hex = String(hex || "#ffffff").toLowerCase();
-
-    const it = state.items.find(x=>x.id===selectedId);
-    if (drawMode || !it || it.type !== "text"){
-      brushColorEl.value = hex;
-      return;
-    }
-
-    textFillEl.value = hex;
-    applyTextPropsToSelection();
-  }
-
-  function buildPalette(){
-    if (!paletteEl) return;
-    paletteEl.innerHTML = "";
-    PALETTE.forEach((c)=>{
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "lf-swatch";
-      b.style.background = c;
-      b.addEventListener("click", ()=> setActiveColor(c));
-      paletteEl.appendChild(b);
-    });
   }
 
   function openTextEditor(item){
@@ -2068,9 +2105,28 @@ Blockbuster YouTube thumbnail aesthetic.`;
   $("btn-clear").addEventListener("click", clearCanvas);
 
   // Text props change
-  [fontFamilyEl, fontSizeEl, textFillEl, textStrokeEl, textStrokeWEl, textShadowEl].forEach(el=>{
+  [fontFamilyEl, textFillEl, textStrokeEl, textStrokeWEl, textShadowEl].forEach(el=>{
     el.addEventListener("change", ()=> applyTextPropsToSelection());
     el.addEventListener("input", ()=> applyTextPropsToSelection());
+  });
+
+  fontSizeEl.addEventListener("input", ()=>{
+    syncFontSizeVal();
+    applyTextPropsToSelection();
+  });
+  fontSizeEl.addEventListener("change", ()=> applyTextPropsToSelection());
+
+  document.querySelectorAll(".lf-swrow .sw").forEach(btn=>{
+    btn.style.setProperty("--c", btn.dataset.c);
+    btn.addEventListener("click", ()=>{
+      const it = state.items.find(x=>x.id===selectedId);
+      if (it && it.type === "text"){
+        textFillEl.value = btn.dataset.c;
+        applyTextPropsToSelection();
+      } else {
+        brushColorEl.value = btn.dataset.c;
+      }
+    });
   });
 
   // Aspect change -> rebuild stage (preserve items)
@@ -2082,6 +2138,7 @@ Blockbuster YouTube thumbnail aesthetic.`;
   zoomInBtn.addEventListener("click", ()=> setZoom(zoom + 0.08));
   zoomOutBtn.addEventListener("click", ()=> setZoom(zoom - 0.08));
   zoomFitBtn.addEventListener("click", ()=> fitCanvas());
+  if (fitScreenBtn) fitScreenBtn.addEventListener("click", ()=> fitCanvas());
 
   // Export PNG preview
   exportBtn.addEventListener("click", async ()=>{
@@ -2160,7 +2217,7 @@ Blockbuster YouTube thumbnail aesthetic.`;
 
   // Init
   initStage();
-  buildPalette();
+  syncFontSizeVal();
   setToolActive(toolSelectBtn);
   setStatus("Ready");
 
