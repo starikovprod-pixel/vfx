@@ -1908,6 +1908,7 @@
       const col = j.collection || {};
       const colItems = Array.isArray(j.items) ? j.items : [];
       const sections = Array.isArray(j.sections) ? j.sections : [];
+      if(!myUserId) myUserId = await getMyUserId();
       currentCol = { col, items: colItems, sections };
       isCurrentColOwner = canManageCollection(col);
 
@@ -2181,7 +2182,7 @@
       };
     });
 
-    if($colReorderFooter) $colReorderFooter.classList.toggle("open", !!colReorderMode && !sections.length);
+    if($colReorderFooter) $colReorderFooter.classList.toggle("open", !!colReorderMode);
     if($btnColReorder) $btnColReorder.textContent = colReorderMode ? "Exit" : "Reorder";
     if(colReorderMode) bindDnD(scenes);
   }
