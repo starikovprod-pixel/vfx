@@ -1,0 +1,1430 @@
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+<style>
+  :root {
+    --bg-body: #050505;
+    --bg-panel: #111111;
+    --bg-card: #181818;
+    --bg-input: #222222;
+    --border: #2b2b2b;
+    --accent: #2b6cff;
+    --accent-hover: #1a5cff;
+    --text-main: #ffffff;
+    --text-sec: #a0a0a0;
+    --danger: #ff465a;
+    --ok: #39ff14;
+    --warn: #ffd166;
+    --radius: 16px;
+  }
+
+  body { margin: 0; background: var(--bg-body); overflow-x: hidden; }
+  #lf-nano * { box-sizing: border-box; outline: none; }
+
+  #lf-nano {
+    color: var(--text-main);
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Контейнер строго ограничен, чтобы лента не вылезала */
+  #lf-main { 
+    padding: 26px 18px 0; 
+    width: 100%;
+    max-width: 1400px; 
+    margin: 0 auto; 
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Важно для ленты */
+  }
+
+  /* --- HEADER & DROPDOWN --- */
+  .lf-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 50;
+  }
+
+  .lf-model-select {
+    position: relative;
+    width: 260px;
+  }
+
+  .lf-select-trigger {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: 0.2s;
+    user-select: none;
+  }
+  .lf-select-trigger:hover {
+    border-color: rgba(255,255,255,0.3);
+    background: var(--bg-card);
+  }
+
+  .lf-model-name {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lf-chevron {
+    color: var(--text-sec);
+    font-size: 18px;
+    transition: transform 0.2s;
+    margin-left: 10px;
+  }
+  .lf-model-select.open .lf-chevron { transform: rotate(90deg); }
+
+  .lf-dropdown-menu {
+    position: absolute;
+    top: 115%; left: 0; width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .lf-model-select.open .lf-dropdown-menu { display: flex; }
+
+  .lf-dd-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-sec);
+    display: flex; align-items: center; gap: 10px;
+    transition: 0.15s;
+  }
+  .lf-dd-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+  .lf-dd-item.active { background: rgba(255,255,255,0.1); color: #fff; }
+    
+  .lf-dd-item .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border); margin-left: auto;
+  }
+  .lf-dd-item.active .status-dot { background: var(--ok); }
+
+  /* --- WORKSPACE --- */
+  #lf-workspace {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    overflow: hidden;
+    background: var(--bg-panel);
+    min-height: 580px;
+    position: relative;
+    width: 100%;
+  }
+
+  .lf-side {
+    padding: 24px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: var(--bg-panel);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .lf-back {
+    background: transparent; border: 0; color: var(--text-sec);
+    font-weight: 900; cursor: pointer; padding: 0; font-size: 13px;
+    text-align: left;
+  }
+    
+  .lf-h2-sub { font-size: 14px; font-weight: 700; color: var(--text-sec); margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .lf-field label { display: block; font-size: 12px; font-weight: 900; color: var(--text-sec); margin-bottom: 8px; }
+  .lf-input-wrap { position: relative; width: 100%; border-radius: 12px; overflow: hidden; }
+  .lf-field textarea, .lf-field select, .lf-field input[type=number], .lf-field input[type=text] {
+    width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+    color: var(--text-main); padding: 12px 12px; border-radius: 12px; font-size: 14px; display: block;
+    transition: 0.2s;
+  }
+  .lf-field textarea:focus, .lf-field select:focus, .lf-field input:focus { border-color: rgba(255,255,255,0.3); }
+
+  .lf-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .lf-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  .lf-drop {
+    border: 2px dashed var(--border); border-radius: 14px; padding: 20px 14px;
+    cursor: pointer; background: rgba(255,255,255,.02); transition: .15s; text-align: center;
+  }
+  .lf-drop:hover { border-color: rgba(43,108,255,.55); background: rgba(43,108,255,.06); }
+  .lf-drop .big { font-weight: 1000; }
+  .lf-drop .sub { font-size: 12px; color: var(--text-sec); margin-top: 6px; }
+
+  .lf-thumbs { display: none; margin-top: 12px; gap: 10px; flex-wrap: wrap; justify-content: flex-start; }
+  .lf-thumbbox {
+    width: 62px; height: 62px; border-radius: 12px; overflow: hidden; position: relative;
+    border: 1px solid rgba(255,255,255,.10); background: #000; flex: 0 0 auto;
+  }
+  .lf-thumbbox img { width: 100%; height: 100%; object-fit: cover; opacity: .98; }
+  .lf-thumbbox .x {
+    position: absolute; top: 4px; right: 4px; width: 18px; height: 18px;
+    border-radius: 50%; background: rgba(0,0,0,.6); color: #fff;
+    font-weight: 700; font-size: 12px; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; opacity: 0; transition: .12s;
+  }
+  .lf-thumbbox:hover .x { opacity: 1; }
+
+  .lf-actions { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+  .lf-chk { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font-size: 13px; font-weight: 700; color: var(--text-sec); padding: 4px 0; }
+  .lf-chk input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+  .lf-chk:hover { color: #fff; }
+
+  .lf-btn {
+    width: 100%; padding: 14px; border-radius: 14px; 
+    /* CHANGED: Dark gray transparent button */
+    background: rgba(255, 255, 255, 0.08); 
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff; font-weight: 1000; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .lf-btn:hover { 
+    /* CHANGED: Hover state */
+    background: rgba(255, 255, 255, 0.15); 
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px); 
+  }
+  /* Active/Disabled state styles */
+  .lf-btn:active { transform: translateY(1px); }
+  .lf-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+  .lf-btn.secondary { background: #2a2a2a; color: #ddd; border:none; }
+  .lf-btn.secondary:hover { background: #333; }
+  .lf-cost { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.10); }
+
+  .lf-status { text-align: center; font-size: 12px; color: var(--text-sec); min-height: 18px; margin-top: 4px; }
+  .lf-status.err { color: #ff5a6b; font-weight: 1000; }
+  .lf-status.ok { color: #9be28a; font-weight: 1000; }
+  .lf-status.warn { color: #ffd166; font-weight: 1000; }
+
+  .lf-main-view {
+    background: #000; display: flex; align-items: center; justify-content: center;
+    padding: 24px; position: relative; min-height: 500px;
+  }
+  .lf-empty { color: #3a3a3a; text-align: center; font-weight: 900; }
+  .lf-result {
+    display: none; width: min(920px, 95%); border-radius: 18px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08); box-shadow: 0 0 50px rgba(0,0,0,.6); background: #0b0b0b;
+  }
+  .lf-result img, .lf-result video { width: 100%; display: block; max-height: 75vh; object-fit: contain; background: #000; }
+  .lf-resbar {
+    padding: 14px; display: flex; justify-content: space-between; align-items: center;
+    gap: 12px; border-top: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.35);
+  }
+  .lf-resbar a { text-decoration: none; background: var(--accent); color: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 1000; }
+
+  .lf-loader {
+    position: absolute; inset: 0; background: rgba(0,0,0,.78); display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 30; backdrop-filter: blur(4px);
+  }
+  .lf-spin {
+    width: 46px; height: 46px; border-radius: 50%; border: 4px solid #2b2b2b;
+    border-top-color: var(--accent); animation: lfspin 1s linear infinite;
+  }
+  @keyframes lfspin { to { transform: rotate(360deg); } }
+  .lf-wait { font-weight: 1000; }
+  .lf-time { font-size: 12px; color: var(--text-sec); }
+
+  .lf-prompt-loader {
+    position: absolute; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 8px; background: rgba(10, 10, 10, 0.65); backdrop-filter: blur(3px);
+  }
+  .lf-prompt-loader::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(43, 108, 255, 0.15) 40%, rgba(43, 108, 255, 0.3) 50%, rgba(43, 108, 255, 0.15) 60%, transparent 100%);
+    background-size: 200% 100%; animation: shine 2s infinite linear; pointer-events: none;
+  }
+  @keyframes shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .lf-prompt-text { font-size: 14px; font-weight: 700; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8); position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; }
+
+  .hidden { display: none !important; }
+
+  /* --- LIBRARY WRAPPER --- */
+  .lf-lib-wrapper {
+    margin-top: 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    /* FIX: Force containment */
+    width: 100%; 
+    box-sizing: border-box;
+    overflow: hidden; 
+  }
+
+  .lf-ribbon-title {
+    font-size: 14px; font-weight: 900; color: var(--text-sec); margin-bottom: 16px; padding-left: 4px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+    
+  /* GRID LAYOUT */
+  .lf-ribbon {
+    display: grid;
+    /* 2 rows, slightly compact height */
+    grid-template-rows: repeat(2, 110px); 
+    grid-auto-flow: column;
+    grid-auto-columns: 110px;
+    gap: 12px;
+      
+    overflow-x: auto;
+    width: 100%;
+    /* Extra padding right to prevent clip on scroll end */
+    padding-bottom: 12px; 
+    padding-right: 20px; 
+      
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) var(--bg-body);
+  }
+
+  .lf-ribbon::-webkit-scrollbar { height: 8px; }
+  .lf-ribbon::-webkit-scrollbar-track { background: var(--bg-body); }
+  .lf-ribbon::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .lf-ribbon::-webkit-scrollbar-thumb:hover { background: #444; }
+
+  .lf-rib-item {
+    width: 100%; height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+    background: #000;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .lf-rib-item:hover { transform: scale(0.96); border-color: rgba(255,255,255,0.4); }
+  .lf-rib-item img, .lf-rib-item video { width: 100%; height: 100%; object-fit: cover; }
+    
+  .lf-rib-status {
+    position: absolute; top: 6px; left: 6px;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(2px);
+    padding: 3px 6px; border-radius: 6px;
+    font-size: 9px; font-weight: 700; color: #fff;
+    display: flex; align-items: center; gap: 4px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+  .dot.ok { background: var(--ok); }
+  .dot.warn { background: var(--warn); }
+  .dot.err { background: var(--danger); }
+
+  .lf-rib-more {
+    grid-row: span 2;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px dashed var(--border); border-radius: 14px;
+    color: var(--text-sec); text-decoration: none; font-size: 13px; font-weight: 700;
+    transition: .2s;
+    background: rgba(255,255,255,0.01);
+  }
+  .lf-rib-more:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: var(--accent); }
+
+  /* --- FULLSCREEN MODAL --- */
+  .lf-modal-backdrop {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+    z-index: 9999; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .lf-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+  .lf-modal {
+    width: 90%; max-width: 1100px; height: 85vh; background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: 24px; display: flex;
+    overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
+  }
+  .m-preview { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+  .m-preview img, .m-preview video, .m-preview model-viewer { max-width: 100%; max-height: 100%; width: 100%; height: 100%; }
+  .m-sidebar { width: 340px; border-left: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px; background: var(--bg-panel); flex-shrink: 0; }
+  .m-close {
+    position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.5);
+    color: #fff; border: 1px solid rgba(255,255,255,0.2); width: 40px; height: 40px;
+    border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center;
+    justify-content: center; z-index: 10; transition: 0.2s;
+  }
+  .m-close:hover { background: #fff; color: #000; }
+  .m-info-row { margin-bottom: 16px; }
+  .m-label { font-size: 11px; text-transform: uppercase; color: var(--text-sec); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .m-val { font-size: 14px; color: #fff; word-break: break-all; }
+  .m-actions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .m-btn {
+    border: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff; font-weight: 600; padding: 12px; border-radius: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; text-decoration: none; width: 100%;
+  }
+  .m-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+  .m-btn.primary { background: #fff; color: #000; border: none; }
+  .m-btn.primary:hover { background: #ddd; }
+
+  @media(max-width: 1000px){
+    #lf-workspace { grid-template-columns: 1fr; }
+    .lf-side { border-right: 0; border-bottom: 1px solid var(--border); max-height: none; }
+    .lf-main-view { min-height: 420px; }
+    .lf-modal { flex-direction: column; height: 90vh; }
+    .m-sidebar { width: 100%; height: auto; border-left: none; border-top: 1px solid var(--border); }
+    .m-preview { height: 50%; }
+    .lf-ribbon { 
+       grid-template-rows: repeat(2, 90px); 
+       grid-auto-columns: 90px; 
+    }
+  }
+</style>
+
+<div id="lf-nano">
+  <div id="lf-main">
+    
+    <div class="lf-header-row">
+      <div class="lf-model-select" id="modelSelect">
+        <div class="lf-select-trigger" onclick="toggleModelDropdown()">
+          <div class="lf-model-name" id="currentModelName">Nano Banana Pro</div>
+          <div class="lf-chevron">›</div>
+        </div>
+        
+        <div class="lf-dropdown-menu" id="modelList">
+          <div class="lf-dd-item active" onclick="selectModel('Nano Banana Pro', 'nano_banana_pro')">
+            <span>Nano Banana Pro</span> <span class="status-dot"></span>
+          </div>
+          <div class="lf-dd-item" onclick="selectModel('Seedream 4', 'seedream_4')">
+            <span>Seedream 4</span>
+          </div>
+          <div class="lf-dd-item" onclick="selectModel('FLUX.2 Max', 'flux_2_max')">
+            <span>FLUX.2 Max</span>
+          </div>
+          <div class="lf-dd-item" onclick="selectModel('Z-Image Turbo', 'z_image_turbo')">
+            <span>Z-Image Turbo</span>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </div>
+
+    <div id="lf-workspace">
+      <div class="lf-side">
+        <button class="lf-back" id="btn-back" type="button">← Back to Flow</button>
+        <div class="lf-h2-sub">Parameters</div>
+
+        <div class="lf-field">
+          <label>Prompt</label>
+          <div class="lf-input-wrap">
+            <textarea id="scene" rows="5" placeholder="Describe what you want..."></textarea>
+            <div class="lf-prompt-loader" id="promptLoader">
+              <div class="lf-prompt-text"><span>✨ Генерация промта...</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lf-field">
+          <label>Reference Images (optional)</label>
+          <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+          <div class="lf-drop" id="drop">
+            <div class="big" id="dropTitle">Upload images</div>
+            <div class="sub" id="dropSub">Click or drag&drop • up to 14 images</div>
+            <div class="lf-thumbs" id="thumbs"></div>
+          </div>
+        </div>
+
+        <div id="params-nano">
+          <div class="lf-row2">
+            <div class="lf-field">
+              <label>Aspect ratio</label>
+              <select id="aspect">
+                <option value="match_input_image" selected>Match input</option>
+                <option value="16:9">16:9</option>
+                <option value="9:16">9:16</option>
+                <option value="1:1">1:1</option>
+              </select>
+            </div>
+            <div class="lf-field">
+              <label>Resolution</label>
+              <select id="res">
+                <option value="1K">1K</option>
+                <option value="2K" selected>2K</option>
+                <option value="4K">4K</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <label class="lf-chk">
+                <input type="checkbox" id="styleOnly" checked>
+                Style-only transform (keep scene)
+            </label>
+          </div>
+        </div>
+
+        <div id="params-seedream" class="hidden">
+           <div class="lf-row2">
+             <div class="lf-field">
+                <label>Size</label>
+                <select id="sdSize">
+                   <option value="1K" selected>1K</option>
+                   <option value="2K">2K</option>
+                   <option value="4K">4K</option>
+                   <option value="custom">Custom</option>
+                </select>
+             </div>
+             <div class="lf-field">
+                <label>Aspect Ratio</label>
+                <select id="sdAspect">
+                   <option value="match_input_image" selected>Match Input</option>
+                   <option value="1:1">1:1</option>
+                   <option value="4:3">4:3</option>
+                   <option value="3:4">3:4</option>
+                   <option value="16:9">16:9</option>
+                   <option value="9:16">9:16</option>
+                   <option value="2:3">2:3</option>
+                   <option value="3:2">3:2</option>
+                   <option value="21:9">21:9</option>
+                </select>
+             </div>
+           </div>
+           
+           <div class="lf-row2 hidden" id="sdCustomRes" style="margin-top:12px;">
+              <div class="lf-field">
+                 <label>Width</label>
+                 <input type="number" id="sdWidth" value="1024" min="64" max="4096">
+              </div>
+              <div class="lf-field">
+                 <label>Height</label>
+                 <input type="number" id="sdHeight" value="1024" min="64" max="4096">
+              </div>
+           </div>
+        </div>
+
+        <div id="params-flux" class="hidden">
+           <div class="lf-row2">
+             <div class="lf-field">
+                <label>Aspect Ratio</label>
+                <select id="fxAspect">
+                   <option value="1:1" selected>1:1</option>
+                   <option value="16:9">16:9</option>
+                   <option value="9:16">9:16</option>
+                   <option value="4:3">4:3</option>
+                   <option value="3:4">3:4</option>
+                   <option value="2:3">2:3</option>
+                   <option value="3:2">3:2</option>
+                </select>
+             </div>
+             <div class="lf-field">
+                <label>Resolution</label>
+                <select id="fxRes">
+                   <option value="1 MP">1 MP</option>
+                   <option value="2 MP" selected>2 MP</option>
+                   <option value="4 MP">4 MP</option>
+                </select>
+             </div>
+           </div>
+
+           <div class="lf-row2" style="margin-top:12px;">
+              <div class="lf-field">
+                 <label>Format</label>
+                 <select id="fxFormat">
+                    <option value="jpg" selected>JPG</option>
+                    <option value="png">PNG</option>
+                 </select>
+              </div>
+              <div class="lf-field">
+                 <label>Quality (0-100)</label>
+                 <input type="number" id="fxQuality" value="80" min="0" max="100">
+              </div>
+           </div>
+
+           <div class="lf-row2" style="margin-top:12px;">
+               <div class="lf-field">
+                  <label>Safety Tolerance</label>
+                  <select id="fxSafety">
+                     <option value="1">1 (Strict)</option>
+                     <option value="2" selected>2 (Default)</option>
+                     <option value="3">3</option>
+                     <option value="4">4</option>
+                     <option value="5">5 (Permissive)</option>
+                  </select>
+               </div>
+               <div class="lf-field">
+                  <label>Seed (optional)</label>
+                  <input type="number" id="fxSeed" placeholder="Random">
+               </div>
+           </div>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run" type="button">Generate <span class="lf-cost" id="cost">—</span></button>
+          <button class="lf-btn secondary" id="gptPrompt" type="button">✨ GPT → Build Prompt</button>
+          <div class="lf-status" id="statusText"></div>
+        </div>
+      </div>
+
+      <div class="lf-main-view">
+        <div class="lf-empty" id="empty">
+          <div style="font-size:56px;opacity:.35;">✨</div>
+          <div style="margin-top:8px;">Result will appear here</div>
+        </div>
+
+        <div class="lf-result" id="result">
+          <video id="outVideo" controls playsinline class="hidden"></video>
+          <img id="outImg" class="hidden" alt="result" />
+          <div class="lf-resbar">
+            <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
+            <a id="download" href="#" target="_blank" download>Download</a>
+          </div>
+        </div>
+
+        <div class="lf-loader" id="loader">
+          <div class="lf-spin"></div>
+          <div class="lf-wait">Waiting…</div>
+          <div class="lf-time" id="loaderTime">01:00</div>
+          <div class="lf-time" id="loaderSub">Sending task…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lf-lib-wrapper">
+      <div class="lf-ribbon-title">
+        <span>History (Library)</span>
+      </div>
+      <div class="lf-ribbon" id="lib-ribbon">
+        <div style="padding: 20px; color:#555; font-size:13px;">Loading library...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="lf-modal-backdrop" id="modal-backdrop">
+  <button class="m-close" id="modal-close">✕</button>
+  <div class="lf-modal" onclick="event.stopPropagation()">
+    <div class="m-preview" id="m-view-container"></div>
+    <div class="m-sidebar">
+      <div class="m-info-row">
+        <div class="m-label">Status</div>
+        <div class="m-val" id="m-status-text">Done</div>
+      </div>
+      <div class="m-info-row">
+        <div class="m-label">Created At</div>
+        <div class="m-val" id="m-date">...</div>
+      </div>
+      <div class="m-info-row">
+        <div class="m-label">ID</div>
+        <div class="m-val" style="font-family:monospace;font-size:11px;color:#666" id="m-id">...</div>
+      </div>
+      <div class="m-actions">
+        <button class="m-btn primary" id="btn-download-m">Download File</button>
+        <button class="m-btn" id="btn-copy-link">Copy URL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* ==========================================================
+      CONFIG & GLOBALS
+     ========================================================== */
+  const BASE = location.origin;
+  const BACKEND_BASE = "https://api.lightfull.ai";
+  const ETA_SECONDS = 60;
+  const INPUTS_BUCKET = "inputs";
+  const MAX_IMAGES = 14;
+
+  const $ = (id) => document.getElementById(id);
+
+  // UI Elements
+  const fileEl = $("file"), drop = $("drop"), thumbsEl = $("thumbs");
+  const dropTitle = $("dropTitle"), dropSub = $("dropSub");
+  const sceneEl = $("scene");
+    
+  // Nano Inputs
+  const paramsNano = $("params-nano");
+  const aspectEl = $("aspect"), resEl = $("res");
+  const styleChk = $("styleOnly");
+
+  // Seedream Inputs
+  const paramsSeedream = $("params-seedream");
+  const sdSize = $("sdSize"), sdAspect = $("sdAspect");
+  const sdCustomRes = $("sdCustomRes"), sdWidth = $("sdWidth"), sdHeight = $("sdHeight");
+
+  // Flux Inputs
+  const paramsFlux = $("params-flux");
+  const fxAspect = $("fxAspect"), fxRes = $("fxRes"), fxSeed = $("fxSeed");
+  const fxFormat = $("fxFormat"), fxQuality = $("fxQuality"), fxSafety = $("fxSafety");
+
+  // Shared Actions
+  const promptLoader = $("promptLoader");
+  const runBtn = $("run"), gptBtn = $("gptPrompt");
+  const statusText = $("statusText");
+  const empty = $("empty"), result = $("result");
+  const outVideo = $("outVideo"), outImg = $("outImg");
+  const download = $("download"), meta = $("meta");
+  const loader = $("loader"), loaderTime = $("loaderTime"), loaderSub = $("loaderSub");
+    
+  // Library & Modal
+  const libRibbon = $("lib-ribbon");
+  const modalBack = $("modal-backdrop");
+  const modalClose = $("modal-close");
+  const mView = $("m-view-container");
+  const mStatus = $("m-status-text");
+  const mDate = $("m-date");
+  const mId = $("m-id");
+  const mBtnDown = $("btn-download-m");
+  const mBtnCopy = $("btn-copy-link");
+
+  let selectedFiles = [];
+  let latestJobId = null; 
+  let timer = null;
+  let timeLeft = ETA_SECONDS;
+  let cachedImageUrls = [];
+  let cachedSignature = "";
+    
+  let currentPresetId = "nano_banana_pro"; // Default model
+
+  $("btn-back").addEventListener("click", () => location.href = "https://lightfull.ai/flow");
+
+  /* ==========================================================
+      DROPDOWN & MODEL SWITCHING LOGIC
+     ========================================================== */
+  window.toggleModelDropdown = () => {
+    $("modelSelect").classList.toggle("open");
+  };
+
+  window.onclick = function(event) {
+    if (!event.target.closest('.lf-model-select')) {
+      $("modelSelect").classList.remove('open');
+    }
+  }
+
+  window.selectModel = (name, presetId) => {
+    $("currentModelName").textContent = name;
+    currentPresetId = presetId;
+    
+    // Visual selection update
+    const items = document.querySelectorAll('.lf-dd-item');
+    items.forEach(el => {
+      el.classList.remove('active');
+      const dot = el.querySelector('.status-dot');
+      if(dot) dot.remove();
+      
+      if(el.textContent.trim() === name) {
+        el.classList.add('active');
+        // No status dot for z_image_turbo by default
+        if(presetId !== 'z_image_turbo' && !el.querySelector('.status-dot')) {
+           el.innerHTML += ' <span class="status-dot"></span>';
+        }
+      }
+    });
+
+    // 2️⃣ Toggle specific param blocks
+    paramsNano.classList.add("hidden");
+    paramsSeedream.classList.add("hidden");
+    paramsFlux.classList.add("hidden");
+
+    if (presetId === "nano_banana_pro") {
+        paramsNano.classList.remove("hidden");
+    } else if (presetId === "seedream_4") {
+        paramsSeedream.classList.remove("hidden");
+    } else if (presetId === "flux_2_max") {
+        paramsFlux.classList.remove("hidden");
+    } else if (presetId === "z_image_turbo") {
+        // ❌ никаких параметров
+    }
+    
+    // Enable GPT button for ALL models
+    gptBtn.style.display = "flex";
+
+    setStatus("");
+    $("modelSelect").classList.remove("open");
+    calcCost(); // Recalculate cost for new model
+  };
+
+  /* ==========================================================
+      CORE LOGIC
+     ========================================================== */
+  function setStatus(t, kind){
+    statusText.textContent = t || "";
+    statusText.classList.remove("err","ok","warn");
+    if (kind) statusText.classList.add(kind);
+  }
+
+  function resetResult(){
+    empty.style.display = "block";
+    result.style.display = "none";
+    outVideo.classList.add("hidden");
+    outImg.classList.add("hidden");
+    outVideo.pause(); outVideo.removeAttribute("src"); outImg.removeAttribute("src");
+    download.href="#"; meta.textContent="";
+  }
+
+  function isVideoUrl(url){
+    const u = String(url||"").toLowerCase();
+    return u.includes(".mp4") || u.includes(".webm") || u.includes(".mov") || u.includes("fal.media");
+  }
+
+  function showResult(url, status){
+    empty.style.display = "none";
+    result.style.display = "block";
+    
+    // FIX: Force immediate download instead of opening new tab
+    download.onclick = (e) => {
+        e.preventDefault();
+        const ext = (url.split('.').pop() || "png").split("?")[0];
+        forceDownload(url, `generated-result.${ext}`);
+    };
+    
+    meta.textContent = `status: ${status}`;
+
+    outVideo.classList.add("hidden");
+    outImg.classList.add("hidden");
+    outVideo.pause(); outVideo.removeAttribute("src"); outImg.removeAttribute("src");
+
+    if (isVideoUrl(url)) {
+      outVideo.src = url;
+      outVideo.classList.remove("hidden");
+      outVideo.load();
+      outVideo.play().catch(()=>{});
+    } else {
+      outImg.src = url;
+      outImg.classList.remove("hidden");
+    }
+  }
+
+  function showLoader(on){
+    loader.style.display = on ? "flex" : "none";
+    if (on) startTimer(ETA_SECONDS);
+    if (!on) stopTimer();
+  }
+    
+  function showPromptLoader(on){
+    promptLoader.style.display = on ? "flex" : "none";
+  }
+
+  function startTimer(sec){
+    stopTimer();
+    timeLeft = Math.max(0, Math.floor(sec));
+    const tick = ()=>{
+      const m = Math.floor(timeLeft/60);
+      const s = String(timeLeft%60).padStart(2,"0");
+      loaderTime.textContent = `${m}:${s}`;
+      timeLeft = Math.max(0, timeLeft-1);
+    };
+    tick();
+    timer = setInterval(tick, 1000);
+  }
+
+  function stopTimer(){
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+
+  function uuid(){
+    if (crypto && crypto.randomUUID) return crypto.randomUUID();
+    return Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function formatSize(bytes){
+    const kb = Math.round(bytes/1024);
+    if (kb < 1024) return kb + " KB";
+    return (kb/1024).toFixed(1) + " MB";
+  }
+
+  function ensureLimit(files){
+    if (files.length <= MAX_IMAGES) return files;
+    return files.slice(0, MAX_IMAGES);
+  }
+
+  function dedupeBySignature(files){
+    const seen = new Set();
+    const out = [];
+    for (const f of files){
+      const key = `${f.name}|${f.size}|${f.lastModified}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(f);
+    }
+    return out;
+  }
+
+  function setFiles(next){
+    selectedFiles = ensureLimit(dedupeBySignature(next));
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = []; cachedSignature = "";
+  }
+
+  function addFiles(files){
+    const imgs = Array.from(files || []).filter(f => f && f.type && f.type.startsWith("image/"));
+    if (!imgs.length) return;
+    const merged = selectedFiles.concat(imgs);
+    const limited = ensureLimit(dedupeBySignature(merged));
+    if (limited.length < merged.length){
+      setStatus(`Max ${MAX_IMAGES} images. Extra files ignored.`, "err");
+      setTimeout(()=>setStatus(""), 1600);
+    }
+    selectedFiles = limited;
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = []; cachedSignature = "";
+  }
+
+  function removeFileAt(idx){
+    const f = selectedFiles[idx];
+    if (f && f.__previewUrl) {
+      try { URL.revokeObjectURL(f.__previewUrl); } catch(e){}
+    }
+    selectedFiles.splice(idx, 1);
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = []; cachedSignature = "";
+  }
+
+  function clearFiles(){
+    for (const f of selectedFiles){
+      if (f && f.__previewUrl) try { URL.revokeObjectURL(f.__previewUrl); } catch(e){}
+    }
+    selectedFiles = [];
+    renderThumbs();
+    updateDropText();
+    cachedImageUrls = []; cachedSignature = "";
+  }
+
+  function renderThumbs(){
+    thumbsEl.innerHTML = "";
+    if (!selectedFiles.length){
+      thumbsEl.style.display = "none";
+      return;
+    }
+    thumbsEl.style.display = "flex";
+    selectedFiles.forEach((file, idx) => {
+      const box = document.createElement("div");
+      box.className = "lf-thumbbox";
+      if (!file.__previewUrl){
+        try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
+      }
+      const img = document.createElement("img");
+      img.alt = file.name || "image";
+      img.src = file.__previewUrl || "";
+      const x = document.createElement("div");
+      x.className = "x";
+      x.textContent = "×";
+      x.title = "Remove";
+      x.addEventListener("click", (ev) => {
+        ev.preventDefault(); ev.stopPropagation();
+        removeFileAt(idx);
+      });
+      box.appendChild(img);
+      box.appendChild(x);
+      thumbsEl.appendChild(box);
+    });
+  }
+
+  function updateDropText(){
+    if (!selectedFiles.length){
+      dropTitle.textContent = "Upload images";
+      dropSub.textContent = "Click or drag&drop • up to 14 images";
+      return;
+    }
+    const count = selectedFiles.length;
+    const totalBytes = selectedFiles.reduce((s,f)=>s+(f?.size||0), 0);
+    dropTitle.textContent = `${count} image${count>1?"s":""} selected`;
+    dropSub.textContent = `Total: ${formatSize(totalBytes)}`;
+  }
+
+  /* --- AUTH & UPLOAD --- */
+  async function getSessionOrRedirect(){
+    const sb = window.sb;
+    if (!sb) { location.href = BASE + "/login"; throw new Error("No supabase client"); }
+    const { data } = await sb.auth.getSession();
+    const s = data?.session;
+    if (!s) { location.href = BASE + "/login"; throw new Error("No session"); }
+    return s;
+  }
+
+  async function refreshSessionSafe(){
+    const sb = window.sb;
+    try { await sb.auth.refreshSession(); } catch(e){}
+    return getSessionOrRedirect();
+  }
+
+  async function fetchJsonWithAuth(url, options={}){
+    let s = await getSessionOrRedirect();
+    let r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+    if (r.status===401 || r.status===403){
+      s = await refreshSessionSafe();
+      r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+    }
+    const raw = await r.text();
+    let j={}; try{ j=raw?JSON.parse(raw):{} }catch(_){}
+    if (!r.ok || j?.ok===false){
+      const err = new Error(j.error || ("HTTP "+r.status));
+      err.status = r.status; err.data = j; throw err;
+    }
+    return j;
+  }
+
+  async function uploadReferenceToInputs(file){
+    const sb = window.sb;
+    const session = await getSessionOrRedirect();
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "png";
+    const path = `${session.user.id}/${uuid()}.${safeExt}`;
+    let up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, { upsert:false, contentType: file.type || "application/octet-stream" });
+    if (up?.error && (up.error.statusCode === 401 || up.error.statusCode === 403)){
+      await refreshSessionSafe();
+      up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, { upsert:false, contentType: file.type || "application/octet-stream" });
+    }
+    if (up.error) throw up.error;
+    const pub = sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
+    return pub.data.publicUrl;
+  }
+
+  async function uploadAllSelectedOrThrow(){
+    if (!selectedFiles.length) return [];
+    loaderSub.textContent = `Uploading ${selectedFiles.length} image(s)…`;
+    const urls = [];
+    for (let i=0; i<selectedFiles.length; i++){
+      loaderSub.textContent = `Uploading ${i+1}/${selectedFiles.length}…`;
+      const url = await uploadReferenceToInputs(selectedFiles[i]);
+      urls.push(url);
+    }
+    return urls;
+  }
+
+  function filesSignature(files){
+    return (files||[]).map(f => `${f.name}|${f.size}|${f.lastModified}`).join("||");
+  }
+
+  async function getOrUploadImageUrls(){
+    if (!selectedFiles.length) return [];
+    const sig = filesSignature(selectedFiles);
+    if (cachedSignature === sig && cachedImageUrls.length === selectedFiles.length){
+      return cachedImageUrls;
+    }
+    const urls = await uploadAllSelectedOrThrow();
+    cachedSignature = sig; cachedImageUrls = urls;
+    return urls;
+  }
+
+  function calcCost(){
+    // 3️⃣ Static Cost for Z-Image Turbo
+    if (currentPresetId === "z_image_turbo") {
+      $("cost").textContent = "1 Cr / 4 runs";
+      return;
+    }
+
+    if (currentPresetId === "nano_banana_pro") {
+        const res = String(resEl.value || "2K");
+        const cost = (res === "4K") ? 2 : 1;
+        $("cost").textContent = cost + " Cr";
+        return;
+    }
+
+    if (currentPresetId === "seedream_4") {
+        const size = String(sdSize.value || "2K").toUpperCase();
+        // Fixed: max images always 1
+        const maxImages = 1; 
+        const base = size === "4K" ? 4 : size === "2K" ? 2 : 1;
+        $("cost").textContent = (base * maxImages) + " Cr";
+        return;
+    }
+
+    if (currentPresetId === "flux_2_max") {
+        const r = String(fxRes.value || "1 MP").toUpperCase();
+        const base = r.includes("4") ? 7 : r.includes("2") ? 4 : 2;
+        $("cost").textContent = base + " Cr";
+        return;
+    }
+
+    $("cost").textContent = "—";
+  }
+
+  /* --- GPT --- */
+  function nanoPromptBuilderSystem(){
+    return `You are a PROMPT BUILDER. OUTPUT ONLY: <PROMPT>...</PROMPT>. Primary Goal: Write a prompt that transforms the provided reference.`;
+  }
+  function enforceCinematicRealism(prompt, userText){
+    const t = (userText||"").toLowerCase();
+    const wantsRealism = /real|cinema|photo/.test(t);
+    if (!wantsRealism) return prompt;
+    return prompt + " AVOID: illustration, cartoon, anime, painterly, lineart.";
+  }
+  function extractPromptTag(text){
+    const s = String(text||"");
+    const a = "<PROMPT>", b = "</PROMPT>";
+    const i = s.indexOf(a), j = s.indexOf(b);
+    if (i !== -1 && j !== -1 && j > i) return s.slice(i+a.length, j).trim();
+    return s.trim();
+  }
+
+  async function gptStart(prompt, image_urls){
+    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/chatgpt_start_json", {
+      method: "POST", headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({ prompt, image_urls, system_prompt: nanoPromptBuilderSystem(), reasoning_effort: "minimal", model: "nano" })
+    });
+    return data.jobId;
+  }
+  async function gptPoll(jobId){
+    const t0 = Date.now(), maxMs = 90000;
+    while (true){
+      if (Date.now() - t0 > maxMs) throw new Error("GPT timeout");
+      const s = await fetchJsonWithAuth(BACKEND_BASE + "/api/chatgpt_status?jobId=" + encodeURIComponent(jobId), { method: "GET" });
+      if (s.status === "succeeded") return String(s.text || "").trim();
+      if (s.status === "failed" || s.status === "canceled") throw new Error(s.error || "GPT failed");
+      await new Promise(r => setTimeout(r, 900));
+    }
+  }
+
+  async function buildPromptNano(){
+    gptBtn.disabled = true; runBtn.disabled = true; setStatus("", ""); showPromptLoader(true);
+    try{
+      let userRequest = (sceneEl.value || "").trim();
+      if (styleChk.checked) userRequest += " \n[INSTRUCTION: STYLE-ONLY transform.]";
+      const image_urls = await getOrUploadImageUrls();
+      const jobId = await gptStart(userRequest || "Make a high-quality image", image_urls);
+      const raw = await gptPoll(jobId);
+      let built = extractPromptTag(raw);
+      if (built === "DECLINED"){
+        setStatus("GPT declined. Describe image content.", "err"); return;
+      }
+      built = enforceCinematicRealism(built, sceneEl.value);
+      sceneEl.value = built;
+      setStatus("Prompt generated ✓", "ok");
+    } catch(e){
+        setStatus("GPT Error", "err");
+    } finally {
+      showPromptLoader(false); gptBtn.disabled = false; runBtn.disabled = false;
+    }
+  }
+
+  /* --- JOB EXECUTION (FIRE AND FORGET) --- */
+    
+  async function startJob(){
+    // DO NOT disable runBtn here to allow parallel jobs
+    gptBtn.disabled = true; 
+    
+    // Setup Main View for "Latest Job"
+    resetResult(); 
+    setStatus(""); 
+    showLoader(true);
+    loaderSub.textContent = "Preparing…";
+
+    // Upload images first for all models
+    let urls = [];
+    if (selectedFiles.length){
+      urls = await getOrUploadImageUrls();
+    }
+
+    const fd = new FormData();
+
+const userText = (sceneEl.value || "").trim();
+
+fd.append("presetId", currentPresetId);
+fd.append("scene", userText || "high quality");
+fd.append("prompt_user", userText);
+
+
+
+    // BRANCHING LOGIC BY MODEL
+    if (currentPresetId === "nano_banana_pro") {
+        fd.append("aspect_ratio", String(aspectEl.value || "match_input_image"));
+        fd.append("resolution", String(resEl.value || "2K"));
+        fd.append("output_format", "png");
+        fd.append("safety_filter_level", "block_only_high");
+        
+        // Nano Image Logic
+        if (urls.length){
+           if (urls.length === 1) fd.append("image_input_url", urls[0]);
+           else {
+             urls.forEach(u => fd.append("image_input_urls", u));
+             fd.append("image_input_url", urls[0]);
+           }
+        }
+        
+    } else if (currentPresetId === "seedream_4") {
+        fd.append("size", sdSize.value);
+        fd.append("aspect_ratio", sdAspect.value);
+        if (sdSize.value === 'custom') {
+            fd.append("width", sdWidth.value);
+            fd.append("height", sdHeight.value);
+        }
+        // Fixed values (UI removed)
+        fd.append("max_images", "1");
+        fd.append("enhance_prompt", "true");
+        
+        // Seedream Image Logic (same as Nano per request)
+        if (urls.length){
+            if (urls.length === 1) fd.append("image_input_url", urls[0]);
+            else {
+              urls.forEach(u => fd.append("image_input_urls", u));
+              fd.append("image_input_url", urls[0]);
+            }
+        }
+
+    } else if (currentPresetId === "flux_2_max") {
+        fd.append("aspect_ratio", fxAspect.value);
+        fd.append("resolution", fxRes.value);
+        if (fxSeed.value) fd.append("seed", fxSeed.value);
+        fd.append("output_format", fxFormat.value);
+        fd.append("output_quality", fxQuality.value);
+        fd.append("safety_tolerance", fxSafety.value);
+
+        // Flux Image Logic: input_images array
+        if (urls.length){
+            urls.forEach(u => fd.append("input_images", u));
+        }
+
+    } else if (currentPresetId === "z_image_turbo") {
+        // 4️⃣ Minimal payload for Z-Image Turbo
+        // Only prompt (added above) + images
+        if (urls.length){
+           if (urls.length === 1) fd.append("image_input_url", urls[0]);
+           else {
+             urls.forEach(u => fd.append("image_input_urls", u));
+             fd.append("image_input_url", urls[0]);
+           }
+        }
+    }
+
+    loaderSub.textContent = "Sending task…";
+    let data;
+    try{
+      data = await fetchJsonWithAuth(BACKEND_BASE + "/api/start", { method: "POST", body: fd });
+    } catch(e){
+      // Restore state if initial req failed
+      showLoader(false); gptBtn.disabled = false; 
+      if (e.status === 402) {
+          setStatus("Not enough credits", "err"); return;
+      }
+      alert("Error: "+e.message); return;
+    }
+
+    const thisJobId = data.jobId;
+    // Mark this as the latest job user clicked
+    latestJobId = thisJobId; 
+
+    // 5️⃣ Response Handling for Z-Image Turbo
+    if (currentPresetId === "z_image_turbo") {
+      if (data.note === "paid_run") {
+        setStatus("Started • 1 credit charged (4th run)", "warn");
+      } else {
+        setStatus("Started • free run", "ok");
+      }
+    } else if (typeof data.cost !== "undefined") {
+      setStatus(`Started • cost ${data.cost} Cr`, "ok");
+    }
+    
+    // Re-enable GPT btn immediately if allowed
+    gptBtn.disabled = false;
+
+    // Trigger Ribbon refresh to show "Processing" state immediately
+    setTimeout(refreshLibraryRibbon, 500);
+
+    // Fork off a dedicated poller for this job
+    pollSingleJob(thisJobId);
+  }
+
+  // Independent poller for a specific job
+  async function pollSingleJob(jobId) {
+    const tick = async () => {
+        try {
+            const data = await fetchJsonWithAuth(BACKEND_BASE + `/api/status?jobId=${encodeURIComponent(jobId)}`, { method:"GET" });
+            
+            // Only update the Main Screen text if this is still the LATEST job
+            if (latestJobId === jobId) {
+                loaderSub.textContent = "status: " + data.status;
+            }
+
+            if (data.status === "succeeded" || data.status === "failed" || data.status === "canceled") {
+                // Job finished
+                refreshLibraryRibbon(); // Update ribbon to show result
+
+                // If this was the specific job the user was staring at on the big screen
+                if (latestJobId === jobId) {
+                    showLoader(false);
+                    if(data.status === "succeeded" && data.output_url) {
+                        showResult(data.output_url, data.status);
+                        setStatus("Done", "ok");
+                    } else {
+                        setStatus("Failed", "err");
+                    }
+                }
+                return; // Stop polling
+            }
+            
+            // Not done yet, keep checking
+            setTimeout(tick, 1500);
+
+        } catch (e) {
+            console.error("Poll error", e);
+            if (latestJobId === jobId) showLoader(false);
+        }
+    };
+    tick();
+  }
+
+
+  /* ==========================================================
+      LIBRARY (2-ROW RIBBON)
+     ========================================================== */
+
+  function getRibbonStatus(raw){
+    const v = String(raw||"").toLowerCase();
+    if (["succeeded","success","done"].includes(v)) return { text:"Done", dot:"ok" };
+    if (["failed","error","canceled"].includes(v)) return { text:"Failed", dot:"err" };
+    return { text:"Processing", dot:"warn" };
+  }
+   
+  async function forceDownload(url, filename){
+      try {
+          const res = await fetch(url);
+          const blob = await res.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none'; a.href = blobUrl; a.download = filename;
+          document.body.appendChild(a); a.click();
+          window.URL.revokeObjectURL(blobUrl);
+      } catch(e) { window.open(url, '_blank'); }
+  }
+
+  window.openLibraryModal = (item) => {
+      const url = item.output_url || "";
+      const st = getRibbonStatus(item.status);
+      
+      let html = "";
+      if(!url) html = `<div style="color:#666">Processing or Failed</div>`;
+      else if(isVideoUrl(url)) html = `<video src="${url}" controls autoplay loop style="max-height:100%;max-width:100%"></video>`;
+      else html = `<img src="${url}" style="object-fit:contain;" />`;
+      
+      mView.innerHTML = html;
+      mStatus.innerHTML = `<span class="dot ${st.dot}" style="display:inline-block;margin-right:6px"></span> ${st.text}`;
+      mDate.textContent = item.created_at ? item.created_at.replace("T"," ").slice(0,16) : "";
+      mId.textContent = item.id;
+
+      if(url) {
+          mBtnDown.style.display = "flex";
+          mBtnDown.onclick = () => {
+              const ext = (url.split('.').pop() || "bin").split("?")[0];
+              forceDownload(url, `generated-${item.id}.${ext}`);
+          };
+          mBtnCopy.onclick = () => {
+              navigator.clipboard.writeText(url);
+              mBtnCopy.textContent = "Copied!";
+              setTimeout(()=>mBtnCopy.textContent="Copy URL", 1000);
+          };
+      } else {
+          mBtnDown.style.display = "none";
+      }
+
+      modalBack.classList.add("open");
+  };
+  modalClose.onclick = () => modalBack.classList.remove("open");
+
+  async function refreshLibraryRibbon(){
+    try {
+        const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/me?limit=30&offset=0`); 
+        const list = data.generations || [];
+        
+        let hiddenIds = [];
+        try { hiddenIds = JSON.parse(localStorage.getItem("lf_hidden_items_v2") || "[]"); } catch(e){}
+        const visible = list.filter(g => !hiddenIds.includes(String(g.id)));
+
+        if(visible.length === 0){
+            libRibbon.innerHTML = `<div style="padding:20px;color:#444">No recent history</div>`;
+            return;
+        }
+
+        const html = visible.map(item => {
+            const url = item.output_url || "";
+            const st = getRibbonStatus(item.status);
+            
+            let media = "";
+            if(!url) media = `<div style="width:100%;height:100%;background:#111;display:flex;align-items:center;justify-content:center;color:#333">...</div>`;
+            else if(isVideoUrl(url)) media = `<video src="${url}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>`;
+            else media = `<img src="${url}" loading="lazy" />`;
+            
+            const jsonItem = JSON.stringify(item).replace(/"/g, '&quot;');
+
+            return `
+            <div class="lf-rib-item" onclick="window.openLibraryModal(${jsonItem})">
+               ${media}
+               <div class="lf-rib-status"><span class="dot ${st.dot}"></span> ${st.text}</div>
+            </div>`;
+        }).join("");
+        
+        const moreBtn = `<a href="https://lightfull.ai/library" class="lf-rib-more">More →</a>`;
+        libRibbon.innerHTML = html + moreBtn;
+
+    } catch(e){
+        console.error("Ribbon fetch err", e);
+    }
+  }
+
+
+  /* ==========================================================
+      INIT & EVENTS
+     ========================================================== */
+  drop.addEventListener("click", ()=>fileEl.click());
+  
+  // FIX: Handle file selection correctly (read files BEFORE clearing value)
+  fileEl.addEventListener("change", (e)=>{
+    const files = e.target.files; 
+    addFiles(files);
+    fileEl.value = ""; 
+  });
+
+  ["dragenter","dragover"].forEach(evt=>{
+    drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="rgba(43,108,255,.55)"; });
+  });
+  ["dragleave","drop"].forEach(evt=>{
+    drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="var(--border)"; });
+  });
+  drop.addEventListener("drop",(ev)=>{ addFiles(ev.dataTransfer?.files); });
+
+  runBtn.addEventListener("click", async ()=>{
+    try{ await startJob(); } catch(e){ showLoader(false); runBtn.disabled=false; gptBtn.disabled=false; }
+  });
+
+  gptBtn.addEventListener("click", async ()=>{
+    try { await buildPromptNano(); } catch(e){ showPromptLoader(false); gptBtn.disabled = false; runBtn.disabled = false; }
+  });
+    
+  // Cost calculation listeners
+  resEl.addEventListener("change", calcCost);
+    
+  // Seedream Listeners
+  sdSize.addEventListener("change", () => {
+      if (sdSize.value === "custom") sdCustomRes.classList.remove("hidden");
+      else sdCustomRes.classList.add("hidden");
+      calcCost();
+  });
+
+  // Flux Listeners
+  fxRes.addEventListener("change", calcCost);
+
+  calcCost(); 
+  updateDropText();
+
+  refreshLibraryRibbon();
+  setInterval(refreshLibraryRibbon, 30000);
+
+})();
+</script>
