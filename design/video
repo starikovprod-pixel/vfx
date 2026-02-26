@@ -2072,10 +2072,34 @@
      HISTORY (vertical, Higgs-like)
      uses /api/me and filters videos
   ============================ */
+  async function loadAllVideos(){
+    let offset = 0;
+    const limit = 100;
+    const all = [];
+    let hasMore = true;
+
+    while(hasMore){
+      const j = await fetchAuth(`${BACKEND_BASE}/api/me?limit=${limit}&offset=${offset}`, { method:"GET" });
+      const gens = Array.isArray(j.generations) ? j.generations : [];
+
+      all.push(...gens);
+
+      if(gens.length < limit){
+        hasMore = false;
+      }else{
+        offset += limit;
+      }
+
+      // защитимся от бесконечного цикла
+      if(offset > 5000) break;
+    }
+
+    return all;
+  }
+
   async function loadHistory(selectNewest=false){
     try{
-      const j = await fetchAuth(`${BACKEND_BASE}/api/me?limit=40&offset=0`, { method:"GET" });
-      const gens = Array.isArray(j.generations) ? j.generations : [];
+      const gens = await loadAllVideos();
       historyItems = gens
         .map(x => ({...x, __video: getVideoOut(x)}))
         .filter(x => !!x.__video);
