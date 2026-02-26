@@ -1813,15 +1813,17 @@ Blockbuster YouTube thumbnail aesthetic.`;
     }
   }
 
-  // ===== Export canvas to PNG blob =====
-  async function exportCanvasBlob(pixelRatio=2){
+  // ===== Export canvas to PNG blob (ALWAYS full-size a.w x a.h) =====
+  async function exportCanvasBlob(pixelRatio = 2) {
     if (!stage) throw new Error("No stage");
     closeTextEditor();
 
     const a = ASPECTS[String(aspectEl.value || "16:9")] || ASPECTS["16:9"];
     const cg = getCanvasGroup();
+    const bg = rootLayer.findOne("#bgRect");
+    if (!bg) throw new Error("No bgRect");
 
-    // --- snapshot current viewport transform (fit-to-screen / zoom) ---
+    // snapshot viewport transform (fit-to-screen / zoom)
     const prev = {
       x: cg.x(),
       y: cg.y(),
@@ -1829,26 +1831,33 @@ Blockbuster YouTube thumbnail aesthetic.`;
       sy: cg.scaleY()
     };
 
-    // Hide transformer so it doesn't export
+    // hide transformer
     tr.visible(false);
     rootLayer.draw();
 
-    // --- IMPORTANT: force export in "native canvas coords" (no viewport scaling/centering) ---
+    // IMPORTANT: force canvasGroup into native coords for export
     cg.position({ x: 0, y: 0 });
     cg.scale({ x: 1, y: 1 });
+    rootLayer.draw();
 
-    // Make sure nothing is mid-draw
-    cg.getLayer()?.draw?.();
-
-    const dataURL = cg.toDataURL({
-      pixelRatio,
-      x: 0,
-      y: 0,
-      width: a.w,
-      height: a.h
+    // get exact clip rect from bgRect in STAGE coordinates (skip shadow!)
+    const r = bg.getClientRect({
+      relativeTo: stage,
+      skipShadow: true,
+      skipStroke: true
     });
 
-    // --- restore viewport transform ---
+    // export from STAGE with precise crop
+    const dataURL = stage.toDataURL({
+      x: Math.round(r.x),
+      y: Math.round(r.y),
+      width: a.w,          // force exact base size
+      height: a.h,         // force exact base size
+      pixelRatio
+    });
+    console.log("EXPORT size target:", a.w, a.h, "pixelRatio:", pixelRatio);
+
+    // restore viewport
     cg.position({ x: prev.x, y: prev.y });
     cg.scale({ x: prev.sx, y: prev.sy });
 
