@@ -786,6 +786,9 @@
               <div class="lf-dd-item active" data-name="Nano Banana Pro" data-id="nano_banana_pro">
                 <span>Nano Banana Pro</span><span class="status-dot"></span>
               </div>
+              <div class="lf-dd-item" data-name="Nano Banana 2" data-id="nano_banana_2">
+                <span>Nano Banana 2</span>
+              </div>
               <div class="lf-dd-item" data-name="Seedream 4" data-id="seedream_4">
                 <span>Seedream 4</span>
               </div>
@@ -809,9 +812,19 @@
               </div>
               <div class="lf-dropdown-menu" id="aspectList">
                 <div class="lf-dd-item active" data-name="Match input" data-value="match_input_image"><span>Match input</span></div>
-                <div class="lf-dd-item" data-name="16:9" data-value="16:9"><span>16:9</span></div>
-                <div class="lf-dd-item" data-name="9:16" data-value="9:16"><span>9:16</span></div>
                 <div class="lf-dd-item" data-name="1:1" data-value="1:1"><span>1:1</span></div>
+                <div class="lf-dd-item" data-name="1:4" data-value="1:4"><span>1:4</span></div>
+                <div class="lf-dd-item" data-name="1:8" data-value="1:8"><span>1:8</span></div>
+                <div class="lf-dd-item" data-name="2:3" data-value="2:3"><span>2:3</span></div>
+                <div class="lf-dd-item" data-name="3:2" data-value="3:2"><span>3:2</span></div>
+                <div class="lf-dd-item" data-name="3:4" data-value="3:4"><span>3:4</span></div>
+                <div class="lf-dd-item" data-name="4:1" data-value="4:1"><span>4:1</span></div>
+                <div class="lf-dd-item" data-name="4:3" data-value="4:3"><span>4:3</span></div>
+                <div class="lf-dd-item" data-name="4:5" data-value="4:5"><span>4:5</span></div>
+                <div class="lf-dd-item" data-name="5:4" data-value="5:4"><span>5:4</span></div>
+                <div class="lf-dd-item" data-name="8:1" data-value="8:1"><span>8:1</span></div>
+                <div class="lf-dd-item" data-name="9:16" data-value="9:16"><span>9:16</span></div>
+                <div class="lf-dd-item" data-name="16:9" data-value="16:9"><span>16:9</span></div>
                 <div class="lf-dd-item" data-name="21:9" data-value="21:9"><span>21:9</span></div>
               </div>
             </div>
@@ -1537,6 +1550,20 @@
     refBlock.style.display = isZ ? "none" : "";
     midSplit.classList.toggle("z-wide", isZ);
 
+    if(presetId === "nano_banana_2"){
+      selectedRes = "1K";
+      currentResName.textContent = "1K";
+      resList.querySelectorAll(".lf-dd-item").forEach(el => {
+        el.classList.toggle("active", el.dataset.value === "1K");
+      });
+
+      selectedAspect = "match_input_image";
+      currentAspectName.textContent = "Match input";
+      aspectList.querySelectorAll(".lf-dd-item").forEach(el => {
+        el.classList.toggle("active", el.dataset.value === "match_input_image");
+      });
+    }
+
     if(isZ){
       selectedFiles.forEach(f => { if(f.__previewUrl) try{ URL.revokeObjectURL(f.__previewUrl); } catch(e){} });
       selectedFiles = [];
@@ -1563,6 +1590,11 @@
     if (currentPresetId === "z_image_turbo") return setGenerateLabel("1 Cr / 4 runs");
     if (currentPresetId === "nano_banana_pro") {
       const cost = (String(selectedRes || "2K") === "4K") ? 2 : 1;
+      return setGenerateLabel(cost + " Cr");
+    }
+    if (currentPresetId === "nano_banana_2") {
+      const res = String(selectedRes || "1K");
+      const cost = (res === "4K") ? 4 : (res === "2K") ? 3 : 2;
       return setGenerateLabel(cost + " Cr");
     }
     if (currentPresetId === "seedream_4") {
@@ -1663,10 +1695,9 @@
     fd.append("scene", userText || "high quality");
     fd.append("prompt_user", userText);
 
-    // by model
-    if(currentPresetId === "nano_banana_pro"){
+    const appendNanoFields = () => {
       fd.append("aspect_ratio", String(selectedAspect || "match_input_image"));
-      fd.append("resolution", String(selectedRes || "2K"));
+      fd.append("resolution", String(selectedRes || (currentPresetId === "nano_banana_2" ? "1K" : "2K")));
       fd.append("output_format", "png");
       fd.append("safety_filter_level", "block_only_high");
 
@@ -1677,6 +1708,11 @@
           fd.append("image_input_url", refs[0]);
         }
       }
+    };
+
+    // by model
+    if(currentPresetId === "nano_banana_pro" || currentPresetId === "nano_banana_2"){
+      appendNanoFields();
     }
 
     if(currentPresetId === "seedream_4"){
