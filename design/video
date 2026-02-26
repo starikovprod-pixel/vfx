@@ -154,8 +154,8 @@
     content:"";
     position:absolute;
     inset:0;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(6px);
+    background: transparent;
+    backdrop-filter: none;
   }
 
   .model-popbox{
@@ -1088,7 +1088,7 @@
       </div>
 
       <!-- detail stub (Higgs-like) -->
-      <div class="detail" id="detail">
+      <div class="detail hidden" id="detail">
         <div class="d-row">
           <div class="d-title" id="d-title">Select a generation</div>
           <div class="chip" id="d-status"><span class="dot warn"></span> —</div>
@@ -1128,7 +1128,7 @@
   </div>
 
         <div class="model-pop" id="modelPop">
-          <div class="model-popbox">
+          <div class="model-popbox" onclick="event.stopPropagation()">
             <!-- groups -->
             <div class="grp">
               <div class="grp-head">Providers</div>
@@ -1147,8 +1147,8 @@
               </div>
             </div>
           </div>
-
-</div>
+        </div>
+      </div>  <!-- end #lf-video -->
 
 <script>
 (() => {
@@ -1357,8 +1357,7 @@
     const ext = cands.find(u => isVideoUrl(u));
     if(ext) return ext;
 
-    const any = cands[0] || "";
-    return any;
+    return "";
   }
   function fmt(ts){
     const s = String(ts||"");
@@ -2066,7 +2065,7 @@
       renderHistory();
 
       if(selectNewest && historyItems.length){
-        const newest = historyItems[0];
+        const newest = historyItems[historyItems.length - 1];
         selectHistory(String(newest.id));
       }else if(selectedHistoryId){
         const still = historyItems.find(x=>String(x.id)===String(selectedHistoryId));
@@ -2079,10 +2078,13 @@
 
   function renderHistory(){
     const host = $("history");
+    const detail = $("detail");
     if(!historyItems.length){
+      detail.classList.add("hidden");
       host.innerHTML = `<div style="padding:14px;color:rgba(255,255,255,0.45);font-weight:900;">No videos yet.</div>`;
       return;
     }
+    detail.classList.remove("hidden");
     host.innerHTML = historyItems.map(it=>{
       const id = String(it.id);
       const url = it.__video || getVideoOut(it) || "";
@@ -2197,7 +2199,7 @@
     $("rw-aleph-cost").textContent = "—";
     $("rw-act-cost").textContent = "—";
 
-    loadHistory(false);
+    loadHistory(true);
   }
 
   init();
