@@ -1,1096 +1,1165 @@
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
 <style>
-  :root {
-    --bg-body: #050505;
-    --bg-panel: #111111;
-    --bg-card: #181818;
-    --bg-input: #222222;
-    --border: #2b2b2b;
-    --accent: #2b6cff;
-    --accent-hover: #1a5cff;
-    --text-main: #ffffff;
-    --text-sec: #a0a0a0;
-    --danger: #ff465a;
-    --ok: #39ff14;
-    --warn: #ffd166;
-    --radius: 16px;
+  :root{
+    --bg:#050505;
+    --panel:#0f0f10;
+    --card:#141416;
+    --card2:#101012;
+    --input:#1b1b1f;
+    --border: rgba(255,255,255,0.10);
+    --border2: rgba(255,255,255,0.16);
+    --text:#ffffff;
+    --muted: rgba(255,255,255,0.60);
+    --muted2: rgba(255,255,255,0.45);
+    --accent:#2b6cff;
+    --accent2:#1a5cff;
+    --ok:#39ff14;
+    --warn:#ffd166;
+    --danger:#ff465a;
+
+    --r12: 12px;
+    --r16: 16px;
+    --r22: 22px;
   }
 
-  body { margin: 0; background: var(--bg-body); overflow-x: hidden; }
-  #lf-video-page * { box-sizing: border-box; outline: none; }
+  body{ margin:0; background:var(--bg); overflow-x:hidden; }
+  #lf-video *{ box-sizing:border-box; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 
-  #lf-video-page {
-    color: var(--text-main);
-    font-family: Inter, system-ui, -apple-system, sans-serif;
-    min-height: 100vh;
-    padding-bottom: 40px;
-    display: flex;
-    flex-direction: column;
+  #lf-video{
+    color:var(--text);
+    min-height:100vh;
   }
 
-  #lf-main { 
-    padding: 26px 20px 0; 
-    width: 100%;
-    max-width: 1360px;
-    margin: 0 auto; 
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    position: relative; 
+  /* Top nav (light stub, Higgs-like) */
+  .topbar{
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 18px 18px 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .tabs{
+    display:flex;
+    gap:14px;
+    align-items:center;
+    color:var(--muted);
+    font-weight:900;
+    font-size:13px;
+  }
+  .tabs a{
+    color:inherit;
+    text-decoration:none;
+    padding:10px 10px;
+    border-radius: 999px;
+    transition:.15s;
+  }
+  .tabs a.active{
+    color:#fff;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+  .tabs a:hover{ background: rgba(255,255,255,0.06); color:#fff; }
+
+  .topbar-right{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    color:var(--muted2);
+    font-size:12px;
+    font-weight:800;
+  }
+  .top-pill{
+    padding:8px 10px;
+    border-radius:999px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
   }
 
-  /* --- HEADER & DROPDOWN --- */
-  .lf-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-    position: relative;
-    z-index: 100;
+  /* Workspace */
+  .workspace{
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 0 18px 26px;
+    display:grid;
+    grid-template-columns: 380px minmax(0,1fr) 380px;
+    gap: 16px;
+    align-items: start;
   }
 
-  .lf-model-select { position: relative; width: 280px; }
-  .lf-select-trigger {
-    background: var(--bg-panel);
+  /* Glass panels */
+  .glass{
+    background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(16,16,18,0.64));
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px 16px;
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer; transition: 0.2s; user-select: none;
-  }
-  .lf-select-trigger:hover { border-color: rgba(255,255,255,0.3); background: var(--bg-card); }
-  .lf-model-name { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .lf-chevron { color: var(--text-sec); font-size: 18px; transition: transform 0.2s; margin-left: 10px; }
-  .lf-model-select.open .lf-chevron { transform: rotate(90deg); }
-
-  .lf-dropdown-menu {
-    position: absolute; top: calc(100% + 10px); left: 0; width: 100%;
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 6px; display: none;
-    flex-direction: column; gap: 4px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    z-index: 1000;
-  }
-  .lf-model-select.open .lf-dropdown-menu { display: flex; }
-
-  .lf-dd-item {
-    padding: 12px; border-radius: 10px; cursor: pointer;
-    font-size: 14px; font-weight: 600; color: var(--text-sec);
-    display: flex; align-items: center; gap: 10px; transition: 0.15s;
-  }
-  .lf-dd-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
-  .lf-dd-item.active { background: rgba(255,255,255,0.1); color: #fff; }
-  .lf-dd-item .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); margin-left: auto; }
-  .lf-dd-item.active .status-dot { background: var(--ok); }
-
-  /* --- WORKSPACE --- */
-  #lf-workspace {
-    display: grid; grid-template-columns: 460px 1fr; /* 460px left col */
-    gap: 0;
-    border: 1px solid var(--border); border-radius: 22px;
-    overflow: hidden; background: var(--bg-panel);
-    min-height: 720px; align-items: stretch; position: relative; width: 100%;
+    border-radius: var(--r22);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    box-shadow: 0 22px 70px rgba(0,0,0,0.70), inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
-  /* --- SIDEBAR --- */
-  .lf-side {
-    padding: 30px; 
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; 
-    gap: 24px; 
-    background: var(--bg-panel); 
-    max-height: calc(100vh - 114px); 
-    overflow-y: auto;
-  }
-
-  .lf-back {
-    background: transparent; border: 0; color: var(--text-sec);
-    font-weight: 900; cursor: pointer; padding: 0; font-size: 13px; text-align: left;
-    margin-bottom: 0px; 
-  }
-  .lf-h2-sub { 
-    font-size: 15px; font-weight: 800; color: var(--text-sec); 
-    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; 
-  }
-
-  /* --- FIELDS --- */
-  .lf-field { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; /* Distance label -> input */
-    margin-top: 2px;
-    position: relative; 
-  }
-    
-  #form-k26 .lf-field,
-  #form-o1 .lf-field,
-  #form-o1-flfv .lf-field,
-  #form-kling-motion .lf-field,
-  #form-veo-fast .lf-field,
-  #form-veo .lf-field,
-  #form-veo-refs .lf-field,
-  #form-runway-aleph .lf-field,
-  #form-runway-acttwo .lf-field {
-    margin-bottom: 18px; 
-  }
-  
-  #form-k26 .lf-field:last-of-type,
-  #form-o1 .lf-field:last-of-type,
-  #form-o1-flfv .lf-field:last-of-type,
-  #form-kling-motion .lf-field:last-of-type,
-  #form-veo-fast .lf-field:last-of-type,
-  #form-veo .lf-field:last-of-type,
-  #form-veo-refs .lf-field:last-of-type,
-  #form-runway-aleph .lf-field:last-of-type,
-  #form-runway-acttwo .lf-field:last-of-type {
-    margin-bottom: 0;
-  }
-
-  .lf-help-row {
-    display: flex; 
-    align-items: baseline; 
-    justify-content: space-between;
-    gap: 10px;
-    padding-top: 2px;
-    margin-bottom: 0;
-  }
-    
-  .lf-help-row label, .lf-field label { 
-    display: block; font-size: 12px; font-weight: 900; color: var(--text-sec); margin: 0; line-height: 1.2;
-  }
-    
-  .lf-field textarea, .lf-field select {
-    width: 100%; background: var(--bg-input); border: 1px solid var(--border);
-    color: var(--text-main); padding: 14px 16px; border-radius: 12px; 
-    font-size: 14px; display: block; line-height: 1.5; transition: 0.2s;
-  }
-    
-  /* K2.6 Textarea */
-  #form-k26 textarea { min-height: 120px; resize: vertical; }
-    
-  .lf-field textarea:focus, .lf-field select:focus { border-color: rgba(255,255,255,0.3); }
-
-  .lf-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
-    
-  /* Dropzone */
-  .lf-drop {
-    border: 2px dashed var(--border); border-radius: 14px; 
-    padding: 32px 20px; 
-    min-height: 140px; 
-    cursor: pointer; background: rgba(255,255,255,.02); transition: .15s; text-align: center;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    position: relative; overflow: hidden;
-  }
-  .lf-drop:hover, .lf-drop.drag-over { border-color: rgba(43,108,255,.55); background: rgba(43,108,255,.06); }
-  .lf-drop .big { font-weight: 900; font-size: 15px; margin-bottom: 6px; color: #fff; display: block; position: relative; z-index: 2; }
-  .lf-drop .sub { font-size: 13px; color: var(--text-sec); font-weight: 500; display: block; position: relative; z-index: 2; }
-    
-  /* O1 margins */
-  #form-o1 #o1-vid-drop { margin-top: 0; }
-    
-  .lf-thumb-preview {
-    display: none; width: 100%; height: 200px; object-fit: contain;
-    border-radius: 10px; background: #000; margin-top: 16px; border: 1px solid var(--border);
-  }
-
-  /* START/LAST Frame Styling */
-  .lf-frame-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .lf-frame-box {
-    flex: 1;
-    min-height: 140px;
-    aspect-ratio: 1/1;
+  /* LEFT: controls */
+  .left{
     padding: 14px;
-    justify-content: center;
+    position: sticky;
+    top: 10px;
+    max-height: calc(100vh - 20px);
+    overflow: auto;
   }
-  .lf-frame-box .lf-thumb-preview {
-    width: 100%; height: 100%; 
-    margin: 0; 
-    position: absolute; inset: 0; 
-    object-fit: cover; 
-    z-index: 1; 
-    opacity: 0.6;
-    border: none;
-    border-radius: 0;
+  .left::-webkit-scrollbar{ width: 10px; }
+  .left::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.14); border-radius:999px; border: 2px solid rgba(0,0,0,0.35); }
+  .left::-webkit-scrollbar-track{ background: rgba(255,255,255,0.04); border-radius:999px; }
+
+  .section{
+    padding: 14px;
+    border-radius: var(--r16);
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    margin-bottom: 12px;
   }
-  .lf-frame-box .big, .lf-frame-box .sub {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  .sec-title{
+    font-size:12px;
+    letter-spacing:.45px;
+    text-transform:uppercase;
+    color:var(--muted2);
+    font-weight:1000;
+    margin-bottom: 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
   }
 
-  .lf-swap {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,.04);
+  .btn-back{
+    background: transparent;
+    border:0;
+    color: var(--muted);
+    font-weight: 950;
+    cursor:pointer;
+    padding: 0;
+    font-size: 13px;
+  }
+  .btn-back:hover{ color:#fff; }
+
+  /* Model chooser (nested) */
+  .model-trigger{
+    width: 100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding: 12px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    cursor:pointer;
+    user-select:none;
+    transition:.15s;
+  }
+  .model-trigger:hover{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.22); }
+  .model-trigger .name{ font-weight:1000; font-size: 14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .model-trigger .chev{ color: rgba(255,255,255,0.55); font-size:18px; }
+
+  .model-pop{
+    position: relative;
+    margin-top: 10px;
+    display:none;
+  }
+  .model-pop.open{ display:block; }
+
+  .model-popbox{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 16px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.65);
+  }
+
+  .grp, .sub{
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+    overflow:hidden;
+  }
+  .grp-head, .sub-head{
+    padding: 10px 10px;
+    font-size: 12px;
+    font-weight: 1000;
+    color: rgba(255,255,255,0.70);
+    text-transform: uppercase;
+    letter-spacing: .35px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .grp-list, .sub-list{ display:flex; flex-direction:column; }
+  .mitem{
+    padding: 10px 10px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    font-size: 13px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.78);
+    transition:.12s;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .mitem:first-child{ border-top: 0; }
+  .mitem:hover{ background: rgba(255,255,255,0.06); color:#fff; }
+  .mitem.active{ background: rgba(255,255,255,0.10); color:#fff; }
+  .pill{
+    font-size: 11px;
+    font-weight: 1000;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.65);
+    white-space:nowrap;
+  }
+
+  /* shared inputs */
+  .lf-field{ display:flex; flex-direction:column; gap: 8px; margin-top: 2px; }
+  .lf-field label{
+    font-size: 12px;
+    font-weight: 1000;
+    color: var(--muted2);
+  }
+  .lf-field textarea, .lf-field select{
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
     color: #fff;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
+    padding: 12px 12px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.45;
     transition: .15s;
-    flex-shrink: 0;
   }
-  .lf-swap:hover {
-    border-color: rgba(255,255,255,.25);
-    background: rgba(255,255,255,.08);
+  .lf-field textarea:focus, .lf-field select:focus{
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.22);
   }
 
-  /* Checkbox Row */
-  .lf-chk-row {
-    display: flex; align-items: center; gap: 12px;
-    cursor: pointer; user-select: none;
-    font-size: 14px; font-weight: 600; color: #e0e0e0;
+  .lf-row2{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .lf-drop{
+    border: 2px dashed rgba(255,255,255,0.14);
+    border-radius: 16px;
+    padding: 18px 14px;
+    min-height: 130px;
+    cursor:pointer;
+    background: rgba(255,255,255,0.02);
+    transition: .15s;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .lf-drop:hover, .lf-drop.drag-over{
+    border-color: rgba(43,108,255,0.55);
+    background: rgba(43,108,255,0.06);
+  }
+  .lf-drop .big{ font-weight:1000; font-size: 14px; margin-bottom: 6px; }
+  .lf-drop .sub{ font-size: 12px; color: var(--muted); font-weight: 700; }
+  .lf-thumb-preview{
+    display:none;
+    width:100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.10);
+    margin-top: 12px;
+    background:#000;
+  }
+
+  .lf-chk-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+    user-select:none;
+    font-size: 14px;
+    font-weight: 850;
+    color: rgba(255,255,255,0.85);
     padding: 4px 0;
   }
-  .lf-chk-row input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+  .lf-chk-row input{ width: 18px; height: 18px; accent-color: var(--accent); }
 
-  /* --- ACTIONS --- */
-  .lf-actions { 
+  .lf-actions{
     margin-top: 10px;
-    padding-top: 20px;
+    padding-top: 14px;
     border-top: 1px solid rgba(255,255,255,0.06);
-    display: flex; flex-direction: column; gap: 12px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
   }
-  .lf-btn {
-    width: 100%; height: 56px; padding: 0 16px; border-radius: 16px;
-    border: 0; background: var(--accent);
-    color: #fff; font-weight: 900; cursor: pointer; 
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    font-size: 15px; transition: 0.2s;
+  .lf-btn{
+    width:100%;
+    height: 52px;
+    border:0;
+    border-radius: 16px;
+    background: var(--accent);
+    color:#fff;
+    font-weight: 1000;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    font-size: 14px;
+    transition:.15s;
   }
-  .lf-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
-  .lf-btn:active { transform: translateY(1px); }
-  .lf-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; background: #333; color: #aaa; }
-  .lf-btn.secondary { background: #2a2a2a; color: #ddd; }
-    
-  .lf-cost { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.15); }
-  .lf-status { text-align: center; font-size: 13px; color: var(--text-sec); min-height: 20px; font-weight: 600; }
-
-  /* --- TOOLTIPS --- */
-  .lf-help { position: relative; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; }
-  .lf-i {
-    width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(255,255,255,.15);
-    background: rgba(255,255,255,.05); color: #bbb; font-weight: 700; font-size: 11px;
-    display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none;
-    font-family: serif; font-style: italic; transition: 0.2s;
+  .lf-btn:hover{ background: var(--accent2); transform: translateY(-1px); }
+  .lf-btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; background:#2b2b2b; color:#aaa; }
+  .lf-cost{
+    font-size: 12px;
+    font-weight: 1000;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.12);
   }
-  .lf-i:hover { border-color: rgba(255,255,255,.5); color: #fff; background: rgba(255,255,255,.1); }
-    
-  .lf-tip {
-    position: absolute; top: 30px; right: 0; 
-    width: 320px; max-width: min(320px, calc(100vw - 48px));
-    padding: 14px; border-radius: 12px; border: 1px solid var(--border);
-    background: #1a1a1a; color: #eee; font-size: 13px; line-height: 1.5;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.8); display: none; z-index: 9999; 
-  }
-  .lf-tip::before {
-    content: ""; position: absolute; top: -6px; right: 5px; width: 12px; height: 12px;
-    background: #1a1a1a; border-left: 1px solid var(--border); border-top: 1px solid var(--border);
-    transform: rotate(45deg);
-  }
-  .lf-tip code {
-    font-family: monospace; font-size: 11px; color: #bcd1ff; background: rgba(43,108,255,.1);
-    padding: 2px 6px; border-radius: 4px;
-  }
-  .lf-help.is-open .lf-tip { display: block; }
-    
-  @media(max-width: 420px){
-    .lf-tip{ right: auto; left: 0; }
-    .lf-tip::before{ right: auto; left: 6px; }
+  .lf-status{
+    text-align:center;
+    font-size: 12px;
+    color: var(--muted);
+    min-height: 18px;
+    font-weight: 850;
   }
 
-  /* Chips & Grid */
-  .lf-chipbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-  .lf-chip {
-    border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #eaeaea;
-    padding: 6px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; cursor: pointer; user-select: none;
+  /* CENTER: preview */
+  .center{
+    padding: 14px;
   }
-  .lf-chip:hover { border-color: var(--accent); background: rgba(43,108,255,.15); color: #fff; }
+  .viewer{
+    border-radius: var(--r22);
+    border: 1px solid rgba(255,255,255,0.10);
+    background: #000;
+    overflow:hidden;
+    position:relative;
+    min-height: 560px;
+  }
+  .viewer-inner{
+    padding: 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: 560px;
+  }
 
-  .lf-img-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
-  .lf-img-tile { width: 100%; aspect-ratio: 1/1; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,.10); background: #0b0b0b; position: relative; }
-  .lf-img-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .lf-img-x {
-    position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%;
-    background: rgba(0,0,0,0.7); color: #fff; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; cursor: pointer; transition: 0.2s;
+  .empty{
+    color: rgba(255,255,255,0.25);
+    text-align:center;
+    font-weight: 1000;
   }
-  .lf-img-x:hover { background: var(--danger); }
-    
-  .lf-validate { 
-    margin-top: -4px; 
-    font-size: 12px; line-height: 1.4; color: var(--text-sec); 
+  .result{
+    display:none;
+    width: min(1020px, 96%);
+    border-radius: 18px;
+    overflow:hidden;
+    border: 1px solid rgba(255,255,255,0.10);
+    background:#0b0b0b;
+    box-shadow: 0 0 70px rgba(0,0,0,0.75);
   }
-  .lf-validate.ok { color: #9be59b; }
-  .lf-validate.bad { color: #ffb5c2; }
+  .result video{
+    width:100%;
+    display:block;
+    max-height: 72vh;
+    object-fit: contain;
+    background:#000;
+  }
+  .resbar{
+    padding: 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    border-top: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.40);
+  }
+  .resmeta{ color: var(--muted); font-weight: 850; font-size: 12px; }
+  .dl{
+    text-decoration:none;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--accent);
+    color:#fff;
+    font-weight: 1000;
+  }
+  .dl:hover{ background: var(--accent2); }
 
-  /* Main View */
-  .lf-main-view {
-    background: #000; display: flex; align-items: center; justify-content: center;
-    padding: 30px; position: relative; min-height: 500px;
+  .loader{
+    position:absolute;
+    inset:0;
+    background: rgba(0,0,0,0.78);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap: 12px;
+    z-index: 20;
+    backdrop-filter: blur(6px);
   }
-  .lf-empty { color: #3a3a3a; text-align: center; font-weight: 900; }
-  .lf-result {
-    display: none; width: min(920px, 95%); border-radius: 18px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,.08); box-shadow: 0 0 60px rgba(0,0,0,.7); background: #0b0b0b;
+  .spin{
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    border: 4px solid rgba(255,255,255,0.14);
+    border-top-color: var(--accent);
+    animation: sp 1s linear infinite;
   }
-  .lf-result video, .lf-result img { width: 100%; display: block; max-height: 75vh; object-fit: contain; background: #000; }
-  .lf-resbar {
-    padding: 16px; display: flex; justify-content: space-between; align-items: center;
-    gap: 12px; border-top: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.35);
-  }
-  .lf-resbar a { text-decoration: none; background: var(--accent); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 1000; transition: 0.2s; }
-  .lf-resbar a:hover { background: var(--accent-hover); }
+  @keyframes sp{ to{ transform: rotate(360deg); } }
+  .wait{ font-weight:1000; font-size: 16px; }
+  .time{ color: var(--muted); font-weight: 900; font-size: 12px; }
 
-  /* Loader */
-  .lf-loader {
-    position: absolute; inset: 0; background: rgba(0,0,0,.85); display: none;
-    flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 30; backdrop-filter: blur(5px);
+  /* RIGHT: history + details (Higgs-like) */
+  .right{
+    padding: 14px;
+    position: sticky;
+    top: 10px;
+    max-height: calc(100vh - 20px);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
   }
-  .lf-spin {
-    width: 50px; height: 50px; border-radius: 50%; border: 4px solid #2b2b2b;
-    border-top-color: var(--accent); animation: lfspin 1s linear infinite;
-  }
-  @keyframes lfspin { to { transform: rotate(360deg); } }
-  .lf-wait { font-weight: 1000; font-size: 16px; }
-  .lf-time { font-size: 13px; color: var(--text-sec); }
 
-  /* Token Menu (O1) */
-  .lf-at-menu {
-    position: fixed; display: none; width: 260px; background: #1a1a1a;
-    border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-    z-index: 999; overflow: hidden;
+  .right-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
   }
-  .lf-at-item {
-    padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05);
-    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-    transition: 0.1s;
+  .right-title{
+    font-weight: 1000;
+    font-size: 13px;
+    color: rgba(255,255,255,0.72);
+    text-transform: uppercase;
+    letter-spacing: .35px;
   }
-  .lf-at-item:hover { background: var(--accent); color: #fff; }
-  .lf-at-tag { font-family: monospace; font-size: 12px; opacity: 0.7; }
+  .right-actions{
+    display:flex;
+    gap:8px;
+  }
+  .mini-btn{
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.12s;
+  }
+  .mini-btn:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.20); }
 
-  .hidden { display: none !important; }
+  .detail{
+    padding: 12px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+  }
+  .d-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .d-title{ font-weight: 1000; font-size: 13px; }
+  .d-sub{ color: var(--muted); font-weight: 850; font-size: 12px; margin-top: 6px; line-height:1.35; white-space: pre-wrap; max-height: 86px; overflow:auto; }
+  .d-chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px; }
+  .chip{
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.35);
+    color: rgba(255,255,255,0.78);
+    font-weight: 950;
+    font-size: 11px;
+    display:inline-flex;
+    align-items:center;
+    gap: 6px;
+  }
+  .dot{ width:6px; height:6px; border-radius:99px; background:#fff; }
+  .dot.ok{ background: var(--ok); }
+  .dot.warn{ background: var(--warn); }
+  .dot.err{ background: var(--danger); }
 
-  /* --- LIBRARY RIBBON (ONE ROW) --- */
-  .lf-lib-wrapper {
-    margin-top: 30px; 
-    border-top: 1px solid var(--border); 
-    padding-top: 24px;
-    width: 100%; 
-    box-sizing: border-box; 
-    overflow: hidden;
+  .history{
+    flex:1;
+    overflow:auto;
+    padding-right: 6px;
   }
-  .lf-ribbon-title { font-size: 15px; font-weight: 900; color: var(--text-sec); margin-bottom: 16px; padding-left: 4px; display: flex; justify-content: space-between; }
-   
-  .lf-ribbon {
-    display: grid; 
-    /* ONE ROW, 130px height */
-    grid-template-rows: 130px;
-    grid-auto-flow: column; 
-    grid-auto-columns: 130px; 
-    gap: 14px;
-    
-    overflow-x: auto; 
-    width: 100%; 
-    padding-bottom: 14px; 
-    padding-right: 4px;
-    
-    scroll-behavior: smooth; 
-    scrollbar-width: thin; 
-    scrollbar-color: var(--border) var(--bg-body);
-  }
-  .lf-ribbon::-webkit-scrollbar { height: 8px; }
-  .lf-ribbon::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-   
-  .lf-rib-item {
-    width: 100%; height: 100%; border-radius: 12px; overflow: hidden; position: relative;
-    border: 1px solid var(--border); background: #000; cursor: pointer; transition: 0.15s;
-  }
-  .lf-rib-item:hover { transform: scale(0.96); border-color: rgba(255,255,255,0.4); }
-  .lf-rib-item img, .lf-rib-item video { width: 100%; height: 100%; object-fit: cover; }
-   
-  .lf-rib-status {
-    position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px);
-    padding: 3px 7px; border-radius: 6px; font-size: 10px; font-weight: 700; color: #fff;
-    display: flex; align-items: center; gap: 5px; border: 1px solid rgba(255,255,255,0.15);
-  }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; }
-  .dot.ok { background: var(--ok); }
-  .dot.warn { background: var(--warn); }
-  .dot.err { background: var(--danger); }
+  .history::-webkit-scrollbar{ width:10px; }
+  .history::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.14); border-radius:999px; border: 2px solid rgba(0,0,0,0.35); }
+  .history::-webkit-scrollbar-track{ background: rgba(255,255,255,0.04); border-radius:999px; }
 
-  .lf-rib-more {
-    grid-row: span 1; /* Single row */
-    width: 130px;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px dashed var(--border); border-radius: 14px;
-    color: var(--text-sec); text-decoration: none; font-size: 13px; font-weight: 700;
-    transition: .2s; background: rgba(255,255,255,0.01);
+  .hitem{
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+    overflow:hidden;
+    cursor:pointer;
+    transition:.12s;
+    margin-bottom: 12px;
   }
-  .lf-rib-more:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: var(--accent); }
+  .hitem:hover{ border-color: rgba(255,255,255,0.22); transform: translateY(-1px); }
+  .hitem.active{ border-color: rgba(43,108,255,0.55); box-shadow: 0 0 0 1px rgba(43,108,255,0.22) inset; }
 
-  /* Modal */
-  .lf-modal-backdrop {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 9999;
-    display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s;
+  .hthumb{
+    height: 140px;
+    background:#000;
+    position:relative;
   }
-  .lf-modal-backdrop.open { opacity: 1; pointer-events: auto; }
-  .lf-modal {
-    width: 90%; max-width: 1100px; height: 85vh; background: var(--bg-card);
-    border: 1px solid var(--border); border-radius: 24px; display: flex; overflow: hidden;
-    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
+  .hthumb video, .hthumb img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    display:block;
   }
-  .m-preview { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; }
-  .m-preview video, .m-preview img { max-width: 100%; max-height: 100%; }
-  .m-sidebar { width: 360px; border-left: 1px solid var(--border); padding: 30px; background: var(--bg-panel); display: flex; flex-direction: column; gap: 20px; }
-  .m-close {
-    position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.5);
-    color: #fff; border: 1px solid rgba(255,255,255,0.2); width: 44px; height: 44px;
-    border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.2s; z-index: 10;
+  .hbadge{
+    position:absolute;
+    top:10px; left:10px;
+    padding: 5px 8px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(4px);
+    font-size: 11px;
+    font-weight: 1000;
+    display:flex;
+    align-items:center;
+    gap: 6px;
   }
-  .m-close:hover { background: #fff; color: #000; }
-   
-  .m-info-row { display: flex; flex-direction: column; gap: 4px; }
-  .m-label { font-size: 11px; text-transform: uppercase; color: var(--text-sec); font-weight: 700; letter-spacing: 0.5px; }
-  .m-val { font-size: 15px; color: #fff; font-weight: 500; }
+  .hbody{
+    padding: 12px;
+    display:flex;
+    flex-direction:column;
+    gap: 8px;
+  }
+  .hmodel{
+    font-weight:1000;
+    font-size: 12px;
+    color: rgba(255,255,255,0.78);
+    text-transform: uppercase;
+    letter-spacing: .35px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+  }
+  .hprompt{
+    font-size: 12px;
+    color: rgba(255,255,255,0.72);
+    line-height: 1.35;
+    max-height: 48px;
+    overflow:hidden;
+  }
+  .hmeta{
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 900;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
 
-  @media(max-width: 1000px){
-    #lf-main { padding: 16px 14px 30px; }
-    #lf-workspace { grid-template-columns: 1fr; border-radius: 18px; }
-    .lf-side { border-right: 0; border-bottom: 1px solid var(--border); max-height: none; padding: 18px; }
-    .lf-main-view { min-height: 420px; }
-    .lf-modal { flex-direction: column; height: 90vh; }
-    .m-sidebar { width: 100%; height: auto; border-left: none; border-top: 1px solid var(--border); }
-    /* Mobile Library */
-    .lf-ribbon { grid-template-rows: 96px; grid-auto-columns: 96px; }
+  /* MODAL (kept simple) */
+  .lf-modal-backdrop{
+    position: fixed; inset:0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transition:.18s;
   }
+  .lf-modal-backdrop.open{ opacity:1; pointer-events:auto; }
+  .lf-modal{
+    width: 92%;
+    max-width: 1200px;
+    height: 88vh;
+    background: rgba(20,20,22,0.92);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    overflow:hidden;
+    display:flex;
+    box-shadow: 0 50px 120px rgba(0,0,0,0.75);
+    position:relative;
+  }
+  .m-close{
+    position:absolute;
+    top: 16px; right: 16px;
+    width: 42px; height: 42px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.45);
+    color:#fff;
+    font-size: 20px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 10;
+  }
+  .m-close:hover{ background:#fff; color:#000; }
+  .m-preview{ flex:1; background:#000; display:flex; align-items:center; justify-content:center; }
+  .m-preview video{ width:100%; height:100%; object-fit:contain; }
+  .m-side{
+    width: 360px;
+    border-left: 1px solid rgba(255,255,255,0.10);
+    padding: 18px;
+    background: rgba(255,255,255,0.04);
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+  }
+  .m-label{ font-size: 11px; font-weight: 1000; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing:.35px; }
+  .m-val{ font-size: 13px; font-weight: 900; color:#fff; }
+  .m-dl{
+    margin-top:auto;
+    height: 48px;
+    border-radius: 16px;
+    border:0;
+    background: var(--accent);
+    color:#fff;
+    font-weight: 1000;
+    cursor:pointer;
+  }
+  .m-dl:hover{ background: var(--accent2); }
+
+  @media(max-width: 1200px){
+    .workspace{ grid-template-columns: 360px 1fr; }
+    .right{ display:none; }
+  }
+  @media(max-width: 980px){
+    .workspace{ grid-template-columns: 1fr; }
+    .left{ position:relative; top:auto; max-height:none; }
+    .center{ padding: 0; }
+    .viewer-inner{ min-height: 420px; }
+  }
+
+  .hidden{ display:none !important; }
 </style>
 
-<div id="lf-video-page">
-  <div id="lf-main">
-    
-    <div class="lf-header-row">
-      <div class="lf-model-select" id="modelSelect">
-        <div class="lf-select-trigger" onclick="toggleModelDropdown()">
-          <div class="lf-model-name" id="currentModelName">Kling 2.6</div>
-          <div class="lf-chevron">›</div>
-        </div>
-        
-        <div class="lf-dropdown-menu" id="modelList">
-          <div class="lf-dd-item active" data-model="kling_26" onclick="selectModel('kling_26', true)">
-            <span>Kling 2.6</span> <span class="status-dot"></span>
-          </div>
-          <div class="lf-dd-item" data-model="kling_o1" onclick="selectModel('kling_o1', true)">
-            <span>Kling O1</span>
-          </div>
-          <div class="lf-dd-item" data-model="kling_o1_flfv" onclick="selectModel('kling_o1_flfv', true)">
-            <span>Kling O1 (First → Last)</span>
-          </div>
-          <div class="lf-dd-item" data-model="kling_motion" onclick="selectModel('kling_motion', true)">
-            <span>Kling 2.6 Motion Control</span>
-          </div>
-          <div class="lf-dd-item" data-model="veo_fast" onclick="selectModel('veo_fast', true)">
-            <span>Veo 3.1 Fast</span>
-          </div>
-          <div class="lf-dd-item" data-model="veo" onclick="selectModel('veo', true)">
-            <span>Veo 3.1</span>
-          </div>
-          <div class="lf-dd-item" data-model="veo_refs" onclick="selectModel('veo_refs', true)">
-              <span>Veo 3.1 Reference</span>
-          </div>
-          <div class="lf-dd-item" data-model="runway_aleph" onclick="selectModel('runway_aleph', true)">
-              <span>Runway Aleph (Gen4)</span>
-          </div>
-          <div class="lf-dd-item" data-model="runway_act_two" onclick="selectModel('runway_act_two', true)">
-              <span>Runway Act Two</span>
-          </div>
-        </div>
-      </div>
-      <div></div>
+<div id="lf-video">
+
+  <div class="topbar">
+    <div class="tabs">
+      <a class="active" href="#" onclick="return false;">Create Video</a>
+      <a href="#" onclick="return false;">Edit Video</a>
+      <a href="#" onclick="return false;">Motion Control</a>
+      <a href="#" onclick="return false;" style="opacity:.55;">History</a>
     </div>
-
-    <div id="lf-workspace">
-      <div class="lf-side">
-        <button class="lf-back" id="btn-back" type="button">← Back to Flow</button>
-        
-        <div id="form-k26">
-          <div class="lf-h2-sub">Kling 2.6 Parameters</div>
-          
-          <div class="lf-field">
-            <label>Prompt</label>
-            <textarea id="k26-scene" rows="4" placeholder="Describe the motion or scene..."></textarea>
-          </div>
-
-          <div class="lf-field">
-            <label>Start Image (required)</label>
-            <input type="file" id="k26-file" accept="image/*" hidden />
-            <div class="lf-drop" id="k26-drop">
-              <div class="big" id="k26-dropTitle">Upload image</div>
-              <div class="sub" id="k26-dropSub">Click or drag&drop • PNG/JPG</div>
-              <img id="k26-thumb" class="lf-thumb-preview" />
-            </div>
-          </div>
-
-          <div class="lf-row2">
-            <div class="lf-field">
-              <label>Ratio</label>
-              <select id="k26-aspect">
-                <option value="16:9">16:9 (Landscape)</option>
-                <option value="9:16">9:16 (Portrait)</option>
-                <option value="1:1">1:1 (Square)</option>
-              </select>
-            </div>
-            <div class="lf-field">
-              <label>Duration</label>
-              <select id="k26-duration">
-                <option value="5">5s (Standard)</option>
-                <option value="10">10s (High Quality)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="lf-field">
-              <label class="lf-chk-row">
-                <input type="checkbox" id="k26-audio"> 
-                Generate Audio
-              </label>
-          </div>
-
-          <div class="lf-actions">
-            <button class="lf-btn" id="run-k26" type="button">
-              Generate <span class="lf-cost" id="k26-cost">2 Cr</span>
-            </button>
-            <div class="lf-status" id="status-k26"></div>
-          </div>
-        </div>
-
-        <div id="form-o1" class="hidden">
-          <div class="lf-h2-sub">Kling O1 Edit</div>
-
-          <div class="lf-field">
-              <div class="lf-help-row">
-                <label>Prompt</label>
-                <div class="lf-help" data-tip>
-                  <div class="lf-i">i</div>
-                  <div class="lf-tip">
-                    <b>How to write:</b><br>
-                    • Reference the video: <code>@Video1</code><br>
-                    • Reference images: <code>@Image1</code>, <code>@Image2</code><br>
-                    • Example: <code>Use @Video1. Make it winter style like @Image1.</code>
-                  </div>
-                </div>
-              </div>
-              <textarea id="o1-scene" rows="4" placeholder="Edit instructions (e.g. change style, remove object)..."></textarea>
-              <div class="lf-chipbar" id="o1-chipbar" style="display:none"></div>
-          </div>
-
-          <div class="lf-field">
-            <div class="lf-help-row">
-                <label>Input Video (MP4)</label>
-                <div class="lf-help" data-tip>
-                  <div class="lf-i">i</div>
-                  <div class="lf-tip">
-                    <b>Constraints:</b><br>
-                    • Duration: 3-12 seconds<br>
-                    • Format: MP4<br>
-                    • Aspect: 16:9 or 9:16 preferred
-                  </div>
-                </div>
-              </div>
-            <input type="file" id="o1-vid-file" accept="video/mp4" hidden />
-            <div class="lf-drop" id="o1-vid-drop">
-              <div class="big" id="o1-vid-title">Upload Video</div>
-              <div class="sub">Click or drag&drop • Required</div>
-            </div>
-            <div class="lf-validate" id="o1-vid-val">No video selected</div>
-          </div>
-
-          <div class="lf-field">
-            <div class="lf-help-row">
-                <label>Style Refs (Optional)</label>
-                <div class="lf-help" data-tip>
-                  <div class="lf-i">i</div>
-                  <div class="lf-tip">
-                    Upload images to guide the style, texture, or lighting of the output video.
-                  </div>
-                </div>
-              </div>
-            <input type="file" id="o1-img-file" accept="image/*" hidden multiple />
-            <div class="lf-drop" id="o1-img-drop">
-              <div class="big" id="o1-img-title">Upload Images</div>
-              <div class="sub">Max 4 images</div>
-            </div>
-            <div class="lf-img-grid" id="o1-img-grid"></div>
-          </div>
-
-          <div class="lf-field">
-              <div class="lf-help-row">
-                <label>Duration cost</label>
-                <div class="lf-help" data-tip>
-                  <div class="lf-i">i</div>
-                  <div class="lf-tip">
-                    This sets the cost bracket. The actual output length depends on your input video.
-                  </div>
-                </div>
-              </div>
-              <select id="o1-duration">
-                <option value="5">5s (15 Cr)</option>
-                <option value="10">10s (20 Cr)</option>
-              </select>
-          </div>
-
-          <div class="lf-actions">
-            <button class="lf-btn" id="run-o1" type="button" disabled>
-              Generate <span class="lf-cost" id="o1-cost">15 Cr</span>
-            </button>
-            <div class="lf-status" id="status-o1"></div>
-          </div>
-        </div>
-
-        <div id="form-o1-flfv" class="hidden">
-           <div class="lf-h2-sub">Kling O1 (First → Last)</div>
-           
-           <div class="lf-field">
-             <label>Prompt</label>
-             <textarea id="o1flfv-scene" rows="4" placeholder="Describe the transformation..."></textarea>
-           </div>
-           
-           <div class="lf-field">
-             <label>Frames (Start ↔ Last)</label>
-             <div class="lf-frame-row">
-               <input type="file" id="o1flfv-start-file" accept="image/*" hidden />
-               <div class="lf-drop lf-frame-box" id="o1flfv-start-drop">
-                 <div class="big" id="o1flfv-start-title">Start</div>
-                 <div class="sub" id="o1flfv-start-sub">Upload</div>
-                 <img id="o1flfv-start-thumb" class="lf-thumb-preview" />
-               </div>
-               
-               <button class="lf-swap" type="button" id="o1flfv-swap">↔</button>
-
-               <input type="file" id="o1flfv-end-file" accept="image/*" hidden />
-               <div class="lf-drop lf-frame-box" id="o1flfv-end-drop">
-                  <div class="big" id="o1flfv-end-title">Last</div>
-                  <div class="sub" id="o1flfv-end-sub">Upload</div>
-                  <img id="o1flfv-end-thumb" class="lf-thumb-preview" />
-               </div>
-             </div>
-           </div>
-           
-           <div class="lf-row2">
-             <div class="lf-field">
-               <label>Mode</label>
-               <select id="o1flfv-mode">
-                 <option value="std">Standard</option>
-                 <option value="pro">Pro (+1 Cr)</option>
-               </select>
-             </div>
-             <div class="lf-field">
-               <label>Duration</label>
-               <select id="o1flfv-duration">
-                 <option value="3">3s</option>
-                 <option value="4">4s</option>
-                 <option value="5" selected>5s (Default)</option>
-                 <option value="6">6s</option>
-                 <option value="7">7s</option>
-                 <option value="8">8s</option>
-                 <option value="9">9s</option>
-                 <option value="10">10s</option>
-               </select>
-             </div>
-           </div>
-           
-           <div class="lf-actions">
-             <button class="lf-btn" id="run-o1flfv" type="button">
-               Generate <span class="lf-cost" id="o1flfv-cost">3 Cr</span>
-             </button>
-             <div class="lf-status" id="status-o1flfv"></div>
-           </div>
-        </div>
-
-        <div id="form-kling-motion" class="hidden">
-           <div class="lf-h2-sub">Kling 2.6 Motion Control</div>
-           
-           <div class="lf-field">
-             <label>Prompt</label>
-             <textarea id="km-scene" rows="4" placeholder="Describe the scene..."></textarea>
-           </div>
-           
-           <div class="lf-field">
-             <label>Reference Image</label>
-             <input type="file" id="km-image-file" accept="image/*" hidden />
-             <div class="lf-drop" id="km-image-drop">
-               <div class="big" id="km-image-title">Upload Image</div>
-               <div class="sub">Click or drag&drop • Required</div>
-               <img id="km-image-thumb" class="lf-thumb-preview" />
-             </div>
-           </div>
-           
-           <div class="lf-field">
-             <label>Reference Video (Motion)</label>
-             <input type="file" id="km-video-file" accept="video/mp4,video/quicktime" hidden />
-             <div class="lf-drop" id="km-video-drop">
-               <div class="big">Upload Video</div>
-               <div class="sub">MP4/MOV • Max 10s</div>
-             </div>
-             <div class="lf-validate" id="km-video-val">No video selected</div>
-           </div>
-           
-           <div class="lf-row2">
-             <div class="lf-field">
-               <label>Mode</label>
-               <select id="km-mode">
-                 <option value="std">Standard</option>
-                 <option value="pro">Pro</option>
-               </select>
-             </div>
-             <div class="lf-field">
-                 <label class="lf-chk-row" style="margin-top:30px">
-                   <input type="checkbox" id="km-keep-sound" checked> 
-                   Keep Sound
-                 </label>
-             </div>
-           </div>
-           
-           <div class="lf-actions">
-             <button class="lf-btn" id="run-km" type="button" disabled>
-               Generate <span class="lf-cost" id="km-cost">0 Cr</span>
-             </button>
-             <div class="lf-status" id="status-km"></div>
-           </div>
-        </div>
-
-        <div id="form-veo-fast" class="hidden">
-            <div class="lf-h2-sub">Veo 3.1 Fast</div>
-            
-            <div class="lf-field">
-              <label>Prompt</label>
-              <textarea id="veo-fast-scene" rows="4" placeholder="Describe the scene..."></textarea>
-            </div>
-            
-            <div class="lf-field">
-              <label>Frames (Start ↔ Last)</label>
-              <div class="lf-frame-row">
-                <input type="file" id="veo-fast-image" accept="image/*" hidden />
-                <div class="lf-drop lf-frame-box" id="veo-fast-image-drop">
-                  <div class="big" id="veo-fast-image-title">Start</div>
-                  <div class="sub" id="veo-fast-image-sub">Upload</div>
-                  <img id="veo-fast-image-thumb" class="lf-thumb-preview" />
-                </div>
-                
-                <button class="lf-swap" type="button" id="veo-fast-swap">↔</button>
-
-                <input type="file" id="veo-fast-last" accept="image/*" hidden />
-                <div class="lf-drop lf-frame-box" id="veo-fast-last-drop">
-                   <div class="big" id="veo-fast-last-title">Last</div>
-                   <div class="sub" id="veo-fast-last-sub">Upload</div>
-                   <img id="veo-fast-last-thumb" class="lf-thumb-preview" />
-                </div>
-              </div>
-            </div>
-            
-            <div class="lf-row2">
-              <div class="lf-field">
-                <label>Ratio</label>
-                <select id="veo-fast-aspect">
-                  <option value="16:9">16:9 (Landscape)</option>
-                  <option value="9:16">9:16 (Portrait)</option>
-                </select>
-              </div>
-              <div class="lf-field">
-                <label>Duration</label>
-                <select id="veo-fast-duration">
-                  <option value="8">8s</option>
-                  <option value="6">6s</option>
-                  <option value="4">4s</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="lf-row2">
-              <div class="lf-field">
-                <label>Resolution</label>
-                <select id="veo-fast-resolution">
-                  <option value="1080p">1080p</option>
-                  <option value="720p">720p</option>
-                </select>
-              </div>
-              <div class="lf-field">
-                </div>
-            </div>
-            
-            <div class="lf-actions">
-              <button class="lf-btn" id="run-veo-fast" type="button">
-                Generate <span class="lf-cost" id="veo-fast-cost">4 Cr</span>
-              </button>
-              <div class="lf-status" id="status-veo-fast"></div>
-            </div>
-        </div>
-
-        <div id="form-veo" class="hidden">
-            <div class="lf-h2-sub">Veo 3.1</div>
-            
-            <div class="lf-field">
-              <label>Prompt</label>
-              <textarea id="veo-scene" rows="4" placeholder="Describe the scene..."></textarea>
-            </div>
-            
-            <div class="lf-field">
-                <label>Frames (Start ↔ Last)</label>
-                <div class="lf-frame-row">
-                  <input type="file" id="veo-image" accept="image/*" hidden />
-                  <div class="lf-drop lf-frame-box" id="veo-image-drop">
-                    <div class="big" id="veo-image-title">Start</div>
-                    <div class="sub" id="veo-image-sub">Upload</div>
-                    <img id="veo-image-thumb" class="lf-thumb-preview" />
-                  </div>
-                   
-                  <button class="lf-swap" type="button" id="veo-swap">↔</button>
-   
-                  <input type="file" id="veo-last" accept="image/*" hidden />
-                  <div class="lf-drop lf-frame-box" id="veo-last-drop">
-                      <div class="big" id="veo-last-title">Last</div>
-                      <div class="sub" id="veo-last-sub">Upload</div>
-                      <img id="veo-last-thumb" class="lf-thumb-preview" />
-                  </div>
-                </div>
-            </div>
-            
-            <div class="lf-row2">
-              <div class="lf-field">
-                <label>Ratio</label>
-                <select id="veo-aspect">
-                  <option value="16:9">16:9 (Landscape)</option>
-                  <option value="9:16">9:16 (Portrait)</option>
-                </select>
-              </div>
-              <div class="lf-field">
-                <label>Duration</label>
-                <select id="veo-duration">
-                  <option value="8">8s</option>
-                  <option value="6">6s</option>
-                  <option value="4">4s</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="lf-row2">
-              <div class="lf-field">
-                <label>Resolution</label>
-                <select id="veo-resolution">
-                  <option value="1080p">1080p</option>
-                  <option value="720p">720p</option>
-                </select>
-              </div>
-              <div class="lf-field">
-                  </div>
-            </div>
-            
-            <div class="lf-actions">
-              <button class="lf-btn" id="run-veo" type="button">
-                Generate <span class="lf-cost" id="veo-cost">6 Cr</span>
-              </button>
-              <div class="lf-status" id="status-veo"></div>
-            </div>
-        </div>
-
-        <div id="form-veo-refs" class="hidden">
-            <div class="lf-h2-sub">Veo 3.1 Reference</div>
-            
-            <div class="lf-field">
-              <label>Prompt</label>
-              <textarea id="veo-refs-scene" rows="4" placeholder="Describe the scene..."></textarea>
-            </div>
-            
-            <div class="lf-field">
-              <label>Reference Images (max 3)</label>
-              <input type="file" id="veo-refs-files" accept="image/*" hidden multiple />
-              <div class="lf-drop" id="veo-refs-drop">
-                <div class="big" id="veo-refs-title">Upload Images</div>
-                <div class="sub">Max 3 images</div>
-              </div>
-              <div class="lf-img-grid" id="veo-refs-grid"></div>
-            </div>
-            
-            <div class="lf-row2">
-              <div class="lf-field">
-                <label>Ratio</label>
-                <select id="veo-refs-aspect">
-                  <option value="16:9">16:9 (Landscape)</option>
-                  <option value="9:16">9:16 (Portrait)</option>
-                </select>
-              </div>
-              <div class="lf-field">
-                <label>Duration</label>
-                <select id="veo-refs-duration">
-                  <option value="8">8s</option>
-                  <option value="6">6s</option>
-                  <option value="4">4s</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="lf-row2">
-              <div class="lf-field">
-                <label>Resolution</label>
-                <select id="veo-refs-resolution">
-                  <option value="1080p">1080p</option>
-                  <option value="720p">720p</option>
-                </select>
-              </div>
-              <div class="lf-field">
-                  </div>
-            </div>
-            
-            <div class="lf-actions">
-              <button class="lf-btn" id="run-veo-refs" type="button">
-                Generate <span class="lf-cost" id="veo-refs-cost">6 Cr</span>
-              </button>
-              <div class="lf-status" id="status-veo-refs"></div>
-            </div>
-        </div>
-
-        <div id="form-runway-aleph" class="hidden">
-            <div class="lf-h2-sub">Runway Aleph (Gen4)</div>
-
-            <div class="lf-field">
-                <label>Prompt</label>
-                <textarea id="rw-aleph-scene" rows="4" placeholder="Describe the transformation..."></textarea>
-            </div>
-
-            <div class="lf-field">
-                <label>Input Video</label>
-                <input type="file" id="rw-aleph-video-file" accept="video/mp4,video/quicktime" hidden />
-                <div class="lf-drop" id="rw-aleph-video-drop">
-                    <div class="big">Upload Video</div>
-                    <div class="sub">MP4/MOV</div>
-                </div>
-                <div class="lf-validate" id="rw-aleph-video-val">No video selected</div>
-            </div>
-
-            <div class="lf-row2">
-                <div class="lf-field">
-                    <label>Ratio</label>
-                    <select id="rw-aleph-ratio">
-                        <option value="16:9">16:9 (Landscape)</option>
-                        <option value="9:16">9:16 (Portrait)</option>
-                        <option value="1:1">1:1 (Square)</option>
-                    </select>
-                </div>
-                <div class="lf-field">
-                    <label>Seed (Optional)</label>
-                    <input type="number" id="rw-aleph-seed" placeholder="Random" style="padding:14px 16px;background:var(--bg-input);border:1px solid var(--border);border-radius:12px;color:#fff;">
-                </div>
-            </div>
-
-            <div class="lf-actions">
-                <button class="lf-btn" id="run-rw-aleph" type="button" disabled>
-                    Generate <span class="lf-cost" id="rw-aleph-cost">—</span>
-                </button>
-                <div class="lf-status" id="status-rw-aleph"></div>
-            </div>
-        </div>
-
-        <div id="form-runway-acttwo" class="hidden">
-            <div class="lf-h2-sub">Runway Act Two</div>
-
-            <div class="lf-field">
-                <label>Prompt</label>
-                <textarea id="rw-act-scene" rows="4" placeholder="Describe the character action..."></textarea>
-            </div>
-
-            <div class="lf-field">
-                <label>Character Image (Required)</label>
-                <input type="file" id="rw-act-image-file" accept="image/*" hidden />
-                <div class="lf-drop" id="rw-act-image-drop">
-                    <div class="big" id="rw-act-image-title">Upload Character</div>
-                    <div class="sub">Click or drag&drop</div>
-                    <img id="rw-act-image-thumb" class="lf-thumb-preview" />
-                </div>
-            </div>
-
-            <div class="lf-field">
-                <label>Reference Video (Driver)</label>
-                <input type="file" id="rw-act-video-file" accept="video/mp4,video/quicktime" hidden />
-                <div class="lf-drop" id="rw-act-video-drop">
-                    <div class="big">Upload Driver Video</div>
-                    <div class="sub">MP4/MOV • 3s to 30s</div>
-                </div>
-                <div class="lf-validate" id="rw-act-video-val">No video selected</div>
-            </div>
-
-            <div class="lf-field">
-                <label class="lf-chk-row" style="margin-top:10px">
-                    <input type="checkbox" id="rw-act-preserve" checked> 
-                    Preserve Identity
-                </label>
-            </div>
-
-            <div class="lf-actions">
-                <button class="lf-btn" id="run-rw-act" type="button" disabled>
-                    Generate <span class="lf-cost" id="rw-act-cost">—</span>
-                </button>
-                <div class="lf-status" id="status-rw-act"></div>
-            </div>
-        </div>
-
-      </div>
-
-      <div class="lf-main-view">
-        <div class="lf-empty" id="empty">
-          <div style="font-size:56px;opacity:.35;">✨</div>
-          <div style="margin-top:8px;">Result will appear here</div>
-        </div>
-
-        <div class="lf-result" id="result">
-          <video id="outVideo" controls playsinline class="hidden"></video>
-          <div class="lf-resbar">
-            <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
-            <a id="download" href="#" target="_blank" download>Download</a>
-          </div>
-        </div>
-
-        <div class="lf-loader" id="loader">
-          <div class="lf-spin"></div>
-          <div class="lf-wait">Waiting…</div>
-          <div class="lf-time" id="loaderTime">00:00</div>
-          <div class="lf-time" id="loaderSub">Processing...</div>
-        </div>
-      </div>
+    <div class="topbar-right">
+      <div class="top-pill">Video Studio</div>
     </div>
+  </div>
 
-    <div class="lf-lib-wrapper">
-      <div class="lf-ribbon-title">
-        <span>History (Library)</span>
-        <a href="https://lightfull.ai/library" style="font-size:11px;opacity:0.5;color:inherit;text-decoration:none">View All →</a>
+  <div class="workspace">
+
+    <!-- LEFT -->
+    <aside class="left glass">
+      <div class="section">
+        <div class="sec-title">
+          <span>Model</span>
+          <button class="btn-back" id="btn-back" type="button">← Back to Flow</button>
+        </div>
+
+        <div class="model-trigger" id="modelTrigger">
+          <div class="name" id="currentModelName">Kling 2.6</div>
+          <div class="chev">›</div>
+        </div>
+
+        <div class="model-pop" id="modelPop">
+          <div class="model-popbox">
+            <!-- groups -->
+            <div class="grp">
+              <div class="grp-head">Providers <span class="pill" id="grpHint">select</span></div>
+              <div class="grp-list" id="providerList">
+                <div class="mitem active" data-provider="kling">Kling <span class="pill">video</span></div>
+                <div class="mitem" data-provider="veo">Google Veo <span class="pill">video</span></div>
+                <div class="mitem" data-provider="runway">Runway <span class="pill">video</span></div>
+              </div>
+            </div>
+
+            <!-- sub models -->
+            <div class="sub">
+              <div class="sub-head" id="subHead">Kling</div>
+              <div class="sub-list" id="subList">
+                <!-- injected by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="lf-ribbon" id="lib-ribbon">
-        <div style="padding: 20px; color:#555; font-size:13px;">Loading library...</div>
+
+      <!-- FORMS: keep your existing IDs and logic -->
+      <div class="section" id="form-k26">
+        <div class="sec-title">Kling 2.6 Parameters</div>
+
+        <div class="lf-field">
+          <label>Prompt</label>
+          <textarea id="k26-scene" rows="4" placeholder="Describe the motion or scene..."></textarea>
+        </div>
+
+        <div class="lf-field">
+          <label>Start Image (required)</label>
+          <input type="file" id="k26-file" accept="image/*" hidden />
+          <div class="lf-drop" id="k26-drop">
+            <div class="big" id="k26-dropTitle">Upload image</div>
+            <div class="sub" id="k26-dropSub">Click or drag&drop • PNG/JPG</div>
+            <img id="k26-thumb" class="lf-thumb-preview" />
+          </div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Ratio</label>
+            <select id="k26-aspect">
+              <option value="16:9">16:9 (Landscape)</option>
+              <option value="9:16">9:16 (Portrait)</option>
+              <option value="1:1">1:1 (Square)</option>
+            </select>
+          </div>
+          <div class="lf-field">
+            <label>Duration</label>
+            <select id="k26-duration">
+              <option value="5">5s (Standard)</option>
+              <option value="10">10s (High Quality)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="lf-field">
+          <label class="lf-chk-row">
+            <input type="checkbox" id="k26-audio">
+            Generate Audio
+          </label>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run-k26" type="button">Generate <span class="lf-cost" id="k26-cost">2 Cr</span></button>
+          <div class="lf-status" id="status-k26"></div>
+        </div>
       </div>
-    </div>
+
+      <div class="section hidden" id="form-o1">
+        <div class="sec-title">Kling O1 Edit</div>
+
+        <div class="lf-field">
+          <label>Prompt</label>
+          <textarea id="o1-scene" rows="4" placeholder="Edit instructions (e.g. change style, remove object)..."></textarea>
+          <div class="lf-chipbar" id="o1-chipbar" style="display:none"></div>
+        </div>
+
+        <div class="lf-field">
+          <label>Input Video (MP4)</label>
+          <input type="file" id="o1-vid-file" accept="video/mp4" hidden />
+          <div class="lf-drop" id="o1-vid-drop">
+            <div class="big" id="o1-vid-title">Upload Video</div>
+            <div class="sub">Click or drag&drop • Required</div>
+          </div>
+          <div class="lf-validate" id="o1-vid-val" style="font-size:12px;color:var(--muted);font-weight:900;">No video selected</div>
+        </div>
+
+        <div class="lf-field">
+          <label>Style Refs (Optional)</label>
+          <input type="file" id="o1-img-file" accept="image/*" hidden multiple />
+          <div class="lf-drop" id="o1-img-drop">
+            <div class="big" id="o1-img-title">Upload Images</div>
+            <div class="sub">Max 4 images</div>
+          </div>
+          <div class="lf-img-grid" id="o1-img-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;"></div>
+        </div>
+
+        <div class="lf-field">
+          <label>Duration cost</label>
+          <select id="o1-duration">
+            <option value="5">5s (15 Cr)</option>
+            <option value="10">10s (20 Cr)</option>
+          </select>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run-o1" type="button" disabled>Generate <span class="lf-cost" id="o1-cost">15 Cr</span></button>
+          <div class="lf-status" id="status-o1"></div>
+        </div>
+      </div>
+
+      <div class="section hidden" id="form-o1-flfv">
+        <div class="sec-title">Kling O1 (First → Last)</div>
+
+        <div class="lf-field">
+          <label>Prompt</label>
+          <textarea id="o1flfv-scene" rows="4" placeholder="Describe the transformation..."></textarea>
+        </div>
+
+        <div class="lf-field">
+          <label>Frames (Start ↔ Last)</label>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input type="file" id="o1flfv-start-file" accept="image/*" hidden />
+            <div class="lf-drop" id="o1flfv-start-drop" style="flex:1;min-height:140px;">
+              <div class="big" id="o1flfv-start-title">Start</div>
+              <div class="sub" id="o1flfv-start-sub">Upload</div>
+              <img id="o1flfv-start-thumb" class="lf-thumb-preview" />
+            </div>
+
+            <button class="lf-btn" type="button" id="o1flfv-swap" style="width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);font-weight:1000;">↔</button>
+
+            <input type="file" id="o1flfv-end-file" accept="image/*" hidden />
+            <div class="lf-drop" id="o1flfv-end-drop" style="flex:1;min-height:140px;">
+              <div class="big" id="o1flfv-end-title">Last</div>
+              <div class="sub" id="o1flfv-end-sub">Upload</div>
+              <img id="o1flfv-end-thumb" class="lf-thumb-preview" />
+            </div>
+          </div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Mode</label>
+            <select id="o1flfv-mode">
+              <option value="std">Standard</option>
+              <option value="pro">Pro (+1 Cr)</option>
+            </select>
+          </div>
+          <div class="lf-field">
+            <label>Duration</label>
+            <select id="o1flfv-duration">
+              <option value="3">3s</option><option value="4">4s</option>
+              <option value="5" selected>5s (Default)</option>
+              <option value="6">6s</option><option value="7">7s</option>
+              <option value="8">8s</option><option value="9">9s</option><option value="10">10s</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run-o1flfv" type="button">Generate <span class="lf-cost" id="o1flfv-cost">3 Cr</span></button>
+          <div class="lf-status" id="status-o1flfv"></div>
+        </div>
+      </div>
+
+      <div class="section hidden" id="form-kling-motion">
+        <div class="sec-title">Kling 2.6 Motion Control</div>
+
+        <div class="lf-field">
+          <label>Prompt</label>
+          <textarea id="km-scene" rows="4" placeholder="Describe the scene..."></textarea>
+        </div>
+
+        <div class="lf-field">
+          <label>Reference Image</label>
+          <input type="file" id="km-image-file" accept="image/*" hidden />
+          <div class="lf-drop" id="km-image-drop">
+            <div class="big" id="km-image-title">Upload Image</div>
+            <div class="sub">Click or drag&drop • Required</div>
+            <img id="km-image-thumb" class="lf-thumb-preview" />
+          </div>
+        </div>
+
+        <div class="lf-field">
+          <label>Reference Video (Motion)</label>
+          <input type="file" id="km-video-file" accept="video/mp4,video/quicktime" hidden />
+          <div class="lf-drop" id="km-video-drop">
+            <div class="big">Upload Video</div>
+            <div class="sub">MP4/MOV • Max 10s</div>
+          </div>
+          <div class="lf-validate" id="km-video-val" style="font-size:12px;color:var(--muted);font-weight:900;">No video selected</div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field">
+            <label>Mode</label>
+            <select id="km-mode">
+              <option value="std">Standard</option>
+              <option value="pro">Pro</option>
+            </select>
+          </div>
+          <div class="lf-field">
+            <label class="lf-chk-row" style="margin-top:28px">
+              <input type="checkbox" id="km-keep-sound" checked> Keep Sound
+            </label>
+          </div>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run-km" type="button" disabled>Generate <span class="lf-cost" id="km-cost">0 Cr</span></button>
+          <div class="lf-status" id="status-km"></div>
+        </div>
+      </div>
+
+      <div class="section hidden" id="form-veo-fast">
+        <div class="sec-title">Veo 3.1 Fast</div>
+        <div class="lf-field"><label>Prompt</label><textarea id="veo-fast-scene" rows="4" placeholder="Describe the scene..."></textarea></div>
+
+        <div class="lf-field">
+          <label>Frames (Start ↔ Last)</label>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input type="file" id="veo-fast-image" accept="image/*" hidden />
+            <div class="lf-drop" id="veo-fast-image-drop" style="flex:1;min-height:140px;">
+              <div class="big" id="veo-fast-image-title">Start</div>
+              <div class="sub" id="veo-fast-image-sub">Upload</div>
+              <img id="veo-fast-image-thumb" class="lf-thumb-preview" />
+            </div>
+
+            <button class="lf-btn" type="button" id="veo-fast-swap" style="width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);font-weight:1000;">↔</button>
+
+            <input type="file" id="veo-fast-last" accept="image/*" hidden />
+            <div class="lf-drop" id="veo-fast-last-drop" style="flex:1;min-height:140px;">
+              <div class="big" id="veo-fast-last-title">Last</div>
+              <div class="sub" id="veo-fast-last-sub">Upload</div>
+              <img id="veo-fast-last-thumb" class="lf-thumb-preview" />
+            </div>
+          </div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field"><label>Ratio</label><select id="veo-fast-aspect"><option value="16:9">16:9</option><option value="9:16">9:16</option></select></div>
+          <div class="lf-field"><label>Duration</label><select id="veo-fast-duration"><option value="8">8s</option><option value="6">6s</option><option value="4">4s</option></select></div>
+        </div>
+        <div class="lf-row2">
+          <div class="lf-field"><label>Resolution</label><select id="veo-fast-resolution"><option value="1080p">1080p</option><option value="720p">720p</option></select></div>
+          <div class="lf-field"></div>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run-veo-fast" type="button">Generate <span class="lf-cost" id="veo-fast-cost">4 Cr</span></button>
+          <div class="lf-status" id="status-veo-fast"></div>
+        </div>
+      </div>
+
+      <div class="section hidden" id="form-veo">
+        <div class="sec-title">Veo 3.1</div>
+        <div class="lf-field"><label>Prompt</label><textarea id="veo-scene" rows="4" placeholder="Describe the scene..."></textarea></div>
+
+        <div class="lf-field">
+          <label>Frames (Start ↔ Last)</label>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input type="file" id="veo-image" accept="image/*" hidden />
+            <div class="lf-drop" id="veo-image-drop" style="flex:1;min-height:140px;">
+              <div class="big" id="veo-image-title">Start</div>
+              <div class="sub" id="veo-image-sub">Upload</div>
+              <img id="veo-image-thumb" class="lf-thumb-preview" />
+            </div>
+
+            <button class="lf-btn" type="button" id="veo-swap" style="width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);font-weight:1000;">↔</button>
+
+            <input type="file" id="veo-last" accept="image/*" hidden />
+            <div class="lf-drop" id="veo-last-drop" style="flex:1;min-height:140px;">
+              <div class="big" id="veo-last-title">Last</div>
+              <div class="sub" id="veo-last-sub">Upload</div>
+              <img id="veo-last-thumb" class="lf-thumb-preview" />
+            </div>
+          </div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field"><label>Ratio</label><select id="veo-aspect"><option value="16:9">16:9</option><option value="9:16">9:16</option></select></div>
+          <div class="lf-field"><label>Duration</label><select id="veo-duration"><option value="8">8s</option><option value="6">6s</option><option value="4">4s</option></select></div>
+        </div>
+        <div class="lf-row2">
+          <div class="lf-field"><label>Resolution</label><select id="veo-resolution"><option value="1080p">1080p</option><option value="720p">720p</option></select></div>
+          <div class="lf-field"></div>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run-veo" type="button">Generate <span class="lf-cost" id="veo-cost">6 Cr</span></button>
+          <div class="lf-status" id="status-veo"></div>
+        </div>
+      </div>
+
+      <div class="section hidden" id="form-veo-refs">
+        <div class="sec-title">Veo 3.1 Reference</div>
+        <div class="lf-field"><label>Prompt</label><textarea id="veo-refs-scene" rows="4" placeholder="Describe the scene..."></textarea></div>
+
+        <div class="lf-field">
+          <label>Reference Images (max 3)</label>
+          <input type="file" id="veo-refs-files" accept="image/*" hidden multiple />
+          <div class="lf-drop" id="veo-refs-drop">
+            <div class="big" id="veo-refs-title">Upload Images</div>
+            <div class="sub">Max 3 images</div>
+          </div>
+          <div class="lf-img-grid" id="veo-refs-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;"></div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field"><label>Ratio</label><select id="veo-refs-aspect"><option value="16:9">16:9</option><option value="9:16">9:16</option></select></div>
+          <div class="lf-field"><label>Duration</label><select id="veo-refs-duration"><option value="8">8s</option><option value="6">6s</option><option value="4">4s</option></select></div>
+        </div>
+        <div class="lf-row2">
+          <div class="lf-field"><label>Resolution</label><select id="veo-refs-resolution"><option value="1080p">1080p</option><option value="720p">720p</option></select></div>
+          <div class="lf-field"></div>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run-veo-refs" type="button">Generate <span class="lf-cost" id="veo-refs-cost">6 Cr</span></button>
+          <div class="lf-status" id="status-veo-refs"></div>
+        </div>
+      </div>
+
+      <div class="section hidden" id="form-runway-aleph">
+        <div class="sec-title">Runway Aleph (Gen4)</div>
+        <div class="lf-field"><label>Prompt</label><textarea id="rw-aleph-scene" rows="4" placeholder="Describe the transformation..."></textarea></div>
+
+        <div class="lf-field">
+          <label>Input Video</label>
+          <input type="file" id="rw-aleph-video-file" accept="video/mp4,video/quicktime" hidden />
+          <div class="lf-drop" id="rw-aleph-video-drop">
+            <div class="big">Upload Video</div>
+            <div class="sub">MP4/MOV</div>
+          </div>
+          <div class="lf-validate" id="rw-aleph-video-val" style="font-size:12px;color:var(--muted);font-weight:900;">No video selected</div>
+        </div>
+
+        <div class="lf-row2">
+          <div class="lf-field"><label>Ratio</label><select id="rw-aleph-ratio"><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="1:1">1:1</option></select></div>
+          <div class="lf-field">
+            <label>Seed (Optional)</label>
+            <input type="number" id="rw-aleph-seed" placeholder="Random" style="padding:12px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:14px;color:#fff;">
+          </div>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run-rw-aleph" type="button" disabled>Generate <span class="lf-cost" id="rw-aleph-cost">—</span></button>
+          <div class="lf-status" id="status-rw-aleph"></div>
+        </div>
+      </div>
+
+      <div class="section hidden" id="form-runway-acttwo">
+        <div class="sec-title">Runway Act Two</div>
+        <div class="lf-field"><label>Prompt</label><textarea id="rw-act-scene" rows="4" placeholder="Describe the character action..."></textarea></div>
+
+        <div class="lf-field">
+          <label>Character Image (Required)</label>
+          <input type="file" id="rw-act-image-file" accept="image/*" hidden />
+          <div class="lf-drop" id="rw-act-image-drop">
+            <div class="big" id="rw-act-image-title">Upload Character</div>
+            <div class="sub">Click or drag&drop</div>
+            <img id="rw-act-image-thumb" class="lf-thumb-preview" />
+          </div>
+        </div>
+
+        <div class="lf-field">
+          <label>Reference Video (Driver)</label>
+          <input type="file" id="rw-act-video-file" accept="video/mp4,video/quicktime" hidden />
+          <div class="lf-drop" id="rw-act-video-drop">
+            <div class="big">Upload Driver Video</div>
+            <div class="sub">MP4/MOV • 3s to 30s</div>
+          </div>
+          <div class="lf-validate" id="rw-act-video-val" style="font-size:12px;color:var(--muted);font-weight:900;">No video selected</div>
+        </div>
+
+        <div class="lf-field">
+          <label class="lf-chk-row">
+            <input type="checkbox" id="rw-act-preserve" checked> Preserve Identity
+          </label>
+        </div>
+
+        <div class="lf-actions">
+          <button class="lf-btn" id="run-rw-act" type="button" disabled>Generate <span class="lf-cost" id="rw-act-cost">—</span></button>
+          <div class="lf-status" id="status-rw-act"></div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- CENTER -->
+    <main class="center glass">
+      <div class="viewer">
+        <div class="loader" id="loader">
+          <div class="spin"></div>
+          <div class="wait">Waiting…</div>
+          <div class="time" id="loaderTime">00:00</div>
+          <div class="time" id="loaderSub">Processing...</div>
+        </div>
+
+        <div class="viewer-inner">
+          <div class="empty" id="empty">
+            <div style="font-size:56px;opacity:.35;">✨</div>
+            <div style="margin-top:8px;">Result will appear here</div>
+          </div>
+
+          <div class="result" id="result">
+            <video id="outVideo" controls playsinline class="hidden"></video>
+            <div class="resbar">
+              <div class="resmeta" id="meta">done</div>
+              <a class="dl" id="download" href="#" target="_blank" download>Download</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT -->
+    <aside class="right glass">
+      <div class="right-head">
+        <div class="right-title">History</div>
+        <div class="right-actions">
+          <button class="mini-btn" id="btn-refresh" title="Refresh">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 2v6h-6"></path>
+              <path d="M3 22v-6h6"></path>
+              <path d="M21 12a9 9 0 0 1-15.5 6"></path>
+              <path d="M3 12a9 9 0 0 1 15.5-6"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- detail stub (Higgs-like) -->
+      <div class="detail" id="detail">
+        <div class="d-row">
+          <div class="d-title" id="d-title">Select a generation</div>
+          <div class="chip" id="d-status"><span class="dot warn"></span> —</div>
+        </div>
+        <div class="d-sub" id="d-prompt">Prompt will appear here…</div>
+        <div class="d-chips" id="d-chips">
+          <span class="chip">Model: —</span>
+          <span class="chip">Duration: —</span>
+          <span class="chip">Aspect: —</span>
+        </div>
+      </div>
+
+      <div class="history" id="history">
+        <div style="padding:14px;color:rgba(255,255,255,0.45);font-weight:900;">Loading…</div>
+      </div>
+    </aside>
 
   </div>
-</div>
 
-<div class="lf-at-menu" id="atMenu">
-  <div class="lf-at-list" id="atList"></div>
-</div>
-
-<div class="lf-modal-backdrop" id="modal-backdrop">
-  <button class="m-close" id="modal-close">✕</button>
-  <div class="lf-modal" onclick="event.stopPropagation()">
-    <div class="m-preview" id="m-view-container"></div>
-    <div class="m-sidebar">
-      <div class="m-info-row"><div class="m-label">Status</div><div class="m-val" id="m-status"></div></div>
-      <div class="m-info-row"><div class="m-label">Date</div><div class="m-val" id="m-date"></div></div>
-      <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;">
-        <button class="lf-btn" id="m-dl">Download</button>
+  <!-- MODAL -->
+  <div class="lf-modal-backdrop" id="modal-backdrop">
+    <button class="m-close" id="modal-close">✕</button>
+    <div class="lf-modal" onclick="event.stopPropagation()">
+      <div class="m-preview" id="m-view-container"></div>
+      <div class="m-side">
+        <div>
+          <div class="m-label">Status</div>
+          <div class="m-val" id="m-status">—</div>
+        </div>
+        <div>
+          <div class="m-label">Date</div>
+          <div class="m-val" id="m-date">—</div>
+        </div>
+        <button class="m-dl" id="m-dl">Download</button>
       </div>
     </div>
   </div>
+
 </div>
 
 <script>
@@ -1099,68 +1168,118 @@
   const BACKEND_BASE = "https://api.lightfull.ai";
   const $ = (id) => document.getElementById(id);
 
-  // Global State
-  let currentModel = 'kling_26';
-  let latestJobId = null; 
+  /* ===========================
+     STATE (kept)
+  ============================ */
+  let currentModel = "kling_26";
+  let latestJobId = null;
   let timer = null;
   let timeLeft = 0;
 
-  // New State
   let o1flfvStart = null, o1flfvEnd = null;
-  let kmImage = null, kmVideo = null;
-  let kmVideoDuration = 0;
+  let kmImage = null, kmVideo = null, kmVideoDuration = 0;
 
-  // Veo State
   let veoFastImage = null, veoFastLast = null;
   let veoImage = null, veoLast = null;
-  let veoRefsFiles = []; 
+  let veoRefsFiles = [];
 
-  // Runway State
-  let rwAlephVideo = null; let rwAlephDuration = 0;
-  let rwActImage = null; let rwActVideo = null; let rwActDuration = 0;
+  let rwAlephVideo = null, rwAlephDuration = 0;
+  let rwActImage = null, rwActVideo = null, rwActDuration = 0;
 
-  // --- HELPER: Setup Drag & Drop ---
-  function setupDragDrop(el, onFiles) {
-      if(!el) return;
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
-          el.addEventListener(evt, e => {
-              e.preventDefault();
-              e.stopPropagation();
-          }, false);
-      });
-      ['dragenter', 'dragover'].forEach(evt => {
-          el.addEventListener(evt, () => el.classList.add('drag-over'), false);
-      });
-      ['dragleave', 'drop'].forEach(evt => {
-          el.addEventListener(evt, () => el.classList.remove('drag-over'), false);
-      });
-      el.addEventListener('drop', e => {
-          const files = e.dataTransfer.files;
-          if(files.length) onFiles(files);
-      }, false);
+  // history UI state
+  let historyItems = [];
+  let selectedHistoryId = null;
+
+  /* ===========================
+     MODEL MENU (nested)
+  ============================ */
+  const MODEL_MAP_NAME = {
+    kling_26: "Kling 2.6",
+    kling_o1: "Kling O1",
+    kling_o1_flfv: "Kling O1 (First → Last)",
+    kling_motion: "Kling 2.6 Motion Control",
+    veo_fast: "Veo 3.1 Fast",
+    veo: "Veo 3.1",
+    veo_refs: "Veo 3.1 Reference",
+    runway_aleph: "Runway Aleph (Gen4)",
+    runway_act_two: "Runway Act Two"
+  };
+
+  const PROVIDERS = {
+    kling: {
+      title: "Kling",
+      models: [
+        { id:"kling_26", label:"Kling 2.6" },
+        { id:"kling_o1", label:"Kling O1" },
+        { id:"kling_o1_flfv", label:"Kling O1 (First → Last)" },
+        { id:"kling_motion", label:"Kling 2.6 Motion Control" },
+      ]
+    },
+    veo: {
+      title: "Google Veo",
+      models: [
+        { id:"veo_fast", label:"Veo 3.1 Fast" },
+        { id:"veo", label:"Veo 3.1" },
+        { id:"veo_refs", label:"Veo 3.1 Reference" },
+      ]
+    },
+    runway: {
+      title: "Runway",
+      models: [
+        { id:"runway_aleph", label:"Runway Aleph (Gen4)" },
+        { id:"runway_act_two", label:"Runway Act Two" },
+      ]
+    }
+  };
+
+  let activeProvider = "kling";
+
+  function renderSubModels(){
+    const sub = $("subList");
+    const head = $("subHead");
+    const p = PROVIDERS[activeProvider];
+    head.textContent = p.title;
+
+    sub.innerHTML = p.models.map(m => `
+      <div class="mitem ${m.id===currentModel ? "active":""}" data-model="${m.id}">
+        <span>${m.label}</span>
+        <span class="pill">${m.id===currentModel ? "active" : "select"}</span>
+      </div>
+    `).join("");
+
+    sub.querySelectorAll("[data-model]").forEach(el => {
+      el.onclick = () => selectModel(el.getAttribute("data-model"), true);
+    });
   }
 
-  // --- MODEL SWITCHER ---
-  window.toggleModelDropdown = () => $("modelSelect").classList.toggle("open");
-    
-  window.selectModel = (model, close=false) => {
-    currentModel = model;
+  function openModelPop(open){
+    const pop = $("modelPop");
+    pop.classList.toggle("open", open);
+  }
 
-    // Map Name
-    const mapName = {
-        kling_26: "Kling 2.6",
-        kling_o1: "Kling O1",
-        kling_o1_flfv: "Kling O1 (First → Last)",
-        kling_motion: "Kling 2.6 Motion Control",
-        veo_fast: "Veo 3.1 Fast",
-        veo: "Veo 3.1",
-        veo_refs: "Veo 3.1 Reference",
-        runway_aleph: "Runway Aleph (Gen4)",
-        runway_act_two: "Runway Act Two"
+  $("modelTrigger").onclick = () => {
+    openModelPop(!$("modelPop").classList.contains("open"));
+  };
+
+  $("providerList").querySelectorAll("[data-provider]").forEach(el => {
+    el.onclick = () => {
+      $("providerList").querySelectorAll("[data-provider]").forEach(x => x.classList.remove("active"));
+      el.classList.add("active");
+      activeProvider = el.getAttribute("data-provider");
+      renderSubModels();
     };
-    $("currentModelName").textContent = mapName[model] || model;
+  });
 
-    // show/hide forms
+  window.addEventListener("click", (e) => {
+    if(!e.target.closest("#modelPop") && !e.target.closest("#modelTrigger")){
+      openModelPop(false);
+    }
+  });
+
+  /* ===========================
+     SHOW/HIDE FORMS (kept)
+  ============================ */
+  function showOnly(model){
     $("form-k26").classList.toggle("hidden", model !== "kling_26");
     $("form-o1").classList.toggle("hidden", model !== "kling_o1");
     $("form-o1-flfv").classList.toggle("hidden", model !== "kling_o1_flfv");
@@ -1170,1193 +1289,859 @@
     $("form-veo-refs").classList.toggle("hidden", model !== "veo_refs");
     $("form-runway-aleph").classList.toggle("hidden", model !== "runway_aleph");
     $("form-runway-acttwo").classList.toggle("hidden", model !== "runway_act_two");
-
-    // active highlight (FIXED via data-model)
-    document.querySelectorAll(".lf-dd-item").forEach(el => {
-        el.classList.remove("active");
-        const dot = el.querySelector(".status-dot");
-        if(dot) dot.remove();
-    });
-
-    const activeEl = document.querySelector(`.lf-dd-item[data-model="${model}"]`);
-    if(activeEl){
-        activeEl.classList.add("active");
-        activeEl.innerHTML += ' <span class="status-dot"></span>';
-    }
-
-    // UX reset for new models
-    if(model.startsWith("runway_")){
-        // Reset status text
-        if(model==="runway_aleph") $("status-rw-aleph").textContent = "";
-        if(model==="runway_act_two") $("status-rw-act").textContent = "";
-    }
-
-    if(close) $("modelSelect").classList.remove("open");
-  };
-    
-  // Close dropdown on click outside
-  window.onclick = function(e) {
-    if (!e.target.closest('.lf-model-select')) $("modelSelect").classList.remove('open');
   }
 
-  // --- SHARED API UTILS ---
-  async function getSession() {
+  window.selectModel = (model, close=false) => selectModel(model, close);
+  function selectModel(model, close=false){
+    currentModel = model;
+    $("currentModelName").textContent = MODEL_MAP_NAME[model] || model;
+    showOnly(model);
+
+    // sync provider based on selection
+    if(model.startsWith("kling_")) activeProvider = "kling";
+    else if(model.startsWith("veo")) activeProvider = "veo";
+    else if(model.startsWith("runway_")) activeProvider = "runway";
+
+    // mark provider active
+    $("providerList").querySelectorAll("[data-provider]").forEach(x => x.classList.remove("active"));
+    const pEl = $("providerList").querySelector(`[data-provider="${activeProvider}"]`);
+    if(pEl) pEl.classList.add("active");
+
+    renderSubModels();
+    if(close) openModelPop(false);
+  }
+
+  /* ===========================
+     AUTH + FETCH (kept)
+  ============================ */
+  async function getSession(){
     const { data } = await window.sb.auth.getSession();
     return data?.session;
   }
-  async function fetchAuth(url, opts={}) {
+
+  async function fetchAuth(url, opts={}){
     let s = await getSession();
-    if(!s) { location.href="/login"; return; }
-    let r = await fetch(url, {...opts, headers: {...opts.headers, Authorization: "Bearer "+s.access_token}});
-    if(r.status === 401) {
-       await window.sb.auth.refreshSession();
-       s = await getSession();
-       r = await fetch(url, {...opts, headers: {...opts.headers, Authorization: "Bearer "+s.access_token}});
+    if(!s){ location.href="/login"; return; }
+    let r = await fetch(url, {...opts, headers: {...opts.headers, Authorization:"Bearer "+s.access_token } });
+    if(r.status===401 || r.status===403){
+      // try refresh
+      try{ await window.sb.auth.refreshSession(); }catch(e){}
+      s = await getSession();
+      if(!s){ location.href="/login"; return; }
+      r = await fetch(url, {...opts, headers: {...opts.headers, Authorization:"Bearer "+s.access_token } });
     }
-    const j = await r.json();
-    if(!r.ok) throw new Error(j.error || "Error");
+    const raw = await r.text();
+    let j = {};
+    try{ j = raw ? JSON.parse(raw) : {}; }catch(e){ j = { raw }; }
+    if(!r.ok || j?.ok === false){
+      const err = new Error(j?.error || j?.details || ("HTTP "+r.status));
+      err.status = r.status;
+      err.data = j;
+      throw err;
+    }
     return j;
   }
-  function uuid(){ return crypto.randomUUID(); }
 
-  // --- UPLOAD HELPERS ---
-  async function uploadToInputs(file, session) {
-    const ext = (file.name.split(".").pop() || "png").toLowerCase();
-    const path = `${session.user.id}/${uuid()}.${ext}`;
-    await sb.storage.from("inputs").upload(path, file);
-    return window.sb.storage.from("inputs").getPublicUrl(path).data.publicUrl;
+  /* ===========================
+     HELPERS
+  ============================ */
+  const INPUTS_BUCKET = "inputs";
+
+  function isVideoUrl(url){
+    const u = String(url||"").toLowerCase();
+    return u.endsWith(".mp4") || u.endsWith(".mov") || u.endsWith(".webm") || u.includes("fal.media");
+  }
+  function fmt(ts){
+    const s = String(ts||"");
+    return s ? s.replace("T"," ").slice(0,16) : "";
+  }
+  function uuid(){
+    if(crypto?.randomUUID) return crypto.randomUUID();
+    return Date.now()+"-"+Math.random().toString(16).slice(2);
+  }
+  function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+
+  function setLoader(on, subText){
+    const L = $("loader");
+    L.style.display = on ? "flex" : "none";
+    if(subText) $("loaderSub").textContent = subText;
+  }
+  function setStatus(id, text, kind){
+    const el = $(id);
+    if(!el) return;
+    el.textContent = text || "";
+    el.style.color =
+      kind==="ok" ? "rgba(155,226,138,0.95)" :
+      kind==="err" ? "rgba(255,123,136,0.95)" :
+      kind==="warn" ? "rgba(255,209,102,0.95)" :
+      "rgba(255,255,255,0.6)";
   }
 
-  async function uploadToInputsImage(file, session){
-    const ext = (file.name.split(".").pop() || "png").toLowerCase();
-    const path = `${session.user.id}/${uuid()}.${ext}`;
-    await window.sb.storage.from("inputs").upload(path, file);
-    return window.sb.storage.from("inputs").getPublicUrl(path).data.publicUrl;
+  function statusDot(status){
+    const s = String(status||"").toLowerCase();
+    if(["succeeded","success","done"].includes(s)) return { t:"Done", c:"ok" };
+    if(["failed","error","canceled"].includes(s)) return { t:"Failed", c:"err" };
+    if(["starting","processing","running","in_progress"].includes(s)) return { t:"Processing", c:"warn" };
+    return { t:s || "—", c:"warn" };
   }
 
-  async function uploadToInputsVideo(file, session){
-    const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
-    const path = `${session.user.id}/${uuid()}.${ext}`;
-    await window.sb.storage.from("inputs_video").upload(path, file);
-    return window.sb.storage.from("inputs_video").getPublicUrl(path).data.publicUrl;
-  }
-
-  function getVideoMeta(file) {
-      return new Promise((res, rej) => {
-          const v = document.createElement("video");
-          v.preload = "metadata";
-          v.src = URL.createObjectURL(file);
-          v.onloadedmetadata = () => res({ w:v.videoWidth, h:v.videoHeight, duration:v.duration });
-          v.onerror = rej;
-      });
-  }
-
-  // --- UI HELPERS ---
-  function showLoader(on, time=180, text="Processing...") {
-    $("loader").style.display = on ? "flex" : "none";
-    if(on) {
-      $("empty").style.display="none";
-      $("result").style.display="none";
-      $("loaderSub").textContent = text;
-      startTimer(time);
-    } else {
-      stopTimer();
+  async function forceDownload(url, filename){
+    try{
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename || "download.mp4";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    }catch(e){
+      window.open(url, "_blank");
     }
   }
-  function startTimer(sec) {
-    stopTimer(); timeLeft = sec;
-    const tick = () => {
-       const m = Math.floor(timeLeft/60);
-       const s = String(timeLeft%60).padStart(2,'0');
-       $("loaderTime").textContent = `${m}:${s}`;
-       timeLeft = Math.max(0, timeLeft-1);
-    };
-    tick(); timer = setInterval(tick, 1000);
+
+  async function uploadToInputs(file){
+    const session = await getSession();
+    if(!session) throw new Error("No session");
+    const ext = (file.name.split(".").pop() || "").toLowerCase();
+    const safeExt = ext && ext.length <= 6 ? ext : "bin";
+    const path = `${session.user.id}/${uuid()}.${safeExt}`;
+
+    const up = await window.sb.storage.from(INPUTS_BUCKET).upload(path, file, {
+      upsert:false,
+      contentType: file.type || "application/octet-stream",
+    });
+    if(up.error) throw up.error;
+
+    const pub = window.sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
+    return pub.data.publicUrl;
   }
-  function stopTimer() { if(timer) clearInterval(timer); }
-    
-  function showResult(url, status) {
-    $("loader").style.display="none";
-    $("empty").style.display="none";
-    $("result").style.display="block";
+
+  function showResultVideo(url, metaText){
+    $("empty").style.display = "none";
+    const box = $("result");
+    box.style.display = "block";
+
     const v = $("outVideo");
-    v.src = url; v.classList.remove("hidden"); v.load();
+    v.classList.remove("hidden");
+    v.src = url;
+    v.load();
+
+    $("meta").textContent = metaText || "Done";
     $("download").href = url;
-    $("meta").textContent = `Status: ${status}`;
   }
 
-
-  // ==========================================
-  // RUNWAY LOGIC
-  // ==========================================
-
-  // Cost Calc Helper
-  function updateRunwayCost() {
-    // MUST MATCH backend lib/pricing.js getRunwayCostCredits():
-    // runwayCredits = sec * rate
-    // usd = runwayCredits * 0.01
-    // billedUsd = usd * markup
-    // credits = max(1, ceil(billedUsd / 1.0))   // 1 Cr = $1
-
-    // Aleph: rate=15 runway credits/sec, markup=4.0
-    const alephSec = Math.max(0, Number(rwAlephDuration) || 0);
-    if (alephSec > 0) {
-      const alephUsd = alephSec * 15 * 0.01;
-      const alephCr = Math.max(1, Math.ceil(alephUsd * 4.0));
-      $("rw-aleph-cost").textContent = alephCr + " Cr";
-    } else {
-      $("rw-aleph-cost").textContent = "—";
-    }
-
-    // Act Two: rate=5 runway credits/sec, markup=6.0
-    const actSec = Math.max(0, Number(rwActDuration) || 0);
-    if (actSec > 0) {
-      const actUsd = actSec * 5 * 0.01;
-      const actCr = Math.max(1, Math.ceil(actUsd * 6.0));
-      $("rw-act-cost").textContent = actCr + " Cr";
-    } else {
-      $("rw-act-cost").textContent = "—";
-    }
+  function clearResult(){
+    $("result").style.display = "none";
+    $("empty").style.display = "block";
+    const v = $("outVideo");
+    v.pause();
+    v.removeAttribute("src");
+    v.load();
   }
 
-  // --- ALEPH ---
-  async function handleAlephVideo(file){
-     if(!file) return;
+  /* ===========================
+     DROPZONES / FILE BINDINGS
+  ============================ */
+  function bindDrop({ dropId, fileId, onFile, thumbId, acceptHint, validateId, maxSizeMB, allowTypes }){
+    const drop = $(dropId);
+    const fileInput = $(fileId);
+    const thumb = thumbId ? $(thumbId) : null;
+    const validate = validateId ? $(validateId) : null;
 
-     // VALIDATION: Type
-     if(file.type !== "video/mp4" && file.type !== "video/quicktime") {
-         $("rw-aleph-video-val").textContent = "MP4 or MOV only";
-         $("rw-aleph-video-val").className = "lf-validate bad";
-         $("run-rw-aleph").disabled = true;
-         return;
-     }
+    const pick = () => fileInput.click();
+    const setPreviewImage = (file) => {
+      if(!thumb) return;
+      const url = URL.createObjectURL(file);
+      thumb.src = url;
+      thumb.style.display = "block";
+      // revoke later when replace
+      thumb.dataset._blob = url;
+    };
 
-     try {
-         const meta = await getVideoMeta(file);
-         rwAlephVideo = file;
-         rwAlephDuration = meta.duration;
-         $("rw-aleph-video-val").textContent = `Ready (${meta.duration.toFixed(1)}s)`;
-         $("rw-aleph-video-val").className = "lf-validate ok";
-         $("run-rw-aleph").disabled = false;
-         updateRunwayCost();
-     } catch(e) {
-         $("rw-aleph-video-val").textContent = "Error reading video";
-         $("rw-aleph-video-val").className = "lf-validate bad";
-         $("run-rw-aleph").disabled = true;
-     }
-  }
-  $("rw-aleph-video-drop").addEventListener("click", ()=> $("rw-aleph-video-file").click());
-  $("rw-aleph-video-file").addEventListener("change", (e) => handleAlephVideo(e.target.files[0]));
-  setupDragDrop($("rw-aleph-video-drop"), (files) => handleAlephVideo(files[0]));
+    const setValidate = (msg, good=false) => {
+      if(!validate) return;
+      validate.textContent = msg;
+      validate.style.color = good ? "rgba(155,226,138,0.95)" : "rgba(255,255,255,0.6)";
+    };
 
-  $("run-rw-aleph").addEventListener("click", async () => {
-     if(!rwAlephVideo) return;
-     $("run-rw-aleph").disabled = true;
-     showLoader(true, 300, "Starting Runway Aleph...");
-     
-     try {
-         const s = await getSession();
-         const vidUrl = await uploadToInputsVideo(rwAlephVideo, s);
-         
-         const fd = new FormData();
-         fd.append("presetId", "runway_gen4_aleph");
-         fd.append("scene", $("rw-aleph-scene").value || "transform");
-         fd.append("video_url", vidUrl);
-         fd.append("video_duration_sec", rwAlephDuration);
-         fd.append("ratio", $("rw-aleph-ratio").value); 
-         if($("rw-aleph-seed").value) fd.append("seed", $("rw-aleph-seed").value);
-         fd.append("access_token", s.access_token);
-
-         // FIX: Use standard /api/start
-         const r = await fetch(BACKEND_BASE + "/api/start", { method:"POST", body: fd });
-         const data = await r.json();
-         if(!r.ok) throw new Error(data.error || "Failed");
-
-         latestJobId = data.jobId;
-         $("status-rw-aleph").textContent = "Job Started";
-         $("run-rw-aleph").disabled = false;
-         
-         // FIX: Standard pollJob
-         pollJob(data.jobId);
-         setTimeout(refreshLibraryRibbon, 1000);
-
-     } catch(e) {
-         showLoader(false);
-         $("run-rw-aleph").disabled = false;
-         alert(e.message);
-     }
-  });
-
-  // --- ACT TWO ---
-  function checkActTwoReady(){
-      const ready = rwActImage && rwActVideo && rwActDuration >= 3 && rwActDuration <= 30.5;
-      $("run-rw-act").disabled = !ready;
-  }
-
-  $("rw-act-image-drop").addEventListener("click", () => $("rw-act-image-file").click());
-  $("rw-act-image-file").addEventListener("change", (e) => {
-      if(e.target.files[0]) {
-         rwActImage = e.target.files[0];
-         $("rw-act-image-thumb").src = URL.createObjectURL(rwActImage);
-         $("rw-act-image-thumb").style.display = "block";
-         $("rw-act-image-title").textContent = rwActImage.name;
-         checkActTwoReady();
+    const validateFile = (file) => {
+      if(maxSizeMB){
+        const mb = file.size / (1024*1024);
+        if(mb > maxSizeMB) throw new Error(`File too large (>${maxSizeMB}MB)`);
       }
-  });
-  setupDragDrop($("rw-act-image-drop"), (files) => {
-      if(files[0]) {
-         rwActImage = files[0];
-         $("rw-act-image-thumb").src = URL.createObjectURL(rwActImage);
-         $("rw-act-image-thumb").style.display = "block";
-         $("rw-act-image-title").textContent = rwActImage.name;
-         checkActTwoReady();
+      if(allowTypes && allowTypes.length){
+        const ok = allowTypes.some(t => (file.type||"").includes(t) || (file.name||"").toLowerCase().endsWith(t));
+        if(!ok) throw new Error("Wrong file type");
       }
-  });
+    };
 
-  async function handleActTwoVideo(file){
-     if(!file) return;
-
-     // VALIDATION: Type
-     if(file.type !== "video/mp4" && file.type !== "video/quicktime") {
-         $("rw-act-video-val").textContent = "MP4 or MOV only";
-         $("rw-act-video-val").className = "lf-validate bad";
-         rwActVideo = null;
-         checkActTwoReady();
-         return;
-     }
-
-     try {
-         const meta = await getVideoMeta(file);
-         if(meta.duration < 3 || meta.duration > 30.5) {
-             $("rw-act-video-val").textContent = `Duration ${meta.duration.toFixed(1)}s (must be 3-30s)`;
-             $("rw-act-video-val").className = "lf-validate bad";
-             rwActVideo = null;
-         } else {
-             rwActVideo = file;
-             rwActDuration = meta.duration;
-             $("rw-act-video-val").textContent = `Ready (${meta.duration.toFixed(1)}s)`;
-             $("rw-act-video-val").className = "lf-validate ok";
-             updateRunwayCost();
-         }
-         checkActTwoReady();
-     } catch(e) {
-         $("rw-act-video-val").textContent = "Error reading video";
-         $("rw-act-video-val").className = "lf-validate bad";
-     }
-  }
-  $("rw-act-video-drop").addEventListener("click", ()=> $("rw-act-video-file").click());
-  $("rw-act-video-file").addEventListener("change", (e) => handleActTwoVideo(e.target.files[0]));
-  setupDragDrop($("rw-act-video-drop"), (files) => handleActTwoVideo(files[0]));
-
-  $("run-rw-act").addEventListener("click", async () => {
-      if(!rwActImage || !rwActVideo) return;
-      $("run-rw-act").disabled = true;
-      showLoader(true, 300, "Starting Runway Act Two...");
-
-      try {
-         const s = await getSession();
-         const imgUrl = await uploadToInputsImage(rwActImage, s);
-         const vidUrl = await uploadToInputsVideo(rwActVideo, s);
-
-         const fd = new FormData();
-         fd.append("presetId", "runway_act_two");
-         fd.append("scene", $("rw-act-scene").value || "perform action");
-         fd.append("character_image_url", imgUrl);
-         fd.append("reference_video_url", vidUrl);
-         fd.append("video_duration_sec", rwActDuration);
-         fd.append("preserve_identity", $("rw-act-preserve").checked);
-         fd.append("access_token", s.access_token);
-
-         // FIX: Use standard /api/start
-         const r = await fetch(BACKEND_BASE + "/api/start", { method:"POST", body: fd });
-         const data = await r.json();
-         if(!r.ok) throw new Error(data.error || "Failed");
-
-         latestJobId = data.jobId;
-         $("status-rw-act").textContent = "Job Started";
-         $("run-rw-act").disabled = false;
-         
-         // FIX: Standard pollJob
-         pollJob(data.jobId);
-         setTimeout(refreshLibraryRibbon, 1000);
-
-      } catch(e) {
-          showLoader(false);
-          $("run-rw-act").disabled = false;
-          alert(e.message);
-      }
-  });
-
-
-  // ==========================================
-  // SHARED: POLLING & LIBRARY
-  // ==========================================
-    
-  // FIX: Simplified pollJob
-  async function pollJob(jobId) {
-  const check = async () => {
-    try {
-      const d = await fetchAuth(`${BACKEND_BASE}/api/status?jobId=${jobId}`);
-
-      if (latestJobId === jobId) {
-        $("loaderSub").textContent = "Status: " + (d.status || "processing");
-      }
-
-      // finished states
-      if (d.status === "succeeded" || d.status === "failed" || d.status === "canceled") {
-        refreshLibraryRibbon();
-
-        if (latestJobId === jobId) {
-          showLoader(false);
-
-          if (d.status === "succeeded") {
-            if (d.output_url) showResult(d.output_url, "Done");
-            else $("loaderSub").textContent = "Done (no output url)";
-            return;
-          }
-
-          // FAILED / CANCELED
-          let msg = (d.status === "canceled") ? "Canceled." : "Failed.";
-
-          // refund message
-          if (d.refunded) {
-            msg += ` Credits returned (+${d.refund_amount || 0} Cr).`;
-            if (typeof d.credits_left === "number") {
-              msg += ` Balance: ${d.credits_left} Cr.`;
-            }
-          }
-
-          // show provider error
-          if (d.error) {
-            console.log("JOB ERROR:", d.error);
-            msg += " See console for error.";
-          }
-
-          $("loaderSub").textContent = msg;
-          alert(msg);
-        }
-
-        return;
-      }
-
-      setTimeout(check, 2000);
-    } catch (e) {
-      console.error(e);
-      setTimeout(check, 2500);
-    }
-  };
-
-  check();
-}
-
-
-
-  // ==========================================
-  // LOGIC: O1 FLFV (First -> Last)
-  // ==========================================
-  function renderO1flfvFrames(){
-      // Start
-      if(o1flfvStart){
-          $("o1flfv-start-thumb").src = URL.createObjectURL(o1flfvStart);
-          $("o1flfv-start-thumb").style.display = "block";
-          $("o1flfv-start-title").textContent = o1flfvStart.name;
-          $("o1flfv-start-sub").style.display = "none";
-      } else {
-          $("o1flfv-start-thumb").style.display = "none";
-          $("o1flfv-start-title").textContent = "Start";
-          $("o1flfv-start-sub").style.display = "block";
-      }
-      // End
-      if(o1flfvEnd){
-          $("o1flfv-end-thumb").src = URL.createObjectURL(o1flfvEnd);
-          $("o1flfv-end-thumb").style.display = "block";
-          $("o1flfv-end-title").textContent = o1flfvEnd.name;
-          $("o1flfv-end-sub").style.display = "none";
-      } else {
-          $("o1flfv-end-thumb").style.display = "none";
-          $("o1flfv-end-title").textContent = "Last";
-          $("o1flfv-end-sub").style.display = "block";
-      }
-  }
-
-  // Handlers
-  $("o1flfv-start-drop").addEventListener("click", () => $("o1flfv-start-file").click());
-  $("o1flfv-start-file").addEventListener("change", (e) => {
-      if(e.target.files[0]) { o1flfvStart = e.target.files[0]; renderO1flfvFrames(); }
-  });
-  setupDragDrop($("o1flfv-start-drop"), (files) => {
-      if(files[0]) { o1flfvStart = files[0]; renderO1flfvFrames(); }
-  });
-
-  $("o1flfv-end-drop").addEventListener("click", () => $("o1flfv-end-file").click());
-  $("o1flfv-end-file").addEventListener("change", (e) => {
-      if(e.target.files[0]) { o1flfvEnd = e.target.files[0]; renderO1flfvFrames(); }
-  });
-  setupDragDrop($("o1flfv-end-drop"), (files) => {
-      if(files[0]) { o1flfvEnd = files[0]; renderO1flfvFrames(); }
-  });
-
-  $("o1flfv-swap").onclick = () => {
-      const tmp = o1flfvStart;
-      o1flfvStart = o1flfvEnd;
-      o1flfvEnd = tmp;
-      renderO1flfvFrames();
-  }
-
-  function updateO1flfvCost(){
-      const d = Number($("o1flfv-duration").value);
-      const isPro = $("o1flfv-mode").value === "pro";
-      let c = 0;
-      if(d <= 4) c = 2;
-      else if(d <= 6) c = 3;
-      else if(d <= 8) c = 4;
-      else c = 5;
-      
-      if(isPro) c += 1;
-      $("o1flfv-cost").textContent = c + " Cr";
-  }
-  $("o1flfv-duration").addEventListener("change", updateO1flfvCost);
-  $("o1flfv-mode").addEventListener("change", updateO1flfvCost);
-
-  // Run O1 FLFV
-  $("run-o1flfv").addEventListener("click", async () => {
-      if(!o1flfvStart || !o1flfvEnd) return alert("Please upload both start and last images");
-      $("run-o1flfv").disabled = true;
-      showLoader(true, 240, "Starting Kling O1 (First→Last)...");
-
-      try {
-          const s = await getSession();
-          $("loaderSub").textContent = "Uploading images...";
-          const startUrl = await uploadToInputsImage(o1flfvStart, s);
-          const endUrl = await uploadToInputsImage(o1flfvEnd, s);
-
-          const payload = {
-            presetId: ($("o1flfv-mode").value === "pro" ? "kling_o1_flfv_pro" : "kling_o1_flfv_std"),
-            scene: $("o1flfv-scene").value || "transform",
-            start_image_url: startUrl,
-            end_image_url: endUrl,
-            duration: Number($("o1flfv-duration").value)
-          };
-
-          const data = await fetchAuth(BACKEND_BASE + "/api/start_fal_json", {
-              method: "POST",
-              headers: {"Content-Type":"application/json"},
-              body: JSON.stringify(payload)
-          });
-
-          latestJobId = data.jobId;
-          $("status-o1flfv").textContent = "Job Started";
-          $("run-o1flfv").disabled = false;
-          pollJob(data.jobId);
-          setTimeout(refreshLibraryRibbon, 1000);
-
-      } catch(e) {
-          showLoader(false);
-          $("run-o1flfv").disabled = false;
-          alert(e.message);
-      }
-  });
-
-
-  // ==========================================
-  // LOGIC: Kling Motion Control
-  // ==========================================
-  function renderKmImage(){
-      if(kmImage){
-          $("km-image-thumb").src = URL.createObjectURL(kmImage);
-          $("km-image-thumb").style.display = "block";
-          $("km-image-title").textContent = kmImage.name;
-      }
-  }
-
-  async function handleKmVideo(file){
+    const handle = (file) => {
       if(!file) return;
-      if(file.type !== "video/mp4" && file.type !== "video/quicktime") {
-          $("km-video-val").textContent = "MP4 or MOV only";
-          $("km-video-val").className = "lf-validate bad";
-          $("run-km").disabled = true;
-          return;
-      }
-      
-      try {
-          const meta = await getVideoMeta(file);
-          if(meta.duration > 10.5) { // slight buffer
-              $("km-video-val").textContent = `Duration ${meta.duration.toFixed(1)}s (Max 10s)`;
-              $("km-video-val").className = "lf-validate bad";
-              kmVideo = null;
-              $("run-km").disabled = true;
-              return;
-          }
-          kmVideo = file;
-          kmVideoDuration = meta.duration;
-          $("km-video-val").textContent = `Ready (${meta.duration.toFixed(1)}s)`;
-          $("km-video-val").className = "lf-validate ok";
-          updateKmCost();
-          $("run-km").disabled = false;
-      } catch(e) {
-          $("km-video-val").textContent = "Error reading video";
-          $("km-video-val").className = "lf-validate bad";
-      }
-  }
+      try{ validateFile(file); }catch(e){ setValidate(e.message); return; }
+      onFile(file);
+      if(file.type.startsWith("image/")) setPreviewImage(file);
+      setValidate(`Selected: ${file.name}`, true);
+    };
 
-  function updateKmCost(){
-      if(!kmVideo || kmVideoDuration <= 0) {
-          $("km-cost").textContent = "0 Cr";
-          return;
-      }
-      const isPro = $("km-mode").value === "pro";
-      const rate = isPro ? 0.12 : 0.07;
-      let cr = Math.ceil((kmVideoDuration * rate) / 0.10);
-      if(cr < 1) cr = 1;
-      $("km-cost").textContent = cr + " Cr";
-  }
-
-  $("km-image-drop").addEventListener("click", () => $("km-image-file").click());
-  $("km-image-file").addEventListener("change", (e) => {
-      if(e.target.files[0]) { kmImage = e.target.files[0]; renderKmImage(); }
-  });
-  setupDragDrop($("km-image-drop"), (files) => {
-      if(files[0]) { kmImage = files[0]; renderKmImage(); }
-  });
-
-  $("km-video-drop").addEventListener("click", () => $("km-video-file").click());
-  $("km-video-file").addEventListener("change", (e) => handleKmVideo(e.target.files[0]));
-  setupDragDrop($("km-video-drop"), (files) => handleKmVideo(files[0]));
-
-  $("km-mode").addEventListener("change", updateKmCost);
-
-  // Run Motion Control
-  $("run-km").addEventListener("click", async () => {
-      if(!kmImage || !kmVideo) return alert("Please upload both image and video");
-      $("run-km").disabled = true;
-      showLoader(true, 180, "Starting Motion Control...");
-
-      try {
-          const s = await getSession();
-          $("loaderSub").textContent = "Uploading assets...";
-          
-          const imgUrl = await uploadToInputsImage(kmImage, s);
-          const vidUrl = await uploadToInputsVideo(kmVideo, s);
-          
-          const fd = new FormData();
-          fd.append("presetId", ($("km-mode").value === "pro" ? "kling_v26_motion_pro" : "kling_v26_motion_std"));
-          fd.append("scene", $("km-scene").value || "animate this");
-          fd.append("image_url", imgUrl);
-          fd.append("video_url", vidUrl);
-          fd.append("video_duration_sec", kmVideoDuration);
-          fd.append("keep_original_sound", $("km-keep-sound").checked);
-          fd.append("access_token", s.access_token);
-
-          const r = await fetch(BACKEND_BASE + "/api/start", { method:"POST", body: fd });
-          const data = await r.json();
-          if(!r.ok) throw new Error(data.error || "Failed");
-
-          latestJobId = data.jobId;
-          $("status-km").textContent = "Job Started";
-          $("run-km").disabled = false;
-          pollJob(data.jobId);
-          setTimeout(refreshLibraryRibbon, 1000);
-      } catch(e) {
-          showLoader(false);
-          $("run-km").disabled = false;
-          alert(e.message);
-      }
-  });
-
-  // ==========================================
-  // LOGIC: KLING 2.6
-  // ==========================================
-  let k26File = null;
-    
-  function handleK26File(f) {
-     if(f && f.type.startsWith('image/')) {
-       k26File = f;
-       $("k26-thumb").src = URL.createObjectURL(k26File);
-       $("k26-thumb").style.display = "block";
-       $("k26-dropTitle").textContent = k26File.name;
-     }
-  }
-
-  $("k26-drop").addEventListener("click", () => $("k26-file").click());
-  $("k26-file").addEventListener("change", (e) => handleK26File(e.target.files[0]));
-  setupDragDrop($("k26-drop"), (files) => handleK26File(files[0]));
-    
-  // Cost calc 2.6
-  function calcK26Cost() {
-      let c = ($("k26-duration").value === "10") ? 4 : 2;
-      if($("k26-audio").checked) c += 2;
-      $("k26-cost").textContent = c + " Cr";
-  }
-  $("k26-duration").addEventListener("change", calcK26Cost);
-  $("k26-audio").addEventListener("change", calcK26Cost);
-
-  $("run-k26").addEventListener("click", async () => {
-     if(!k26File) return alert("Please upload an image");
-     
-     $("run-k26").disabled = true;
-     
-     if(currentModel === 'kling_26') {
-       showLoader(true, 180, "Starting Kling 2.6...");
-     }
-     $("status-k26").textContent = "Uploading...";
-
-     try {
-       const s = await getSession();
-       const fd = new FormData();
-       fd.append("presetId", "kling_v26");
-       fd.append("scene", $("k26-scene").value || "cinematic shot");
-       fd.append("duration", $("k26-duration").value);
-       fd.append("aspect_ratio", $("k26-aspect").value);
-       fd.append("generate_audio", $("k26-audio").checked);
-       fd.append("image", k26File);
-       fd.append("access_token", s.access_token);
-
-       const r = await fetch(BACKEND_BASE + "/api/start", { method:"POST", body: fd });
-       const data = await r.json();
-       
-       if(!r.ok) throw new Error(data.error || "Failed");
-       
-       const jobId = data.jobId;
-       latestJobId = jobId;
-       $("status-k26").textContent = "Job Started";
-       $("run-k26").disabled = false;
-       
-       pollJob(jobId);
-       setTimeout(refreshLibraryRibbon, 1000);
-
-     } catch(e) {
-       showLoader(false);
-       $("run-k26").disabled = false;
-       alert(e.message);
-     }
-  });
-
-  // ==========================================
-  // LOGIC: VEO FAST & NORMAL (Start/Last Swap)
-  // ==========================================
-
-  // --- RENDER FUNCTIONS FOR FRAMES ---
-  function renderVeoFastPreviews() {
-      // Start
-      if(veoFastImage) {
-          $("veo-fast-image-thumb").src = URL.createObjectURL(veoFastImage);
-          $("veo-fast-image-thumb").style.display = "block";
-          $("veo-fast-image-title").textContent = veoFastImage.name;
-          $("veo-fast-image-sub").style.display = "none";
-      } else {
-          $("veo-fast-image-thumb").style.display = "none";
-          $("veo-fast-image-title").textContent = "Start";
-          $("veo-fast-image-sub").style.display = "block";
-      }
-      // Last
-      if(veoFastLast) {
-          $("veo-fast-last-thumb").src = URL.createObjectURL(veoFastLast);
-          $("veo-fast-last-thumb").style.display = "block";
-          $("veo-fast-last-title").textContent = veoFastLast.name;
-          $("veo-fast-last-sub").style.display = "none";
-      } else {
-          $("veo-fast-last-thumb").style.display = "none";
-          $("veo-fast-last-title").textContent = "Last";
-          $("veo-fast-last-sub").style.display = "block";
-      }
-  }
-
-  function renderVeoPreviews() {
-      // Start
-      if(veoImage) {
-          $("veo-image-thumb").src = URL.createObjectURL(veoImage);
-          $("veo-image-thumb").style.display = "block";
-          $("veo-image-title").textContent = veoImage.name;
-          $("veo-image-sub").style.display = "none";
-      } else {
-          $("veo-image-thumb").style.display = "none";
-          $("veo-image-title").textContent = "Start";
-          $("veo-image-sub").style.display = "block";
-      }
-      // Last
-      if(veoLast) {
-          $("veo-last-thumb").src = URL.createObjectURL(veoLast);
-          $("veo-last-thumb").style.display = "block";
-          $("veo-last-title").textContent = veoLast.name;
-          $("veo-last-sub").style.display = "none";
-      } else {
-          $("veo-last-thumb").style.display = "none";
-          $("veo-last-title").textContent = "Last";
-          $("veo-last-sub").style.display = "block";
-      }
-  }
-
-  // --- VEO FAST HANDLERS ---
-  $("veo-fast-image-drop").addEventListener("click", () => $("veo-fast-image").click());
-  $("veo-fast-image").addEventListener("change", (e) => {
-      if(e.target.files[0]) { veoFastImage = e.target.files[0]; renderVeoFastPreviews(); }
-  });
-  setupDragDrop($("veo-fast-image-drop"), (files) => {
-      if(files[0]) { veoFastImage = files[0]; renderVeoFastPreviews(); }
-  });
-
-  $("veo-fast-last-drop").addEventListener("click", () => $("veo-fast-last").click());
-  $("veo-fast-last").addEventListener("change", (e) => {
-      if(e.target.files[0]) { veoFastLast = e.target.files[0]; renderVeoFastPreviews(); }
-  });
-  setupDragDrop($("veo-fast-last-drop"), (files) => {
-      if(files[0]) { veoFastLast = files[0]; renderVeoFastPreviews(); }
-  });
-
-  // Swap Fast
-  $("veo-fast-swap").onclick = () => {
-      const tmp = veoFastImage;
-      veoFastImage = veoFastLast;
-      veoFastLast = tmp;
-      renderVeoFastPreviews();
-  };
-
-  // Run Veo Fast
-  $("run-veo-fast").addEventListener("click", async () => {
-    $("run-veo-fast").disabled = true;
-    showLoader(true, 240, "Starting Veo 3.1 Fast...");
-
-    try {
-        const s = await getSession();
-        const fd = new FormData();
-        fd.append("presetId", "veo_3_1_fast");
-        fd.append("scene", $("veo-fast-scene").value || "cinematic shot");
-        fd.append("duration", $("veo-fast-duration").value);
-        fd.append("aspect_ratio", $("veo-fast-aspect").value);
-        fd.append("resolution", $("veo-fast-resolution").value);
-        fd.append("generate_audio", "true"); // HARDCODED AUDIO
-        fd.append("access_token", s.access_token);
-
-        if (veoFastImage) {
-            const url = await uploadToInputs(veoFastImage, s);
-            fd.append("image_url", url);
-        }
-        if (veoFastLast) {
-            const url = await uploadToInputs(veoFastLast, s);
-            fd.append("last_frame_url", url);
-        }
-        
-        const r = await fetch(BACKEND_BASE + "/api/start", { method:"POST", body: fd });
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.error || "Failed");
-
-        latestJobId = data.jobId;
-        $("status-veo-fast").textContent = "Job Started";
-        $("run-veo-fast").disabled = false;
-        pollJob(data.jobId);
-        setTimeout(refreshLibraryRibbon, 1000);
-    } catch(e) {
-        showLoader(false);
-        $("run-veo-fast").disabled = false;
-        alert(e.message);
-    }
-  });
-
-
-  // --- VEO NORMAL HANDLERS ---
-  $("veo-image-drop").addEventListener("click", () => $("veo-image").click());
-  $("veo-image").addEventListener("change", (e) => {
-      if(e.target.files[0]) { veoImage = e.target.files[0]; renderVeoPreviews(); }
-  });
-  setupDragDrop($("veo-image-drop"), (files) => {
-      if(files[0]) { veoImage = files[0]; renderVeoPreviews(); }
-  });
-
-  $("veo-last-drop").addEventListener("click", () => $("veo-last").click());
-  $("veo-last").addEventListener("change", (e) => {
-      if(e.target.files[0]) { veoLast = e.target.files[0]; renderVeoPreviews(); }
-  });
-  setupDragDrop($("veo-last-drop"), (files) => {
-      if(files[0]) { veoLast = files[0]; renderVeoPreviews(); }
-  });
-
-  // Swap Normal
-  $("veo-swap").onclick = () => {
-      const tmp = veoImage;
-      veoImage = veoLast;
-      veoLast = tmp;
-      renderVeoPreviews();
-  };
-
-  // Run Veo Normal
-  $("run-veo").addEventListener("click", async () => {
-    $("run-veo").disabled = true;
-    showLoader(true, 240, "Starting Veo 3.1...");
-
-    try {
-        const s = await getSession();
-        const fd = new FormData();
-        fd.append("presetId", "veo_3_1");
-        fd.append("scene", $("veo-scene").value || "cinematic shot");
-        fd.append("duration", $("veo-duration").value);
-        fd.append("aspect_ratio", $("veo-aspect").value);
-        fd.append("resolution", $("veo-resolution").value);
-        fd.append("generate_audio", "true"); // HARDCODED AUDIO
-        fd.append("access_token", s.access_token);
-
-        if (veoImage) {
-            const url = await uploadToInputs(veoImage, s);
-            fd.append("image_url", url);
-        }
-        if (veoLast) {
-            const url = await uploadToInputs(veoLast, s);
-            fd.append("last_frame_url", url);
-        }
-
-        const r = await fetch(BACKEND_BASE + "/api/start", { method:"POST", body: fd });
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.error || "Failed");
-
-        latestJobId = data.jobId;
-        $("status-veo").textContent = "Job Started";
-        $("run-veo").disabled = false;
-        pollJob(data.jobId);
-        setTimeout(refreshLibraryRibbon, 1000);
-    } catch(e) {
-        showLoader(false);
-        $("run-veo").disabled = false;
-        alert(e.message);
-    }
-  });
-
-
-  // ==========================================
-  // LOGIC: VEO REFS
-  // ==========================================
-  function renderVeoRefsGrid(gridId, filesArray, titleId, max=3) {
-    const g = $(gridId);
-    g.innerHTML = "";
-    filesArray.forEach((f, i) => {
-        const d = document.createElement("div");
-        d.className = "lf-img-tile";
-        d.innerHTML = `<img src="${URL.createObjectURL(f)}"><div class="lf-img-x">×</div>`;
-        d.querySelector(".lf-img-x").onclick = (e) => {
-            e.stopPropagation();
-            filesArray.splice(i, 1);
-            renderVeoRefsGrid(gridId, filesArray, titleId, max);
-        };
-        g.appendChild(d);
+    drop.addEventListener("click", pick);
+    fileInput.addEventListener("change", (e) => {
+      const f = e.target.files && e.target.files[0];
+      handle(f);
+      fileInput.value = "";
     });
-    $(titleId).textContent = filesArray.length ? `${filesArray.length} images` : "Upload Images";
-  }
 
-  const vRefsTabHandler = (files) => {
-    Array.from(files).forEach(f => {
-        if(veoRefsFiles.length < 3 && f.type.startsWith('image/')) veoRefsFiles.push(f);
+    // drag&drop
+    drop.addEventListener("dragover", (e)=>{ e.preventDefault(); drop.classList.add("drag-over"); });
+    drop.addEventListener("dragleave", ()=> drop.classList.remove("drag-over"));
+    drop.addEventListener("drop", (e)=>{
+      e.preventDefault();
+      drop.classList.remove("drag-over");
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      handle(f);
     });
-    renderVeoRefsGrid('veo-refs-grid', veoRefsFiles, 'veo-refs-title', 3);
-  };
-    
-  $("veo-refs-drop").addEventListener("click", () => $("veo-refs-files").click());
-  $("veo-refs-files").addEventListener("change", (e) => vRefsTabHandler(e.target.files));
-  setupDragDrop($("veo-refs-drop"), vRefsTabHandler);
 
-  // Run Veo Refs
-  $("run-veo-refs").addEventListener("click", async () => {
-    $("run-veo-refs").disabled = true;
-    showLoader(true, 240, "Starting Veo 3.1 Reference...");
-
-    try {
-        const s = await getSession();
-        const fd = new FormData();
-        fd.append("presetId", "veo_3_1"); // Use normal veo preset
-        fd.append("scene", $("veo-refs-scene").value || "cinematic shot");
-        fd.append("duration", $("veo-refs-duration").value);
-        fd.append("aspect_ratio", $("veo-refs-aspect").value);
-        fd.append("resolution", $("veo-refs-resolution").value);
-        fd.append("generate_audio", "true"); // HARDCODED AUDIO
-        fd.append("access_token", s.access_token);
-        
-        // Upload refs and send URLs
-        const refs = (veoRefsFiles || []).slice(0,3);
-        for (const f of refs) {
-            const url = await uploadToInputs(f, s);
-            fd.append("reference_image_urls", url);
-        }
-        
-        // No Start/Last here
-
-        const r = await fetch(BACKEND_BASE + "/api/start", { method:"POST", body: fd });
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.error || "Failed");
-
-        latestJobId = data.jobId;
-        $("status-veo-refs").textContent = "Job Started";
-        $("run-veo-refs").disabled = false;
-        pollJob(data.jobId);
-        setTimeout(refreshLibraryRibbon, 1000);
-    } catch(e) {
-        showLoader(false);
-        $("run-veo-refs").disabled = false;
-        alert(e.message);
+    // hint
+    if(acceptHint){
+      const sub = drop.querySelector(".sub");
+      if(sub) sub.textContent = acceptHint;
     }
+  }
+
+  // Kling 2.6 start image
+  bindDrop({
+    dropId:"k26-drop", fileId:"k26-file",
+    onFile:(f)=>{ $("k26-dropTitle").textContent = "Image selected"; $("k26-dropSub").textContent = f.name; },
+    thumbId:"k26-thumb",
+    allowTypes:["image/"],
+    maxSizeMB: 20
+  });
+  $("k26-drop").addEventListener("click", ()=> $("k26-file").click());
+  $("k26-file").addEventListener("change", (e)=>{
+    const f = e.target.files?.[0];
+    if(!f) return;
+    // preview
+    const thumb = $("k26-thumb");
+    if(thumb.dataset._blob) try{ URL.revokeObjectURL(thumb.dataset._blob); }catch(_){}
+    thumb.dataset._blob = URL.createObjectURL(f);
+    thumb.src = thumb.dataset._blob;
+    thumb.style.display = "block";
+    $("k26-dropTitle").textContent = "Image selected";
+    $("k26-dropSub").textContent = f.name;
+    // store
+    $("k26-file")._picked = f;
+    e.target.value = "";
+  });
+  // also allow drop for k26-drop via generic handler
+  $("k26-drop").addEventListener("dragover", (e)=>{ e.preventDefault(); $("k26-drop").classList.add("drag-over"); });
+  $("k26-drop").addEventListener("dragleave", ()=> $("k26-drop").classList.remove("drag-over"));
+  $("k26-drop").addEventListener("drop", (e)=>{
+    e.preventDefault(); $("k26-drop").classList.remove("drag-over");
+    const f = e.dataTransfer.files?.[0]; if(!f) return;
+    $("k26-file")._picked = f;
+    const thumb = $("k26-thumb");
+    if(thumb.dataset._blob) try{ URL.revokeObjectURL(thumb.dataset._blob); }catch(_){}
+    thumb.dataset._blob = URL.createObjectURL(f);
+    thumb.src = thumb.dataset._blob;
+    thumb.style.display = "block";
+    $("k26-dropTitle").textContent = "Image selected";
+    $("k26-dropSub").textContent = f.name;
   });
 
-
-  // ==========================================
-  // LOGIC: KLING O1
-  // ==========================================
-  let o1Video = null;
-  let o1Images = [];
-  let o1VideoOk = false;
-
-  async function handleO1Video(f) {
-      if(!f) return;
-      if(f.type !== "video/mp4") return setO1Val(false, "MP4 only");
-      
-      const meta = await getVideoMeta(f);
-      if(meta.duration < 3 || meta.duration > 12) return setO1Val(false, `Duration ${meta.duration.toFixed(1)}s (must be 3-12s)`);
-      
-      o1Video = f;
-      setO1Val(true, `Ready (${meta.w}x${meta.h}, ${meta.duration.toFixed(1)}s)`);
-      $("o1-vid-title").textContent = f.name;
-      updateO1Tokens();
-  }
-
-  // Video Validation
-  $("o1-vid-drop").addEventListener("click", () => $("o1-vid-file").click());
-  $("o1-vid-file").addEventListener("change", (e) => handleO1Video(e.target.files[0]));
-  setupDragDrop($("o1-vid-drop"), (files) => handleO1Video(files[0]));
-
-  function setO1Val(ok, msg) {
-      o1VideoOk = ok;
-      $("o1-vid-val").textContent = msg;
-      $("o1-vid-val").className = "lf-validate " + (ok?"ok":"bad");
-      $("run-o1").disabled = !ok;
-  }
-
-  // Image Ref Logic
-  function handleO1Images(files) {
-      Array.from(files).forEach(f => {
-          if(o1Images.length < 4 && f.type.startsWith('image/')) o1Images.push(f);
-      });
-      renderO1Images();
-      updateO1Tokens();
-  }
-
-  $("o1-img-drop").addEventListener("click", () => $("o1-img-file").click());
-  $("o1-img-file").addEventListener("change", (e) => handleO1Images(e.target.files));
-  setupDragDrop($("o1-img-drop"), handleO1Images);
-
-  function renderO1Images() {
-      const g = $("o1-img-grid");
-      g.innerHTML = "";
-      o1Images.forEach((f, i) => {
-          const d = document.createElement("div");
-          d.className = "lf-img-tile";
-          d.innerHTML = `<img src="${URL.createObjectURL(f)}"><div class="lf-img-x">×</div>`;
-          d.querySelector(".lf-img-x").onclick = (e) => {
-              e.stopPropagation();
-              o1Images.splice(i, 1);
-              renderO1Images();
-              updateO1Tokens();
-          };
-          g.appendChild(d);
-      });
-      $("o1-img-title").textContent = o1Images.length ? `${o1Images.length} images` : "Upload Images";
-  }
-
-  // Token Logic (@Video1)
-  function updateO1Tokens() {
-      const chips = $("o1-chipbar");
-      chips.innerHTML = "";
-      chips.style.display = "none";
-      let tokens = [];
-      if(o1Video) tokens.push("@Video1");
-      o1Images.forEach((_, i) => tokens.push(`@Image${i+1}`));
-      
-      if(tokens.length) {
-          chips.style.display = "flex";
-          tokens.forEach(t => {
-              const c = document.createElement("div");
-              c.className = "lf-chip";
-              c.textContent = t;
-              c.onclick = () => {
-                  const el = $("o1-scene");
-                  el.value += t + " ";
-                  el.focus();
-              };
-              chips.appendChild(c);
-          });
-      }
-  }
-
-  // O1 Run
-  $("run-o1").addEventListener("click", async () => {
-      if(!o1VideoOk) return;
-      $("run-o1").disabled = true;
-      
-      if(currentModel === 'kling_o1') showLoader(true, 270, "Uploading O1 Assets...");
-      
-      try {
-          const s = await getSession();
-          
-          // Upload Video
-          const vPath = `${s.user.id}/${uuid()}.mp4`;
-          await window.sb.storage.from("inputs_video").upload(vPath, o1Video);
-          const vUrl = window.sb.storage.from("inputs_video").getPublicUrl(vPath).data.publicUrl;
-
-          // Upload Images
-          let iUrls = [];
-          for(let img of o1Images) {
-              const iPath = `${s.user.id}/${uuid()}.png`;
-              await window.sb.storage.from("inputs").upload(iPath, img);
-              iUrls.push(window.sb.storage.from("inputs").getPublicUrl(iPath).data.publicUrl);
-          }
-
-          // Build Prompt
-          let p = $("o1-scene").value || "edit video";
-          if(iUrls.length) p += "\nUse reference images for style.";
-
-          const payload = {
-              presetId: "kling_o1_edit_std",
-              scene: p,
-              video_url: vUrl,
-              image_urls: iUrls.length ? iUrls : undefined,
-              duration: Number($("o1-duration").value),
-              keep_original_sound: true
-          };
-
-          const data = await fetchAuth(BACKEND_BASE + "/api/start_fal_json", {
-              method: "POST",
-              headers: {"Content-Type":"application/json"},
-              body: JSON.stringify(payload)
-          });
-
-          latestJobId = data.jobId;
-          $("status-o1").textContent = "Job Started";
-          $("run-o1").disabled = false;
-          
-          pollJob(data.jobId);
-          setTimeout(refreshLibraryRibbon, 1000);
-
-      } catch(e) {
-          showLoader(false);
-          $("run-o1").disabled = false;
-          alert(e.message);
-      }
+  // O1 edit video
+  bindDrop({
+    dropId:"o1-vid-drop", fileId:"o1-vid-file",
+    onFile:(f)=>{ o1flfvStart = o1flfvStart; $("o1-vid-val").textContent = "Selected: "+f.name; $("o1-vid-val").style.color="rgba(155,226,138,0.95)"; $("o1-vid-file")._picked = f; enableO1Run(); },
+    allowTypes:["video/","mp4",".mp4",".mov",".webm"],
+    maxSizeMB: 200
   });
 
-  $("o1-duration").addEventListener("change", () => {
-      const d = Number($("o1-duration").value);
-      $("o1-cost").textContent = (d <= 6 ? 15 : 20) + " Cr";
+  // O1 style refs (max 4)
+  $("o1-img-drop").addEventListener("click", ()=> $("o1-img-file").click());
+  $("o1-img-file").addEventListener("change", (e)=>{
+    const files = Array.from(e.target.files||[]).filter(f=>f.type.startsWith("image/"));
+    const limited = files.slice(0,4);
+    const grid = $("o1-img-grid");
+    grid.innerHTML = "";
+    limited.forEach((f)=>{
+      const url = URL.createObjectURL(f);
+      const img = document.createElement("img");
+      img.src = url;
+      img.style.width="100%";
+      img.style.height="70px";
+      img.style.objectFit="cover";
+      img.style.borderRadius="12px";
+      img.style.border="1px solid rgba(255,255,255,0.10)";
+      grid.appendChild(img);
+    });
+    $("o1-img-file")._picked = limited;
+    enableO1Run();
+    e.target.value="";
   });
 
-  async function refreshLibraryRibbon() {
-      try {
-          const d = await fetchAuth(`${BACKEND_BASE}/api/me?limit=30&offset=0`);
-          const list = d.generations || [];
-          
-          let hiddenIds = [];
-          try { hiddenIds = JSON.parse(localStorage.getItem("lf_hidden_items_v2") || "[]"); } catch(e){}
-          const visible = list.filter(g => !hiddenIds.includes(String(g.id)));
-
-          const ribbon = $("lib-ribbon");
-          
-          if(visible.length === 0) {
-              ribbon.innerHTML = `<div style="padding:20px;color:#444">No history</div>`;
-              return;
-          }
-
-          const html = visible.map(item => {
-              const url = item.output_url || "";
-              const st = item.status === 'succeeded' ? {t:'Done',c:'ok'} : 
-                         (item.status==='failed' || item.status==='canceled') ? {t:'Fail',c:'err'} : {t:'Proc',c:'warn'};
-              
-              let media = `<div style="width:100%;height:100%;background:#111;display:flex;align-items:center;justify-content:center;color:#333">...</div>`;
-              if(url && (url.includes('.mp4') || url.includes('.mov'))) {
-                  media = `<video src="${url}" muted onmouseover="this.play()" onmouseout="this.pause()"></video>`;
-              } else if (url) {
-                  media = `<img src="${url}">`;
-              }
-
-              const json = JSON.stringify(item).replace(/"/g, '&quot;');
-              
-              return `
-              <div class="lf-rib-item" onclick="openModal(${json})">
-                  ${media}
-                  <div class="lf-rib-status"><span class="dot ${st.c}"></span> ${st.t}</div>
-              </div>`;
-          }).join("");
-          
-          // Append "Show All" button
-          const moreBtn = `<a href="https://lightfull.ai/library" class="lf-rib-more">Show All →</a>`;
-          
-          ribbon.innerHTML = html + moreBtn;
-
-      } catch(e) { console.error("Lib err", e); }
+  function enableO1Run(){
+    const hasVideo = !!$("o1-vid-file")._picked;
+    $("run-o1").disabled = !hasVideo;
   }
 
-  // --- MODAL ---
-  window.openModal = (item) => {
-      $("modal-backdrop").classList.add("open");
-      const v = item.output_url;
-      const c = $("m-view-container");
-      c.innerHTML = "";
-      
-      if(v && (v.includes(".mp4") || v.includes(".mov"))) {
-          c.innerHTML = `<video src="${v}" controls autoplay loop style="max-height:100%;max-width:100%"></video>`;
-      } else {
-          c.innerHTML = `<img src="${v}" style="object-fit:contain;max-height:100%">`;
-      }
-      
-      $("m-status").textContent = item.status;
-      $("m-date").textContent = item.created_at.slice(0,10);
-      $("m-dl").onclick = () => window.open(v, '_blank');
+  // O1 FLFV start/end
+  function bindImgPick(inputId, dropId, titleId, thumbId, setter){
+    $(dropId).addEventListener("click", ()=> $(inputId).click());
+    $(inputId).addEventListener("change", (e)=>{
+      const f = e.target.files?.[0]; if(!f) return;
+      setter(f);
+      const th = $(thumbId);
+      if(th.dataset._blob) try{ URL.revokeObjectURL(th.dataset._blob); }catch(_){}
+      th.dataset._blob = URL.createObjectURL(f);
+      th.src = th.dataset._blob;
+      th.style.display = "block";
+      $(titleId).textContent = "Selected";
+      e.target.value="";
+      syncO1flfv();
+    });
+  }
+  bindImgPick("o1flfv-start-file","o1flfv-start-drop","o1flfv-start-title","o1flfv-start-thumb",(f)=>{ o1flfvStart=f; });
+  bindImgPick("o1flfv-end-file","o1flfv-end-drop","o1flfv-end-title","o1flfv-end-thumb",(f)=>{ o1flfvEnd=f; });
+  $("o1flfv-swap").onclick = ()=>{
+    const a = o1flfvStart; o1flfvStart = o1flfvEnd; o1flfvEnd = a;
+    const t1 = $("o1flfv-start-thumb").src;
+    $("o1flfv-start-thumb").src = $("o1flfv-end-thumb").src;
+    $("o1flfv-end-thumb").src = t1;
+    syncO1flfv();
   };
-  $("modal-close").onclick = () => $("modal-backdrop").classList.remove("open");
+  function syncO1flfv(){
+    $("run-o1flfv").disabled = !(o1flfvStart && o1flfvEnd);
+  }
+  syncO1flfv();
 
-  // Init
-  $("btn-back").addEventListener("click", () => location.href = "https://lightfull.ai/flow");
-    
-  // Tooltip Logic
-  document.addEventListener("click", e => {
-      if(e.target.closest(".lf-i")) {
-          const p = e.target.closest(".lf-help");
-          p.classList.toggle("is-open");
-      } else if (!e.target.closest(".lf-tip")) {
-          document.querySelectorAll(".lf-help.is-open").forEach(x => x.classList.remove("is-open"));
-      }
+  // Kling Motion image + optional video
+  bindImgPick("km-image-file","km-image-drop","km-image-title","km-image-thumb",(f)=>{ kmImage=f; syncKm(); });
+  $("km-video-drop").addEventListener("click", ()=> $("km-video-file").click());
+  $("km-video-file").addEventListener("change", (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    kmVideo = f;
+    $("km-video-val").textContent = "Selected: "+f.name;
+    $("km-video-val").style.color="rgba(155,226,138,0.95)";
+    syncKm();
+    e.target.value="";
   });
-
-  // VEO cost listeners
-  $("veo-fast-duration").addEventListener("change", updateVeoCosts);
-  $("veo-duration").addEventListener("change", updateVeoCosts);
-  $("veo-refs-duration").addEventListener("change", updateVeoCosts);
-  
-  function calcVeoCost(kind){
-    const d =
-      kind === "fast"   ? Number($("veo-fast-duration").value) :
-      kind === "normal" ? Number($("veo-duration").value) :
-                          Number($("veo-refs-duration").value);
-
-    // MUST MATCH backend lib/pricing.js getVeoCost():
-    // Fast: 4->2, 6->3, 8->4
-    // Norm: 4->4, 6->5, 8->6
-    const tableFast = { 4: 2, 6: 3, 8: 4 };
-    const tableNorm = { 4: 4, 6: 5, 8: 6 };
-
-    if (kind === "fast") return tableFast[d] ?? 4;
-    return tableNorm[d] ?? 6; // normal + refs
+  function syncKm(){
+    $("run-km").disabled = !kmImage;
+    $("km-cost").textContent = "—";
   }
 
-  function updateVeoCosts(){
-    $("veo-fast-cost").textContent = calcVeoCost("fast") + " Cr";
-    $("veo-cost").textContent      = calcVeoCost("normal") + " Cr";
-    $("veo-refs-cost").textContent = calcVeoCost("refs") + " Cr";
+  // Veo fast / veo start-last
+  bindImgPick("veo-fast-image","veo-fast-image-drop","veo-fast-image-title","veo-fast-image-thumb",(f)=>{ veoFastImage=f; syncVeoFast(); });
+  bindImgPick("veo-fast-last","veo-fast-last-drop","veo-fast-last-title","veo-fast-last-thumb",(f)=>{ veoFastLast=f; syncVeoFast(); });
+  $("veo-fast-swap").onclick = ()=>{
+    const a = veoFastImage; veoFastImage=veoFastLast; veoFastLast=a;
+    const t1 = $("veo-fast-image-thumb").src;
+    $("veo-fast-image-thumb").src = $("veo-fast-last-thumb").src;
+    $("veo-fast-last-thumb").src = t1;
+    syncVeoFast();
+  };
+  function syncVeoFast(){
+    $("run-veo-fast").disabled = !(veoFastImage && veoFastLast);
+  }
+  syncVeoFast();
+
+  bindImgPick("veo-image","veo-image-drop","veo-image-title","veo-image-thumb",(f)=>{ veoImage=f; syncVeo(); });
+  bindImgPick("veo-last","veo-last-drop","veo-last-title","veo-last-thumb",(f)=>{ veoLast=f; syncVeo(); });
+  $("veo-swap").onclick = ()=>{
+    const a = veoImage; veoImage=veoLast; veoLast=a;
+    const t1 = $("veo-image-thumb").src;
+    $("veo-image-thumb").src = $("veo-last-thumb").src;
+    $("veo-last-thumb").src = t1;
+    syncVeo();
+  };
+  function syncVeo(){
+    $("run-veo").disabled = !(veoImage && veoLast);
+  }
+  syncVeo();
+
+  // Veo refs (max 3)
+  $("veo-refs-drop").addEventListener("click", ()=> $("veo-refs-files").click());
+  $("veo-refs-files").addEventListener("change", (e)=>{
+    const files = Array.from(e.target.files||[]).filter(f=>f.type.startsWith("image/")).slice(0,3);
+    veoRefsFiles = files;
+    const grid = $("veo-refs-grid");
+    grid.innerHTML = "";
+    files.forEach((f)=>{
+      const url = URL.createObjectURL(f);
+      const img = document.createElement("img");
+      img.src = url;
+      img.style.width="100%";
+      img.style.height="70px";
+      img.style.objectFit="cover";
+      img.style.borderRadius="12px";
+      img.style.border="1px solid rgba(255,255,255,0.10)";
+      grid.appendChild(img);
+    });
+    $("run-veo-refs").disabled = files.length === 0;
+    e.target.value="";
+  });
+  $("run-veo-refs").disabled = true;
+
+  // Runway Aleph video
+  $("rw-aleph-video-drop").addEventListener("click", ()=> $("rw-aleph-video-file").click());
+  $("rw-aleph-video-file").addEventListener("change", (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    rwAlephVideo = f;
+    $("rw-aleph-video-val").textContent = "Selected: "+f.name;
+    $("rw-aleph-video-val").style.color="rgba(155,226,138,0.95)";
+    $("run-rw-aleph").disabled = !rwAlephVideo;
+    e.target.value="";
+  });
+  $("run-rw-aleph").disabled = true;
+
+  // Runway Act Two image + driver
+  bindImgPick("rw-act-image-file","rw-act-image-drop","rw-act-image-title","rw-act-image-thumb",(f)=>{ rwActImage=f; syncAct(); });
+  $("rw-act-video-drop").addEventListener("click", ()=> $("rw-act-video-file").click());
+  $("rw-act-video-file").addEventListener("change", (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    rwActVideo = f;
+    $("rw-act-video-val").textContent = "Selected: "+f.name;
+    $("rw-act-video-val").style.color="rgba(155,226,138,0.95)";
+    syncAct();
+    e.target.value="";
+  });
+  function syncAct(){
+    $("run-rw-act").disabled = !(rwActImage && rwActVideo);
+  }
+  syncAct();
+
+  /* ===========================
+     START / POLL
+  ============================ */
+  function startTimer(){
+    const tEl = $("loaderTime");
+    const tick = ()=>{
+      timeLeft++;
+      const mm = String(Math.floor(timeLeft/60)).padStart(2,"0");
+      const ss = String(timeLeft%60).padStart(2,"0");
+      tEl.textContent = `${mm}:${ss}`;
+      timer = setTimeout(tick, 1000);
+    };
+    stopTimer();
+    timeLeft = 0;
+    tick();
+  }
+  function stopTimer(){
+    if(timer){ clearTimeout(timer); timer=null; }
   }
 
-  updateVeoCosts();
-  
-  // INIT NEW COSTS
-  updateO1flfvCost();
-  updateKmCost();
-  
-  // Re-trigger selectModel to fix active state on load
-  selectModel('kling_26');
+  async function pollJob(jobId){
+    const t0 = Date.now();
+    while(true){
+      const s = await fetchAuth(`${BACKEND_BASE}/api/status?jobId=${encodeURIComponent(jobId)}`, { method:"GET" });
+      const st = String(s.status||"").toLowerCase();
 
-  refreshLibraryRibbon();
-  setInterval(refreshLibraryRibbon, 30000);
+      if(["succeeded","failed","canceled"].includes(st)){
+        stopTimer();
+        setLoader(false);
 
+        if(st === "succeeded"){
+          const out = s.output_url || s.outputUrl || s.url || s.result_url || "";
+          if(out && isVideoUrl(out)){
+            showResultVideo(out, "Done • "+fmt(s.finished_at || s.updated_at || ""));
+          }else{
+            // fallback: refresh history and select newest
+            await loadHistory(true);
+          }
+          return { ok:true, data:s };
+        }else{
+          return { ok:false, data:s };
+        }
+      }
+      await new Promise(r=>setTimeout(r, 1200));
+      if(Date.now() - t0 > 10*60*1000){
+        throw new Error("Timeout");
+      }
+    }
+  }
+
+  async function startJob(payloadBuilder, statusElId){
+    try{
+      setStatus(statusElId, "", "");
+      setLoader(true, "Starting…");
+      startTimer();
+
+      const fd = await payloadBuilder();
+      const data = await fetchAuth(`${BACKEND_BASE}/api/start`, { method:"POST", body: fd });
+
+      latestJobId = data.jobId;
+      setLoader(true, "Processing…");
+      await loadHistory(false);
+
+      const res = await pollJob(latestJobId);
+      if(res.ok){
+        setStatus(statusElId, "Done", "ok");
+        await loadHistory(true);
+      }else{
+        setStatus(statusElId, "Failed", "err");
+      }
+    }catch(e){
+      stopTimer();
+      setLoader(false);
+      setStatus(statusElId, e.message || "Error", "err");
+      console.error(e);
+      alert("Error: "+(e.message||e));
+    }
+  }
+
+  /* ===========================
+     BUILD FORM DATA PER MODEL
+     NOTE: uses Supabase Storage inputs bucket
+  ============================ */
+  async function buildK26(){
+    const img = $("k26-file")._picked;
+    if(!img) throw new Error("Start image required");
+
+    const scene = ($("k26-scene").value || "").trim();
+    const aspect = $("k26-aspect").value;
+    const duration = $("k26-duration").value;
+    const audio = $("k26-audio").checked;
+
+    const imgUrl = await uploadToInputs(img);
+
+    const fd = new FormData();
+    fd.append("presetId", "kling_26");
+    fd.append("scene", scene || "video");
+    fd.append("prompt_user", scene || "video");
+    fd.append("image_input_url", imgUrl);
+    fd.append("aspect_ratio", aspect);
+    fd.append("duration", duration);
+    fd.append("audio", audio ? "true":"false");
+    return fd;
+  }
+
+  async function buildO1(){
+    const vid = $("o1-vid-file")._picked;
+    if(!vid) throw new Error("Input video required");
+    const scene = ($("o1-scene").value || "").trim();
+    const duration = $("o1-duration").value;
+
+    const videoUrl = await uploadToInputs(vid);
+
+    const imgs = ($("o1-img-file")._picked || []).slice(0,4);
+    const urls = [];
+    for(const f of imgs) urls.push(await uploadToInputs(f));
+
+    const fd = new FormData();
+    fd.append("presetId", "kling_o1");
+    fd.append("scene", scene || "edit");
+    fd.append("prompt_user", scene || "edit");
+    fd.append("video_input_url", videoUrl);
+    urls.forEach(u => fd.append("image_input_urls", u));
+    fd.append("duration", duration);
+    return fd;
+  }
+
+  async function buildO1flfv(){
+    if(!o1flfvStart || !o1flfvEnd) throw new Error("Start & last required");
+    const scene = ($("o1flfv-scene").value || "").trim();
+    const mode = $("o1flfv-mode").value;
+    const duration = $("o1flfv-duration").value;
+
+    const startUrl = await uploadToInputs(o1flfvStart);
+    const endUrl = await uploadToInputs(o1flfvEnd);
+
+    const fd = new FormData();
+    fd.append("presetId", "kling_o1_flfv");
+    fd.append("scene", scene || "transform");
+    fd.append("prompt_user", scene || "transform");
+    fd.append("start_image_url", startUrl);
+    fd.append("end_image_url", endUrl);
+    fd.append("mode", mode);
+    fd.append("duration", duration);
+    return fd;
+  }
+
+  async function buildKmotion(){
+    if(!kmImage) throw new Error("Reference image required");
+    const scene = ($("km-scene").value || "").trim();
+    const mode = $("km-mode").value;
+    const keep = $("km-keep-sound").checked;
+
+    const imgUrl = await uploadToInputs(kmImage);
+    let vidUrl = "";
+    if(kmVideo) vidUrl = await uploadToInputs(kmVideo);
+
+    const fd = new FormData();
+    fd.append("presetId", "kling_motion");
+    fd.append("scene", scene || "motion");
+    fd.append("prompt_user", scene || "motion");
+    fd.append("image_input_url", imgUrl);
+    if(vidUrl) fd.append("video_input_url", vidUrl);
+    fd.append("mode", mode);
+    fd.append("keep_sound", keep ? "true":"false");
+    return fd;
+  }
+
+  async function buildVeoFast(){
+    if(!veoFastImage || !veoFastLast) throw new Error("Start & last required");
+    const scene = ($("veo-fast-scene").value || "").trim();
+    const aspect = $("veo-fast-aspect").value;
+    const duration = $("veo-fast-duration").value;
+    const res = $("veo-fast-resolution").value;
+
+    const a = await uploadToInputs(veoFastImage);
+    const b = await uploadToInputs(veoFastLast);
+
+    const fd = new FormData();
+    fd.append("presetId", "veo_fast");
+    fd.append("scene", scene || "video");
+    fd.append("prompt_user", scene || "video");
+    fd.append("start_image_url", a);
+    fd.append("end_image_url", b);
+    fd.append("aspect_ratio", aspect);
+    fd.append("duration", duration);
+    fd.append("resolution", res);
+    return fd;
+  }
+
+  async function buildVeo(){
+    if(!veoImage || !veoLast) throw new Error("Start & last required");
+    const scene = ($("veo-scene").value || "").trim();
+    const aspect = $("veo-aspect").value;
+    const duration = $("veo-duration").value;
+    const res = $("veo-resolution").value;
+
+    const a = await uploadToInputs(veoImage);
+    const b = await uploadToInputs(veoLast);
+
+    const fd = new FormData();
+    fd.append("presetId", "veo");
+    fd.append("scene", scene || "video");
+    fd.append("prompt_user", scene || "video");
+    fd.append("start_image_url", a);
+    fd.append("end_image_url", b);
+    fd.append("aspect_ratio", aspect);
+    fd.append("duration", duration);
+    fd.append("resolution", res);
+    return fd;
+  }
+
+  async function buildVeoRefs(){
+    if(!veoRefsFiles.length) throw new Error("At least 1 ref image");
+    const scene = ($("veo-refs-scene").value || "").trim();
+    const aspect = $("veo-refs-aspect").value;
+    const duration = $("veo-refs-duration").value;
+    const res = $("veo-refs-resolution").value;
+
+    const urls = [];
+    for(const f of veoRefsFiles.slice(0,3)) urls.push(await uploadToInputs(f));
+
+    const fd = new FormData();
+    fd.append("presetId", "veo_refs");
+    fd.append("scene", scene || "video");
+    fd.append("prompt_user", scene || "video");
+    urls.forEach(u=> fd.append("image_input_urls", u));
+    fd.append("aspect_ratio", aspect);
+    fd.append("duration", duration);
+    fd.append("resolution", res);
+    return fd;
+  }
+
+  async function buildAleph(){
+    if(!rwAlephVideo) throw new Error("Input video required");
+    const scene = ($("rw-aleph-scene").value || "").trim();
+    const ratio = $("rw-aleph-ratio").value;
+    const seed = ($("rw-aleph-seed").value || "").trim();
+
+    const v = await uploadToInputs(rwAlephVideo);
+
+    const fd = new FormData();
+    fd.append("presetId", "runway_aleph");
+    fd.append("scene", scene || "edit");
+    fd.append("prompt_user", scene || "edit");
+    fd.append("video_input_url", v);
+    fd.append("aspect_ratio", ratio);
+    if(seed) fd.append("seed", seed);
+    return fd;
+  }
+
+  async function buildActTwo(){
+    if(!rwActImage || !rwActVideo) throw new Error("Character & driver required");
+    const scene = ($("rw-act-scene").value || "").trim();
+    const preserve = $("rw-act-preserve").checked;
+
+    const img = await uploadToInputs(rwActImage);
+    const vid = await uploadToInputs(rwActVideo);
+
+    const fd = new FormData();
+    fd.append("presetId", "runway_act_two");
+    fd.append("scene", scene || "act");
+    fd.append("prompt_user", scene || "act");
+    fd.append("image_input_url", img);
+    fd.append("video_input_url", vid);
+    fd.append("preserve_identity", preserve ? "true":"false");
+    return fd;
+  }
+
+  /* ===========================
+     BUTTONS
+  ============================ */
+  $("run-k26").onclick = ()=> startJob(buildK26, "status-k26");
+  $("run-o1").onclick = ()=> startJob(buildO1, "status-o1");
+  $("run-o1flfv").onclick = ()=> startJob(buildO1flfv, "status-o1flfv");
+  $("run-km").onclick = ()=> startJob(buildKmotion, "status-km");
+  $("run-veo-fast").onclick = ()=> startJob(buildVeoFast, "status-veo-fast");
+  $("run-veo").onclick = ()=> startJob(buildVeo, "status-veo");
+  $("run-veo-refs").onclick = ()=> startJob(buildVeoRefs, "status-veo-refs");
+  $("run-rw-aleph").onclick = ()=> startJob(buildAleph, "status-rw-aleph");
+  $("run-rw-act").onclick = ()=> startJob(buildActTwo, "status-rw-act");
+
+  $("btn-back").onclick = ()=> { window.location.href = "/vfx"; };
+
+  /* ===========================
+     HISTORY (vertical, Higgs-like)
+     uses /api/me and filters videos
+  ============================ */
+  async function loadHistory(selectNewest=false){
+    try{
+      const j = await fetchAuth(`${BACKEND_BASE}/api/me?limit=40&offset=0`, { method:"GET" });
+      const gens = Array.isArray(j.generations) ? j.generations : [];
+      historyItems = gens.filter(x => isVideoUrl(x.output_url || x.url || x.outputUrl || ""));
+      renderHistory();
+
+      if(selectNewest && historyItems.length){
+        const newest = historyItems[0];
+        selectHistory(String(newest.id));
+      }else if(selectedHistoryId){
+        const still = historyItems.find(x=>String(x.id)===String(selectedHistoryId));
+        if(still) selectHistory(String(still.id), true);
+      }
+    }catch(e){
+      $("history").innerHTML = `<div style="padding:14px;color:rgba(255,123,136,0.95);font-weight:900;">${e.message}</div>`;
+    }
+  }
+
+  function renderHistory(){
+    const host = $("history");
+    if(!historyItems.length){
+      host.innerHTML = `<div style="padding:14px;color:rgba(255,255,255,0.45);font-weight:900;">No videos yet.</div>`;
+      return;
+    }
+    host.innerHTML = historyItems.map(it=>{
+      const id = String(it.id);
+      const url = it.output_url || it.url || it.outputUrl || "";
+      const st = statusDot(it.status);
+      const model = it.model_display || it.model_key || it.model || "Video";
+      const prompt = (it.prompt_user || it.prompt || "").trim();
+      const when = fmt(it.created_at || it.updated_at);
+
+      // thumbnail strategy: use thumb_url if available, else video tag poster by browser
+      const thumb = it.output_thumb_url || it.thumb_url || it.preview_url || "";
+
+      const badge = `<div class="hbadge"><span class="dot ${st.c==='ok'?'ok':st.c==='err'?'err':'warn'}"></span>${st.t}</div>`;
+      const media = thumb
+        ? `<img src="${thumb}" loading="lazy" decoding="async" />`
+        : `<video muted playsinline preload="metadata" src="${url}"></video>`;
+
+      return `
+        <div class="hitem ${id===String(selectedHistoryId) ? "active":""}" data-hid="${id}">
+          <div class="hthumb">
+            ${media}
+            ${badge}
+          </div>
+          <div class="hbody">
+            <div class="hmodel">${String(model).slice(0,24)} <span class="pill">${when || ""}</span></div>
+            <div class="hprompt">${prompt ? prompt.slice(0,140) : "—"}</div>
+            <div class="hmeta"><span>${id}</span><span>${isVideoUrl(url) ? "video" : ""}</span></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    host.querySelectorAll("[data-hid]").forEach(el=>{
+      el.onclick = ()=> selectHistory(el.getAttribute("data-hid"));
+    });
+  }
+
+  function selectHistory(id, silent=false){
+    selectedHistoryId = String(id);
+    renderHistory();
+
+    const it = historyItems.find(x=>String(x.id)===String(id));
+    if(!it) return;
+
+    const url = it.output_url || it.url || it.outputUrl || "";
+    if(url) showResultVideo(url, `Done • ${fmt(it.created_at || it.updated_at)}`);
+
+    // detail
+    const st = statusDot(it.status);
+    $("d-title").textContent = it.title || (it.model_display || it.model_key || it.model || "Generation");
+    $("d-status").innerHTML = `<span class="dot ${st.c==='ok'?'ok':st.c==='err'?'err':'warn'}"></span> ${st.t}`;
+
+    const p = (it.prompt_user || it.prompt || "").trim();
+    $("d-prompt").textContent = p || "—";
+
+    const chips = [];
+    chips.push(`<span class="chip">Model: ${(it.model_display || it.model_key || it.model || "—")}</span>`);
+    if(it.duration) chips.push(`<span class="chip">Duration: ${it.duration}s</span>`);
+    if(it.aspect_ratio) chips.push(`<span class="chip">Aspect: ${it.aspect_ratio}</span>`);
+    $("d-chips").innerHTML = chips.join("");
+
+    if(!silent){
+      // also open modal on double click (optional)
+    }
+  }
+
+  $("btn-refresh").onclick = ()=> loadHistory(false);
+
+  /* ===========================
+     MODAL (simple)
+  ============================ */
+  const modal = $("modal-backdrop");
+  $("modal-close").onclick = ()=> modal.classList.remove("open");
+  modal.onclick = (e)=>{ if(e.target===modal) modal.classList.remove("open"); };
+
+  function openModalForCurrent(){
+    const it = historyItems.find(x=>String(x.id)===String(selectedHistoryId));
+    if(!it) return;
+    const url = it.output_url || it.url || it.outputUrl || "";
+    const st = statusDot(it.status);
+
+    $("m-view-container").innerHTML = url ? `<video src="${url}" controls autoplay playsinline loop style="width:100%;height:100%;object-fit:contain"></video>` : `<div style="color:#666;font-weight:900;">—</div>`;
+    $("m-status").textContent = st.t;
+    $("m-date").textContent = fmt(it.created_at || it.updated_at);
+
+    $("m-dl").onclick = ()=> {
+      if(!url) return;
+      forceDownload(url, `video-${it.id}.mp4`);
+    };
+
+    modal.classList.add("open");
+  }
+
+  // open modal if click on center result
+  $("result").addEventListener("dblclick", openModalForCurrent);
+
+  /* ===========================
+     INIT
+  ============================ */
+  function init(){
+    // init models
+    renderSubModels();
+    selectModel("kling_26", true);
+
+    // costs (static stubs)
+    $("k26-cost").textContent = "2 Cr";
+    $("o1-cost").textContent = "15 Cr";
+    $("o1flfv-cost").textContent = "3 Cr";
+    $("km-cost").textContent = "—";
+    $("veo-fast-cost").textContent = "4 Cr";
+    $("veo-cost").textContent = "6 Cr";
+    $("veo-refs-cost").textContent = "6 Cr";
+    $("rw-aleph-cost").textContent = "—";
+    $("rw-act-cost").textContent = "—";
+
+    loadHistory(false);
+  }
+
+  init();
 })();
 </script>
