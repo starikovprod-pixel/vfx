@@ -15,623 +15,895 @@
     --ok: #39ff14;
     --warn: #ffd166;
     --radius: 16px;
+
+    /* Bottom bar sizing */
+    --dock-h: 112px;
+    --dock-max: 144px;
   }
 
-  body { margin: 0; background: var(--bg-body); overflow-x: hidden; }
-  #lf-nano * { box-sizing: border-box; outline: none; }
+  body { margin:0; background:var(--bg-body); overflow-x:hidden; }
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
 
-  #lf-nano {
-    color: var(--text-main);
-    font-family: Inter, system-ui, -apple-system, sans-serif;
-    min-height: 100vh;
-    padding-bottom: 40px;
-    display: flex;
-    flex-direction: column;
+  #lf-studio * { box-sizing:border-box; outline:none; font-family: Inter, system-ui, -apple-system, sans-serif; }
+  #lf-studio { color: var(--text-main); min-height: 100vh; position: relative; }
+
+  /* Main area = grid (history/library) */
+  #lf-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 18px calc(var(--dock-max) + 28px);
   }
 
-  /* Контейнер строго ограничен, чтобы лента не вылезала */
-  #lf-main { 
-    padding: 26px 18px 0; 
-    width: 100%;
-    max-width: 1400px; 
-    margin: 0 auto; 
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Важно для ленты */
+  .lf-toprow{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    border-bottom:1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+  }
+  .lf-title{
+    margin:0;
+    font-size: 28px;
+    font-weight: 1000;
+    letter-spacing: -0.5px;
+  }
+  .lf-sub{
+    margin-top: 6px;
+    color: var(--text-sec);
+    font-size: 13px;
   }
 
-  /* --- HEADER & DROPDOWN --- */
-  .lf-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 50;
+  .lf-pillrow{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .lf-pill{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    font-weight: 800;
+    user-select:none;
+  }
+  .lf-pill .muted{ color: rgba(255,255,255,0.55); font-weight:700; }
+
+  .lf-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
   }
 
-  .lf-model-select {
-    position: relative;
-    width: 260px;
-  }
-
-  .lf-select-trigger {
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: 0.2s;
-    user-select: none;
-  }
-  .lf-select-trigger:hover {
-    border-color: rgba(255,255,255,0.3);
+  .lf-card{
+    position:relative;
+    height: 250px;
+    border-radius: 18px;
+    overflow:hidden;
     background: var(--bg-card);
+    border: 1px solid var(--border);
+    cursor:pointer;
+    transition: transform .18s ease, border-color .18s ease;
+  }
+  .lf-card:hover{
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.28);
   }
 
-  .lf-model-name {
-    font-size: 14px;
-    font-weight: 700;
+  .lf-media{
+    position:absolute; inset:0;
+    background:#000;
+  }
+  .lf-media img, .lf-media video, .lf-media model-viewer{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+
+  .card-badge{
+    position:absolute;
+    top:10px; left:10px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 900;
+    display:flex;
+    align-items:center;
+    gap: 6px;
+    border: 1px solid rgba(255,255,255,0.12);
+    z-index: 2;
+  }
+  .dot{ width:6px;height:6px;border-radius:50%; background:#fff; }
+  .dot.ok{ background: var(--ok); }
+  .dot.warn{ background: var(--warn); }
+  .dot.bad{ background: var(--danger); }
+
+  .mini-date{
+    position:absolute;
+    bottom: 10px; left: 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    z-index: 2;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  }
+
+  /* Hover overlay (model + actions) */
+  .card-overlay{
+    position:absolute;
+    inset:0;
+    background: linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0.10) 55%, rgba(0,0,0,0));
+    opacity:0;
+    transition: opacity .18s ease;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    padding: 12px;
+    gap: 10px;
+    z-index: 3;
+  }
+  .lf-card:hover .card-overlay{ opacity:1; }
+
+  .ov-left{
+    display:flex;
+    flex-direction:column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .ov-model{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.82);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .35px;
+    max-width: 240px;
     white-space: nowrap;
-    overflow: hidden;
+    overflow:hidden;
     text-overflow: ellipsis;
   }
-
-  .lf-chevron {
-    color: var(--text-sec);
-    font-size: 18px;
-    transition: transform 0.2s;
-    margin-left: 10px;
-  }
-  .lf-model-select.open .lf-chevron { transform: rotate(90deg); }
-
-  .lf-dropdown-menu {
-    position: absolute;
-    top: 115%; left: 0; width: 100%;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 6px;
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    max-height: 300px;
-    overflow-y: auto;
-  }
-  .lf-model-select.open .lf-dropdown-menu { display: flex; }
-
-  .lf-dd-item {
-    padding: 10px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-sec);
-    display: flex; align-items: center; gap: 10px;
-    transition: 0.15s;
-  }
-  .lf-dd-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
-  .lf-dd-item.active { background: rgba(255,255,255,0.1); color: #fff; }
-    
-  .lf-dd-item .status-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--border); margin-left: auto;
-  }
-  .lf-dd-item.active .status-dot { background: var(--ok); }
-
-  /* --- WORKSPACE --- */
-  #lf-workspace {
-    display: grid;
-    grid-template-columns: 420px 1fr;
-    gap: 0;
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    overflow: hidden;
-    background: var(--bg-panel);
-    min-height: 580px;
-    position: relative;
-    width: 100%;
+  .ov-chip{
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    font-weight: 1000;
+    font-size: 11px;
+    color: rgba(255,255,255,0.70);
   }
 
-  .lf-side {
-    padding: 24px;
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    background: var(--bg-panel);
-    max-height: 85vh;
-    overflow-y: auto;
+  .ov-actions{
+    display:flex;
+    gap: 8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
   }
-
-  .lf-back {
-    background: transparent; border: 0; color: var(--text-sec);
-    font-weight: 900; cursor: pointer; padding: 0; font-size: 13px;
-    text-align: left;
-  }
-    
-  .lf-h2-sub { font-size: 14px; font-weight: 700; color: var(--text-sec); margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px; }
-
-  .lf-field label { display: block; font-size: 12px; font-weight: 900; color: var(--text-sec); margin-bottom: 8px; }
-  .lf-input-wrap { position: relative; width: 100%; border-radius: 12px; overflow: hidden; }
-  .lf-field textarea, .lf-field select, .lf-field input[type=number], .lf-field input[type=text] {
-    width: 100%; background: var(--bg-input); border: 1px solid var(--border);
-    color: var(--text-main); padding: 12px 12px; border-radius: 12px; font-size: 14px; display: block;
-    transition: 0.2s;
-  }
-  .lf-field textarea:focus, .lf-field select:focus, .lf-field input:focus { border-color: rgba(255,255,255,0.3); }
-
-  .lf-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .lf-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-
-  .lf-drop {
-    border: 2px dashed var(--border); border-radius: 14px; padding: 20px 14px;
-    cursor: pointer; background: rgba(255,255,255,.02); transition: .15s; text-align: center;
-  }
-  .lf-drop:hover { border-color: rgba(43,108,255,.55); background: rgba(43,108,255,.06); }
-  .lf-drop .big { font-weight: 1000; }
-  .lf-drop .sub { font-size: 12px; color: var(--text-sec); margin-top: 6px; }
-
-  .lf-thumbs { display: none; margin-top: 12px; gap: 10px; flex-wrap: wrap; justify-content: flex-start; }
-  .lf-thumbbox {
-    width: 62px; height: 62px; border-radius: 12px; overflow: hidden; position: relative;
-    border: 1px solid rgba(255,255,255,.10); background: #000; flex: 0 0 auto;
-  }
-  .lf-thumbbox img { width: 100%; height: 100%; object-fit: cover; opacity: .98; }
-  .lf-thumbbox .x {
-    position: absolute; top: 4px; right: 4px; width: 18px; height: 18px;
-    border-radius: 50%; background: rgba(0,0,0,.6); color: #fff;
-    font-weight: 700; font-size: 12px; display: flex; align-items: center;
-    justify-content: center; cursor: pointer; opacity: 0; transition: .12s;
-  }
-  .lf-thumbbox:hover .x { opacity: 1; }
-
-  .lf-actions { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
-  .lf-chk { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font-size: 13px; font-weight: 700; color: var(--text-sec); padding: 4px 0; }
-  .lf-chk input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
-  .lf-chk:hover { color: #fff; }
-
-  .lf-btn {
-    width: 100%; padding: 14px; border-radius: 14px; 
-    /* CHANGED: Dark gray transparent button */
-    background: rgba(255, 255, 255, 0.08); 
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #fff; font-weight: 1000; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: 0.2s;
-    backdrop-filter: blur(4px);
-  }
-  .lf-btn:hover { 
-    /* CHANGED: Hover state */
-    background: rgba(255, 255, 255, 0.15); 
-    border-color: rgba(255, 255, 255, 0.25);
-    transform: translateY(-1px); 
-  }
-  /* Active/Disabled state styles */
-  .lf-btn:active { transform: translateY(1px); }
-  .lf-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-
-  .lf-btn.secondary { background: #2a2a2a; color: #ddd; border:none; }
-  .lf-btn.secondary:hover { background: #333; }
-  .lf-cost { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.10); }
-
-  .lf-status { text-align: center; font-size: 12px; color: var(--text-sec); min-height: 18px; margin-top: 4px; }
-  .lf-status.err { color: #ff5a6b; font-weight: 1000; }
-  .lf-status.ok { color: #9be28a; font-weight: 1000; }
-  .lf-status.warn { color: #ffd166; font-weight: 1000; }
-
-  .lf-main-view {
-    background: #000; display: flex; align-items: center; justify-content: center;
-    padding: 24px; position: relative; min-height: 500px;
-  }
-  .lf-empty { color: #3a3a3a; text-align: center; font-weight: 900; }
-  .lf-result {
-    display: none; width: min(920px, 95%); border-radius: 18px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,.08); box-shadow: 0 0 50px rgba(0,0,0,.6); background: #0b0b0b;
-  }
-  .lf-result img, .lf-result video { width: 100%; display: block; max-height: 75vh; object-fit: contain; background: #000; }
-  .lf-resbar {
-    padding: 14px; display: flex; justify-content: space-between; align-items: center;
-    gap: 12px; border-top: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.35);
-  }
-  .lf-resbar a { text-decoration: none; background: var(--accent); color: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 1000; }
-
-  .lf-loader {
-    position: absolute; inset: 0; background: rgba(0,0,0,.78); display: none;
-    flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 30; backdrop-filter: blur(4px);
-  }
-  .lf-spin {
-    width: 46px; height: 46px; border-radius: 50%; border: 4px solid #2b2b2b;
-    border-top-color: var(--accent); animation: lfspin 1s linear infinite;
-  }
-  @keyframes lfspin { to { transform: rotate(360deg); } }
-  .lf-wait { font-weight: 1000; }
-  .lf-time { font-size: 12px; color: var(--text-sec); }
-
-  .lf-prompt-loader {
-    position: absolute; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center;
-    flex-direction: column; gap: 8px; background: rgba(10, 10, 10, 0.65); backdrop-filter: blur(3px);
-  }
-  .lf-prompt-loader::before {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(43, 108, 255, 0.15) 40%, rgba(43, 108, 255, 0.3) 50%, rgba(43, 108, 255, 0.15) 60%, transparent 100%);
-    background-size: 200% 100%; animation: shine 2s infinite linear; pointer-events: none;
-  }
-  @keyframes shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  .lf-prompt-text { font-size: 14px; font-weight: 700; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8); position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; }
-
-  .hidden { display: none !important; }
-
-  /* --- LIBRARY WRAPPER --- */
-  .lf-lib-wrapper {
-    margin-top: 24px;
-    border-top: 1px solid var(--border);
-    padding-top: 20px;
-    /* FIX: Force containment */
-    width: 100%; 
-    box-sizing: border-box;
-    overflow: hidden; 
-  }
-
-  .lf-ribbon-title {
-    font-size: 14px; font-weight: 900; color: var(--text-sec); margin-bottom: 16px; padding-left: 4px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-    
-  /* GRID LAYOUT */
-  .lf-ribbon {
-    display: grid;
-    /* 2 rows, slightly compact height */
-    grid-template-rows: repeat(2, 110px); 
-    grid-auto-flow: column;
-    grid-auto-columns: 110px;
-    gap: 12px;
-      
-    overflow-x: auto;
-    width: 100%;
-    /* Extra padding right to prevent clip on scroll end */
-    padding-bottom: 12px; 
-    padding-right: 20px; 
-      
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) var(--bg-body);
-  }
-
-  .lf-ribbon::-webkit-scrollbar { height: 8px; }
-  .lf-ribbon::-webkit-scrollbar-track { background: var(--bg-body); }
-  .lf-ribbon::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  .lf-ribbon::-webkit-scrollbar-thumb:hover { background: #444; }
-
-  .lf-rib-item {
-    width: 100%; height: 100%;
+  .btn-mini{
+    border: 0;
+    cursor:pointer;
     border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid var(--border);
-    background: #000;
-    cursor: pointer;
-    transition: transform 0.15s, border-color 0.15s;
+    padding: 9px 10px;
+    font-size: 12px;
+    font-weight: 1000;
+    color:#fff;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(4px);
+    transition: .16s ease;
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    user-select:none;
   }
-  .lf-rib-item:hover { transform: scale(0.96); border-color: rgba(255,255,255,0.4); }
-  .lf-rib-item img, .lf-rib-item video { width: 100%; height: 100%; object-fit: cover; }
-    
-  .lf-rib-status {
-    position: absolute; top: 6px; left: 6px;
-    background: rgba(0,0,0,0.7); backdrop-filter: blur(2px);
-    padding: 3px 6px; border-radius: 6px;
-    font-size: 9px; font-weight: 700; color: #fff;
-    display: flex; align-items: center; gap: 4px;
-    border: 1px solid rgba(255,255,255,0.15);
+  .btn-mini:hover{
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.28);
+    transform: translateY(-1px);
   }
-  .dot { width: 5px; height: 5px; border-radius: 50%; background: #fff; }
-  .dot.ok { background: var(--ok); }
-  .dot.warn { background: var(--warn); }
-  .dot.err { background: var(--danger); }
+  .btn-mini.primary{
+    background: #fff;
+    color:#000;
+    border-color: transparent;
+  }
+  .btn-mini.primary:hover{
+    background: #e9e9e9;
+  }
 
-  .lf-rib-more {
-    grid-row: span 2;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px dashed var(--border); border-radius: 14px;
-    color: var(--text-sec); text-decoration: none; font-size: 13px; font-weight: 700;
-    transition: .2s;
-    background: rgba(255,255,255,0.01);
+  /* Empty / loader */
+  .lf-empty{
+    padding: 40px;
+    text-align:center;
+    color: var(--text-sec);
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed var(--border);
+    border-radius: 18px;
   }
-  .lf-rib-more:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: var(--accent); }
+  .lf-loader{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: rgba(255,255,255,0.55);
+    padding: 16px 0 0;
+    font-size: 13px;
+  }
 
-  /* --- FULLSCREEN MODAL --- */
+  /* ===== FIXED BOTTOM DOCK (controls) ===== */
+  #lf-dock{
+    position: fixed;
+    left:0; right:0; bottom:0;
+    z-index: 50;
+    padding: 12px 12px 14px;
+    background: rgba(10,10,10,0.82);
+    border-top: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(10px);
+  }
+  #lf-dock-inner{
+    max-width: 1400px;
+    margin: 0 auto;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(20,20,20,0.85);
+    border-radius: 22px;
+    padding: 12px;
+    display:flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .dock-col-left{
+    width: 320px;
+    min-width: 280px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+
+  .dock-col-mid{
+    flex: 1;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    min-width: 260px;
+  }
+
+  .dock-col-right{
+    width: 240px;
+    min-width: 220px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+
+  .dock-row{
+    display:flex;
+    gap: 10px;
+    align-items:center;
+  }
+
+  .dock-label{
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .45px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+
+  /* Model dropdown (reuse from 1 doc idea) */
+  .lf-model-select{ position: relative; width: 100%; }
+  .lf-select-trigger{
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 16px;
+    padding: 10px 12px;
+    display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer;
+    user-select:none;
+    transition: .18s ease;
+  }
+  .lf-select-trigger:hover{
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.22);
+  }
+  .lf-model-name{ font-size: 13px; font-weight: 1000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lf-chevron{ color: rgba(255,255,255,0.6); font-size: 18px; transition: transform .18s; margin-left:10px; }
+  .lf-model-select.open .lf-chevron{ transform: rotate(90deg); }
+
+  .lf-dropdown-menu{
+    position:absolute;
+    bottom: calc(100% + 10px);
+    left:0;
+    width: 100%;
+    background: #141414;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 16px;
+    padding: 6px;
+    display:none;
+    flex-direction:column;
+    gap: 4px;
+    box-shadow: 0 20px 70px rgba(0,0,0,0.65);
+    max-height: 280px;
+    overflow:auto;
+    z-index: 80;
+  }
+  .lf-model-select.open .lf-dropdown-menu{ display:flex; }
+
+  .lf-dd-item{
+    padding: 10px 10px;
+    border-radius: 12px;
+    cursor:pointer;
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.72);
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    transition: .14s;
+  }
+  .lf-dd-item:hover{ background: rgba(255,255,255,0.06); color:#fff; }
+  .lf-dd-item.active{ background: rgba(255,255,255,0.10); color:#fff; }
+  .status-dot{ width: 7px; height:7px; border-radius:50%; background: var(--ok); margin-left:auto; }
+
+  /* Inputs */
+  .lf-input, .lf-select, .lf-num{
+    width:100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: #fff;
+    border-radius: 16px;
+    padding: 10px 12px;
+    font-size: 14px;
+    transition: .18s ease;
+  }
+  .lf-input:focus, .lf-select:focus, .lf-num:focus{
+    border-color: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.08);
+  }
+
+  .dock-prompt-wrap{ position: relative; }
+  .dock-prompt{
+    min-height: 44px;
+    max-height: 78px;
+    resize: none;
+    line-height: 1.35;
+  }
+
+  /* Reference strip inside dock */
+  .dock-refbar{
+    display:flex;
+    gap: 8px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .ref-add{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width: 44px; height:44px;
+    border-radius: 14px;
+    border: 1px dashed rgba(255,255,255,0.20);
+    background: rgba(255,255,255,0.04);
+    cursor:pointer;
+    transition: .16s ease;
+    user-select:none;
+    font-weight: 1000;
+    color: rgba(255,255,255,0.75);
+  }
+  .ref-add:hover{ border-color: rgba(43,108,255,.65); background: rgba(43,108,255,.10); color:#fff; }
+
+  .ref-thumb{
+    width: 44px; height:44px;
+    border-radius: 14px;
+    overflow:hidden;
+    border: 1px solid rgba(255,255,255,0.14);
+    background:#000;
+    position:relative;
+    flex: 0 0 auto;
+  }
+  .ref-thumb img{
+    width:100%; height:100%; object-fit:cover; opacity:.98;
+  }
+  .ref-thumb .x{
+    position:absolute; top: 4px; right:4px;
+    width: 18px; height:18px;
+    border-radius: 999px;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(0,0,0,0.65);
+    border: 1px solid rgba(255,255,255,0.10);
+    color:#fff;
+    font-size: 12px;
+    font-weight: 900;
+    cursor:pointer;
+    opacity: 0;
+    transition: .12s ease;
+  }
+  .ref-thumb:hover .x{ opacity:1; }
+
+  /* Buttons */
+  .dock-btn{
+    width:100%;
+    border:0;
+    border-radius: 18px;
+    padding: 12px 12px;
+    font-weight: 1000;
+    cursor:pointer;
+    transition: .18s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    user-select:none;
+  }
+  .dock-btn.primary{
+    background: #d6ff2a; /* like your neon button vibe */
+    color:#000;
+  }
+  .dock-btn.primary:hover{ filter: brightness(0.96); transform: translateY(-1px); }
+  .dock-btn.ghost{
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    color:#fff;
+  }
+  .dock-btn.ghost:hover{
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.22);
+    transform: translateY(-1px);
+  }
+  .dock-btn:disabled{ opacity: .65; cursor:not-allowed; transform:none; }
+
+  .dock-meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+  }
+  .dock-cost{
+    font-size: 12px;
+    font-weight: 1000;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.85);
+    white-space:nowrap;
+  }
+  .dock-status{
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 800;
+    min-height: 16px;
+    text-align:right;
+  }
+  .dock-status.err{ color: #ff7b88; }
+  .dock-status.ok{ color: #9be28a; }
+  .dock-status.warn{ color: var(--warn); }
+
+  /* Processing overlay (optional subtle) */
+  .lf-proc-shimmer{
+    position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent 0%, rgba(43,108,255,0.10) 40%, rgba(43,108,255,0.22) 50%, rgba(43,108,255,0.10) 60%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shine 1.8s infinite linear;
+    opacity: .55;
+    pointer-events:none;
+  }
+  @keyframes shine { 0%{ background-position:200% 0 } 100%{ background-position:-200% 0 } }
+
+  /* ===== MODAL (copied style from Library page + small align) ===== */
   .lf-modal-backdrop {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
-    z-index: 9999; display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
   }
   .lf-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+
   .lf-modal {
-    width: 90%; max-width: 1100px; height: 85vh; background: var(--bg-card);
-    border: 1px solid var(--border); border-radius: 24px; display: flex;
-    overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
+    width: 90%;
+    max-width: 1100px;
+    height: 85vh;
+    background: #1f1f1f;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
+    position: relative;
   }
-  .m-preview { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
-  .m-preview img, .m-preview video, .m-preview model-viewer { max-width: 100%; max-height: 100%; width: 100%; height: 100%; }
-  .m-sidebar { width: 340px; border-left: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px; background: var(--bg-panel); flex-shrink: 0; }
+
+  .m-preview {
+    flex: 1;
+    background: #000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position: relative;
+    overflow:hidden;
+  }
+  .m-preview img, .m-preview video, .m-preview model-viewer {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+  }
+
+  .m-sidebar {
+    width: 360px;
+    border-left: 1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    padding: 22px;
+    background: var(--bg-card);
+    flex-shrink: 0;
+  }
+
   .m-close {
-    position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.5);
-    color: #fff; border: 1px solid rgba(255,255,255,0.2); width: 40px; height: 40px;
-    border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center;
-    justify-content: center; z-index: 10; transition: 0.2s;
+    position: absolute;
+    top: 16px; right: 16px;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display:flex; align-items:center; justify-content:center;
+    z-index: 10;
+    transition: .2s;
   }
   .m-close:hover { background: #fff; color: #000; }
-  .m-info-row { margin-bottom: 16px; }
-  .m-label { font-size: 11px; text-transform: uppercase; color: var(--text-sec); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .m-val { font-size: 14px; color: #fff; word-break: break-all; }
-  .m-actions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
-  .m-btn {
-    border: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    color: #ffffff; font-weight: 600; padding: 12px; border-radius: 12px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; text-decoration: none; width: 100%;
-  }
-  .m-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
-  .m-btn.primary { background: #fff; color: #000; border: none; }
-  .m-btn.primary:hover { background: #ddd; }
 
-  @media(max-width: 1000px){
-    #lf-workspace { grid-template-columns: 1fr; }
-    .lf-side { border-right: 0; border-bottom: 1px solid var(--border); max-height: none; }
-    .lf-main-view { min-height: 420px; }
+  .m-info-row { margin-bottom: 14px; }
+  .m-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .45px;
+    color: var(--text-sec);
+    font-weight: 900;
+    margin-bottom: 6px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+  }
+  .m-val { font-size: 14px; color:#fff; word-break: break-all; }
+  .m-val.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; color: rgba(255,255,255,0.55); font-size: 12px; }
+
+  .m-box{
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.35);
+    border-radius: 14px;
+    padding: 10px 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .m-model-pill{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .m-model-chip{
+    font-size: 11px;
+    font-weight: 1000;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+  }
+
+  .m-prompt-box{
+    white-space: pre-wrap;
+    max-height: 220px;
+    overflow:auto;
+    line-height: 1.35;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: rgba(255,255,255,0.86);
+    padding-right: 6px;
+  }
+  .m-prompt-box::-webkit-scrollbar{ width:10px; }
+  .m-prompt-box::-webkit-scrollbar-track{ background: rgba(255,255,255,0.04); border-radius: 999px; }
+  .m-prompt-box::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.18); border-radius: 999px; border: 2px solid rgba(0,0,0,0.35); }
+  .m-prompt-box::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.26); }
+
+  .m-actions{ margin-top:auto; display:flex; flex-direction:column; gap:10px; }
+
+  .btn {
+    border:0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff;
+    font-weight: 900;
+    padding: 12px;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: 0.2s;
+    text-decoration: none;
+    width: 100%;
+  }
+  .btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+  .btn.primary { background: #fff; color: #000; border: none; }
+  .btn.primary:hover { background: #ddd; }
+  .btn.danger { color: var(--danger); border-color: rgba(255, 70, 90, 0.3); }
+  .btn.danger:hover { background: rgba(255, 70, 90, 0.1); border-color: var(--danger); }
+  .btn.ok { border-color: rgba(57,255,20,0.35); background: rgba(57,255,20,0.08); }
+
+  .pub-pop {
+    position:absolute; inset:0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding: 18px;
+    z-index: 30;
+  }
+  .pub-pop.open{ display:flex; }
+  .pub-card{
+    width: 100%;
+    max-width: 420px;
+    background: rgba(20,20,20,0.95);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+  .pub-title{ font-weight:1000; font-size:16px; margin-bottom:10px; }
+  .pub-input{
+    width:100%;
+    border-radius: 14px;
+    padding: 12px;
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    color:#fff;
+    font-size:14px;
+  }
+  .pub-actions{ display:flex; gap:10px; margin-top:12px; }
+  .pub-actions .btn{ width:100%; }
+
+  @media(max-width: 980px){
+    #lf-dock-inner{ flex-direction:column; }
+    .dock-col-left, .dock-col-right{ width:100%; min-width: 0; }
     .lf-modal { flex-direction: column; height: 90vh; }
-    .m-sidebar { width: 100%; height: auto; border-left: none; border-top: 1px solid var(--border); }
+    .m-sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); }
     .m-preview { height: 50%; }
-    .lf-ribbon { 
-       grid-template-rows: repeat(2, 90px); 
-       grid-auto-columns: 90px; 
-    }
   }
 </style>
 
-<div id="lf-nano">
+<div id="lf-studio">
   <div id="lf-main">
-    
-    <div class="lf-header-row">
-      <div class="lf-model-select" id="modelSelect">
-        <div class="lf-select-trigger" onclick="toggleModelDropdown()">
-          <div class="lf-model-name" id="currentModelName">Nano Banana Pro</div>
-          <div class="lf-chevron">›</div>
-        </div>
-        
-        <div class="lf-dropdown-menu" id="modelList">
-          <div class="lf-dd-item active" onclick="selectModel('Nano Banana Pro', 'nano_banana_pro')">
-            <span>Nano Banana Pro</span> <span class="status-dot"></span>
-          </div>
-          <div class="lf-dd-item" onclick="selectModel('Seedream 4', 'seedream_4')">
-            <span>Seedream 4</span>
-          </div>
-          <div class="lf-dd-item" onclick="selectModel('FLUX.2 Max', 'flux_2_max')">
-            <span>FLUX.2 Max</span>
-          </div>
-          <div class="lf-dd-item" onclick="selectModel('Z-Image Turbo', 'z_image_turbo')">
-            <span>Z-Image Turbo</span>
-          </div>
-        </div>
+    <div class="lf-toprow">
+      <div>
+        <h1 class="lf-title">Studio</h1>
+        <div class="lf-sub">User: <span id="m-email">…</span> • Credits: <span id="m-credits">0</span></div>
       </div>
-      <div></div>
-    </div>
-
-    <div id="lf-workspace">
-      <div class="lf-side">
-        <button class="lf-back" id="btn-back" type="button">← Back to Flow</button>
-        <div class="lf-h2-sub">Parameters</div>
-
-        <div class="lf-field">
-          <label>Prompt</label>
-          <div class="lf-input-wrap">
-            <textarea id="scene" rows="5" placeholder="Describe what you want..."></textarea>
-            <div class="lf-prompt-loader" id="promptLoader">
-              <div class="lf-prompt-text"><span>✨ Генерация промта...</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="lf-field">
-          <label>Reference Images (optional)</label>
-          <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
-          <div class="lf-drop" id="drop">
-            <div class="big" id="dropTitle">Upload images</div>
-            <div class="sub" id="dropSub">Click or drag&drop • up to 14 images</div>
-            <div class="lf-thumbs" id="thumbs"></div>
-          </div>
-        </div>
-
-        <div id="params-nano">
-          <div class="lf-row2">
-            <div class="lf-field">
-              <label>Aspect ratio</label>
-              <select id="aspect">
-                <option value="match_input_image" selected>Match input</option>
-                <option value="16:9">16:9</option>
-                <option value="9:16">9:16</option>
-                <option value="1:1">1:1</option>
-              </select>
-            </div>
-            <div class="lf-field">
-              <label>Resolution</label>
-              <select id="res">
-                <option value="1K">1K</option>
-                <option value="2K" selected>2K</option>
-                <option value="4K">4K</option>
-              </select>
-            </div>
-          </div>
-          <div style="margin-top:12px;">
-            <label class="lf-chk">
-                <input type="checkbox" id="styleOnly" checked>
-                Style-only transform (keep scene)
-            </label>
-          </div>
-        </div>
-
-        <div id="params-seedream" class="hidden">
-           <div class="lf-row2">
-             <div class="lf-field">
-                <label>Size</label>
-                <select id="sdSize">
-                   <option value="1K" selected>1K</option>
-                   <option value="2K">2K</option>
-                   <option value="4K">4K</option>
-                   <option value="custom">Custom</option>
-                </select>
-             </div>
-             <div class="lf-field">
-                <label>Aspect Ratio</label>
-                <select id="sdAspect">
-                   <option value="match_input_image" selected>Match Input</option>
-                   <option value="1:1">1:1</option>
-                   <option value="4:3">4:3</option>
-                   <option value="3:4">3:4</option>
-                   <option value="16:9">16:9</option>
-                   <option value="9:16">9:16</option>
-                   <option value="2:3">2:3</option>
-                   <option value="3:2">3:2</option>
-                   <option value="21:9">21:9</option>
-                </select>
-             </div>
-           </div>
-           
-           <div class="lf-row2 hidden" id="sdCustomRes" style="margin-top:12px;">
-              <div class="lf-field">
-                 <label>Width</label>
-                 <input type="number" id="sdWidth" value="1024" min="64" max="4096">
-              </div>
-              <div class="lf-field">
-                 <label>Height</label>
-                 <input type="number" id="sdHeight" value="1024" min="64" max="4096">
-              </div>
-           </div>
-        </div>
-
-        <div id="params-flux" class="hidden">
-           <div class="lf-row2">
-             <div class="lf-field">
-                <label>Aspect Ratio</label>
-                <select id="fxAspect">
-                   <option value="1:1" selected>1:1</option>
-                   <option value="16:9">16:9</option>
-                   <option value="9:16">9:16</option>
-                   <option value="4:3">4:3</option>
-                   <option value="3:4">3:4</option>
-                   <option value="2:3">2:3</option>
-                   <option value="3:2">3:2</option>
-                </select>
-             </div>
-             <div class="lf-field">
-                <label>Resolution</label>
-                <select id="fxRes">
-                   <option value="1 MP">1 MP</option>
-                   <option value="2 MP" selected>2 MP</option>
-                   <option value="4 MP">4 MP</option>
-                </select>
-             </div>
-           </div>
-
-           <div class="lf-row2" style="margin-top:12px;">
-              <div class="lf-field">
-                 <label>Format</label>
-                 <select id="fxFormat">
-                    <option value="jpg" selected>JPG</option>
-                    <option value="png">PNG</option>
-                 </select>
-              </div>
-              <div class="lf-field">
-                 <label>Quality (0-100)</label>
-                 <input type="number" id="fxQuality" value="80" min="0" max="100">
-              </div>
-           </div>
-
-           <div class="lf-row2" style="margin-top:12px;">
-               <div class="lf-field">
-                  <label>Safety Tolerance</label>
-                  <select id="fxSafety">
-                     <option value="1">1 (Strict)</option>
-                     <option value="2" selected>2 (Default)</option>
-                     <option value="3">3</option>
-                     <option value="4">4</option>
-                     <option value="5">5 (Permissive)</option>
-                  </select>
-               </div>
-               <div class="lf-field">
-                  <label>Seed (optional)</label>
-                  <input type="number" id="fxSeed" placeholder="Random">
-               </div>
-           </div>
-        </div>
-
-        <div class="lf-actions">
-          <button class="lf-btn" id="run" type="button">Generate <span class="lf-cost" id="cost">—</span></button>
-          <button class="lf-btn secondary" id="gptPrompt" type="button">✨ GPT → Build Prompt</button>
-          <div class="lf-status" id="statusText"></div>
-        </div>
-      </div>
-
-      <div class="lf-main-view">
-        <div class="lf-empty" id="empty">
-          <div style="font-size:56px;opacity:.35;">✨</div>
-          <div style="margin-top:8px;">Result will appear here</div>
-        </div>
-
-        <div class="lf-result" id="result">
-          <video id="outVideo" controls playsinline class="hidden"></video>
-          <img id="outImg" class="hidden" alt="result" />
-          <div class="lf-resbar">
-            <div style="color:var(--text-sec);font-size:13px" id="meta">done</div>
-            <a id="download" href="#" target="_blank" download>Download</a>
-          </div>
-        </div>
-
-        <div class="lf-loader" id="loader">
-          <div class="lf-spin"></div>
-          <div class="lf-wait">Waiting…</div>
-          <div class="lf-time" id="loaderTime">01:00</div>
-          <div class="lf-time" id="loaderSub">Sending task…</div>
-        </div>
+      <div class="lf-pillrow">
+        <div class="lf-pill">History <span class="muted">+ Processing</span></div>
+        <div class="lf-pill">Click card <span class="muted">→ details</span></div>
       </div>
     </div>
 
-    <div class="lf-lib-wrapper">
-      <div class="lf-ribbon-title">
-        <span>History (Library)</span>
-      </div>
-      <div class="lf-ribbon" id="lib-ribbon">
-        <div style="padding: 20px; color:#555; font-size:13px;">Loading library...</div>
-      </div>
+    <div id="grid" class="lf-grid">
+      <div class="lf-empty">Loading…</div>
     </div>
-
+    <div class="lf-loader" id="grid-loader" style="display:none;">Loading more…</div>
   </div>
-</div>
 
-<div class="lf-modal-backdrop" id="modal-backdrop">
-  <button class="m-close" id="modal-close">✕</button>
-  <div class="lf-modal" onclick="event.stopPropagation()">
-    <div class="m-preview" id="m-view-container"></div>
-    <div class="m-sidebar">
-      <div class="m-info-row">
-        <div class="m-label">Status</div>
-        <div class="m-val" id="m-status-text">Done</div>
+  <!-- FIXED DOCK -->
+  <div id="lf-dock">
+    <div id="lf-dock-inner">
+      <!-- left: model + quick params -->
+      <div class="dock-col-left">
+        <div>
+          <div class="dock-label">Model</div>
+          <div class="lf-model-select" id="modelSelect">
+            <div class="lf-select-trigger" id="modelTrigger">
+              <div class="lf-model-name" id="currentModelName">Nano Banana Pro</div>
+              <div class="lf-chevron">›</div>
+            </div>
+
+            <div class="lf-dropdown-menu" id="modelList">
+              <div class="lf-dd-item active" data-name="Nano Banana Pro" data-id="nano_banana_pro">
+                <span>Nano Banana Pro</span><span class="status-dot"></span>
+              </div>
+              <div class="lf-dd-item" data-name="Seedream 4" data-id="seedream_4">
+                <span>Seedream 4</span>
+              </div>
+              <div class="lf-dd-item" data-name="FLUX.2 Max" data-id="flux_2_max">
+                <span>FLUX.2 Max</span>
+              </div>
+              <div class="lf-dd-item" data-name="Z-Image Turbo" data-id="z_image_turbo">
+                <span>Z-Image Turbo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dock-row">
+          <div style="flex:1">
+            <div class="dock-label">Aspect</div>
+            <select id="aspect" class="lf-select">
+              <option value="match_input_image" selected>Match input</option>
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+              <option value="1:1">1:1</option>
+              <option value="21:9">21:9</option>
+            </select>
+          </div>
+          <div style="width:120px" id="resWrap">
+            <div class="dock-label">Res</div>
+            <select id="res" class="lf-select">
+              <option value="1K">1K</option>
+              <option value="2K" selected>2K</option>
+              <option value="4K">4K</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Seedream / Flux extra (hidden by default, shown when model selected) -->
+        <div class="dock-row" id="seedreamRow" style="display:none;">
+          <div style="flex:1">
+            <div class="dock-label">Seedream size</div>
+            <select id="sdSize" class="lf-select">
+              <option value="1K" selected>1K</option>
+              <option value="2K">2K</option>
+              <option value="4K">4K</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <div class="dock-label">Seedream aspect</div>
+            <select id="sdAspect" class="lf-select">
+              <option value="match_input_image" selected>Match Input</option>
+              <option value="1:1">1:1</option>
+              <option value="4:3">4:3</option>
+              <option value="3:4">3:4</option>
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+              <option value="21:9">21:9</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="dock-row" id="seedreamCustom" style="display:none;">
+          <input id="sdWidth" class="lf-num" type="number" min="64" max="4096" value="1024" />
+          <input id="sdHeight" class="lf-num" type="number" min="64" max="4096" value="1024" />
+        </div>
+
+        <div class="dock-row" id="fluxRow" style="display:none;">
+          <div style="flex:1">
+            <div class="dock-label">Flux aspect</div>
+            <select id="fxAspect" class="lf-select">
+              <option value="1:1" selected>1:1</option>
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+              <option value="4:3">4:3</option>
+              <option value="3:4">3:4</option>
+              <option value="2:3">2:3</option>
+              <option value="3:2">3:2</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <div class="dock-label">Flux res</div>
+            <select id="fxRes" class="lf-select">
+              <option value="1 MP">1 MP</option>
+              <option value="2 MP" selected>2 MP</option>
+              <option value="4 MP">4 MP</option>
+            </select>
+          </div>
+        </div>
       </div>
-      <div class="m-info-row">
-        <div class="m-label">Created At</div>
-        <div class="m-val" id="m-date">...</div>
+
+      <!-- mid: prompt + refs -->
+      <div class="dock-col-mid">
+        <div class="dock-prompt-wrap">
+          <div class="dock-label">Prompt</div>
+          <textarea id="scene" class="lf-input dock-prompt" rows="2" placeholder="Describe what you want..."></textarea>
+        </div>
+
+        <div>
+          <div class="dock-label">Reference images</div>
+          <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+          <div class="dock-refbar" id="refbar">
+            <div class="ref-add" id="refAdd" title="Upload images">+</div>
+            <!-- thumbs rendered here -->
+          </div>
+          <!-- Hidden style-only (kept for logic, hidden in UI as requested) -->
+          <label style="display:none; margin-top:10px; color: rgba(255,255,255,0.7); font-weight:800; font-size:12px;">
+            <input type="checkbox" id="styleOnly" checked /> Style-only transform (hidden)
+          </label>
+        </div>
       </div>
-      <div class="m-info-row">
-        <div class="m-label">ID</div>
-        <div class="m-val" style="font-family:monospace;font-size:11px;color:#666" id="m-id">...</div>
+
+      <!-- right: actions -->
+      <div class="dock-col-right">
+        <div class="dock-meta">
+          <div class="dock-cost" id="cost">—</div>
+          <div class="dock-status" id="statusText"></div>
+        </div>
+        <button class="dock-btn primary" id="run" type="button">Generate</button>
+        <button class="dock-btn ghost" id="gptPrompt" type="button">✨ GPT → Build Prompt</button>
       </div>
-      <div class="m-actions">
-        <button class="m-btn primary" id="btn-download-m">Download File</button>
-        <button class="m-btn" id="btn-copy-link">Copy URL</button>
+    </div>
+  </div>
+
+  <!-- MODAL (Library-like) -->
+  <div class="lf-modal-backdrop" id="modal-backdrop">
+    <button class="m-close" id="modal-close">✕</button>
+
+    <div class="lf-modal" onclick="event.stopPropagation()">
+      <div class="m-preview" id="m-view-container"></div>
+
+      <div class="m-sidebar">
+        <div class="m-info-row">
+          <div class="m-label">Status</div>
+          <div class="m-val" id="m-status-text">—</div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">Created At</div>
+          <div class="m-val" id="m-date">—</div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">File ID</div>
+          <div class="m-val mono" id="m-id">—</div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">Model</div>
+          <div class="m-box m-model-pill">
+            <div class="m-val" id="m-model">—</div>
+            <div class="m-model-chip" id="m-model-chip">AI</div>
+          </div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">
+            <span>Prompt</span>
+            <button class="btn" id="btn-use-as-ref" style="width:auto; padding:6px 10px; font-size:11px;">Use as reference</button>
+          </div>
+          <div class="m-box m-prompt-box" id="m-prompt">—</div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">Feed</div>
+          <div class="m-val" id="m-feed-state">Not published</div>
+        </div>
+
+        <div class="m-actions">
+          <button class="btn primary" id="btn-publish">Publish to Feed</button>
+          <button class="btn danger" id="btn-unpublish" style="display:none;">Unpublish from Feed</button>
+          <button class="btn primary" id="btn-download">Download File</button>
+          <button class="btn" id="btn-copy-link">Copy URL</button>
+          <button class="btn" id="btn-copy-prompt">Copy Prompt</button>
+          <button class="btn danger" id="btn-toggle-hide">Move to Trash</button>
+        </div>
+      </div>
+
+      <div class="pub-pop" id="pub-pop">
+        <div class="pub-card" onclick="event.stopPropagation()">
+          <div class="pub-title">Publish to Feed</div>
+          <input class="pub-input" id="pub-title-input" placeholder="Title (optional)" />
+          <div class="pub-actions">
+            <button class="btn" id="pub-cancel">Cancel</button>
+            <button class="btn primary" id="pub-confirm">Publish</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -640,200 +912,112 @@
 <script>
 (() => {
   /* ==========================================================
-      CONFIG & GLOBALS
+      CONFIG
      ========================================================== */
   const BASE = location.origin;
-  const BACKEND_BASE = "https://api.lightfull.ai";
-  const ETA_SECONDS = 60;
+  const BACKEND = "https://api.lightfull.ai";
+
   const INPUTS_BUCKET = "inputs";
   const MAX_IMAGES = 14;
 
+  const LS_HIDDEN_KEY = "lf_hidden_items_v2";
+  const LS_PUB_KEY = "lf_feed_published_v1";
+
+  const PAGE_SIZE = 30;   // studio view = last N items
+  let loading = false;
+
+  /* ==========================================================
+      ELEMENTS
+     ========================================================== */
   const $ = (id) => document.getElementById(id);
 
-  // UI Elements
-  const fileEl = $("file"), drop = $("drop"), thumbsEl = $("thumbs");
-  const dropTitle = $("dropTitle"), dropSub = $("dropSub");
+  const grid = $("grid");
+  const gridLoader = $("grid-loader");
+  const mEmail = $("m-email");
+  const mCredits = $("m-credits");
+
+  // Dock inputs
   const sceneEl = $("scene");
-    
-  // Nano Inputs
-  const paramsNano = $("params-nano");
-  const aspectEl = $("aspect"), resEl = $("res");
-  const styleChk = $("styleOnly");
+  const fileEl = $("file");
+  const refAdd = $("refAdd");
+  const refbar = $("refbar");
 
-  // Seedream Inputs
-  const paramsSeedream = $("params-seedream");
-  const sdSize = $("sdSize"), sdAspect = $("sdAspect");
-  const sdCustomRes = $("sdCustomRes"), sdWidth = $("sdWidth"), sdHeight = $("sdHeight");
+  const aspectEl = $("aspect");
+  const resEl = $("res");
+  const resWrap = $("resWrap");
 
-  // Flux Inputs
-  const paramsFlux = $("params-flux");
-  const fxAspect = $("fxAspect"), fxRes = $("fxRes"), fxSeed = $("fxSeed");
-  const fxFormat = $("fxFormat"), fxQuality = $("fxQuality"), fxSafety = $("fxSafety");
+  const styleChk = $("styleOnly"); // hidden, but keep logic
 
-  // Shared Actions
-  const promptLoader = $("promptLoader");
-  const runBtn = $("run"), gptBtn = $("gptPrompt");
+  // Seedream
+  const seedreamRow = $("seedreamRow");
+  const sdSize = $("sdSize");
+  const sdAspect = $("sdAspect");
+  const seedreamCustom = $("seedreamCustom");
+  const sdWidth = $("sdWidth");
+  const sdHeight = $("sdHeight");
+
+  // Flux
+  const fluxRow = $("fluxRow");
+  const fxAspect = $("fxAspect");
+  const fxRes = $("fxRes");
+
+  // Actions
+  const runBtn = $("run");
+  const gptBtn = $("gptPrompt");
+  const costEl = $("cost");
   const statusText = $("statusText");
-  const empty = $("empty"), result = $("result");
-  const outVideo = $("outVideo"), outImg = $("outImg");
-  const download = $("download"), meta = $("meta");
-  const loader = $("loader"), loaderTime = $("loaderTime"), loaderSub = $("loaderSub");
-    
-  // Library & Modal
-  const libRibbon = $("lib-ribbon");
+
+  // Model dropdown
+  const modelSelect = $("modelSelect");
+  const modelTrigger = $("modelTrigger");
+  const currentModelName = $("currentModelName");
+  const modelList = $("modelList");
+
+  // Modal
   const modalBack = $("modal-backdrop");
   const modalClose = $("modal-close");
-  const mView = $("m-view-container");
+  const viewCont = $("m-view-container");
   const mStatus = $("m-status-text");
   const mDate = $("m-date");
   const mId = $("m-id");
-  const mBtnDown = $("btn-download-m");
-  const mBtnCopy = $("btn-copy-link");
+  const mModel = $("m-model");
+  const mModelChip = $("m-model-chip");
+  const mPrompt = $("m-prompt");
+  const mFeedState = $("m-feed-state");
 
-  let selectedFiles = [];
-  let latestJobId = null; 
-  let timer = null;
-  let timeLeft = ETA_SECONDS;
+  const btnDown = $("btn-download");
+  const btnCopy = $("btn-copy-link");
+  const btnCopyPrompt = $("btn-copy-prompt");
+  const btnHide = $("btn-toggle-hide");
+
+  const btnPublish = $("btn-publish");
+  const btnUnpublish = $("btn-unpublish");
+  const pubPop = $("pub-pop");
+  const pubTitle = $("pub-title-input");
+  const pubCancel = $("pub-cancel");
+  const pubConfirm = $("pub-confirm");
+
+  const btnUseAsRef = $("btn-use-as-ref");
+
+  /* ==========================================================
+      STATE
+     ========================================================== */
+  let currentPresetId = "nano_banana_pro";
+  let selectedFiles = [];      // local File objects
+  let selectedRefUrls = [];    // remote urls picked from library
   let cachedImageUrls = [];
   let cachedSignature = "";
-    
-  let currentPresetId = "nano_banana_pro"; // Default model
 
-  $("btn-back").addEventListener("click", () => location.href = "https://lightfull.ai/flow");
-
-  /* ==========================================================
-      DROPDOWN & MODEL SWITCHING LOGIC
-     ========================================================== */
-  window.toggleModelDropdown = () => {
-    $("modelSelect").classList.toggle("open");
-  };
-
-  window.onclick = function(event) {
-    if (!event.target.closest('.lf-model-select')) {
-      $("modelSelect").classList.remove('open');
-    }
-  }
-
-  window.selectModel = (name, presetId) => {
-    $("currentModelName").textContent = name;
-    currentPresetId = presetId;
-    
-    // Visual selection update
-    const items = document.querySelectorAll('.lf-dd-item');
-    items.forEach(el => {
-      el.classList.remove('active');
-      const dot = el.querySelector('.status-dot');
-      if(dot) dot.remove();
-      
-      if(el.textContent.trim() === name) {
-        el.classList.add('active');
-        // No status dot for z_image_turbo by default
-        if(presetId !== 'z_image_turbo' && !el.querySelector('.status-dot')) {
-           el.innerHTML += ' <span class="status-dot"></span>';
-        }
-      }
-    });
-
-    // 2️⃣ Toggle specific param blocks
-    paramsNano.classList.add("hidden");
-    paramsSeedream.classList.add("hidden");
-    paramsFlux.classList.add("hidden");
-
-    if (presetId === "nano_banana_pro") {
-        paramsNano.classList.remove("hidden");
-    } else if (presetId === "seedream_4") {
-        paramsSeedream.classList.remove("hidden");
-    } else if (presetId === "flux_2_max") {
-        paramsFlux.classList.remove("hidden");
-    } else if (presetId === "z_image_turbo") {
-        // ❌ никаких параметров
-    }
-    
-    // Enable GPT button for ALL models
-    gptBtn.style.display = "flex";
-
-    setStatus("");
-    $("modelSelect").classList.remove("open");
-    calcCost(); // Recalculate cost for new model
-  };
+  let allItems = [];
+  let currentItem = null;
 
   /* ==========================================================
-      CORE LOGIC
+      HELPERS
      ========================================================== */
   function setStatus(t, kind){
     statusText.textContent = t || "";
     statusText.classList.remove("err","ok","warn");
-    if (kind) statusText.classList.add(kind);
-  }
-
-  function resetResult(){
-    empty.style.display = "block";
-    result.style.display = "none";
-    outVideo.classList.add("hidden");
-    outImg.classList.add("hidden");
-    outVideo.pause(); outVideo.removeAttribute("src"); outImg.removeAttribute("src");
-    download.href="#"; meta.textContent="";
-  }
-
-  function isVideoUrl(url){
-    const u = String(url||"").toLowerCase();
-    return u.includes(".mp4") || u.includes(".webm") || u.includes(".mov") || u.includes("fal.media");
-  }
-
-  function showResult(url, status){
-    empty.style.display = "none";
-    result.style.display = "block";
-    
-    // FIX: Force immediate download instead of opening new tab
-    download.onclick = (e) => {
-        e.preventDefault();
-        const ext = (url.split('.').pop() || "png").split("?")[0];
-        forceDownload(url, `generated-result.${ext}`);
-    };
-    
-    meta.textContent = `status: ${status}`;
-
-    outVideo.classList.add("hidden");
-    outImg.classList.add("hidden");
-    outVideo.pause(); outVideo.removeAttribute("src"); outImg.removeAttribute("src");
-
-    if (isVideoUrl(url)) {
-      outVideo.src = url;
-      outVideo.classList.remove("hidden");
-      outVideo.load();
-      outVideo.play().catch(()=>{});
-    } else {
-      outImg.src = url;
-      outImg.classList.remove("hidden");
-    }
-  }
-
-  function showLoader(on){
-    loader.style.display = on ? "flex" : "none";
-    if (on) startTimer(ETA_SECONDS);
-    if (!on) stopTimer();
-  }
-    
-  function showPromptLoader(on){
-    promptLoader.style.display = on ? "flex" : "none";
-  }
-
-  function startTimer(sec){
-    stopTimer();
-    timeLeft = Math.max(0, Math.floor(sec));
-    const tick = ()=>{
-      const m = Math.floor(timeLeft/60);
-      const s = String(timeLeft%60).padStart(2,"0");
-      loaderTime.textContent = `${m}:${s}`;
-      timeLeft = Math.max(0, timeLeft-1);
-    };
-    tick();
-    timer = setInterval(tick, 1000);
-  }
-
-  function stopTimer(){
-    if (timer) clearInterval(timer);
-    timer = null;
+    if(kind) statusText.classList.add(kind);
   }
 
   function uuid(){
@@ -841,115 +1025,103 @@
     return Date.now() + "-" + Math.random().toString(16).slice(2);
   }
 
-  function formatSize(bytes){
-    const kb = Math.round(bytes/1024);
-    if (kb < 1024) return kb + " KB";
-    return (kb/1024).toFixed(1) + " MB";
+  function isVideo(url){
+    const u = String(url||"").toLowerCase();
+    return u.endsWith(".mp4") || u.endsWith(".mov") || u.endsWith(".webm") || u.includes("fal.media");
   }
 
-  function ensureLimit(files){
-    if (files.length <= MAX_IMAGES) return files;
-    return files.slice(0, MAX_IMAGES);
+  function is3D(url){
+    const u = String(url||"").toLowerCase();
+    return u.endsWith(".glb") || u.endsWith(".gltf");
   }
 
-  function dedupeBySignature(files){
-    const seen = new Set();
-    const out = [];
-    for (const f of files){
-      const key = `${f.name}|${f.size}|${f.lastModified}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push(f);
+  function getStatus(raw){
+    const v = String(raw||"").toLowerCase();
+    if (["succeeded","success","done"].includes(v)) return { text:"Done", dot:"ok", type:"done" };
+    if (["failed","error","canceled"].includes(v)) return { text:"Failed", dot:"bad", type:"done" };
+    if (["starting","processing","running","in_progress"].includes(v)) return { text:"Processing", dot:"warn", type:"process" };
+    return { text: v, dot:"warn", type:"process" };
+  }
+
+  function prettyModelName(raw){
+    const s = String(raw || "").toLowerCase();
+    if (s.includes("nano-banana") || s.includes("nano_banana")) return "Nano Banana";
+    if (s.includes("seedream")) return "Seedream";
+    if (s.includes("flux")) return "FLUX";
+    if (s.includes("z-image") || s.includes("z_image")) return "Z-Image";
+    if (s.includes("kling") && s.includes("2.6")) return "Kling 2.6";
+    if (s.includes("kling") && s.includes("2.5")) return "Kling 2.5";
+    if (s.includes("veo")) return "Veo";
+    if (s.startsWith("runway:")) return "Runway";
+    if (s.startsWith("freepik:")) return "Freepik";
+    const parts = String(raw || "").split("/");
+    return parts[parts.length - 1] || "Model";
+  }
+
+  function modelChip(raw){
+    const s = String(raw || "").toLowerCase();
+    if (s.startsWith("runway:")) return "RUNWAY";
+    if (s.startsWith("freepik:")) return "FREEPIK";
+    if (s.includes("replicate")) return "REPLICATE";
+    if (s.includes("fal")) return "FAL";
+    return "AI";
+  }
+
+  function getHiddenIds(){
+    try { return JSON.parse(localStorage.getItem(LS_HIDDEN_KEY) || "[]"); } catch(e){ return []; }
+  }
+  function setHiddenIds(ids){ localStorage.setItem(LS_HIDDEN_KEY, JSON.stringify(ids)); }
+
+  function toggleHideId(id){
+    id = String(id);
+    let ids = getHiddenIds();
+    if(ids.includes(id)) ids = ids.filter(x => x !== id);
+    else ids.push(id);
+    setHiddenIds(ids);
+    renderGrid();
+    if(currentItem && String(currentItem.id) === id) updateModal(currentItem);
+  }
+
+  function getPubMap(){
+    try { return JSON.parse(localStorage.getItem(LS_PUB_KEY)||"{}"); } catch(e){ return {}; }
+  }
+  function setPubMap(m){ localStorage.setItem(LS_PUB_KEY, JSON.stringify(m)); }
+  function isPublished(genId){
+    const m = getPubMap();
+    return !!m[String(genId)];
+  }
+  function markPublished(genId, postId=true){
+    const m = getPubMap();
+    m[String(genId)] = postId || true;
+    setPubMap(m);
+  }
+  function markUnpublished(genId){
+    const m = getPubMap();
+    delete m[String(genId)];
+    setPubMap(m);
+  }
+
+  async function forceDownload(url, filename){
+    try{
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+      a.remove();
+    } catch(e){
+      window.open(url, "_blank");
     }
-    return out;
   }
 
-  function setFiles(next){
-    selectedFiles = ensureLimit(dedupeBySignature(next));
-    renderThumbs();
-    updateDropText();
-    cachedImageUrls = []; cachedSignature = "";
-  }
-
-  function addFiles(files){
-    const imgs = Array.from(files || []).filter(f => f && f.type && f.type.startsWith("image/"));
-    if (!imgs.length) return;
-    const merged = selectedFiles.concat(imgs);
-    const limited = ensureLimit(dedupeBySignature(merged));
-    if (limited.length < merged.length){
-      setStatus(`Max ${MAX_IMAGES} images. Extra files ignored.`, "err");
-      setTimeout(()=>setStatus(""), 1600);
-    }
-    selectedFiles = limited;
-    renderThumbs();
-    updateDropText();
-    cachedImageUrls = []; cachedSignature = "";
-  }
-
-  function removeFileAt(idx){
-    const f = selectedFiles[idx];
-    if (f && f.__previewUrl) {
-      try { URL.revokeObjectURL(f.__previewUrl); } catch(e){}
-    }
-    selectedFiles.splice(idx, 1);
-    renderThumbs();
-    updateDropText();
-    cachedImageUrls = []; cachedSignature = "";
-  }
-
-  function clearFiles(){
-    for (const f of selectedFiles){
-      if (f && f.__previewUrl) try { URL.revokeObjectURL(f.__previewUrl); } catch(e){}
-    }
-    selectedFiles = [];
-    renderThumbs();
-    updateDropText();
-    cachedImageUrls = []; cachedSignature = "";
-  }
-
-  function renderThumbs(){
-    thumbsEl.innerHTML = "";
-    if (!selectedFiles.length){
-      thumbsEl.style.display = "none";
-      return;
-    }
-    thumbsEl.style.display = "flex";
-    selectedFiles.forEach((file, idx) => {
-      const box = document.createElement("div");
-      box.className = "lf-thumbbox";
-      if (!file.__previewUrl){
-        try { file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
-      }
-      const img = document.createElement("img");
-      img.alt = file.name || "image";
-      img.src = file.__previewUrl || "";
-      const x = document.createElement("div");
-      x.className = "x";
-      x.textContent = "×";
-      x.title = "Remove";
-      x.addEventListener("click", (ev) => {
-        ev.preventDefault(); ev.stopPropagation();
-        removeFileAt(idx);
-      });
-      box.appendChild(img);
-      box.appendChild(x);
-      thumbsEl.appendChild(box);
-    });
-  }
-
-  function updateDropText(){
-    if (!selectedFiles.length){
-      dropTitle.textContent = "Upload images";
-      dropSub.textContent = "Click or drag&drop • up to 14 images";
-      return;
-    }
-    const count = selectedFiles.length;
-    const totalBytes = selectedFiles.reduce((s,f)=>s+(f?.size||0), 0);
-    dropTitle.textContent = `${count} image${count>1?"s":""} selected`;
-    dropSub.textContent = `Total: ${formatSize(totalBytes)}`;
-  }
-
-  /* --- AUTH & UPLOAD --- */
+  /* ==========================================================
+      AUTH / API
+     ========================================================== */
   async function getSessionOrRedirect(){
     const sb = window.sb;
     if (!sb) { location.href = BASE + "/login"; throw new Error("No supabase client"); }
@@ -981,91 +1153,297 @@
     return j;
   }
 
-  async function uploadReferenceToInputs(file){
+  async function getTokenOrThrow(){
     const sb = window.sb;
-    const session = await getSessionOrRedirect();
-    const ext = (file.name.split(".").pop() || "png").toLowerCase();
-    const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "png";
-    const path = `${session.user.id}/${uuid()}.${safeExt}`;
-    let up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, { upsert:false, contentType: file.type || "application/octet-stream" });
-    if (up?.error && (up.error.statusCode === 401 || up.error.statusCode === 403)){
-      await refreshSessionSafe();
-      up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, { upsert:false, contentType: file.type || "application/octet-stream" });
-    }
-    if (up.error) throw up.error;
-    const pub = sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
-    return pub.data.publicUrl;
+    if(!sb) throw new Error("Supabase not found");
+    const { data } = await sb.auth.getSession();
+    if(!data.session) throw new Error("No session");
+    return data.session.access_token;
   }
 
-  async function uploadAllSelectedOrThrow(){
-    if (!selectedFiles.length) return [];
-    loaderSub.textContent = `Uploading ${selectedFiles.length} image(s)…`;
-    const urls = [];
-    for (let i=0; i<selectedFiles.length; i++){
-      loaderSub.textContent = `Uploading ${i+1}/${selectedFiles.length}…`;
-      const url = await uploadReferenceToInputs(selectedFiles[i]);
-      urls.push(url);
+  async function publishGeneration(generationId, title){
+    const token = await getTokenOrThrow();
+    const r = await fetch(`${BACKEND}/api/feed/publish`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token },
+      body: JSON.stringify({ generation_id: Number(generationId), title: title || "" })
+    });
+    const j = await r.json().catch(()=> ({}));
+    if(!r.ok) throw new Error(j?.error || j?.details || "Publish failed");
+    return j;
+  }
+
+  async function unpublishGeneration(generationId){
+    const token = await getTokenOrThrow();
+    const r = await fetch(`${BACKEND}/api/feed/unpublish`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token },
+      body: JSON.stringify({ generation_id: Number(generationId) })
+    });
+    const j = await r.json().catch(()=> ({}));
+    if(!r.ok) throw new Error(j?.error || j?.details || "Unpublish failed");
+    return j;
+  }
+
+  /* ==========================================================
+      FILES / REFS
+     ========================================================== */
+  function ensureLimit(arr){
+    if(arr.length <= MAX_IMAGES) return arr;
+    return arr.slice(0, MAX_IMAGES);
+  }
+
+  function dedupeRefUrls(urls){
+    const out = [];
+    const seen = new Set();
+    for(const u of urls){
+      const key = String(u||"").trim();
+      if(!key) continue;
+      if(seen.has(key)) continue;
+      seen.add(key);
+      out.push(key);
     }
-    return urls;
+    return out;
+  }
+
+  function dedupeFiles(files){
+    const seen = new Set();
+    const out = [];
+    for (const f of files){
+      const key = `${f.name}|${f.size}|${f.lastModified}`;
+      if(seen.has(key)) continue;
+      seen.add(key);
+      out.push(f);
+    }
+    return out;
+  }
+
+  function setFiles(next){
+    selectedFiles = ensureLimit(dedupeFiles(next));
+    cachedImageUrls = []; cachedSignature = "";
+    renderRefbar();
+  }
+
+  function addFiles(files){
+    const imgs = Array.from(files || []).filter(f => f && f.type && f.type.startsWith("image/"));
+    if(!imgs.length) return;
+    const merged = selectedFiles.concat(imgs);
+    const limited = ensureLimit(dedupeFiles(merged));
+    if(limited.length < merged.length){
+      setStatus(`Max ${MAX_IMAGES} images. Extra ignored.`, "warn");
+      setTimeout(()=>setStatus(""), 1200);
+    }
+    selectedFiles = limited;
+    cachedImageUrls = []; cachedSignature = "";
+    renderRefbar();
+  }
+
+  function removeLocalFileAt(idx){
+    const f = selectedFiles[idx];
+    if(f && f.__previewUrl){ try{ URL.revokeObjectURL(f.__previewUrl); }catch(e){} }
+    selectedFiles.splice(idx,1);
+    cachedImageUrls = []; cachedSignature = "";
+    renderRefbar();
+  }
+
+  function removeRefUrlAt(idx){
+    selectedRefUrls.splice(idx,1);
+    renderRefbar();
+  }
+
+  function addRefUrl(url){
+    const clean = String(url||"").trim();
+    if(!clean) return;
+    selectedRefUrls = ensureLimit(dedupeRefUrls([ ...selectedRefUrls, clean ]));
+    renderRefbar();
+  }
+
+  function renderRefbar(){
+    // keep "+" button, then thumbs for local files, then thumbs for urls
+    // remove previous thumbs
+    [...refbar.querySelectorAll(".ref-thumb")].forEach(el => el.remove());
+
+    // local files thumbs
+    selectedFiles.forEach((file, i) => {
+      if(!file.__previewUrl){
+        try{ file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
+      }
+      const box = document.createElement("div");
+      box.className = "ref-thumb";
+      box.title = file.name || "reference";
+
+      const img = document.createElement("img");
+      img.src = file.__previewUrl || "";
+      img.alt = "ref";
+
+      const x = document.createElement("div");
+      x.className = "x";
+      x.textContent = "×";
+      x.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); removeLocalFileAt(i); };
+
+      box.appendChild(img);
+      box.appendChild(x);
+      refbar.appendChild(box);
+    });
+
+    // remote urls thumbs
+    selectedRefUrls.forEach((url, i) => {
+      const box = document.createElement("div");
+      box.className = "ref-thumb";
+      box.title = "Library reference";
+
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = "ref-url";
+
+      const x = document.createElement("div");
+      x.className = "x";
+      x.textContent = "×";
+      x.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); removeRefUrlAt(i); };
+
+      box.appendChild(img);
+      box.appendChild(x);
+      refbar.appendChild(box);
+    });
   }
 
   function filesSignature(files){
     return (files||[]).map(f => `${f.name}|${f.size}|${f.lastModified}`).join("||");
   }
 
-  async function getOrUploadImageUrls(){
+  async function uploadReferenceToInputs(file){
+    const sb = window.sb;
+    const session = await getSessionOrRedirect();
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "png";
+    const path = `${session.user.id}/${uuid()}.${safeExt}`;
+
+    let up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, { upsert:false, contentType: file.type || "application/octet-stream" });
+    if (up?.error && (up.error.statusCode === 401 || up.error.statusCode === 403)){
+      await refreshSessionSafe();
+      up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, { upsert:false, contentType: file.type || "application/octet-stream" });
+    }
+    if (up.error) throw up.error;
+
+    const pub = sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
+    return pub.data.publicUrl;
+  }
+
+  async function uploadAllSelectedOrThrow(){
+    if (!selectedFiles.length) return [];
+    const urls = [];
+    for (let i=0; i<selectedFiles.length; i++){
+      const url = await uploadReferenceToInputs(selectedFiles[i]);
+      urls.push(url);
+    }
+    return urls;
+  }
+
+  async function getOrUploadLocalUrls(){
     if (!selectedFiles.length) return [];
     const sig = filesSignature(selectedFiles);
     if (cachedSignature === sig && cachedImageUrls.length === selectedFiles.length){
       return cachedImageUrls;
     }
     const urls = await uploadAllSelectedOrThrow();
-    cachedSignature = sig; cachedImageUrls = urls;
+    cachedSignature = sig;
+    cachedImageUrls = urls;
     return urls;
   }
 
+  async function getAllReferenceUrls(){
+    // merge uploaded urls + selectedRefUrls, respect MAX_IMAGES
+    const local = await getOrUploadLocalUrls();
+    const merged = ensureLimit(dedupeRefUrls([ ...local, ...selectedRefUrls ]));
+    return merged;
+  }
+
+  /* ==========================================================
+      MODEL DROPDOWN / PARAM VISIBILITY
+     ========================================================== */
+  function closeModelDropdown(){ modelSelect.classList.remove("open"); }
+  function openModelDropdown(){ modelSelect.classList.add("open"); }
+
+  modelTrigger.addEventListener("click", (e) => {
+    e.preventDefault();
+    modelSelect.classList.toggle("open");
+  });
+
+  window.addEventListener("click", (e) => {
+    if(!e.target.closest("#modelSelect")) closeModelDropdown();
+  });
+
+  modelList.querySelectorAll(".lf-dd-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const name = item.dataset.name;
+      const presetId = item.dataset.id;
+      selectModel(name, presetId);
+    });
+  });
+
+  function selectModel(name, presetId){
+    currentPresetId = presetId;
+    currentModelName.textContent = name;
+
+    modelList.querySelectorAll(".lf-dd-item").forEach(el => el.classList.remove("active"));
+    const activeEl = [...modelList.querySelectorAll(".lf-dd-item")].find(el => el.dataset.id === presetId);
+    if(activeEl) activeEl.classList.add("active");
+
+    // Toggle param rows
+    seedreamRow.style.display = (presetId === "seedream_4") ? "flex" : "none";
+    seedreamCustom.style.display = (presetId === "seedream_4" && sdSize.value === "custom") ? "flex" : "none";
+
+    fluxRow.style.display = (presetId === "flux_2_max") ? "flex" : "none";
+
+    // Nano res/aspect: keep visible for nano and z-image; for seedream/flux, resWrap can be hidden
+    if(presetId === "seedream_4" || presetId === "flux_2_max"){
+      resWrap.style.display = "none";
+    } else {
+      resWrap.style.display = "block";
+    }
+
+    calcCost();
+    closeModelDropdown();
+  }
+
+  sdSize.addEventListener("change", () => {
+    seedreamCustom.style.display = (sdSize.value === "custom") ? "flex" : "none";
+    calcCost();
+  });
+  fxRes.addEventListener("change", calcCost);
+  resEl.addEventListener("change", calcCost);
+
   function calcCost(){
-    // 3️⃣ Static Cost for Z-Image Turbo
     if (currentPresetId === "z_image_turbo") {
-      $("cost").textContent = "1 Cr / 4 runs";
+      costEl.textContent = "1 Cr / 4 runs";
       return;
     }
-
     if (currentPresetId === "nano_banana_pro") {
-        const res = String(resEl.value || "2K");
-        const cost = (res === "4K") ? 2 : 1;
-        $("cost").textContent = cost + " Cr";
-        return;
+      const r = String(resEl.value || "2K");
+      const cost = (r === "4K") ? 2 : 1;
+      costEl.textContent = cost + " Cr";
+      return;
     }
-
     if (currentPresetId === "seedream_4") {
-        const size = String(sdSize.value || "2K").toUpperCase();
-        // Fixed: max images always 1
-        const maxImages = 1; 
-        const base = size === "4K" ? 4 : size === "2K" ? 2 : 1;
-        $("cost").textContent = (base * maxImages) + " Cr";
-        return;
+      const size = String(sdSize.value || "2K").toUpperCase();
+      const base = size === "4K" ? 4 : size === "2K" ? 2 : 1;
+      costEl.textContent = base + " Cr";
+      return;
     }
-
     if (currentPresetId === "flux_2_max") {
-        const r = String(fxRes.value || "1 MP").toUpperCase();
-        const base = r.includes("4") ? 7 : r.includes("2") ? 4 : 2;
-        $("cost").textContent = base + " Cr";
-        return;
+      const r = String(fxRes.value || "1 MP").toUpperCase();
+      const base = r.includes("4") ? 7 : r.includes("2") ? 4 : 2;
+      costEl.textContent = base + " Cr";
+      return;
     }
-
-    $("cost").textContent = "—";
+    costEl.textContent = "—";
   }
 
-  /* --- GPT --- */
+  /* ==========================================================
+      GPT PROMPT BUILDER (same as 1 doc logic)
+     ========================================================== */
   function nanoPromptBuilderSystem(){
     return `You are a PROMPT BUILDER. OUTPUT ONLY: <PROMPT>...</PROMPT>. Primary Goal: Write a prompt that transforms the provided reference.`;
-  }
-  function enforceCinematicRealism(prompt, userText){
-    const t = (userText||"").toLowerCase();
-    const wantsRealism = /real|cinema|photo/.test(t);
-    if (!wantsRealism) return prompt;
-    return prompt + " AVOID: illustration, cartoon, anime, painterly, lineart.";
   }
   function extractPromptTag(text){
     const s = String(text||"");
@@ -1074,9 +1452,15 @@
     if (i !== -1 && j !== -1 && j > i) return s.slice(i+a.length, j).trim();
     return s.trim();
   }
+  function enforceCinematicRealism(prompt, userText){
+    const t = (userText||"").toLowerCase();
+    const wantsRealism = /real|cinema|photo|фото|кино/.test(t);
+    if (!wantsRealism) return prompt;
+    return prompt + " AVOID: illustration, cartoon, anime, painterly, lineart.";
+  }
 
   async function gptStart(prompt, image_urls){
-    const data = await fetchJsonWithAuth(BACKEND_BASE + "/api/chatgpt_start_json", {
+    const data = await fetchJsonWithAuth(BACKEND + "/api/chatgpt_start_json", {
       method: "POST", headers: { "Content-Type":"application/json" },
       body: JSON.stringify({ prompt, image_urls, system_prompt: nanoPromptBuilderSystem(), reasoning_effort: "minimal", model: "nano" })
     });
@@ -1084,347 +1468,483 @@
   }
   async function gptPoll(jobId){
     const t0 = Date.now(), maxMs = 90000;
-    while (true){
-      if (Date.now() - t0 > maxMs) throw new Error("GPT timeout");
-      const s = await fetchJsonWithAuth(BACKEND_BASE + "/api/chatgpt_status?jobId=" + encodeURIComponent(jobId), { method: "GET" });
-      if (s.status === "succeeded") return String(s.text || "").trim();
-      if (s.status === "failed" || s.status === "canceled") throw new Error(s.error || "GPT failed");
+    while(true){
+      if(Date.now() - t0 > maxMs) throw new Error("GPT timeout");
+      const s = await fetchJsonWithAuth(BACKEND + "/api/chatgpt_status?jobId=" + encodeURIComponent(jobId), { method:"GET" });
+      if(s.status === "succeeded") return String(s.text || "").trim();
+      if(s.status === "failed" || s.status === "canceled") throw new Error(s.error || "GPT failed");
       await new Promise(r => setTimeout(r, 900));
     }
   }
 
-  async function buildPromptNano(){
-    gptBtn.disabled = true; runBtn.disabled = true; setStatus("", ""); showPromptLoader(true);
+  async function buildPrompt(){
+    gptBtn.disabled = true;
+    runBtn.disabled = true;
+    setStatus("", "");
     try{
       let userRequest = (sceneEl.value || "").trim();
-      if (styleChk.checked) userRequest += " \n[INSTRUCTION: STYLE-ONLY transform.]";
-      const image_urls = await getOrUploadImageUrls();
-      const jobId = await gptStart(userRequest || "Make a high-quality image", image_urls);
+      if(styleChk.checked) userRequest += " \n[INSTRUCTION: STYLE-ONLY transform.]";
+
+      const refs = await getAllReferenceUrls();
+      const jobId = await gptStart(userRequest || "Make a high-quality image", refs);
       const raw = await gptPoll(jobId);
+
       let built = extractPromptTag(raw);
-      if (built === "DECLINED"){
-        setStatus("GPT declined. Describe image content.", "err"); return;
+      if(built === "DECLINED"){
+        setStatus("GPT declined. Describe image content.", "err");
+        return;
       }
       built = enforceCinematicRealism(built, sceneEl.value);
       sceneEl.value = built;
       setStatus("Prompt generated ✓", "ok");
     } catch(e){
-        setStatus("GPT Error", "err");
+      setStatus("GPT Error", "err");
     } finally {
-      showPromptLoader(false); gptBtn.disabled = false; runBtn.disabled = false;
+      gptBtn.disabled = false;
+      runBtn.disabled = false;
     }
   }
 
-  /* --- JOB EXECUTION (FIRE AND FORGET) --- */
-    
+  /* ==========================================================
+      JOB START + polling
+     ========================================================== */
   async function startJob(){
-    // DO NOT disable runBtn here to allow parallel jobs
-    gptBtn.disabled = true; 
-    
-    // Setup Main View for "Latest Job"
-    resetResult(); 
-    setStatus(""); 
-    showLoader(true);
-    loaderSub.textContent = "Preparing…";
+    gptBtn.disabled = true;
+    runBtn.disabled = true;
+    setStatus("Starting…", "warn");
 
-    // Upload images first for all models
-    let urls = [];
-    if (selectedFiles.length){
-      urls = await getOrUploadImageUrls();
-    }
+    // Make sure refs exist (upload local files, keep remote urls)
+    const refs = await getAllReferenceUrls();
 
     const fd = new FormData();
+    const userText = (sceneEl.value || "").trim();
 
-const userText = (sceneEl.value || "").trim();
+    fd.append("presetId", currentPresetId);
+    fd.append("scene", userText || "high quality");
+    fd.append("prompt_user", userText);
 
-fd.append("presetId", currentPresetId);
-fd.append("scene", userText || "high quality");
-fd.append("prompt_user", userText);
+    // by model
+    if(currentPresetId === "nano_banana_pro"){
+      fd.append("aspect_ratio", String(aspectEl.value || "match_input_image"));
+      fd.append("resolution", String(resEl.value || "2K"));
+      fd.append("output_format", "png");
+      fd.append("safety_filter_level", "block_only_high");
 
-
-
-    // BRANCHING LOGIC BY MODEL
-    if (currentPresetId === "nano_banana_pro") {
-        fd.append("aspect_ratio", String(aspectEl.value || "match_input_image"));
-        fd.append("resolution", String(resEl.value || "2K"));
-        fd.append("output_format", "png");
-        fd.append("safety_filter_level", "block_only_high");
-        
-        // Nano Image Logic
-        if (urls.length){
-           if (urls.length === 1) fd.append("image_input_url", urls[0]);
-           else {
-             urls.forEach(u => fd.append("image_input_urls", u));
-             fd.append("image_input_url", urls[0]);
-           }
+      if(refs.length){
+        if(refs.length === 1) fd.append("image_input_url", refs[0]);
+        else {
+          refs.forEach(u => fd.append("image_input_urls", u));
+          fd.append("image_input_url", refs[0]);
         }
-        
-    } else if (currentPresetId === "seedream_4") {
-        fd.append("size", sdSize.value);
-        fd.append("aspect_ratio", sdAspect.value);
-        if (sdSize.value === 'custom') {
-            fd.append("width", sdWidth.value);
-            fd.append("height", sdHeight.value);
-        }
-        // Fixed values (UI removed)
-        fd.append("max_images", "1");
-        fd.append("enhance_prompt", "true");
-        
-        // Seedream Image Logic (same as Nano per request)
-        if (urls.length){
-            if (urls.length === 1) fd.append("image_input_url", urls[0]);
-            else {
-              urls.forEach(u => fd.append("image_input_urls", u));
-              fd.append("image_input_url", urls[0]);
-            }
-        }
-
-    } else if (currentPresetId === "flux_2_max") {
-        fd.append("aspect_ratio", fxAspect.value);
-        fd.append("resolution", fxRes.value);
-        if (fxSeed.value) fd.append("seed", fxSeed.value);
-        fd.append("output_format", fxFormat.value);
-        fd.append("output_quality", fxQuality.value);
-        fd.append("safety_tolerance", fxSafety.value);
-
-        // Flux Image Logic: input_images array
-        if (urls.length){
-            urls.forEach(u => fd.append("input_images", u));
-        }
-
-    } else if (currentPresetId === "z_image_turbo") {
-        // 4️⃣ Minimal payload for Z-Image Turbo
-        // Only prompt (added above) + images
-        if (urls.length){
-           if (urls.length === 1) fd.append("image_input_url", urls[0]);
-           else {
-             urls.forEach(u => fd.append("image_input_urls", u));
-             fd.append("image_input_url", urls[0]);
-           }
-        }
+      }
     }
 
-    loaderSub.textContent = "Sending task…";
+    if(currentPresetId === "seedream_4"){
+      fd.append("size", sdSize.value);
+      fd.append("aspect_ratio", sdAspect.value);
+      if(sdSize.value === "custom"){
+        fd.append("width", sdWidth.value);
+        fd.append("height", sdHeight.value);
+      }
+      fd.append("max_images", "1");
+      fd.append("enhance_prompt", "true");
+
+      if(refs.length){
+        if(refs.length === 1) fd.append("image_input_url", refs[0]);
+        else {
+          refs.forEach(u => fd.append("image_input_urls", u));
+          fd.append("image_input_url", refs[0]);
+        }
+      }
+    }
+
+    if(currentPresetId === "flux_2_max"){
+      fd.append("aspect_ratio", fxAspect.value);
+      fd.append("resolution", fxRes.value);
+      fd.append("output_format", "jpg");
+      fd.append("output_quality", "80");
+      fd.append("safety_tolerance", "2");
+
+      if(refs.length){
+        refs.forEach(u => fd.append("input_images", u));
+      }
+    }
+
+    if(currentPresetId === "z_image_turbo"){
+      if(refs.length){
+        if(refs.length === 1) fd.append("image_input_url", refs[0]);
+        else {
+          refs.forEach(u => fd.append("image_input_urls", u));
+          fd.append("image_input_url", refs[0]);
+        }
+      }
+    }
+
     let data;
     try{
-      data = await fetchJsonWithAuth(BACKEND_BASE + "/api/start", { method: "POST", body: fd });
+      data = await fetchJsonWithAuth(BACKEND + "/api/start", { method:"POST", body: fd });
     } catch(e){
-      // Restore state if initial req failed
-      showLoader(false); gptBtn.disabled = false; 
-      if (e.status === 402) {
-          setStatus("Not enough credits", "err"); return;
+      if(e.status === 402){
+        setStatus("Not enough credits", "err");
+      } else {
+        setStatus("Start error", "err");
+        alert("Error: " + e.message);
       }
-      alert("Error: "+e.message); return;
+      gptBtn.disabled = false;
+      runBtn.disabled = false;
+      return;
     }
 
-    const thisJobId = data.jobId;
-    // Mark this as the latest job user clicked
-    latestJobId = thisJobId; 
-
-    // 5️⃣ Response Handling for Z-Image Turbo
-    if (currentPresetId === "z_image_turbo") {
-      if (data.note === "paid_run") {
-        setStatus("Started • 1 credit charged (4th run)", "warn");
-      } else {
-        setStatus("Started • free run", "ok");
-      }
+    // show started msg
+    if(currentPresetId === "z_image_turbo"){
+      if(data.note === "paid_run") setStatus("Started • 1 credit charged (4th run)", "warn");
+      else setStatus("Started • free run", "ok");
     } else if (typeof data.cost !== "undefined") {
       setStatus(`Started • cost ${data.cost} Cr`, "ok");
+    } else {
+      setStatus("Started", "ok");
     }
-    
-    // Re-enable GPT btn immediately if allowed
+
+    // refresh grid quickly to show processing card
+    await refreshStudioGrid();
+
+    // poll this job until done, then refresh grid
+    const jobId = data.jobId;
     gptBtn.disabled = false;
-
-    // Trigger Ribbon refresh to show "Processing" state immediately
-    setTimeout(refreshLibraryRibbon, 500);
-
-    // Fork off a dedicated poller for this job
-    pollSingleJob(thisJobId);
+    runBtn.disabled = false;
+    pollJob(jobId);
   }
 
-  // Independent poller for a specific job
-  async function pollSingleJob(jobId) {
+  async function pollJob(jobId){
     const tick = async () => {
-        try {
-            const data = await fetchJsonWithAuth(BACKEND_BASE + `/api/status?jobId=${encodeURIComponent(jobId)}`, { method:"GET" });
-            
-            // Only update the Main Screen text if this is still the LATEST job
-            if (latestJobId === jobId) {
-                loaderSub.textContent = "status: " + data.status;
-            }
-
-            if (data.status === "succeeded" || data.status === "failed" || data.status === "canceled") {
-                // Job finished
-                refreshLibraryRibbon(); // Update ribbon to show result
-
-                // If this was the specific job the user was staring at on the big screen
-                if (latestJobId === jobId) {
-                    showLoader(false);
-                    if(data.status === "succeeded" && data.output_url) {
-                        showResult(data.output_url, data.status);
-                        setStatus("Done", "ok");
-                    } else {
-                        setStatus("Failed", "err");
-                    }
-                }
-                return; // Stop polling
-            }
-            
-            // Not done yet, keep checking
-            setTimeout(tick, 1500);
-
-        } catch (e) {
-            console.error("Poll error", e);
-            if (latestJobId === jobId) showLoader(false);
+      try{
+        const s = await fetchJsonWithAuth(BACKEND + "/api/status?jobId=" + encodeURIComponent(jobId), { method:"GET" });
+        if(["succeeded","failed","canceled"].includes(String(s.status||"").toLowerCase())){
+          await refreshStudioGrid();
+          if(String(s.status||"").toLowerCase() === "succeeded"){
+            setStatus("Done", "ok");
+          } else {
+            setStatus("Failed", "err");
+          }
+          return;
         }
+        // keep slight live status without spamming
+        setStatus("Processing…", "warn");
+        setTimeout(tick, 1600);
+      } catch(e){
+        console.error("poll err", e);
+        setStatus("Poll error", "err");
+      }
     };
     tick();
   }
 
-
   /* ==========================================================
-      LIBRARY (2-ROW RIBBON)
+      STUDIO GRID (library+processing in one view)
      ========================================================== */
-
-  function getRibbonStatus(raw){
-    const v = String(raw||"").toLowerCase();
-    if (["succeeded","success","done"].includes(v)) return { text:"Done", dot:"ok" };
-    if (["failed","error","canceled"].includes(v)) return { text:"Failed", dot:"err" };
-    return { text:"Processing", dot:"warn" };
-  }
-   
-  async function forceDownload(url, filename){
-      try {
-          const res = await fetch(url);
-          const blob = await res.blob();
-          const blobUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none'; a.href = blobUrl; a.download = filename;
-          document.body.appendChild(a); a.click();
-          window.URL.revokeObjectURL(blobUrl);
-      } catch(e) { window.open(url, '_blank'); }
+  function showGridLoader(v){
+    gridLoader.style.display = v ? "flex" : "none";
   }
 
-  window.openLibraryModal = (item) => {
-      const url = item.output_url || "";
-      const st = getRibbonStatus(item.status);
-      
-      let html = "";
-      if(!url) html = `<div style="color:#666">Processing or Failed</div>`;
-      else if(isVideoUrl(url)) html = `<video src="${url}" controls autoplay loop style="max-height:100%;max-width:100%"></video>`;
-      else html = `<img src="${url}" style="object-fit:contain;" />`;
-      
-      mView.innerHTML = html;
-      mStatus.innerHTML = `<span class="dot ${st.dot}" style="display:inline-block;margin-right:6px"></span> ${st.text}`;
-      mDate.textContent = item.created_at ? item.created_at.replace("T"," ").slice(0,16) : "";
-      mId.textContent = item.id;
+  async function refreshStudioGrid(){
+    if(loading) return;
+    loading = true;
+    showGridLoader(true);
 
-      if(url) {
-          mBtnDown.style.display = "flex";
-          mBtnDown.onclick = () => {
-              const ext = (url.split('.').pop() || "bin").split("?")[0];
-              forceDownload(url, `generated-${item.id}.${ext}`);
-          };
-          mBtnCopy.onclick = () => {
-              navigator.clipboard.writeText(url);
-              mBtnCopy.textContent = "Copied!";
-              setTimeout(()=>mBtnCopy.textContent="Copy URL", 1000);
-          };
-      } else {
-          mBtnDown.style.display = "none";
-      }
+    try{
+      const data = await fetchJsonWithAuth(`${BACKEND}/api/me?limit=${PAGE_SIZE}&offset=0`);
+      allItems = Array.isArray(data.generations) ? data.generations : [];
+      mEmail.textContent = data.user?.email || "…";
+      mCredits.textContent = data.credits ?? 0;
 
-      modalBack.classList.add("open");
-  };
-  modalClose.onclick = () => modalBack.classList.remove("open");
-
-  async function refreshLibraryRibbon(){
-    try {
-        const data = await fetchJsonWithAuth(`${BACKEND_BASE}/api/me?limit=30&offset=0`); 
-        const list = data.generations || [];
-        
-        let hiddenIds = [];
-        try { hiddenIds = JSON.parse(localStorage.getItem("lf_hidden_items_v2") || "[]"); } catch(e){}
-        const visible = list.filter(g => !hiddenIds.includes(String(g.id)));
-
-        if(visible.length === 0){
-            libRibbon.innerHTML = `<div style="padding:20px;color:#444">No recent history</div>`;
-            return;
-        }
-
-        const html = visible.map(item => {
-            const url = item.output_url || "";
-            const st = getRibbonStatus(item.status);
-            
-            let media = "";
-            if(!url) media = `<div style="width:100%;height:100%;background:#111;display:flex;align-items:center;justify-content:center;color:#333">...</div>`;
-            else if(isVideoUrl(url)) media = `<video src="${url}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>`;
-            else media = `<img src="${url}" loading="lazy" />`;
-            
-            const jsonItem = JSON.stringify(item).replace(/"/g, '&quot;');
-
-            return `
-            <div class="lf-rib-item" onclick="window.openLibraryModal(${jsonItem})">
-               ${media}
-               <div class="lf-rib-status"><span class="dot ${st.dot}"></span> ${st.text}</div>
-            </div>`;
-        }).join("");
-        
-        const moreBtn = `<a href="https://lightfull.ai/library" class="lf-rib-more">More →</a>`;
-        libRibbon.innerHTML = html + moreBtn;
-
+      renderGrid();
     } catch(e){
-        console.error("Ribbon fetch err", e);
+      grid.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`;
+    } finally {
+      loading = false;
+      showGridLoader(false);
     }
   }
 
+  function renderGrid(){
+    const hiddenIds = getHiddenIds();
+    const visible = allItems.filter(g => !hiddenIds.includes(String(g.id)));
+
+    if(!visible.length){
+      grid.innerHTML = `<div class="lf-empty">No history yet. Generate something ????</div>`;
+      return;
+    }
+
+    // show Processing first, then Done (like your screenshot feeling)
+    const proc = visible.filter(g => getStatus(g.status).type === "process");
+    const done = visible.filter(g => getStatus(g.status).type === "done");
+    const list = proc.concat(done);
+
+    grid.innerHTML = list.map(item => {
+      const url = item.output_url || "";
+      const st = getStatus(item.status);
+
+      // media
+      let mediaHtml = "";
+      if(!url){
+        mediaHtml = `<div style="width:100%;height:100%;background:#0b0b0b;display:flex;align-items:center;justify-content:center;color:#333;font-weight:900;">…</div>`;
+      } else if(is3D(url)){
+        mediaHtml = `<model-viewer src="${url}" shadow-intensity="1" auto-rotate="false" camera-controls="false" interaction-prompt="none"></model-viewer>`;
+      } else if(isVideo(url)){
+        mediaHtml = `<video src="${url}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`;
+      } else {
+        mediaHtml = `<img src="${url}" loading="lazy" />`;
+      }
+
+      // model label for hover
+      const rawModel = item.model_display || item.model_key || item.model || "—";
+      const modelName = prettyModelName(rawModel);
+      const chip = modelChip(rawModel);
+
+      const dateText = (item.created_at||"").replace("T"," ").slice(0,16);
+
+      const dataJson = JSON.stringify(item).replace(/"/g, "&quot;");
+
+      // per-card buttons: download + use-as-ref (only if has image url)
+      const canRef = (!!url && !isVideo(url) && !is3D(url)); // image only
+      const refBtn = canRef
+        ? `<button class="btn-mini" onclick="event.stopPropagation(); window.lfAddRefFromCard('${encodeURIComponent(url)}')">Use as ref</button>`
+        : ``;
+
+      const dlBtn = url
+        ? `<button class="btn-mini primary" onclick="event.stopPropagation(); window.lfDownloadFromCard('${encodeURIComponent(url)}','${item.id}')">Download</button>`
+        : `<button class="btn-mini primary" disabled style="opacity:.55;">Download</button>`;
+
+      // shimmer if processing
+      const shimmer = (st.type === "process") ? `<div class="lf-proc-shimmer"></div>` : ``;
+
+      return `
+        <div class="lf-card" onclick="window.openModal('${item.id}')">
+          <div class="lf-media">${mediaHtml}${shimmer}</div>
+          <div class="card-badge"><span class="dot ${st.dot}"></span>${st.text}</div>
+          <div class="mini-date">${dateText}</div>
+
+          <div class="card-overlay">
+            <div class="ov-left">
+              <div class="ov-model">
+                <span class="ov-chip">${chip}</span>
+                <span title="${modelName}">${modelName}</span>
+              </div>
+            </div>
+            <div class="ov-actions">
+              ${refBtn}
+              ${dlBtn}
+              <button class="btn-mini" onclick="event.stopPropagation(); window.openModal('${item.id}')">Open</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // expose card actions
+  window.lfDownloadFromCard = (encUrl, id) => {
+    const url = decodeURIComponent(encUrl);
+    const ext = (url.split(".").pop() || "png").split("?")[0];
+    forceDownload(url, `generated-${id}.${ext}`);
+  };
+
+  window.lfAddRefFromCard = (encUrl) => {
+    const url = decodeURIComponent(encUrl);
+    addRefUrl(url);
+    setStatus("Added reference ✓", "ok");
+    setTimeout(()=>setStatus(""), 900);
+  };
 
   /* ==========================================================
-      INIT & EVENTS
+      MODAL (Library-like)
      ========================================================== */
-  drop.addEventListener("click", ()=>fileEl.click());
-  
-  // FIX: Handle file selection correctly (read files BEFORE clearing value)
-  fileEl.addEventListener("change", (e)=>{
-    const files = e.target.files; 
-    addFiles(files);
-    fileEl.value = ""; 
+  window.openModal = (id) => {
+    const item = allItems.find(x => String(x.id) === String(id));
+    if(!item) return;
+    currentItem = item;
+    updateModal(item);
+    modalBack.classList.add("open");
+  };
+
+  function updateModal(item){
+    const url = item.output_url || "";
+    const st = getStatus(item.status);
+    const hiddenIds = getHiddenIds();
+    const isHidden = hiddenIds.includes(String(item.id));
+
+    // preview
+    let html = "";
+    if(!url) html = `<div style="color:#666;font-weight:900;">Processing or Failed</div>`;
+    else if(is3D(url)) html = `<model-viewer src="${url}" camera-controls auto-rotate shadow-intensity="1" style="width:100%;height:100%;background:#111;"></model-viewer>`;
+    else if(isVideo(url)) html = `<video src="${url}" controls autoplay loop style="max-height:100%;max-width:100%"></video>`;
+    else html = `<img src="${url}" style="object-fit:contain;" />`;
+    viewCont.innerHTML = html;
+
+    mStatus.innerHTML = `<span class="dot ${st.dot}" style="display:inline-block;margin-right:6px"></span> ${st.text}`;
+    mDate.textContent = (item.created_at || "").replace("T"," ").slice(0,16);
+    mId.textContent = item.id;
+
+    const rawModel = item.model_display || item.model_key || item.model || "—";
+    const modelName = prettyModelName(rawModel);
+    const prompt = item.prompt_user ?? "";
+
+    mModel.textContent = modelName;
+    mModelChip.textContent = modelChip(rawModel);
+    mPrompt.textContent = prompt || "—";
+
+    // Use as ref (only image)
+    const canRef = (!!url && !isVideo(url) && !is3D(url));
+    btnUseAsRef.style.display = canRef ? "inline-flex" : "none";
+    btnUseAsRef.onclick = () => {
+      if(!canRef) return;
+      addRefUrl(url);
+      setStatus("Added reference ✓", "ok");
+      setTimeout(()=>setStatus(""), 900);
+    };
+
+    // download/copy
+    if(url){
+      btnDown.style.display = "flex";
+      btnDown.onclick = () => {
+        const ext = (url.split(".").pop() || "bin").split("?")[0];
+        forceDownload(url, `generated-${item.id}.${ext}`);
+      };
+      btnCopy.onclick = async () => {
+        await navigator.clipboard.writeText(url);
+        btnCopy.textContent = "Copied!";
+        setTimeout(()=>btnCopy.textContent="Copy URL", 900);
+      };
+    } else {
+      btnDown.style.display = "none";
+      btnCopy.onclick = null;
+    }
+
+    btnCopyPrompt.onclick = async () => {
+      if(!prompt) return;
+      try{
+        await navigator.clipboard.writeText(prompt);
+        btnCopyPrompt.classList.add("ok");
+        const prev = btnCopyPrompt.textContent;
+        btnCopyPrompt.textContent = "Copied ✓";
+        setTimeout(() => {
+          btnCopyPrompt.textContent = prev || "Copy Prompt";
+          btnCopyPrompt.classList.remove("ok");
+        }, 900);
+      } catch(e){
+        alert("Copy failed");
+      }
+    };
+
+    // trash
+    if(isHidden){
+      btnHide.textContent = "Restore from Trash";
+      btnHide.classList.remove("danger");
+      btnHide.classList.add("primary");
+    } else {
+      btnHide.textContent = "Move to Trash";
+      btnHide.classList.add("danger");
+      btnHide.classList.remove("primary");
+    }
+    btnHide.onclick = () => {
+      toggleHideId(item.id);
+      if(!isHidden) modalBack.classList.remove("open");
+    };
+
+    // publish states
+    const pub = isPublished(item.id);
+    mFeedState.textContent = pub ? "Published" : "Not published";
+
+    btnPublish.style.display = pub ? "none" : "flex";
+    btnUnpublish.style.display = pub ? "flex" : "none";
+
+    btnPublish.onclick = () => {
+      if(getStatus(item.status).type !== "done"){ alert("Only Done items can be published"); return; }
+      pubTitle.value = item.title || "";
+      pubPop.classList.add("open");
+    };
+
+    btnUnpublish.onclick = async () => {
+      try{
+        btnUnpublish.textContent = "Unpublishing…";
+        await unpublishGeneration(item.id);
+        markUnpublished(item.id);
+        mFeedState.textContent = "Not published";
+        btnPublish.style.display = "flex";
+        btnUnpublish.style.display = "none";
+        renderGrid();
+      } catch(e){
+        alert(e.message);
+      } finally {
+        btnUnpublish.textContent = "Unpublish from Feed";
+      }
+    };
+  }
+
+  modalClose.onclick = () => {
+    modalBack.classList.remove("open");
+    pubPop.classList.remove("open");
+  };
+  modalBack.onclick = (e) => {
+    if(e.target === modalBack){
+      modalBack.classList.remove("open");
+      pubPop.classList.remove("open");
+    }
+  };
+
+  pubCancel.onclick = () => pubPop.classList.remove("open");
+  pubPop.onclick = (e) => { if(e.target === pubPop) pubPop.classList.remove("open"); };
+
+  pubConfirm.onclick = async () => {
+    if(!currentItem) return;
+    if(getStatus(currentItem.status).type !== "done"){ alert("Only Done items can be published"); return; }
+    try{
+      pubConfirm.textContent = "Publishing…";
+      const title = (pubTitle.value || "").trim();
+      const j = await publishGeneration(currentItem.id, title);
+      markPublished(currentItem.id, j?.post?.id || true);
+
+      mFeedState.textContent = "Published";
+      btnPublish.style.display = "none";
+      btnUnpublish.style.display = "flex";
+
+      pubPop.classList.remove("open");
+      renderGrid();
+    } catch(e){
+      alert(e.message);
+    } finally {
+      pubConfirm.textContent = "Publish";
+    }
+  };
+
+  /* ==========================================================
+      EVENTS (dock)
+     ========================================================== */
+  refAdd.addEventListener("click", () => fileEl.click());
+  fileEl.addEventListener("change", (e) => {
+    addFiles(e.target.files);
+    fileEl.value = "";
   });
 
-  ["dragenter","dragover"].forEach(evt=>{
-    drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="rgba(43,108,255,.55)"; });
-  });
-  ["dragleave","drop"].forEach(evt=>{
-    drop.addEventListener(evt,(ev)=>{ ev.preventDefault(); drop.style.borderColor="var(--border)"; });
-  });
-  drop.addEventListener("drop",(ev)=>{ addFiles(ev.dataTransfer?.files); });
-
-  runBtn.addEventListener("click", async ()=>{
-    try{ await startJob(); } catch(e){ showLoader(false); runBtn.disabled=false; gptBtn.disabled=false; }
+  runBtn.addEventListener("click", async () => {
+    try{ await startJob(); } catch(e){ console.error(e); setStatus("Error", "err"); runBtn.disabled=false; gptBtn.disabled=false; }
   });
 
-  gptBtn.addEventListener("click", async ()=>{
-    try { await buildPromptNano(); } catch(e){ showPromptLoader(false); gptBtn.disabled = false; runBtn.disabled = false; }
-  });
-    
-  // Cost calculation listeners
-  resEl.addEventListener("change", calcCost);
-    
-  // Seedream Listeners
-  sdSize.addEventListener("change", () => {
-      if (sdSize.value === "custom") sdCustomRes.classList.remove("hidden");
-      else sdCustomRes.classList.add("hidden");
-      calcCost();
+  gptBtn.addEventListener("click", async () => {
+    try{ await buildPrompt(); } catch(e){ console.error(e); setStatus("GPT error", "err"); }
   });
 
-  // Flux Listeners
-  fxRes.addEventListener("change", calcCost);
+  /* ==========================================================
+      INIT
+     ========================================================== */
+  // Default model state (nano)
+  selectModel("Nano Banana Pro", "nano_banana_pro");
+  calcCost();
+  renderRefbar();
 
-  calcCost(); 
-  updateDropText();
-
-  refreshLibraryRibbon();
-  setInterval(refreshLibraryRibbon, 30000);
+  // Initial grid load and auto refresh
+  refreshStudioGrid();
+  setInterval(refreshStudioGrid, 25000);
 
 })();
 </script>
