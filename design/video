@@ -166,17 +166,21 @@
     display:grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
-    padding: 10px;
-    border-radius: 16px;
-    background: rgba(0,0,0,0.55);
-    border: 1px solid rgba(255,255,255,0.14);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.65);
+    padding: 12px;
+    border-radius: 18px;
+    background: rgba(12,12,13,0.92);
+    border: 1px solid rgba(255,255,255,0.16);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    box-shadow:
+      0 30px 90px rgba(0,0,0,0.78),
+      inset 0 1px 0 rgba(255,255,255,0.05);
   }
 
   .grp, .sub{
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.10);
-    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
     overflow:hidden;
   }
   .grp-head, .sub-head{
@@ -1345,6 +1349,15 @@
     const u = String(url||"").toLowerCase();
     return u.endsWith(".mp4") || u.endsWith(".mov") || u.endsWith(".webm") || u.includes("fal.media");
   }
+  function isLikelyVideoItem(it){
+    const kind = String(it.kind || it.media_type || it.output_type || "").toLowerCase();
+    if(kind === "video") return true;
+
+    const mk = String(it.model_key || it.model_display || it.model || "").toLowerCase();
+    if(mk.includes("kling") || mk.includes("veo") || mk.includes("runway")) return true;
+
+    return false;
+  }
   function getVideoOut(it){
     const cands = [
       it.output_url, it.outputUrl, it.url, it.result_url, it.resultUrl,
@@ -1356,6 +1369,10 @@
 
     const ext = cands.find(u => isVideoUrl(u));
     if(ext) return ext;
+
+    const any = cands[0] || "";
+    const st = String(it.status || "").toLowerCase();
+    if(any && isLikelyVideoItem(it) && ["succeeded","success","done"].includes(st)) return any;
 
     return "";
   }
@@ -2062,6 +2079,7 @@
       historyItems = gens
         .map(x => ({...x, __video: getVideoOut(x)}))
         .filter(x => !!x.__video);
+      historyItems.sort((a,b) => String(a.created_at||"").localeCompare(String(b.created_at||"")));
       renderHistory();
 
       if(selectNewest && historyItems.length){
