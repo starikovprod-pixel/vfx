@@ -33,7 +33,7 @@
 
   /* Top nav (light stub, Higgs-like) */
   .topbar{
-    max-width: 1520px;
+    max-width: 1760px;
     margin: 0 auto;
     padding: 18px 18px 10px;
     display:flex;
@@ -41,28 +41,6 @@
     justify-content:space-between;
     gap:16px;
   }
-  .tabs{
-    display:flex;
-    gap:14px;
-    align-items:center;
-    color:var(--muted);
-    font-weight:900;
-    font-size:13px;
-  }
-  .tabs a{
-    color:inherit;
-    text-decoration:none;
-    padding:10px 10px;
-    border-radius: 999px;
-    transition:.15s;
-  }
-  .tabs a.active{
-    color:#fff;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.10);
-  }
-  .tabs a:hover{ background: rgba(255,255,255,0.06); color:#fff; }
-
   .topbar-right{
     display:flex;
     gap:10px;
@@ -80,12 +58,12 @@
 
   /* Workspace */
   .workspace{
-    max-width: 1520px;
+    max-width: 1760px;
     margin: 0 auto;
     padding: 0 18px 26px;
     display:grid;
-    grid-template-columns: 380px minmax(0,1fr) 380px;
-    gap: 16px;
+    grid-template-columns: 360px minmax(0,1fr) 360px;
+    gap: 22px;
     align-items: start;
   }
 
@@ -162,13 +140,29 @@
   .model-trigger .chev{ color: rgba(255,255,255,0.55); font-size:18px; }
 
   .model-pop{
-    position: relative;
-    margin-top: 10px;
-    display:none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    z-index: 12000;
   }
   .model-pop.open{ display:block; }
 
+  .model-pop::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+  }
+
   .model-popbox{
+    position:absolute;
+    left: 420px;
+    top: 140px;
+    width: 520px;
     display:grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
@@ -348,14 +342,14 @@
     background: #000;
     overflow:hidden;
     position:relative;
-    min-height: 560px;
+    min-height: 640px;
   }
   .viewer-inner{
     padding: 18px;
     display:flex;
     align-items:center;
     justify-content:center;
-    min-height: 560px;
+    min-height: 640px;
   }
 
   .empty{
@@ -657,12 +651,6 @@
 <div id="lf-video">
 
   <div class="topbar">
-    <div class="tabs">
-      <a class="active" href="#" onclick="return false;">Create Video</a>
-      <a href="#" onclick="return false;">Edit Video</a>
-      <a href="#" onclick="return false;">Motion Control</a>
-      <a href="#" onclick="return false;" style="opacity:.55;">History</a>
-    </div>
     <div class="topbar-right">
       <div class="top-pill">Video Studio</div>
     </div>
@@ -683,27 +671,6 @@
           <div class="chev">›</div>
         </div>
 
-        <div class="model-pop" id="modelPop">
-          <div class="model-popbox">
-            <!-- groups -->
-            <div class="grp">
-              <div class="grp-head">Providers <span class="pill" id="grpHint">select</span></div>
-              <div class="grp-list" id="providerList">
-                <div class="mitem active" data-provider="kling">Kling <span class="pill">video</span></div>
-                <div class="mitem" data-provider="veo">Google Veo <span class="pill">video</span></div>
-                <div class="mitem" data-provider="runway">Runway <span class="pill">video</span></div>
-              </div>
-            </div>
-
-            <!-- sub models -->
-            <div class="sub">
-              <div class="sub-head" id="subHead">Kling</div>
-              <div class="sub-list" id="subList">
-                <!-- injected by JS -->
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- FORMS: keep your existing IDs and logic -->
@@ -794,7 +761,7 @@
         </div>
 
         <div class="lf-actions">
-          <button class="lf-btn" id="run-o1" type="button" disabled>Generate <span class="lf-cost" id="o1-cost">15 Cr</span></button>
+          <button class="lf-btn" id="run-o1" type="button">Generate <span class="lf-cost" id="o1-cost">15 Cr</span></button>
           <div class="lf-status" id="status-o1"></div>
         </div>
       </div>
@@ -897,7 +864,7 @@
         </div>
 
         <div class="lf-actions">
-          <button class="lf-btn" id="run-km" type="button" disabled>Generate <span class="lf-cost" id="km-cost">0 Cr</span></button>
+          <button class="lf-btn" id="run-km" type="button">Generate <span class="lf-cost" id="km-cost">0 Cr</span></button>
           <div class="lf-status" id="status-km"></div>
         </div>
       </div>
@@ -1034,7 +1001,7 @@
         </div>
 
         <div class="lf-actions">
-          <button class="lf-btn" id="run-rw-aleph" type="button" disabled>Generate <span class="lf-cost" id="rw-aleph-cost">—</span></button>
+          <button class="lf-btn" id="run-rw-aleph" type="button">Generate <span class="lf-cost" id="rw-aleph-cost">—</span></button>
           <div class="lf-status" id="status-rw-aleph"></div>
         </div>
       </div>
@@ -1070,7 +1037,7 @@
         </div>
 
         <div class="lf-actions">
-          <button class="lf-btn" id="run-rw-act" type="button" disabled>Generate <span class="lf-cost" id="rw-act-cost">—</span></button>
+          <button class="lf-btn" id="run-rw-act" type="button">Generate <span class="lf-cost" id="rw-act-cost">—</span></button>
           <div class="lf-status" id="status-rw-act"></div>
         </div>
       </div>
@@ -1160,6 +1127,27 @@
     </div>
   </div>
 
+        <div class="model-pop" id="modelPop">
+          <div class="model-popbox">
+            <!-- groups -->
+            <div class="grp">
+              <div class="grp-head">Providers</div>
+              <div class="grp-list" id="providerList">
+                <div class="mitem active" data-provider="kling">Kling</div>
+                <div class="mitem" data-provider="veo">Google Veo</div>
+                <div class="mitem" data-provider="runway">Runway</div>
+              </div>
+            </div>
+
+            <!-- sub models -->
+            <div class="sub">
+              <div class="sub-head" id="subHead">Kling</div>
+              <div class="sub-list" id="subList">
+                <!-- injected by JS -->
+              </div>
+            </div>
+          </div>
+
 </div>
 
 <script>
@@ -1243,7 +1231,6 @@
     sub.innerHTML = p.models.map(m => `
       <div class="mitem ${m.id===currentModel ? "active":""}" data-model="${m.id}">
         <span>${m.label}</span>
-        <span class="pill">${m.id===currentModel ? "active" : "select"}</span>
       </div>
     `).join("");
 
@@ -1258,7 +1245,14 @@
   }
 
   $("modelTrigger").onclick = () => {
-    openModelPop(!$("modelPop").classList.contains("open"));
+    const open = !$("modelPop").classList.contains("open");
+    openModelPop(open);
+    if(open){
+      const r = $("modelTrigger").getBoundingClientRect();
+      const box = $("modelPop").querySelector(".model-popbox");
+      box.style.left = Math.min(window.innerWidth - 560, Math.max(18, r.left)) + "px";
+      box.style.top = Math.min(window.innerHeight - 360, r.bottom + 10) + "px";
+    }
   };
 
   $("providerList").querySelectorAll("[data-provider]").forEach(el => {
@@ -1270,10 +1264,9 @@
     };
   });
 
-  window.addEventListener("click", (e) => {
-    if(!e.target.closest("#modelPop") && !e.target.closest("#modelTrigger")){
-      openModelPop(false);
-    }
+
+  $("modelPop").addEventListener("click", (e)=>{
+    if(e.target.id === "modelPop") openModelPop(false);
   });
 
   /* ===========================
@@ -1346,10 +1339,26 @@
      HELPERS
   ============================ */
   const INPUTS_BUCKET = "inputs";
+  const INPUTS_VIDEO_BUCKET = "inputs_video";
 
   function isVideoUrl(url){
     const u = String(url||"").toLowerCase();
     return u.endsWith(".mp4") || u.endsWith(".mov") || u.endsWith(".webm") || u.includes("fal.media");
+  }
+  function getVideoOut(it){
+    const cands = [
+      it.output_url, it.outputUrl, it.url, it.result_url, it.resultUrl,
+      it.media_url, it.mediaUrl,
+      it.output_video_url, it.outputVideoUrl,
+      it.file_url, it.fileUrl,
+      it.video_url, it.videoUrl
+    ].filter(Boolean);
+
+    const ext = cands.find(u => isVideoUrl(u));
+    if(ext) return ext;
+
+    const any = cands[0] || "";
+    return any;
   }
   function fmt(ts){
     const s = String(ts||"");
@@ -1417,6 +1426,23 @@
 
     const pub = window.sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
     return pub.data.publicUrl;
+  }
+
+
+  async function uploadToInputsVideo(file){
+    const session = await getSession();
+    if(!session) throw new Error("No session");
+
+    const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+    const path = `${session.user.id}/${uuid()}.${ext}`;
+
+    const up = await window.sb.storage.from(INPUTS_VIDEO_BUCKET).upload(path, file, {
+      upsert:false,
+      contentType: file.type || "video/mp4",
+    });
+    if(up.error) throw up.error;
+
+    return window.sb.storage.from(INPUTS_VIDEO_BUCKET).getPublicUrl(up.data.path).data.publicUrl;
   }
 
   function showResultVideo(url, metaText){
@@ -1551,11 +1577,14 @@
   });
 
   // O1 edit video
-  bindDrop({
-    dropId:"o1-vid-drop", fileId:"o1-vid-file",
-    onFile:(f)=>{ o1flfvStart = o1flfvStart; $("o1-vid-val").textContent = "Selected: "+f.name; $("o1-vid-val").style.color="rgba(155,226,138,0.95)"; $("o1-vid-file")._picked = f; enableO1Run(); },
-    allowTypes:["video/","mp4",".mp4",".mov",".webm"],
-    maxSizeMB: 200
+  $("o1-vid-drop").addEventListener("click", ()=> $("o1-vid-file").click());
+  $("o1-vid-file").addEventListener("change", (e)=>{
+    const f = e.target.files?.[0];
+    if(!f) return;
+    $("o1-vid-file")._picked = f;
+    $("o1-vid-val").textContent = "Selected: " + f.name;
+    $("o1-vid-val").style.color = "rgba(155,226,138,0.95)";
+    e.target.value = "";
   });
 
   // O1 style refs (max 4)
@@ -1577,14 +1606,9 @@
       grid.appendChild(img);
     });
     $("o1-img-file")._picked = limited;
-    enableO1Run();
     e.target.value="";
   });
 
-  function enableO1Run(){
-    const hasVideo = !!$("o1-vid-file")._picked;
-    $("run-o1").disabled = !hasVideo;
-  }
 
   // O1 FLFV start/end
   function bindImgPick(inputId, dropId, titleId, thumbId, setter){
@@ -1612,7 +1636,8 @@
     syncO1flfv();
   };
   function syncO1flfv(){
-    $("run-o1flfv").disabled = !(o1flfvStart && o1flfvEnd);
+    const ok = !!(o1flfvStart && o1flfvEnd);
+    setStatus("status-o1flfv", ok ? "" : "Upload start and last images", ok ? "" : "warn");
   }
   syncO1flfv();
 
@@ -1628,7 +1653,8 @@
     e.target.value="";
   });
   function syncKm(){
-    $("run-km").disabled = !kmImage;
+    const ok = !!kmImage;
+    setStatus("status-km", ok ? "" : "Upload reference image", ok ? "" : "warn");
     $("km-cost").textContent = "—";
   }
 
@@ -1643,7 +1669,8 @@
     syncVeoFast();
   };
   function syncVeoFast(){
-    $("run-veo-fast").disabled = !(veoFastImage && veoFastLast);
+    const ok = !!(veoFastImage && veoFastLast);
+    setStatus("status-veo-fast", ok ? "" : "Upload start and last images", ok ? "" : "warn");
   }
   syncVeoFast();
 
@@ -1657,7 +1684,8 @@
     syncVeo();
   };
   function syncVeo(){
-    $("run-veo").disabled = !(veoImage && veoLast);
+    const ok = !!(veoImage && veoLast);
+    setStatus("status-veo", ok ? "" : "Upload start and last images", ok ? "" : "warn");
   }
   syncVeo();
 
@@ -1679,10 +1707,10 @@
       img.style.border="1px solid rgba(255,255,255,0.10)";
       grid.appendChild(img);
     });
-    $("run-veo-refs").disabled = files.length === 0;
+
     e.target.value="";
   });
-  $("run-veo-refs").disabled = true;
+
 
   // Runway Aleph video
   $("rw-aleph-video-drop").addEventListener("click", ()=> $("rw-aleph-video-file").click());
@@ -1691,10 +1719,10 @@
     rwAlephVideo = f;
     $("rw-aleph-video-val").textContent = "Selected: "+f.name;
     $("rw-aleph-video-val").style.color="rgba(155,226,138,0.95)";
-    $("run-rw-aleph").disabled = !rwAlephVideo;
+
     e.target.value="";
   });
-  $("run-rw-aleph").disabled = true;
+
 
   // Runway Act Two image + driver
   bindImgPick("rw-act-image-file","rw-act-image-drop","rw-act-image-title","rw-act-image-thumb",(f)=>{ rwActImage=f; syncAct(); });
@@ -1708,7 +1736,8 @@
     e.target.value="";
   });
   function syncAct(){
-    $("run-rw-act").disabled = !(rwActImage && rwActVideo);
+    const ok = !!(rwActImage && rwActVideo);
+    setStatus("status-rw-act", ok ? "" : "Upload character image + driver video", ok ? "" : "warn");
   }
   syncAct();
 
@@ -1743,7 +1772,7 @@
         setLoader(false);
 
         if(st === "succeeded"){
-          const out = s.output_url || s.outputUrl || s.url || s.result_url || "";
+          const out = getVideoOut(s);
           if(out && isVideoUrl(out)){
             showResultVideo(out, "Done • "+fmt(s.finished_at || s.updated_at || ""));
           }else{
@@ -1769,6 +1798,8 @@
       startTimer();
 
       const fd = await payloadBuilder();
+      console.log("START MODEL", currentModel);
+      for (const [k,v] of fd.entries()) console.log("FD", k, v);
       const data = await fetchAuth(`${BACKEND_BASE}/api/start`, { method:"POST", body: fd });
 
       latestJobId = data.jobId;
@@ -1786,7 +1817,7 @@
       stopTimer();
       setLoader(false);
       setStatus(statusElId, e.message || "Error", "err");
-      console.error(e);
+      console.error("START ERROR", e?.message, e?.data || e);
       alert("Error: "+(e.message||e));
     }
   }
@@ -1823,7 +1854,7 @@
     const scene = ($("o1-scene").value || "").trim();
     const duration = $("o1-duration").value;
 
-    const videoUrl = await uploadToInputs(vid);
+    const videoUrl = await uploadToInputsVideo(vid);
 
     const imgs = ($("o1-img-file")._picked || []).slice(0,4);
     const urls = [];
@@ -1951,7 +1982,7 @@
     const ratio = $("rw-aleph-ratio").value;
     const seed = ($("rw-aleph-seed").value || "").trim();
 
-    const v = await uploadToInputs(rwAlephVideo);
+    const v = await uploadToInputsVideo(rwAlephVideo);
 
     const fd = new FormData();
     fd.append("presetId", "runway_aleph");
@@ -1969,7 +2000,7 @@
     const preserve = $("rw-act-preserve").checked;
 
     const img = await uploadToInputs(rwActImage);
-    const vid = await uploadToInputs(rwActVideo);
+    const vid = await uploadToInputsVideo(rwActVideo);
 
     const fd = new FormData();
     fd.append("presetId", "runway_act_two");
@@ -1985,14 +2016,39 @@
      BUTTONS
   ============================ */
   $("run-k26").onclick = ()=> startJob(buildK26, "status-k26");
-  $("run-o1").onclick = ()=> startJob(buildO1, "status-o1");
-  $("run-o1flfv").onclick = ()=> startJob(buildO1flfv, "status-o1flfv");
-  $("run-km").onclick = ()=> startJob(buildKmotion, "status-km");
-  $("run-veo-fast").onclick = ()=> startJob(buildVeoFast, "status-veo-fast");
-  $("run-veo").onclick = ()=> startJob(buildVeo, "status-veo");
-  $("run-veo-refs").onclick = ()=> startJob(buildVeoRefs, "status-veo-refs");
-  $("run-rw-aleph").onclick = ()=> startJob(buildAleph, "status-rw-aleph");
-  $("run-rw-act").onclick = ()=> startJob(buildActTwo, "status-rw-act");
+  $("run-o1").onclick = ()=> {
+    const vid = $("o1-vid-file")._picked;
+    if(!vid) return alert("Upload input video first");
+    startJob(buildO1, "status-o1");
+  };
+  $("run-o1flfv").onclick = ()=> {
+    if(!o1flfvStart || !o1flfvEnd) return alert("Upload start and last images first");
+    startJob(buildO1flfv, "status-o1flfv");
+  };
+  $("run-km").onclick = ()=> {
+    if(!kmImage) return alert("Upload reference image first");
+    startJob(buildKmotion, "status-km");
+  };
+  $("run-veo-fast").onclick = ()=> {
+    if(!veoFastImage || !veoFastLast) return alert("Upload start and last images first");
+    startJob(buildVeoFast, "status-veo-fast");
+  };
+  $("run-veo").onclick = ()=> {
+    if(!veoImage || !veoLast) return alert("Upload start and last images first");
+    startJob(buildVeo, "status-veo");
+  };
+  $("run-veo-refs").onclick = ()=> {
+    if(!veoRefsFiles.length) return alert("Upload reference images first");
+    startJob(buildVeoRefs, "status-veo-refs");
+  };
+  $("run-rw-aleph").onclick = ()=> {
+    if(!rwAlephVideo) return alert("Upload input video first");
+    startJob(buildAleph, "status-rw-aleph");
+  };
+  $("run-rw-act").onclick = ()=> {
+    if(!rwActImage || !rwActVideo) return alert("Upload character image + driver video first");
+    startJob(buildActTwo, "status-rw-act");
+  };
 
   $("btn-back").onclick = ()=> { window.location.href = "/vfx"; };
 
@@ -2004,7 +2060,9 @@
     try{
       const j = await fetchAuth(`${BACKEND_BASE}/api/me?limit=40&offset=0`, { method:"GET" });
       const gens = Array.isArray(j.generations) ? j.generations : [];
-      historyItems = gens.filter(x => isVideoUrl(x.output_url || x.url || x.outputUrl || ""));
+      historyItems = gens
+        .map(x => ({...x, __video: getVideoOut(x)}))
+        .filter(x => !!x.__video);
       renderHistory();
 
       if(selectNewest && historyItems.length){
@@ -2027,7 +2085,7 @@
     }
     host.innerHTML = historyItems.map(it=>{
       const id = String(it.id);
-      const url = it.output_url || it.url || it.outputUrl || "";
+      const url = it.__video || getVideoOut(it) || "";
       const st = statusDot(it.status);
       const model = it.model_display || it.model_key || it.model || "Video";
       const prompt = (it.prompt_user || it.prompt || "").trim();
@@ -2068,7 +2126,7 @@
     const it = historyItems.find(x=>String(x.id)===String(id));
     if(!it) return;
 
-    const url = it.output_url || it.url || it.outputUrl || "";
+    const url = it.__video || getVideoOut(it) || "";
     if(url) showResultVideo(url, `Done • ${fmt(it.created_at || it.updated_at)}`);
 
     // detail
@@ -2102,7 +2160,7 @@
   function openModalForCurrent(){
     const it = historyItems.find(x=>String(x.id)===String(selectedHistoryId));
     if(!it) return;
-    const url = it.output_url || it.url || it.outputUrl || "";
+    const url = it.__video || getVideoOut(it) || "";
     const st = statusDot(it.status);
 
     $("m-view-container").innerHTML = url ? `<video src="${url}" controls autoplay playsinline loop style="width:100%;height:100%;object-fit:contain"></video>` : `<div style="color:#666;font-weight:900;">—</div>`;
