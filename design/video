@@ -2072,42 +2072,37 @@
      HISTORY (vertical, Higgs-like)
      uses /api/me and filters videos
   ============================ */
-  async function loadAllVideos(){
+  async function loadSomeVideos({ need=30, page=100, maxPages=6 } = {}){
     let offset = 0;
-    const limit = 100;
-    const all = [];
-    let hasMore = true;
+    let pages = 0;
+    const collected = [];
 
-    while(hasMore){
-      const j = await fetchAuth(`${BACKEND_BASE}/api/me?limit=${limit}&offset=${offset}`, { method:"GET" });
+    while(collected.length < need && pages < maxPages){
+      const j = await fetchAuth(`${BACKEND_BASE}/api/me?limit=${page}&offset=${offset}`, { method:"GET" });
       const gens = Array.isArray(j.generations) ? j.generations : [];
 
-      all.push(...gens);
+      const vids = gens
+        .map(x => ({...x, __video: getVideoOut(x)}))
+        .filter(x => !!x.__video);
 
-      if(gens.length < limit){
-        hasMore = false;
-      }else{
-        offset += limit;
-      }
+      collected.push(...vids);
 
-      // защитимся от бесконечного цикла
-      if(offset > 5000) break;
+      if(gens.length < page) break;
+      offset += page;
+      pages++;
     }
 
-    return all;
+    return collected;
   }
 
   async function loadHistory(selectNewest=false){
     try{
-      const gens = await loadAllVideos();
-      historyItems = gens
-        .map(x => ({...x, __video: getVideoOut(x)}))
-        .filter(x => !!x.__video);
-      historyItems.sort((a,b) => String(a.created_at||"").localeCompare(String(b.created_at||"")));
+      historyItems = await loadSomeVideos({ need: 30, page: 120, maxPages: 10 });
+      historyItems.sort((a,b) => String(b.created_at||"").localeCompare(String(a.created_at||"")));
       renderHistory();
 
       if(selectNewest && historyItems.length){
-        const newest = historyItems[historyItems.length - 1];
+        const newest = historyItems[0];
         selectHistory(String(newest.id));
       }else if(selectedHistoryId){
         const still = historyItems.find(x=>String(x.id)===String(selectedHistoryId));
@@ -2127,7 +2122,8 @@
       return;
     }
     detail.classList.remove("hidden");
-    host.innerHTML = historyItems.map(it=>{
+    const visible = historyItems.slice(0, 30);
+    host.innerHTML = visible.map(it=>{
       const id = String(it.id);
       const url = it.__video || getVideoOut(it) || "";
       const st = statusDot(it.status);
@@ -2141,7 +2137,7 @@
       const badge = `<div class="hbadge"><span class="dot ${st.c==='ok'?'ok':st.c==='err'?'err':'warn'}"></span>${st.t}</div>`;
       const media = thumb
         ? `<img src="${thumb}" loading="lazy" decoding="async" />`
-        : `<video muted playsinline preload="metadata" src="${url}"></video>`;
+        : `<video muted playsinline preload="none" data-src="${url}"></video>`;
 
       return `
         <div class="hitem ${id===String(selectedHistoryId) ? "active":""}" data-hid="${id}">
@@ -2161,6 +2157,26 @@
     host.querySelectorAll("[data-hid]").forEach(el=>{
       el.onclick = ()=> selectHistory(el.getAttribute("data-hid"));
     });
+
+    hydrateHistoryVideos();
+  }
+
+  function hydrateHistoryVideos(){
+    const vids = document.querySelectorAll("#history video[data-src]");
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(!e.isIntersecting) return;
+        const v = e.target;
+        const src = v.dataset.src;
+        if(src){
+          v.src = src;
+          v.removeAttribute("data-src");
+        }
+        io.unobserve(v);
+      });
+    }, { root: document.querySelector("#history"), rootMargin: "200px 0px" });
+
+    vids.forEach(v=> io.observe(v));
   }
 
   function selectHistory(id, silent=false){
