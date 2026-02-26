@@ -105,15 +105,6 @@
   .dot.warn{ background: var(--warn); }
   .dot.bad{ background: var(--danger); }
 
-  .mini-date{
-    position:absolute;
-    bottom: 10px; left: 12px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.65);
-    z-index: 2;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-  }
-
   /* Hover overlay (model + actions) */
   .card-overlay{
     position:absolute;
@@ -239,9 +230,9 @@
     left:0; right:0; bottom:0;
     z-index: 50;
     padding: 12px 12px 14px;
-    background: rgba(10,10,10,0.82);
-    border-top: 1px solid rgba(255,255,255,0.10);
-    backdrop-filter: blur(10px);
+    background: transparent;
+    border-top: none;
+    backdrop-filter: none;
   }
   #lf-dock-inner{
     max-width: 1400px;
@@ -265,9 +256,6 @@
 
   .dock-col-mid{
     flex: 1;
-    display:flex;
-    flex-direction:column;
-    gap: 10px;
     min-width: 260px;
   }
 
@@ -278,6 +266,25 @@
     flex-direction:column;
     gap: 10px;
   }
+  .dock-col-right .dock-meta{ margin-bottom: 6px; }
+  .dock-col-right .dock-spacer{ flex:1; }
+
+  .dock-mid-split{
+    display:grid;
+    grid-template-columns: 1fr 1px 0.9fr;
+    gap: 14px;
+    align-items: stretch;
+    height: 100%;
+    min-height: 0;
+  }
+  .dock-mid-divider{ background: rgba(255,255,255,0.10); border-radius: 999px; }
+  .dock-mid-left, .dock-mid-right{ min-height: 0; display:flex; flex-direction:column; }
+  .dock-mid-right{ max-height: 170px; overflow:auto; }
+  .dock-mid-right::-webkit-scrollbar{ width:10px; }
+  .dock-mid-right::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.18); border-radius:999px; }
+  .dock-mid-split.z-wide{ grid-template-columns: 1fr; }
+  .dock-mid-split.z-wide .dock-mid-divider,
+  .dock-mid-split.z-wide .dock-mid-right{ display:none; }
 
   .dock-row{
     display:flex;
@@ -365,13 +372,14 @@
     background: rgba(255,255,255,0.08);
   }
 
-  .dock-prompt-wrap{ position: relative; }
+  .dock-prompt-wrap{ position: relative; min-height: 110px; max-height: 170px; display:flex; flex-direction:column; }
   .dock-prompt{
-    min-height: 84px;
-    max-height: 140px;
+    min-height: 110px;
+    max-height: 170px;
     resize: none;
     line-height: 1.35;
     overflow:auto;
+    flex:1;
   }
   .dock-prompt::-webkit-scrollbar{ width:10px; }
   .dock-prompt::-webkit-scrollbar-track{ background: rgba(0,0,0,0.35); border-radius:999px; }
@@ -397,6 +405,12 @@
     user-select:none;
     font-weight: 1000;
     color: rgba(255,255,255,0.75);
+    line-height: 0;
+    font-size: 22px;
+  }
+  .ref-add::before{
+    content:"+";
+    line-height: 1;
   }
   .ref-add:hover{ border-color: rgba(43,108,255,.65); background: rgba(43,108,255,.10); color:#fff; }
 
@@ -819,22 +833,28 @@
 
       <!-- mid: prompt + refs -->
       <div class="dock-col-mid">
-        <div>
-          <div class="dock-label">Reference images</div>
-          <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
-          <div class="dock-refbar" id="refbar">
-            <div class="ref-add" id="refAdd" title="Upload images">+</div>
-            <!-- thumbs rendered here -->
+        <div class="dock-mid-split" id="midSplit">
+          <div class="dock-mid-left">
+            <div class="dock-prompt-wrap">
+              <div class="dock-label">Prompt</div>
+              <textarea id="scene" class="lf-input dock-prompt" rows="2" placeholder="Describe what you want..."></textarea>
+            </div>
           </div>
-          <!-- Hidden style-only (kept for logic, hidden in UI as requested) -->
-          <label style="display:none; margin-top:10px; color: rgba(255,255,255,0.7); font-weight:800; font-size:12px;">
-            <input type="checkbox" id="styleOnly" checked /> Style-only transform (hidden)
-          </label>
-        </div>
 
-        <div class="dock-prompt-wrap">
-          <div class="dock-label">Prompt</div>
-          <textarea id="scene" class="lf-input dock-prompt" rows="2" placeholder="Describe what you want..."></textarea>
+          <div class="dock-mid-divider"></div>
+
+          <div class="dock-mid-right" id="refBlock">
+            <div class="dock-label">Reference images</div>
+            <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+            <div class="dock-refbar" id="refbar">
+              <div class="ref-add" id="refAdd"></div>
+              <!-- thumbs rendered here -->
+            </div>
+            <!-- Hidden style-only (kept for logic, hidden in UI as requested) -->
+            <label style="display:none; margin-top:10px; color: rgba(255,255,255,0.7); font-weight:800; font-size:12px;">
+              <input type="checkbox" id="styleOnly" checked /> Style-only transform (hidden)
+            </label>
+          </div>
         </div>
       </div>
 
@@ -843,6 +863,7 @@
         <div class="dock-meta">
           <div class="dock-status" id="statusText"></div>
         </div>
+        <div class="dock-spacer"></div>
         <button class="dock-btn primary" id="run" type="button">Generate</button>
         <button class="dock-btn ghost" id="gptPrompt" type="button">✨ GPT → Build Prompt</button>
       </div>
@@ -926,7 +947,7 @@
   const BACKEND = "https://api.lightfull.ai";
 
   const INPUTS_BUCKET = "inputs";
-  const MAX_IMAGES = 14;
+  const MAX_IMAGES = 12;
 
   const LS_HIDDEN_KEY = "lf_hidden_items_v2";
   const LS_PUB_KEY = "lf_feed_published_v1";
@@ -950,6 +971,8 @@
   const fileEl = $("file");
   const refAdd = $("refAdd");
   const refbar = $("refbar");
+  const refBlock = $("refBlock");
+  const midSplit = $("midSplit");
 
   const resWrap = $("resWrap");
 
@@ -1439,6 +1462,7 @@
 
   function selectModel(name, presetId){
     currentPresetId = presetId;
+    const isZ = (presetId === "z_image_turbo");
 
     modelList.querySelectorAll(".lf-dd-item").forEach(el => el.classList.remove("active"));
     const activeEl = [...modelList.querySelectorAll(".lf-dd-item")].find(el => el.dataset.id === presetId);
@@ -1449,8 +1473,21 @@
 
     fluxRow.style.display = (presetId === "flux_2_max") ? "flex" : "none";
 
-    if(presetId === "seedream_4" || presetId === "flux_2_max") resWrap.style.display = "none";
+    if(presetId === "seedream_4" || presetId === "flux_2_max" || isZ) resWrap.style.display = "none";
     else resWrap.style.display = "block";
+
+    aspectSelect.style.display = isZ ? "none" : "";
+    refBlock.style.display = isZ ? "none" : "";
+    midSplit.classList.toggle("z-wide", isZ);
+
+    if(isZ){
+      selectedFiles.forEach(f => { if(f.__previewUrl) try{ URL.revokeObjectURL(f.__previewUrl); } catch(e){} });
+      selectedFiles = [];
+      selectedRefUrls = [];
+      cachedImageUrls = [];
+      cachedSignature = "";
+      renderRefbar();
+    }
 
     calcCost();
   }
@@ -1559,7 +1596,8 @@
     setStatus("Starting…", "warn");
 
     // Make sure refs exist (upload local files, keep remote urls)
-    const refs = await getAllReferenceUrls();
+    const isZ = (currentPresetId === "z_image_turbo");
+    const refs = isZ ? [] : await getAllReferenceUrls();
 
     const fd = new FormData();
     const userText = (sceneEl.value || "").trim();
@@ -1616,13 +1654,7 @@
     }
 
     if(currentPresetId === "z_image_turbo"){
-      if(refs.length){
-        if(refs.length === 1) fd.append("image_input_url", refs[0]);
-        else {
-          refs.forEach(u => fd.append("image_input_urls", u));
-          fd.append("image_input_url", refs[0]);
-        }
-      }
+      // no references or aspect/res in simplified mode
     }
 
     let data;
@@ -1725,6 +1757,33 @@
     await loadNextPage(true);
   }
 
+  async function refreshOnlyProcessing(){
+    const hasProcessing = allItems.some(x => getStatus(x.status).type === "process");
+    if(!hasProcessing) return;
+    try{
+      const data = await fetchJsonWithAuth(`${BACKEND}/api/me?limit=${PAGE_SIZE}&offset=0`);
+      const fresh = Array.isArray(data.generations) ? data.generations : [];
+      if(data.user){
+        mEmail.textContent = data.user?.email || "…";
+        mCredits.textContent = data.credits ?? 0;
+      }
+      const map = new Map(fresh.map(x => [String(x.id), x]));
+      let changed = false;
+      allItems = allItems.map(old => {
+        const upd = map.get(String(old.id));
+        if(!upd) return old;
+        if(upd.status !== old.status || upd.output_url !== old.output_url || upd.output_thumb_url !== old.output_thumb_url){
+          changed = true;
+          return upd;
+        }
+        return old;
+      });
+      if(changed) renderGrid();
+    } catch(e){
+      console.warn("refreshOnlyProcessing error", e);
+    }
+  }
+
   async function loadNextPage(isInitial=false){
     if(loading || !hasMore) return;
     loading = true;
@@ -1781,8 +1840,6 @@
       const modelName = prettyModelName(rawModel);
       const chip = modelChip(rawModel);
 
-      const dateText = (item.created_at||"").replace("T"," ").slice(0,16);
-
       const badgeHtml = showBadge ? `<div class="card-badge"><span class="dot ${st.dot}"></span>${st.text}</div>` : "";
       const chipHtml = chip ? `<span class="ov-chip">${chip}</span>` : "";
 
@@ -1790,7 +1847,7 @@
       const downloadIconBtn = `<button class="icon-btn" title="Download" onclick="event.stopPropagation(); window.lfDownloadFromCard('${encodeURIComponent(url)}','${item.id}')"><svg viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M5 21h14"></path></svg></button>`;
       const copyIconBtn = `<button class="icon-btn" title="Copy URL" onclick="event.stopPropagation(); window.lfCopyFromCard('${encodeURIComponent(url)}')"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>`;
       const menuIconBtn = `<button class="icon-btn" title="Details" onclick="event.stopPropagation(); window.openModal('${item.id}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg></button>`;
-      const useAsRefPlusBtn = `<button class="icon-btn plus-btn" title="Use as reference" onclick="event.stopPropagation(); window.lfAddRefFromCard('${encodeURIComponent(url)}')">+</button>`;
+      const useAsRefPlusBtn = `<button class="icon-btn plus-btn" onclick="event.stopPropagation(); window.lfAddRefFromCard('${encodeURIComponent(url)}')">+</button>`;
 
       const shimmer = (st.type === "process") ? `<div class="lf-proc-shimmer"></div>` : ``;
 
@@ -1798,9 +1855,15 @@
         <div class="lf-card" onclick="window.openModal('${item.id}')">
           <div class="lf-media">${mediaHtml}${shimmer}</div>
           ${badgeHtml}
-          <div class="mini-date">${dateText}</div>
 
           <div class="card-overlay">
+            <div class="card-actions-tr">
+              ${heartBtn}
+              ${downloadIconBtn}
+              ${copyIconBtn}
+              ${menuIconBtn}
+            </div>
+            <div class="card-action-br">${useAsRefPlusBtn}</div>
             <div class="ov-left">
               <div class="ov-model">
                 ${chipHtml}
@@ -1808,15 +1871,6 @@
               </div>
             </div>
           </div>
-
-          <div class="card-actions-tr">
-            ${heartBtn}
-            ${downloadIconBtn}
-            ${copyIconBtn}
-            ${menuIconBtn}
-          </div>
-
-          <div class="card-action-br">${useAsRefPlusBtn}</div>
         </div>
       `;
     }).join("");
@@ -2050,7 +2104,7 @@
   // Initial grid load and auto refresh
   setupGridPagination();
   refreshStudioGrid();
-  setInterval(refreshStudioGrid, 25000);
+  setInterval(refreshOnlyProcessing, 8000);
 
 })();
 </script>
