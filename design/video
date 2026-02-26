@@ -1356,6 +1356,9 @@
     const mk = String(it.model_key || it.model_display || it.model || "").toLowerCase();
     if(mk.includes("kling") || mk.includes("veo") || mk.includes("runway")) return true;
 
+    const dur = Number(it.duration || it.duration_sec || it.video_duration_sec || 0);
+    if(dur > 0) return true;
+
     return false;
   }
   function getVideoOut(it){
@@ -2072,12 +2075,12 @@
      HISTORY (vertical, Higgs-like)
      uses /api/me and filters videos
   ============================ */
-  async function loadSomeVideos({ need=30, page=100, maxPages=6 } = {}){
+  async function loadSomeVideos({ need=30, page=150, maxOffset=20000, maxEmptyPages=8 } = {}){
     let offset = 0;
-    let pages = 0;
+    let emptyPages = 0;
     const collected = [];
 
-    while(collected.length < need && pages < maxPages){
+    while(collected.length < need && offset < maxOffset && emptyPages < maxEmptyPages){
       const j = await fetchAuth(`${BACKEND_BASE}/api/me?limit=${page}&offset=${offset}`, { method:"GET" });
       const gens = Array.isArray(j.generations) ? j.generations : [];
 
@@ -2085,11 +2088,13 @@
         .map(x => ({...x, __video: getVideoOut(x)}))
         .filter(x => !!x.__video);
 
+      if(vids.length === 0) emptyPages++;
+      else emptyPages = 0;
+
       collected.push(...vids);
 
       if(gens.length < page) break;
       offset += page;
-      pages++;
     }
 
     return collected;
@@ -2097,7 +2102,7 @@
 
   async function loadHistory(selectNewest=false){
     try{
-      historyItems = await loadSomeVideos({ need: 30, page: 120, maxPages: 10 });
+      historyItems = await loadSomeVideos({ need: 30, page: 150, maxOffset: 50000, maxEmptyPages: 12 });
       historyItems.sort((a,b) => String(b.created_at||"").localeCompare(String(a.created_at||"")));
       renderHistory();
 
@@ -2137,7 +2142,7 @@
       const badge = `<div class="hbadge"><span class="dot ${st.c==='ok'?'ok':st.c==='err'?'err':'warn'}"></span>${st.t}</div>`;
       const media = thumb
         ? `<img src="${thumb}" loading="lazy" decoding="async" />`
-        : `<video muted playsinline preload="none" data-src="${url}"></video>`;
+        : `<video muted playsinline preload="metadata" data-src="${url}" data-hid="${id}" class="hvid"></video>`;
 
       return `
         <div class="hitem ${id===String(selectedHistoryId) ? "active":""}" data-hid="${id}">
@@ -2159,6 +2164,7 @@
     });
 
     hydrateHistoryVideos();
+    primeVisiblePosters();
   }
 
   function hydrateHistoryVideos(){
@@ -2177,6 +2183,19 @@
     }, { root: document.querySelector("#history"), rootMargin: "200px 0px" });
 
     vids.forEach(v=> io.observe(v));
+  }
+
+  function primeVisiblePosters(){
+    const root = document.querySelector("#history");
+    if(!root) return;
+    const vids = root.querySelectorAll("video.hvid");
+    vids.forEach(v => {
+      if(v.dataset.primed === "1") return;
+      v.dataset.primed = "1";
+      const src = v.dataset.src;
+      if(!src) return;
+      v.src = src;
+    });
   }
 
   function selectHistory(id, silent=false){
