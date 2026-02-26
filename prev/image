@@ -1818,18 +1818,27 @@ Blockbuster YouTube thumbnail aesthetic.`;
     if (!stage) throw new Error("No stage");
     closeTextEditor();
 
-    // export only content group inside clip (no outer UI)
     const a = ASPECTS[String(aspectEl.value || "16:9")] || ASPECTS["16:9"];
     const cg = getCanvasGroup();
-    const content = getContentGroup();
 
-    // Use Konva built-in toDataURL by temporarily creating an offscreen stage is heavy.
-    // We'll export by using cg.toDataURL with exact bounding box.
-    // Ensure deterministic background: we already have bgRect inside canvasGroup.
+    // --- snapshot current viewport transform (fit-to-screen / zoom) ---
+    const prev = {
+      x: cg.x(),
+      y: cg.y(),
+      sx: cg.scaleX(),
+      sy: cg.scaleY()
+    };
 
-    // Make sure transformer is not exported (it is on rootLayer outside contentGroup)
+    // Hide transformer so it doesn't export
     tr.visible(false);
     rootLayer.draw();
+
+    // --- IMPORTANT: force export in "native canvas coords" (no viewport scaling/centering) ---
+    cg.position({ x: 0, y: 0 });
+    cg.scale({ x: 1, y: 1 });
+
+    // Make sure nothing is mid-draw
+    cg.getLayer()?.draw?.();
 
     const dataURL = cg.toDataURL({
       pixelRatio,
@@ -1838,6 +1847,10 @@ Blockbuster YouTube thumbnail aesthetic.`;
       width: a.w,
       height: a.h
     });
+
+    // --- restore viewport transform ---
+    cg.position({ x: prev.x, y: prev.y });
+    cg.scale({ x: prev.sx, y: prev.sy });
 
     tr.visible(true);
     rootLayer.draw();
@@ -1904,7 +1917,8 @@ Blockbuster YouTube thumbnail aesthetic.`;
     }
 
     // export -> upload
-    const blob = await exportCanvasBlob(2);
+    const pr = (String(resEl.value) === "4K") ? 3 : (String(resEl.value) === "2K" ? 2 : 1.5);
+    const blob = await exportCanvasBlob(pr);
     loaderSub.textContent = "Uploading…";
     const imgUrl = await uploadBlobToInputs(blob, "thumb.png");
 
