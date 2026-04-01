@@ -1,0 +1,2203 @@
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+<style>
+  :root {
+    --bg-body: #050505;
+    --bg-panel: #111111;
+    --bg-card: #181818;
+    --bg-input: #222222;
+    --border: #2b2b2b;
+    --accent: #2b6cff;
+    --accent-hover: #1a5cff;
+    --text-main: #ffffff;
+    --text-sec: #a0a0a0;
+    --danger: #ff465a;
+    --ok: #39ff14;
+    --warn: #ffd166;
+    --radius: 16px;
+
+    /* Bottom bar sizing */
+    --dock-h: 112px;
+    --dock-max: 144px;
+  }
+
+  body { margin:0; background:var(--bg-body); overflow-x:hidden; }
+  .t-tilda-label, #tilda-copyright, #tilda-copy { display:none !important; }
+
+  #lf-studio * { box-sizing:border-box; outline:none; font-family: Inter, system-ui, -apple-system, sans-serif; }
+  #lf-studio { color: var(--text-main); min-height: 100vh; position: relative; }
+
+  /* Main area = grid (history/library) */
+  #lf-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 18px calc(var(--dock-max) + 28px);
+  }
+
+  .lf-toprow{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    border-bottom:1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+  }
+  .lf-title{
+    margin:0;
+    font-size: 28px;
+    font-weight: 1000;
+    letter-spacing: -0.5px;
+  }
+  .lf-sub{
+    margin-top: 6px;
+    color: var(--text-sec);
+    font-size: 13px;
+  }
+
+  .lf-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+
+  .lf-card{
+    position:relative;
+    height: 250px;
+    border-radius: 18px;
+    overflow:hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    cursor:pointer;
+    transition: transform .18s ease, border-color .18s ease;
+  }
+  .lf-card:hover{
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.28);
+  }
+
+  .lf-media{
+    position:absolute; inset:0;
+    background:#000;
+  }
+  .lf-media img, .lf-media video, .lf-media model-viewer{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+
+  .card-badge{
+    position:absolute;
+    top:10px; left:10px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 900;
+    display:flex;
+    align-items:center;
+    gap: 6px;
+    border: 1px solid rgba(255,255,255,0.12);
+    z-index: 2;
+  }
+  .dot{ width:6px;height:6px;border-radius:50%; background:#fff; }
+  .dot.ok{ background: var(--ok); }
+  .dot.warn{ background: var(--warn); }
+  .dot.bad{ background: var(--danger); }
+
+  /* Hover overlay (model + actions) */
+  .card-overlay{
+    position:absolute;
+    inset:0;
+    background: linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0.10) 55%, rgba(0,0,0,0));
+    opacity:0;
+    transition: opacity .18s ease;
+    display:flex;
+    align-items:flex-end;
+    justify-content:flex-start;
+    padding: 12px;
+    gap: 10px;
+    z-index: 3;
+  }
+  .lf-card:hover .card-overlay{ opacity:1; }
+
+  .ov-left{
+    display:flex;
+    flex-direction:column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .ov-model{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.82);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .35px;
+    max-width: 240px;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+  }
+  .ov-chip{
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    font-weight: 1000;
+    font-size: 11px;
+    color: rgba(255,255,255,0.70);
+  }
+
+  .card-actions-tr{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    z-index: 5;
+  }
+  .icon-btn{
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(10,10,10,0.65);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition: .16s ease;
+    padding: 0;
+  }
+  .icon-btn svg{
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .icon-btn:hover{
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.30);
+    transform: translateY(-1px);
+  }
+  .icon-btn.active{
+    color: #ff6a84;
+    border-color: rgba(255,106,132,0.5);
+  }
+
+  .card-action-br{
+    position:absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 5;
+  }
+  .plus-btn{
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  /* Empty / loader */
+  .lf-empty{
+    padding: 40px;
+    text-align:center;
+    color: var(--text-sec);
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed var(--border);
+    border-radius: 18px;
+  }
+  .lf-loader{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: rgba(255,255,255,0.55);
+    padding: 16px 0 0;
+    font-size: 13px;
+  }
+
+  /* ===== FIXED BOTTOM DOCK (controls) ===== */
+  #lf-dock{
+    position: fixed;
+    left:0; right:0; bottom:0;
+    z-index: 9000;
+    padding: 12px 12px 14px;
+
+    /* ничего не рисуем на всю ширину */
+    background: transparent;
+    border-top: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  #lf-dock-inner{
+    max-width: 1400px;
+    margin: 0 auto;
+    border-radius: 22px;
+    padding: 12px;
+    display:flex;
+    gap: 12px;
+    align-items: stretch;
+
+    /* стекло именно по форме панели */
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.88),
+      rgba(14,14,14,0.70)
+    );
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow:
+      0 30px 90px rgba(0,0,0,0.78),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+
+    position: relative;
+    z-index: 9001;
+  }
+  #lf-dock-inner::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius: 22px;
+    background: radial-gradient(
+      1200px 260px at 40% 0%,
+      rgba(255,255,255,0.06),
+      transparent 60%
+    );
+    pointer-events:none;
+  }
+
+  .dock-col-left{
+    width: 320px;
+    min-width: 280px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+
+  .dock-col-mid{
+    flex: 1;
+    min-width: 260px;
+  }
+
+  .dock-col-right{
+    width: 240px;
+    min-width: 220px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+  .dock-col-right .dock-meta{ margin-bottom: 6px; }
+  .dock-col-right .dock-spacer{ flex:1; }
+
+  .dock-mid-split{
+    display:grid;
+    grid-template-columns: 1fr 1px 0.9fr;
+    gap: 14px;
+    align-items: stretch;
+    height: 100%;
+    min-height: 0;
+  }
+  .dock-mid-divider{ background: rgba(255,255,255,0.10); border-radius: 999px; }
+  .dock-mid-left, .dock-mid-right{ min-height: 0; display:flex; flex-direction:column; }
+  .dock-mid-right{ max-height: 170px; overflow:auto; }
+  .dock-mid-right::-webkit-scrollbar{ width:10px; }
+  .dock-mid-right::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.18); border-radius:999px; }
+  .dock-mid-split.z-wide{ grid-template-columns: 1fr; }
+  .dock-mid-split.z-wide .dock-mid-divider,
+  .dock-mid-split.z-wide .dock-mid-right{ display:none; }
+
+  .dock-row{
+    display:flex;
+    gap: 10px;
+    align-items:center;
+  }
+
+  .dock-label{
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .45px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+
+  /* Model dropdown (reuse from 1 doc idea) */
+  .lf-model-select{ position: relative; width: 100%; }
+  .lf-select-trigger{
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 16px;
+    padding: 10px 12px;
+    display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer;
+    user-select:none;
+    transition: .18s ease;
+  }
+  .lf-select-trigger:hover{
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.22);
+  }
+  .lf-model-name{ font-size: 13px; font-weight: 1000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lf-chevron{ color: rgba(255,255,255,0.6); font-size: 18px; transition: transform .18s; margin-left:10px; }
+  .lf-model-select.open .lf-chevron{ transform: rotate(90deg); }
+
+  .lf-dropdown-menu{
+    position:absolute;
+    bottom: calc(100% + 10px);
+    left:0;
+    width: 100%;
+    background: #141414;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 16px;
+    padding: 6px;
+    display:none;
+    flex-direction:column;
+    gap: 4px;
+    box-shadow: 0 20px 70px rgba(0,0,0,0.65);
+    max-height: 280px;
+    overflow:auto;
+    z-index: 9999;
+  }
+  .lf-model-select.open .lf-dropdown-menu{ display:flex; }
+
+  .lf-dd-item{
+    padding: 10px 10px;
+    border-radius: 12px;
+    cursor:pointer;
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.72);
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    transition: .14s;
+  }
+  .lf-dd-item:hover{ background: rgba(255,255,255,0.06); color:#fff; }
+  .lf-dd-item.active{ background: rgba(255,255,255,0.10); color:#fff; }
+  .status-dot{ width: 7px; height:7px; border-radius:50%; background: var(--ok); margin-left:auto; }
+
+  /* Inputs */
+  .lf-input, .lf-select, .lf-num{
+    width:100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: #fff;
+    border-radius: 16px;
+    padding: 10px 12px;
+    font-size: 14px;
+    transition: .18s ease;
+  }
+  .lf-input:focus, .lf-select:focus, .lf-num:focus{
+    border-color: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.08);
+  }
+
+  .dock-prompt-wrap{ position: relative; min-height: 110px; max-height: 170px; display:flex; flex-direction:column; }
+  .dock-prompt{
+    min-height: 110px;
+    max-height: 170px;
+    resize: none;
+    line-height: 1.35;
+    overflow:auto;
+    flex:1;
+  }
+  /* scrollbar base */
+  .dock-prompt{
+    position: relative;
+    z-index: 2;
+  }
+
+  /* width */
+  .dock-prompt::-webkit-scrollbar{
+    width: 12px;
+  }
+
+  /* track */
+  .dock-prompt::-webkit-scrollbar-track{
+    background: rgba(0,0,0,0.85);
+    border-radius: 12px;
+  }
+
+  /* thumb */
+  .dock-prompt::-webkit-scrollbar-thumb{
+    background: rgba(120,120,120,0.9);
+    border-radius: 12px;
+    border: 2px solid rgba(0,0,0,0.85);
+  }
+
+  /* hover */
+  .dock-prompt::-webkit-scrollbar-thumb:hover{
+    background: rgba(170,170,170,1);
+  }
+
+  /* Reference strip inside dock */
+  .dock-refbar{
+    display:flex;
+    gap: 8px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .ref-add{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width: 44px; height:44px;
+    border-radius: 14px;
+    border: 1px dashed rgba(255,255,255,0.20);
+    background: rgba(255,255,255,0.04);
+    cursor:pointer;
+    transition: .16s ease;
+    user-select:none;
+    font-weight: 1000;
+    color: rgba(255,255,255,0.75);
+    line-height: 0;
+    font-size: 22px;
+  }
+  .ref-add::before{
+    content:"+";
+    line-height: 1;
+  }
+  .ref-add:hover{ border-color: rgba(43,108,255,.65); background: rgba(43,108,255,.10); color:#fff; }
+
+  .ref-thumb{
+    width: 44px; height:44px;
+    border-radius: 14px;
+    overflow:hidden;
+    border: 1px solid rgba(255,255,255,0.14);
+    background:#000;
+    position:relative;
+    flex: 0 0 auto;
+  }
+  .ref-thumb img{
+    width:100%; height:100%; object-fit:cover; opacity:.98;
+  }
+  .ref-thumb .x{
+    position:absolute; top: 4px; right:4px;
+    width: 18px; height:18px;
+    border-radius: 999px;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(0,0,0,0.65);
+    border: 1px solid rgba(255,255,255,0.10);
+    color:#fff;
+    font-size: 12px;
+    font-weight: 900;
+    cursor:pointer;
+    opacity: 0;
+    transition: .12s ease;
+  }
+  .ref-thumb:hover .x{ opacity:1; }
+
+  /* Buttons */
+  .dock-btn{
+    width:100%;
+    border:0;
+    border-radius: 18px;
+    padding: 12px 12px;
+    font-weight: 1000;
+    cursor:pointer;
+    transition: .18s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    user-select:none;
+  }
+  .dock-btn.primary{
+    background: var(--accent);
+    color:#fff;
+  }
+  .dock-btn.primary:hover{ background: var(--accent-hover); transform: translateY(-1px); }
+  .dock-btn.ghost{
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    color:#fff;
+  }
+  .dock-btn.ghost:hover{
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.22);
+    transform: translateY(-1px);
+  }
+  .dock-btn:disabled{ opacity: .65; cursor:not-allowed; transform:none; }
+
+  .dock-meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+  }
+  .dock-cost{
+    font-size: 12px;
+    font-weight: 1000;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.85);
+    white-space:nowrap;
+  }
+  .dock-status{
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 800;
+    min-height: 16px;
+    text-align:right;
+  }
+  .dock-status.err{ color: #ff7b88; }
+  .dock-status.ok{ color: #9be28a; }
+  .dock-status.warn{ color: var(--warn); }
+
+  /* Processing overlay (optional subtle) */
+  .lf-proc-shimmer{
+    position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent 0%, rgba(43,108,255,0.10) 40%, rgba(43,108,255,0.22) 50%, rgba(43,108,255,0.10) 60%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shine 1.8s infinite linear;
+    opacity: .55;
+    pointer-events:none;
+  }
+  @keyframes shine { 0%{ background-position:200% 0 } 100%{ background-position:-200% 0 } }
+
+  /* ===== MODAL (copied style from Library page + small align) ===== */
+  .lf-modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .lf-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  .lf-modal {
+    width: 90%;
+    max-width: 1100px;
+    height: 85vh;
+    background: #1f1f1f;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
+    position: relative;
+  }
+
+  .m-preview {
+    flex: 1;
+    background: #000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position: relative;
+    overflow:hidden;
+  }
+  .m-preview img, .m-preview video, .m-preview model-viewer {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+  }
+
+  .m-sidebar {
+    width: 360px;
+    border-left: 1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    padding: 22px;
+    background: var(--bg-card);
+    flex-shrink: 0;
+  }
+
+  .m-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display:flex; align-items:center; justify-content:center;
+    z-index: 10;
+    transition: .2s;
+  }
+  .m-close:hover { background: #fff; color: #000; }
+
+  .m-info-row { margin-bottom: 14px; }
+  .m-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .45px;
+    color: var(--text-sec);
+    font-weight: 900;
+    margin-bottom: 6px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+  }
+  .m-val { font-size: 14px; color:#fff; word-break: break-all; }
+  .m-val.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; color: rgba(255,255,255,0.55); font-size: 12px; }
+
+  .m-box{
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.35);
+    border-radius: 14px;
+    padding: 10px 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .m-model-pill{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .m-model-chip{
+    font-size: 11px;
+    font-weight: 1000;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+  }
+
+  .m-prompt-box{
+    white-space: pre-wrap;
+    max-height: 220px;
+    overflow:auto;
+    line-height: 1.35;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: rgba(255,255,255,0.86);
+    padding-right: 6px;
+  }
+  .m-prompt-box::-webkit-scrollbar{ width:10px; }
+  .m-prompt-box::-webkit-scrollbar-track{ background: rgba(255,255,255,0.04); border-radius: 999px; }
+  .m-prompt-box::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.18); border-radius: 999px; border: 2px solid rgba(0,0,0,0.35); }
+  .m-prompt-box::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.26); }
+
+  .m-actions{ margin-top:auto; display:flex; flex-direction:column; gap:10px; }
+
+  .btn {
+    border:0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff;
+    font-weight: 900;
+    padding: 12px;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: 0.2s;
+    text-decoration: none;
+    width: 100%;
+  }
+  .btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+  .btn.primary { background: #fff; color: #000; border: none; }
+  .btn.primary:hover { background: #ddd; }
+  .btn.danger { color: var(--danger); border-color: rgba(255, 70, 90, 0.3); }
+  .btn.danger:hover { background: rgba(255, 70, 90, 0.1); border-color: var(--danger); }
+  .btn.ok { border-color: rgba(57,255,20,0.35); background: rgba(57,255,20,0.08); }
+
+  .pub-pop {
+    position:absolute; inset:0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding: 18px;
+    z-index: 30;
+  }
+  .pub-pop.open{ display:flex; }
+  .pub-card{
+    width: 100%;
+    max-width: 420px;
+    background: rgba(20,20,20,0.95);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+  .pub-title{ font-weight:1000; font-size:16px; margin-bottom:10px; }
+  .pub-input{
+    width:100%;
+    border-radius: 14px;
+    padding: 12px;
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    color:#fff;
+    font-size:14px;
+  }
+  .pub-actions{ display:flex; gap:10px; margin-top:12px; }
+  .pub-actions .btn{ width:100%; }
+
+  @media(max-width: 980px){
+    #lf-dock-inner{ flex-direction:column; }
+    .dock-col-left, .dock-col-right{ width:100%; min-width: 0; }
+    .lf-modal { flex-direction: column; height: 90vh; }
+    .m-sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+    .m-preview { height: 50%; }
+  }
+</style>
+
+<div id="lf-studio">
+  <div id="lf-main">
+    <div class="lf-toprow">
+      <div>
+        <h1 class="lf-title">image</h1>
+        <div class="lf-sub">User: <span id="m-email">…</span> • Credits: <span id="m-credits">0</span></div>
+      </div>
+    </div>
+
+    <div id="grid" class="lf-grid">
+      <div class="lf-empty">Loading…</div>
+    </div>
+    <div class="lf-loader" id="grid-loader" style="display:none;">Loading more…</div>
+    <div id="grid-sentinel"></div>
+  </div>
+
+  <!-- FIXED DOCK -->
+  <div id="lf-dock">
+    <div id="lf-dock-inner">
+      <!-- left: model + quick params -->
+      <div class="dock-col-left">
+        <div>
+          <div class="dock-label">Model</div>
+          <div class="lf-model-select" id="modelSelect">
+            <div class="lf-select-trigger" id="modelTrigger">
+              <div class="lf-model-name" id="currentModelName">Nano Banana Pro</div>
+              <div class="lf-chevron">›</div>
+            </div>
+
+            <div class="lf-dropdown-menu" id="modelList">
+              <div class="lf-dd-item active" data-name="Nano Banana Pro" data-id="nano_banana_pro">
+                <span>Nano Banana Pro</span><span class="status-dot"></span>
+              </div>
+              <div class="lf-dd-item" data-name="Nano Banana 2" data-id="nano_banana_2">
+                <span>Nano Banana 2</span>
+              </div>
+              <div class="lf-dd-item" data-name="Seedream 4" data-id="seedream_4">
+                <span>Seedream 4</span>
+              </div>
+              <div class="lf-dd-item" data-name="FLUX.2 Max" data-id="flux_2_max">
+                <span>FLUX.2 Max</span>
+              </div>
+              <div class="lf-dd-item" data-name="Z-Image Turbo" data-id="z_image_turbo">
+                <span>Z-Image Turbo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dock-row">
+          <div style="flex:1" id="aspectBlock">
+            <div class="dock-label">Aspect</div>
+            <div class="lf-model-select" id="aspectSelect">
+              <div class="lf-select-trigger" id="aspectTrigger">
+                <div class="lf-model-name" id="currentAspectName">Match input</div>
+                <div class="lf-chevron">›</div>
+              </div>
+              <div class="lf-dropdown-menu" id="aspectList">
+                <div class="lf-dd-item active" data-name="Match input" data-value="match_input_image"><span>Match input</span></div>
+                <div class="lf-dd-item" data-name="1:1" data-value="1:1"><span>1:1</span></div>
+                <div class="lf-dd-item" data-name="1:4" data-value="1:4"><span>1:4</span></div>
+                <div class="lf-dd-item" data-name="1:8" data-value="1:8"><span>1:8</span></div>
+                <div class="lf-dd-item" data-name="2:3" data-value="2:3"><span>2:3</span></div>
+                <div class="lf-dd-item" data-name="3:2" data-value="3:2"><span>3:2</span></div>
+                <div class="lf-dd-item" data-name="3:4" data-value="3:4"><span>3:4</span></div>
+                <div class="lf-dd-item" data-name="4:1" data-value="4:1"><span>4:1</span></div>
+                <div class="lf-dd-item" data-name="4:3" data-value="4:3"><span>4:3</span></div>
+                <div class="lf-dd-item" data-name="4:5" data-value="4:5"><span>4:5</span></div>
+                <div class="lf-dd-item" data-name="5:4" data-value="5:4"><span>5:4</span></div>
+                <div class="lf-dd-item" data-name="8:1" data-value="8:1"><span>8:1</span></div>
+                <div class="lf-dd-item" data-name="9:16" data-value="9:16"><span>9:16</span></div>
+                <div class="lf-dd-item" data-name="16:9" data-value="16:9"><span>16:9</span></div>
+                <div class="lf-dd-item" data-name="21:9" data-value="21:9"><span>21:9</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="width:120px" id="resWrap">
+            <div class="dock-label">Res</div>
+            <div class="lf-model-select" id="resSelect">
+              <div class="lf-select-trigger" id="resTrigger">
+                <div class="lf-model-name" id="currentResName">2K</div>
+                <div class="lf-chevron">›</div>
+              </div>
+              <div class="lf-dropdown-menu" id="resList">
+                <div class="lf-dd-item" data-name="1K" data-value="1K"><span>1K</span></div>
+                <div class="lf-dd-item active" data-name="2K" data-value="2K"><span>2K</span></div>
+                <div class="lf-dd-item" data-name="4K" data-value="4K"><span>4K</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seedream / Flux extra (hidden by default, shown when model selected) -->
+        <div class="dock-row" id="seedreamRow" style="display:none;">
+          <div style="flex:1">
+            <div class="dock-label">Seedream size</div>
+            <select id="sdSize" class="lf-select">
+              <option value="1K" selected>1K</option>
+              <option value="2K">2K</option>
+              <option value="4K">4K</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <div class="dock-label">Seedream aspect</div>
+            <select id="sdAspect" class="lf-select">
+              <option value="match_input_image" selected>Match Input</option>
+              <option value="1:1">1:1</option>
+              <option value="4:3">4:3</option>
+              <option value="3:4">3:4</option>
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+              <option value="21:9">21:9</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="dock-row" id="seedreamCustom" style="display:none;">
+          <input id="sdWidth" class="lf-num" type="number" min="64" max="4096" value="1024" />
+          <input id="sdHeight" class="lf-num" type="number" min="64" max="4096" value="1024" />
+        </div>
+
+        <div class="dock-row" id="fluxRow" style="display:none;">
+          <div style="flex:1">
+            <div class="dock-label">Flux aspect</div>
+            <select id="fxAspect" class="lf-select">
+              <option value="1:1" selected>1:1</option>
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+              <option value="4:3">4:3</option>
+              <option value="3:4">3:4</option>
+              <option value="2:3">2:3</option>
+              <option value="3:2">3:2</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <div class="dock-label">Flux res</div>
+            <select id="fxRes" class="lf-select">
+              <option value="1 MP">1 MP</option>
+              <option value="2 MP" selected>2 MP</option>
+              <option value="4 MP">4 MP</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- mid: prompt + refs -->
+      <div class="dock-col-mid">
+        <div class="dock-mid-split" id="midSplit">
+          <div class="dock-mid-left">
+            <div class="dock-prompt-wrap">
+              <div class="dock-label">Prompt</div>
+              <textarea id="scene" class="lf-input dock-prompt" rows="2" placeholder="Describe what you want..."></textarea>
+            </div>
+          </div>
+
+          <div class="dock-mid-divider"></div>
+
+          <div class="dock-mid-right" id="refBlock">
+            <div class="dock-label">Reference images</div>
+            <input type="file" id="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+            <div class="dock-refbar" id="refbar">
+              <div class="ref-add" id="refAdd"></div>
+              <!-- thumbs rendered here -->
+            </div>
+            <!-- Hidden style-only (kept for logic, hidden in UI as requested) -->
+            <label style="display:none; margin-top:10px; color: rgba(255,255,255,0.7); font-weight:800; font-size:12px;">
+              <input type="checkbox" id="styleOnly" checked /> Style-only transform (hidden)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- right: actions -->
+      <div class="dock-col-right">
+        <div class="dock-meta">
+          <div class="dock-status" id="statusText"></div>
+        </div>
+        <div class="dock-spacer"></div>
+        <button class="dock-btn primary" id="run" type="button">Generate</button>
+        <button class="dock-btn ghost" id="gptPrompt" type="button">✨ GPT → Build Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL (Library-like) -->
+  <div class="lf-modal-backdrop" id="modal-backdrop">
+    <button class="m-close" id="modal-close">✕</button>
+
+    <div class="lf-modal" onclick="event.stopPropagation()">
+      <div class="m-preview" id="m-view-container"></div>
+
+      <div class="m-sidebar">
+        <div class="m-info-row">
+          <div class="m-label">Status</div>
+          <div class="m-val" id="m-status-text">—</div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">Created At</div>
+          <div class="m-val" id="m-date">—</div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">File ID</div>
+          <div class="m-val mono" id="m-id">—</div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">Model</div>
+          <div class="m-box m-model-pill">
+            <div class="m-val" id="m-model">—</div>
+            <div class="m-model-chip" id="m-model-chip"></div>
+          </div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">
+            <span>Prompt</span>
+            <button class="btn" id="btn-use-as-ref" style="width:auto; padding:6px 10px; font-size:11px;">Use as reference</button>
+          </div>
+          <div class="m-box m-prompt-box" id="m-prompt">—</div>
+        </div>
+
+        <div class="m-info-row">
+          <div class="m-label">Feed</div>
+          <div class="m-val" id="m-feed-state">Not published</div>
+        </div>
+
+        <div class="m-actions">
+          <button class="btn primary" id="btn-publish">Publish to Feed</button>
+          <button class="btn danger" id="btn-unpublish" style="display:none;">Unpublish from Feed</button>
+          <button class="btn primary" id="btn-download">Download File</button>
+          <button class="btn" id="btn-copy-link">Copy URL</button>
+          <button class="btn" id="btn-copy-prompt">Copy Prompt</button>
+          <button class="btn danger" id="btn-toggle-hide">Move to Trash</button>
+        </div>
+      </div>
+
+      <div class="pub-pop" id="pub-pop">
+        <div class="pub-card" onclick="event.stopPropagation()">
+          <div class="pub-title">Publish to Feed</div>
+          <input class="pub-input" id="pub-title-input" placeholder="Title (optional)" />
+          <div class="pub-actions">
+            <button class="btn" id="pub-cancel">Cancel</button>
+            <button class="btn primary" id="pub-confirm">Publish</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* ==========================================================
+      CONFIG
+     ========================================================== */
+  const BASE = location.origin;
+  const BACKEND = "https://api.lightfull.ai";
+
+  const INPUTS_BUCKET = "inputs";
+  const MAX_IMAGES = 12;
+
+  const LS_HIDDEN_KEY = "lf_hidden_items_v2";
+  const LS_PUB_KEY = "lf_feed_published_v1";
+
+  const PAGE_SIZE = 30;   // studio view = last N items
+  let loading = false;
+
+  /* ==========================================================
+      ELEMENTS
+     ========================================================== */
+  const $ = (id) => document.getElementById(id);
+
+  const grid = $("grid");
+  const gridLoader = $("grid-loader");
+  const gridSentinel = $("grid-sentinel");
+  const mEmail = $("m-email");
+  const mCredits = $("m-credits");
+
+  // Dock inputs
+  const sceneEl = $("scene");
+  const fileEl = $("file");
+  const refAdd = $("refAdd");
+  const refbar = $("refbar");
+  const refBlock = $("refBlock");
+  const midSplit = $("midSplit");
+
+  const resWrap = $("resWrap");
+
+  const aspectBlock = $("aspectBlock");
+  const aspectSelect = $("aspectSelect");
+  const aspectTrigger = $("aspectTrigger");
+  const currentAspectName = $("currentAspectName");
+  const aspectList = $("aspectList");
+
+  const resSelect = $("resSelect");
+  const resTrigger = $("resTrigger");
+  const currentResName = $("currentResName");
+  const resList = $("resList");
+
+  const styleChk = $("styleOnly"); // hidden, but keep logic
+
+  // Seedream
+  const seedreamRow = $("seedreamRow");
+  const sdSize = $("sdSize");
+  const sdAspect = $("sdAspect");
+  const seedreamCustom = $("seedreamCustom");
+  const sdWidth = $("sdWidth");
+  const sdHeight = $("sdHeight");
+
+  // Flux
+  const fluxRow = $("fluxRow");
+  const fxAspect = $("fxAspect");
+  const fxRes = $("fxRes");
+
+  // Actions
+  const runBtn = $("run");
+  const gptBtn = $("gptPrompt");
+  const statusText = $("statusText");
+
+  // Model dropdown
+  const modelSelect = $("modelSelect");
+  const modelTrigger = $("modelTrigger");
+  const currentModelName = $("currentModelName");
+  const modelList = $("modelList");
+
+  // Modal
+  const modalBack = $("modal-backdrop");
+  const modalClose = $("modal-close");
+  const viewCont = $("m-view-container");
+  const mStatus = $("m-status-text");
+  const mDate = $("m-date");
+  const mId = $("m-id");
+  const mModel = $("m-model");
+  const mModelChip = $("m-model-chip");
+  const mPrompt = $("m-prompt");
+  const mFeedState = $("m-feed-state");
+
+  const btnDown = $("btn-download");
+  const btnCopy = $("btn-copy-link");
+  const btnCopyPrompt = $("btn-copy-prompt");
+  const btnHide = $("btn-toggle-hide");
+
+  const btnPublish = $("btn-publish");
+  const btnUnpublish = $("btn-unpublish");
+  const pubPop = $("pub-pop");
+  const pubTitle = $("pub-title-input");
+  const pubCancel = $("pub-cancel");
+  const pubConfirm = $("pub-confirm");
+
+  const btnUseAsRef = $("btn-use-as-ref");
+
+  /* ==========================================================
+      STATE
+     ========================================================== */
+  let currentPresetId = "nano_banana_pro";
+  let selectedFiles = [];      // local File objects
+  let selectedRefUrls = [];    // remote urls picked from library
+  let cachedImageUrls = [];
+  let cachedSignature = "";
+
+  let allItems = [];
+  let currentItem = null;
+  let offset = 0;
+  let hasMore = true;
+  let lazyMediaObserver = null;
+  let gridObserver = null;
+
+  /* ==========================================================
+      HELPERS
+     ========================================================== */
+  function setStatus(t, kind){
+    statusText.textContent = t || "";
+    statusText.classList.remove("err","ok","warn");
+    if(kind) statusText.classList.add(kind);
+  }
+
+  function uuid(){
+    if (crypto && crypto.randomUUID) return crypto.randomUUID();
+    return Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function isVideo(url){
+    const u = String(url||"").toLowerCase();
+    return u.endsWith(".mp4") || u.endsWith(".mov") || u.endsWith(".webm") || u.includes("fal.media");
+  }
+
+  function is3D(url){
+    const u = String(url||"").toLowerCase();
+    return u.endsWith(".glb") || u.endsWith(".gltf");
+  }
+
+  function getStatus(raw){
+    const v = String(raw||"").toLowerCase();
+    if (["succeeded","success","done"].includes(v)) return { text:"Done", dot:"ok", type:"done" };
+    if (["failed","error","canceled"].includes(v)) return { text:"Failed", dot:"bad", type:"done" };
+    if (["starting","processing","running","in_progress"].includes(v)) return { text:"Processing", dot:"warn", type:"process" };
+    return { text: v, dot:"warn", type:"process" };
+  }
+
+  function prettyModelName(raw){
+    const s = String(raw || "").toLowerCase();
+    if (s.includes("nano-banana") || s.includes("nano_banana")) return "Nano Banana";
+    if (s.includes("seedream")) return "Seedream";
+    if (s.includes("flux")) return "FLUX";
+    if (s.includes("z-image") || s.includes("z_image")) return "Z-Image";
+    if (s.includes("kling") && s.includes("2.6")) return "Kling 2.6";
+    if (s.includes("kling") && s.includes("2.5")) return "Kling 2.5";
+    if (s.includes("veo")) return "Veo";
+    if (s.startsWith("runway:")) return "Runway";
+    if (s.startsWith("freepik:")) return "Freepik";
+    const parts = String(raw || "").split("/");
+    return parts[parts.length - 1] || "Model";
+  }
+
+  function modelChip(raw){
+    const s = String(raw || "").toLowerCase();
+    if (s.startsWith("runway:")) return "RUNWAY";
+    if (s.startsWith("freepik:")) return "FREEPIK";
+    if (s.includes("replicate")) return "REPLICATE";
+    if (s.includes("fal")) return "FAL";
+    return "";
+  }
+
+  function getHiddenIds(){
+    try { return JSON.parse(localStorage.getItem(LS_HIDDEN_KEY) || "[]"); } catch(e){ return []; }
+  }
+  function setHiddenIds(ids){ localStorage.setItem(LS_HIDDEN_KEY, JSON.stringify(ids)); }
+
+  function toggleHideId(id){
+    id = String(id);
+    let ids = getHiddenIds();
+    if(ids.includes(id)) ids = ids.filter(x => x !== id);
+    else ids.push(id);
+    setHiddenIds(ids);
+    renderGrid();
+    if(currentItem && String(currentItem.id) === id) updateModal(currentItem);
+  }
+
+  function getPubMap(){
+    try { return JSON.parse(localStorage.getItem(LS_PUB_KEY)||"{}"); } catch(e){ return {}; }
+  }
+  function setPubMap(m){ localStorage.setItem(LS_PUB_KEY, JSON.stringify(m)); }
+  function isPublished(genId){
+    const m = getPubMap();
+    return !!m[String(genId)];
+  }
+  function markPublished(genId, postId=true){
+    const m = getPubMap();
+    m[String(genId)] = postId || true;
+    setPubMap(m);
+  }
+  function markUnpublished(genId){
+    const m = getPubMap();
+    delete m[String(genId)];
+    setPubMap(m);
+  }
+
+  async function forceDownload(url, filename){
+    try{
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+      a.remove();
+    } catch(e){
+      window.open(url, "_blank");
+    }
+  }
+
+  /* ==========================================================
+      AUTH / API
+     ========================================================== */
+  async function getSessionOrRedirect(){
+    const sb = window.sb;
+    if (!sb) { location.href = BASE + "/login"; throw new Error("No supabase client"); }
+    const { data } = await sb.auth.getSession();
+    const s = data?.session;
+    if (!s) { location.href = BASE + "/login"; throw new Error("No session"); }
+    return s;
+  }
+
+  async function refreshSessionSafe(){
+    const sb = window.sb;
+    try { await sb.auth.refreshSession(); } catch(e){}
+    return getSessionOrRedirect();
+  }
+
+  async function fetchJsonWithAuth(url, options={}){
+    let s = await getSessionOrRedirect();
+    let r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+    if (r.status===401 || r.status===403){
+      s = await refreshSessionSafe();
+      r = await fetch(url, { ...options, headers:{...(options.headers||{}), Authorization:"Bearer "+s.access_token} });
+    }
+    const raw = await r.text();
+    let j={}; try{ j=raw?JSON.parse(raw):{} }catch(_){}
+    if (!r.ok || j?.ok===false){
+      const err = new Error(j.error || ("HTTP "+r.status));
+      err.status = r.status; err.data = j; throw err;
+    }
+    return j;
+  }
+
+  async function getTokenOrThrow(){
+    const sb = window.sb;
+    if(!sb) throw new Error("Supabase not found");
+    const { data } = await sb.auth.getSession();
+    if(!data.session) throw new Error("No session");
+    return data.session.access_token;
+  }
+
+  async function publishGeneration(generationId, title){
+    const token = await getTokenOrThrow();
+    const r = await fetch(`${BACKEND}/api/feed/publish`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token },
+      body: JSON.stringify({ generation_id: Number(generationId), title: title || "" })
+    });
+    const j = await r.json().catch(()=> ({}));
+    if(!r.ok) throw new Error(j?.error || j?.details || "Publish failed");
+    return j;
+  }
+
+  async function unpublishGeneration(generationId){
+    const token = await getTokenOrThrow();
+    const r = await fetch(`${BACKEND}/api/feed/unpublish`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", Authorization:"Bearer " + token },
+      body: JSON.stringify({ generation_id: Number(generationId) })
+    });
+    const j = await r.json().catch(()=> ({}));
+    if(!r.ok) throw new Error(j?.error || j?.details || "Unpublish failed");
+    return j;
+  }
+
+  /* ==========================================================
+      FILES / REFS
+     ========================================================== */
+  function ensureLimit(arr){
+    if(arr.length <= MAX_IMAGES) return arr;
+    return arr.slice(0, MAX_IMAGES);
+  }
+
+  function dedupeRefUrls(urls){
+    const out = [];
+    const seen = new Set();
+    for(const u of urls){
+      const key = String(u||"").trim();
+      if(!key) continue;
+      if(seen.has(key)) continue;
+      seen.add(key);
+      out.push(key);
+    }
+    return out;
+  }
+
+  function dedupeFiles(files){
+    const seen = new Set();
+    const out = [];
+    for (const f of files){
+      const key = `${f.name}|${f.size}|${f.lastModified}`;
+      if(seen.has(key)) continue;
+      seen.add(key);
+      out.push(f);
+    }
+    return out;
+  }
+
+  function setFiles(next){
+    selectedFiles = ensureLimit(dedupeFiles(next));
+    cachedImageUrls = []; cachedSignature = "";
+    renderRefbar();
+  }
+
+  function addFiles(files){
+    const imgs = Array.from(files || []).filter(f => f && f.type && f.type.startsWith("image/"));
+    if(!imgs.length) return;
+    const merged = selectedFiles.concat(imgs);
+    const limited = ensureLimit(dedupeFiles(merged));
+    if(limited.length < merged.length){
+      setStatus(`Max ${MAX_IMAGES} images. Extra ignored.`, "warn");
+      setTimeout(()=>setStatus(""), 1200);
+    }
+    selectedFiles = limited;
+    cachedImageUrls = []; cachedSignature = "";
+    renderRefbar();
+  }
+
+  function removeLocalFileAt(idx){
+    const f = selectedFiles[idx];
+    if(f && f.__previewUrl){ try{ URL.revokeObjectURL(f.__previewUrl); }catch(e){} }
+    selectedFiles.splice(idx,1);
+    cachedImageUrls = []; cachedSignature = "";
+    renderRefbar();
+  }
+
+  function removeRefUrlAt(idx){
+    selectedRefUrls.splice(idx,1);
+    renderRefbar();
+  }
+
+  function addRefUrl(url){
+    const clean = String(url||"").trim();
+    if(!clean) return;
+    selectedRefUrls = ensureLimit(dedupeRefUrls([ ...selectedRefUrls, clean ]));
+    renderRefbar();
+  }
+
+  function renderRefbar(){
+    // keep "+" button, then thumbs for local files, then thumbs for urls
+    // remove previous thumbs
+    [...refbar.querySelectorAll(".ref-thumb")].forEach(el => el.remove());
+
+    // local files thumbs
+    selectedFiles.forEach((file, i) => {
+      if(!file.__previewUrl){
+        try{ file.__previewUrl = URL.createObjectURL(file); } catch(e){ file.__previewUrl = ""; }
+      }
+      const box = document.createElement("div");
+      box.className = "ref-thumb";
+      box.title = file.name || "reference";
+
+      const img = document.createElement("img");
+      img.src = file.__previewUrl || "";
+      img.alt = "ref";
+
+      const x = document.createElement("div");
+      x.className = "x";
+      x.textContent = "×";
+      x.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); removeLocalFileAt(i); };
+
+      box.appendChild(img);
+      box.appendChild(x);
+      refbar.appendChild(box);
+    });
+
+    // remote urls thumbs
+    selectedRefUrls.forEach((url, i) => {
+      const box = document.createElement("div");
+      box.className = "ref-thumb";
+      box.title = "Library reference";
+
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = "ref-url";
+
+      const x = document.createElement("div");
+      x.className = "x";
+      x.textContent = "×";
+      x.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); removeRefUrlAt(i); };
+
+      box.appendChild(img);
+      box.appendChild(x);
+      refbar.appendChild(box);
+    });
+  }
+
+  function filesSignature(files){
+    return (files||[]).map(f => `${f.name}|${f.size}|${f.lastModified}`).join("||");
+  }
+
+  async function uploadReferenceToInputs(file){
+    const sb = window.sb;
+    const session = await getSessionOrRedirect();
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "png";
+    const path = `${session.user.id}/${uuid()}.${safeExt}`;
+
+    let up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, { upsert:false, contentType: file.type || "application/octet-stream" });
+    if (up?.error && (up.error.statusCode === 401 || up.error.statusCode === 403)){
+      await refreshSessionSafe();
+      up = await sb.storage.from(INPUTS_BUCKET).upload(path, file, { upsert:false, contentType: file.type || "application/octet-stream" });
+    }
+    if (up.error) throw up.error;
+
+    const pub = sb.storage.from(INPUTS_BUCKET).getPublicUrl(up.data.path);
+    return pub.data.publicUrl;
+  }
+
+  async function uploadAllSelectedOrThrow(){
+    if (!selectedFiles.length) return [];
+    const urls = [];
+    for (let i=0; i<selectedFiles.length; i++){
+      const url = await uploadReferenceToInputs(selectedFiles[i]);
+      urls.push(url);
+    }
+    return urls;
+  }
+
+  async function getOrUploadLocalUrls(){
+    if (!selectedFiles.length) return [];
+    const sig = filesSignature(selectedFiles);
+    if (cachedSignature === sig && cachedImageUrls.length === selectedFiles.length){
+      return cachedImageUrls;
+    }
+    const urls = await uploadAllSelectedOrThrow();
+    cachedSignature = sig;
+    cachedImageUrls = urls;
+    return urls;
+  }
+
+  async function getAllReferenceUrls(){
+    // merge uploaded urls + selectedRefUrls, respect MAX_IMAGES
+    const local = await getOrUploadLocalUrls();
+    const merged = ensureLimit(dedupeRefUrls([ ...local, ...selectedRefUrls ]));
+    return merged;
+  }
+
+  /* ==========================================================
+      MODEL DROPDOWN / PARAM VISIBILITY
+     ========================================================== */
+  let selectedAspect = "match_input_image";
+  let selectedRes = "2K";
+
+  function setupCustomSelect({ root, trigger, list, current, itemSelector, closePredicates, onSelect }){
+    trigger.addEventListener("click", (e) => {
+      e.preventDefault();
+      root.classList.toggle("open");
+    });
+    list.querySelectorAll(itemSelector).forEach(item => {
+      item.addEventListener("click", () => {
+        const name = item.dataset.name;
+        const value = item.dataset.value || item.dataset.id;
+        current.textContent = name;
+        list.querySelectorAll(itemSelector).forEach(el => el.classList.remove("active"));
+        item.classList.add("active");
+        onSelect(name, value);
+        root.classList.remove("open");
+      });
+    });
+    closePredicates.push((e) => { if(!e.target.closest(`#${root.id}`)) root.classList.remove("open"); });
+  }
+
+  const closeHandlers = [];
+
+  setupCustomSelect({
+    root: modelSelect,
+    trigger: modelTrigger,
+    list: modelList,
+    current: currentModelName,
+    itemSelector: ".lf-dd-item",
+    closePredicates: closeHandlers,
+    onSelect: (name, presetId) => selectModel(name, presetId)
+  });
+
+  setupCustomSelect({
+    root: aspectSelect,
+    trigger: aspectTrigger,
+    list: aspectList,
+    current: currentAspectName,
+    itemSelector: ".lf-dd-item",
+    closePredicates: closeHandlers,
+    onSelect: (_, value) => { selectedAspect = value; }
+  });
+
+  setupCustomSelect({
+    root: resSelect,
+    trigger: resTrigger,
+    list: resList,
+    current: currentResName,
+    itemSelector: ".lf-dd-item",
+    closePredicates: closeHandlers,
+    onSelect: (_, value) => { selectedRes = value; calcCost(); }
+  });
+
+  window.addEventListener("click", (e) => { closeHandlers.forEach(fn => fn(e)); });
+
+  function selectModel(name, presetId){
+    currentPresetId = presetId;
+    const isZ = (presetId === "z_image_turbo");
+
+    modelList.querySelectorAll(".lf-dd-item").forEach(el => el.classList.remove("active"));
+    const activeEl = [...modelList.querySelectorAll(".lf-dd-item")].find(el => el.dataset.id === presetId);
+    if(activeEl) activeEl.classList.add("active");
+
+    seedreamRow.style.display = (presetId === "seedream_4") ? "flex" : "none";
+    seedreamCustom.style.display = (presetId === "seedream_4" && sdSize.value === "custom") ? "flex" : "none";
+
+    fluxRow.style.display = (presetId === "flux_2_max") ? "flex" : "none";
+
+    if(presetId === "seedream_4" || presetId === "flux_2_max" || isZ) resWrap.style.display = "none";
+    else resWrap.style.display = "block";
+
+    aspectBlock.style.display = isZ ? "none" : "";
+    aspectSelect.style.display = isZ ? "none" : "";
+    refBlock.style.display = isZ ? "none" : "";
+    midSplit.classList.toggle("z-wide", isZ);
+
+    if(presetId === "nano_banana_2"){
+      selectedRes = "1K";
+      currentResName.textContent = "1K";
+      resList.querySelectorAll(".lf-dd-item").forEach(el => {
+        el.classList.toggle("active", el.dataset.value === "1K");
+      });
+
+      selectedAspect = "match_input_image";
+      currentAspectName.textContent = "Match input";
+      aspectList.querySelectorAll(".lf-dd-item").forEach(el => {
+        el.classList.toggle("active", el.dataset.value === "match_input_image");
+      });
+    }
+
+    if(isZ){
+      selectedFiles.forEach(f => { if(f.__previewUrl) try{ URL.revokeObjectURL(f.__previewUrl); } catch(e){} });
+      selectedFiles = [];
+      selectedRefUrls = [];
+      cachedImageUrls = [];
+      cachedSignature = "";
+      renderRefbar();
+    }
+
+    calcCost();
+  }
+
+  function setGenerateLabel(costText){
+    runBtn.textContent = costText ? `Generate • ${costText}` : "Generate";
+  }
+
+  sdSize.addEventListener("change", () => {
+    seedreamCustom.style.display = (sdSize.value === "custom") ? "flex" : "none";
+    calcCost();
+  });
+  fxRes.addEventListener("change", calcCost);
+
+  function calcCost(){
+    if (currentPresetId === "z_image_turbo") return setGenerateLabel("1 Cr / 4 runs");
+    if (currentPresetId === "nano_banana_pro") {
+      const cost = (String(selectedRes || "2K") === "4K") ? 2 : 1;
+      return setGenerateLabel(cost + " Cr");
+    }
+    if (currentPresetId === "nano_banana_2") {
+      const res = String(selectedRes || "1K");
+      const cost = (res === "4K") ? 4 : (res === "2K") ? 3 : 2;
+      return setGenerateLabel(cost + " Cr");
+    }
+    if (currentPresetId === "seedream_4") {
+      const size = String(sdSize.value || "2K").toUpperCase();
+      const base = size === "4K" ? 4 : size === "2K" ? 2 : 1;
+      return setGenerateLabel(base + " Cr");
+    }
+    if (currentPresetId === "flux_2_max") {
+      const r = String(fxRes.value || "1 MP").toUpperCase();
+      const base = r.includes("4") ? 7 : r.includes("2") ? 4 : 2;
+      return setGenerateLabel(base + " Cr");
+    }
+    setGenerateLabel("");
+  }
+
+  /* ==========================================================
+      GPT PROMPT BUILDER (same as 1 doc logic)
+     ========================================================== */
+  function nanoPromptBuilderSystem(){
+    return `You are a PROMPT BUILDER. OUTPUT ONLY: <PROMPT>...</PROMPT>. Primary Goal: Write a prompt that transforms the provided reference.`;
+  }
+  function extractPromptTag(text){
+    const s = String(text||"");
+    const a = "<PROMPT>", b = "</PROMPT>";
+    const i = s.indexOf(a), j = s.indexOf(b);
+    if (i !== -1 && j !== -1 && j > i) return s.slice(i+a.length, j).trim();
+    return s.trim();
+  }
+  function enforceCinematicRealism(prompt, userText){
+    const t = (userText||"").toLowerCase();
+    const wantsRealism = /real|cinema|photo|фото|кино/.test(t);
+    if (!wantsRealism) return prompt;
+    return prompt + " AVOID: illustration, cartoon, anime, painterly, lineart.";
+  }
+
+  async function gptStart(prompt, image_urls){
+    const data = await fetchJsonWithAuth(BACKEND + "/api/chatgpt_start_json", {
+      method: "POST", headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({ prompt, image_urls, system_prompt: nanoPromptBuilderSystem(), reasoning_effort: "minimal", model: "nano" })
+    });
+    return data.jobId;
+  }
+  async function gptPoll(jobId){
+    const t0 = Date.now(), maxMs = 90000;
+    while(true){
+      if(Date.now() - t0 > maxMs) throw new Error("GPT timeout");
+      const s = await fetchJsonWithAuth(BACKEND + "/api/chatgpt_status?jobId=" + encodeURIComponent(jobId), { method:"GET" });
+      if(s.status === "succeeded") return String(s.text || "").trim();
+      if(s.status === "failed" || s.status === "canceled") throw new Error(s.error || "GPT failed");
+      await new Promise(r => setTimeout(r, 900));
+    }
+  }
+
+  async function buildPrompt(){
+    gptBtn.disabled = true;
+    runBtn.disabled = true;
+    setStatus("", "");
+    try{
+      let userRequest = (sceneEl.value || "").trim();
+      if(styleChk.checked) userRequest += " \n[INSTRUCTION: STYLE-ONLY transform.]";
+
+      const refs = await getAllReferenceUrls();
+      const jobId = await gptStart(userRequest || "Make a high-quality image", refs);
+      const raw = await gptPoll(jobId);
+
+      let built = extractPromptTag(raw);
+      if(built === "DECLINED"){
+        setStatus("GPT declined. Describe image content.", "err");
+        return;
+      }
+      built = enforceCinematicRealism(built, sceneEl.value);
+      sceneEl.value = built;
+      setStatus("Prompt generated ✓", "ok");
+    } catch(e){
+      setStatus("GPT Error", "err");
+    } finally {
+      gptBtn.disabled = false;
+      runBtn.disabled = false;
+    }
+  }
+
+  /* ==========================================================
+      JOB START + polling
+     ========================================================== */
+  async function startJob(){
+    gptBtn.disabled = true;
+    runBtn.disabled = true;
+    setStatus("Starting…", "warn");
+
+    // Make sure refs exist (upload local files, keep remote urls)
+    const isZ = (currentPresetId === "z_image_turbo");
+    const refs = isZ ? [] : await getAllReferenceUrls();
+
+    const fd = new FormData();
+    const userText = (sceneEl.value || "").trim();
+
+    fd.append("presetId", currentPresetId);
+    fd.append("scene", userText || "high quality");
+    fd.append("prompt_user", userText);
+
+    const appendNanoFields = () => {
+      fd.append("aspect_ratio", String(selectedAspect || "match_input_image"));
+      fd.append("resolution", String(selectedRes || (currentPresetId === "nano_banana_2" ? "1K" : "2K")));
+      fd.append("output_format", "png");
+      fd.append("safety_filter_level", "block_only_high");
+
+      if(refs.length){
+        if(refs.length === 1) fd.append("image_input_url", refs[0]);
+        else {
+          refs.forEach(u => fd.append("image_input_urls", u));
+          fd.append("image_input_url", refs[0]);
+        }
+      }
+    };
+
+    // by model
+    if(currentPresetId === "nano_banana_pro" || currentPresetId === "nano_banana_2"){
+      appendNanoFields();
+    }
+
+    if(currentPresetId === "seedream_4"){
+      fd.append("size", sdSize.value);
+      fd.append("aspect_ratio", sdAspect.value);
+      if(sdSize.value === "custom"){
+        fd.append("width", sdWidth.value);
+        fd.append("height", sdHeight.value);
+      }
+      fd.append("max_images", "1");
+      fd.append("enhance_prompt", "true");
+
+      if(refs.length){
+        if(refs.length === 1) fd.append("image_input_url", refs[0]);
+        else {
+          refs.forEach(u => fd.append("image_input_urls", u));
+          fd.append("image_input_url", refs[0]);
+        }
+      }
+    }
+
+    if(currentPresetId === "flux_2_max"){
+      fd.append("aspect_ratio", fxAspect.value);
+      fd.append("resolution", fxRes.value);
+      fd.append("output_format", "jpg");
+      fd.append("output_quality", "80");
+      fd.append("safety_tolerance", "2");
+
+      if(refs.length){
+        refs.forEach(u => fd.append("input_images", u));
+      }
+    }
+
+    if(currentPresetId === "z_image_turbo"){
+      // no references or aspect/res in simplified mode
+    }
+
+    let data;
+    try{
+      data = await fetchJsonWithAuth(BACKEND + "/api/start", { method:"POST", body: fd });
+    } catch(e){
+      if(e.status === 402){
+        setStatus("Not enough credits", "err");
+      } else {
+        setStatus("Start error", "err");
+        alert("Error: " + e.message);
+      }
+      gptBtn.disabled = false;
+      runBtn.disabled = false;
+      return;
+    }
+
+    // show started msg
+    if(currentPresetId === "z_image_turbo"){
+      if(data.note === "paid_run") setStatus("Started • 1 credit charged (4th run)", "warn");
+      else setStatus("Started • free run", "ok");
+    } else if (typeof data.cost !== "undefined") {
+      setStatus(`Started • cost ${data.cost} Cr`, "ok");
+    } else {
+      setStatus("Started", "ok");
+    }
+
+    // refresh grid quickly to show processing card
+    await refreshStudioGrid();
+
+    // poll this job until done, then refresh grid
+    const jobId = data.jobId;
+    gptBtn.disabled = false;
+    runBtn.disabled = false;
+    pollJob(jobId);
+  }
+
+  async function pollJob(jobId){
+    const tick = async () => {
+      try{
+        const s = await fetchJsonWithAuth(BACKEND + "/api/status?jobId=" + encodeURIComponent(jobId), { method:"GET" });
+        if(["succeeded","failed","canceled"].includes(String(s.status||"").toLowerCase())){
+          await refreshStudioGrid();
+          if(String(s.status||"").toLowerCase() === "succeeded"){
+            setStatus("Done", "ok");
+          } else {
+            setStatus("Failed", "err");
+          }
+          return;
+        }
+        // keep slight live status without spamming
+        setStatus("Processing…", "warn");
+        setTimeout(tick, 1600);
+      } catch(e){
+        console.error("poll err", e);
+        setStatus("Poll error", "err");
+      }
+    };
+    tick();
+  }
+
+  /* ==========================================================
+      STUDIO GRID (library+processing in one view)
+     ========================================================== */
+  function showGridLoader(v){
+    gridLoader.style.display = v ? "flex" : "none";
+  }
+
+  function isImageOnly(url){
+    return !!url && !isVideo(url) && !is3D(url);
+  }
+
+  function getThumbUrl(item){
+    return item.output_thumb_url || item.thumb_url || item.preview_url || item.output_url || "";
+  }
+
+  function setupLazyGridMedia(){
+    if(lazyMediaObserver) lazyMediaObserver.disconnect();
+    lazyMediaObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if(!entry.isIntersecting) return;
+        const img = entry.target;
+        const src = img.dataset.src;
+        if(src){
+          img.src = src;
+          img.removeAttribute("data-src");
+        }
+        lazyMediaObserver.unobserve(img);
+      });
+    }, { rootMargin: "180px 0px" });
+
+    grid.querySelectorAll("img.lazy-img[data-src]").forEach((img) => lazyMediaObserver.observe(img));
+  }
+
+  async function refreshStudioGrid(){
+    offset = 0;
+    hasMore = true;
+    allItems = [];
+    grid.innerHTML = `<div class="lf-empty">Loading…</div>`;
+    await loadNextPage(true);
+  }
+
+  async function refreshOnlyProcessing(){
+    const hasProcessing = allItems.some(x => getStatus(x.status).type === "process");
+    if(!hasProcessing) return;
+    try{
+      const data = await fetchJsonWithAuth(`${BACKEND}/api/me?limit=${PAGE_SIZE}&offset=0`);
+      const fresh = Array.isArray(data.generations) ? data.generations : [];
+      if(data.user){
+        mEmail.textContent = data.user?.email || "…";
+        mCredits.textContent = data.credits ?? 0;
+      }
+      const map = new Map(fresh.map(x => [String(x.id), x]));
+      let changed = false;
+      allItems = allItems.map(old => {
+        const upd = map.get(String(old.id));
+        if(!upd) return old;
+        if(upd.status !== old.status || upd.output_url !== old.output_url || upd.output_thumb_url !== old.output_thumb_url){
+          changed = true;
+          return upd;
+        }
+        return old;
+      });
+      if(changed) renderGrid();
+    } catch(e){
+      console.warn("refreshOnlyProcessing error", e);
+    }
+  }
+
+  async function loadNextPage(isInitial=false){
+    if(loading || !hasMore) return;
+    loading = true;
+    showGridLoader(true);
+
+    try{
+      const data = await fetchJsonWithAuth(`${BACKEND}/api/me?limit=${PAGE_SIZE}&offset=${offset}`);
+      const batch = Array.isArray(data.generations) ? data.generations : [];
+      mEmail.textContent = data.user?.email || "…";
+      mCredits.textContent = data.credits ?? 0;
+
+      offset += batch.length;
+      if(batch.length < PAGE_SIZE) hasMore = false;
+
+      allItems.push(...batch);
+      renderGrid();
+
+      if(isInitial && !batch.length){
+        grid.innerHTML = `<div class="lf-empty">No history yet. Generate something ✨</div>`;
+      }
+    } catch(e){
+      grid.innerHTML = `<div class="lf-empty" style="color:var(--danger)">${e.message}</div>`;
+      hasMore = false;
+    } finally {
+      loading = false;
+      showGridLoader(false);
+    }
+  }
+
+  function renderGrid(){
+    const hiddenIds = getHiddenIds();
+    const visible = allItems.filter(g => isImageOnly(g.output_url) && !hiddenIds.includes(String(g.id)));
+
+    if(!visible.length){
+      grid.innerHTML = `<div class="lf-empty">No images yet. Generate something ✨</div>`;
+      return;
+    }
+
+    const proc = visible.filter(g => getStatus(g.status).type === "process");
+    const done = visible.filter(g => getStatus(g.status).type === "done");
+    const list = proc.concat(done);
+
+    grid.innerHTML = list.map(item => {
+      const url = item.output_url || "";
+      const thumbUrl = getThumbUrl(item);
+      const st = getStatus(item.status);
+      const showBadge = (st.type !== "done");
+
+      const mediaHtml = thumbUrl
+        ? `<img data-src="${thumbUrl}" class="lazy-img" alt="preview" />`
+        : `<div style="width:100%;height:100%;background:#0b0b0b;display:flex;align-items:center;justify-content:center;color:#333;font-weight:900;">…</div>`;
+
+      const rawModel = item.model_display || item.model_key || item.model || "—";
+      const modelName = prettyModelName(rawModel);
+      const chip = modelChip(rawModel);
+
+      const badgeHtml = showBadge ? `<div class="card-badge"><span class="dot ${st.dot}"></span>${st.text}</div>` : "";
+      const chipHtml = chip ? `<span class="ov-chip">${chip}</span>` : "";
+
+      const heartBtn = `<button class="icon-btn" title="Like" onclick="event.stopPropagation(); this.classList.toggle('active')"><svg viewBox="0 0 24 24"><path d="M12 21s-6.7-4.3-9.2-7.8C.9 10.5 2 6.9 5.4 5.8 7.8 5.1 10 6.3 12 8.6c2-2.3 4.2-3.5 6.6-2.8 3.4 1.1 4.5 4.7 2.6 7.4C18.7 16.7 12 21 12 21z"/></svg></button>`;
+      const downloadIconBtn = `<button class="icon-btn" title="Download" onclick="event.stopPropagation(); window.lfDownloadFromCard('${encodeURIComponent(url)}','${item.id}')"><svg viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M5 21h14"></path></svg></button>`;
+      const copyIconBtn = `<button class="icon-btn" title="Copy URL" onclick="event.stopPropagation(); window.lfCopyFromCard('${encodeURIComponent(url)}')"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>`;
+      const menuIconBtn = `<button class="icon-btn" title="Details" onclick="event.stopPropagation(); window.openModal('${item.id}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg></button>`;
+      const useAsRefPlusBtn = `<button class="icon-btn plus-btn" onclick="event.stopPropagation(); window.lfAddRefFromCard('${encodeURIComponent(url)}')">+</button>`;
+
+      const shimmer = (st.type === "process") ? `<div class="lf-proc-shimmer"></div>` : ``;
+
+      return `
+        <div class="lf-card" onclick="window.openModal('${item.id}')">
+          <div class="lf-media">${mediaHtml}${shimmer}</div>
+          ${badgeHtml}
+
+          <div class="card-overlay">
+            <div class="card-actions-tr">
+              ${heartBtn}
+              ${downloadIconBtn}
+              ${copyIconBtn}
+              ${menuIconBtn}
+            </div>
+            <div class="card-action-br">${useAsRefPlusBtn}</div>
+            <div class="ov-left">
+              <div class="ov-model">
+                ${chipHtml}
+                <span title="${modelName}">${modelName}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    setupLazyGridMedia();
+  }
+  // expose card actions
+  window.lfDownloadFromCard = (encUrl, id) => {
+    const url = decodeURIComponent(encUrl);
+    if(!url) return;
+    const ext = (url.split(".").pop() || "png").split("?")[0];
+    forceDownload(url, `generated-${id}.${ext}`);
+  };
+
+  window.lfCopyFromCard = async (encUrl) => {
+    const url = decodeURIComponent(encUrl);
+    if(!url) return;
+    try{
+      await navigator.clipboard.writeText(url);
+      setStatus("URL copied ✓", "ok");
+      setTimeout(()=>setStatus(""), 900);
+    } catch(e){
+      setStatus("Copy failed", "err");
+    }
+  };
+
+  window.lfAddRefFromCard = (encUrl) => {
+    const url = decodeURIComponent(encUrl);
+    addRefUrl(url);
+    setStatus("Added reference ✓", "ok");
+    setTimeout(()=>setStatus(""), 900);
+  };
+
+  /* ==========================================================
+      MODAL (Library-like)
+     ========================================================== */
+  window.openModal = (id) => {
+    const item = allItems.find(x => String(x.id) === String(id));
+    if(!item) return;
+    currentItem = item;
+    updateModal(item);
+    modalBack.classList.add("open");
+  };
+
+  function updateModal(item){
+    const url = item.output_url || "";
+    const st = getStatus(item.status);
+    const hiddenIds = getHiddenIds();
+    const isHidden = hiddenIds.includes(String(item.id));
+
+    // preview
+    let html = "";
+    if(!url) html = `<div style="color:#666;font-weight:900;">Processing or Failed</div>`;
+    else if(is3D(url)) html = `<model-viewer src="${url}" camera-controls auto-rotate shadow-intensity="1" style="width:100%;height:100%;background:#111;"></model-viewer>`;
+    else if(isVideo(url)) html = `<video src="${url}" controls autoplay loop style="max-height:100%;max-width:100%"></video>`;
+    else html = `<img src="${url}" style="object-fit:contain;" />`;
+    viewCont.innerHTML = html;
+
+    mStatus.innerHTML = `<span class="dot ${st.dot}" style="display:inline-block;margin-right:6px"></span> ${st.text}`;
+    mDate.textContent = (item.created_at || "").replace("T"," ").slice(0,16);
+    mId.textContent = item.id;
+
+    const rawModel = item.model_display || item.model_key || item.model || "—";
+    const modelName = prettyModelName(rawModel);
+    const prompt = item.prompt_user ?? "";
+
+    mModel.textContent = modelName;
+    const modalChip = modelChip(rawModel);
+    mModelChip.textContent = modalChip;
+    mModelChip.style.display = modalChip ? "inline-flex" : "none";
+    mPrompt.textContent = prompt || "—";
+
+    // Use as ref (only image)
+    const canRef = (!!url && !isVideo(url) && !is3D(url));
+    btnUseAsRef.style.display = canRef ? "inline-flex" : "none";
+    btnUseAsRef.onclick = () => {
+      if(!canRef) return;
+      addRefUrl(url);
+      setStatus("Added reference ✓", "ok");
+      setTimeout(()=>setStatus(""), 900);
+    };
+
+    // download/copy
+    if(url){
+      btnDown.style.display = "flex";
+      btnDown.onclick = () => {
+        const ext = (url.split(".").pop() || "bin").split("?")[0];
+        forceDownload(url, `generated-${item.id}.${ext}`);
+      };
+      btnCopy.onclick = async () => {
+        await navigator.clipboard.writeText(url);
+        btnCopy.textContent = "Copied!";
+        setTimeout(()=>btnCopy.textContent="Copy URL", 900);
+      };
+    } else {
+      btnDown.style.display = "none";
+      btnCopy.onclick = null;
+    }
+
+    btnCopyPrompt.onclick = async () => {
+      if(!prompt) return;
+      try{
+        await navigator.clipboard.writeText(prompt);
+        btnCopyPrompt.classList.add("ok");
+        const prev = btnCopyPrompt.textContent;
+        btnCopyPrompt.textContent = "Copied ✓";
+        setTimeout(() => {
+          btnCopyPrompt.textContent = prev || "Copy Prompt";
+          btnCopyPrompt.classList.remove("ok");
+        }, 900);
+      } catch(e){
+        alert("Copy failed");
+      }
+    };
+
+    // trash
+    if(isHidden){
+      btnHide.textContent = "Restore from Trash";
+      btnHide.classList.remove("danger");
+      btnHide.classList.add("primary");
+    } else {
+      btnHide.textContent = "Move to Trash";
+      btnHide.classList.add("danger");
+      btnHide.classList.remove("primary");
+    }
+    btnHide.onclick = () => {
+      toggleHideId(item.id);
+      if(!isHidden) modalBack.classList.remove("open");
+    };
+
+    // publish states
+    const pub = isPublished(item.id);
+    mFeedState.textContent = pub ? "Published" : "Not published";
+
+    btnPublish.style.display = pub ? "none" : "flex";
+    btnUnpublish.style.display = pub ? "flex" : "none";
+
+    btnPublish.onclick = () => {
+      if(getStatus(item.status).type !== "done"){ alert("Only Done items can be published"); return; }
+      pubTitle.value = item.title || "";
+      pubPop.classList.add("open");
+    };
+
+    btnUnpublish.onclick = async () => {
+      try{
+        btnUnpublish.textContent = "Unpublishing…";
+        await unpublishGeneration(item.id);
+        markUnpublished(item.id);
+        mFeedState.textContent = "Not published";
+        btnPublish.style.display = "flex";
+        btnUnpublish.style.display = "none";
+        renderGrid();
+      } catch(e){
+        alert(e.message);
+      } finally {
+        btnUnpublish.textContent = "Unpublish from Feed";
+      }
+    };
+  }
+
+  modalClose.onclick = () => {
+    modalBack.classList.remove("open");
+    pubPop.classList.remove("open");
+  };
+  modalBack.onclick = (e) => {
+    if(e.target === modalBack){
+      modalBack.classList.remove("open");
+      pubPop.classList.remove("open");
+    }
+  };
+
+  pubCancel.onclick = () => pubPop.classList.remove("open");
+  pubPop.onclick = (e) => { if(e.target === pubPop) pubPop.classList.remove("open"); };
+
+  pubConfirm.onclick = async () => {
+    if(!currentItem) return;
+    if(getStatus(currentItem.status).type !== "done"){ alert("Only Done items can be published"); return; }
+    try{
+      pubConfirm.textContent = "Publishing…";
+      const title = (pubTitle.value || "").trim();
+      const j = await publishGeneration(currentItem.id, title);
+      markPublished(currentItem.id, j?.post?.id || true);
+
+      mFeedState.textContent = "Published";
+      btnPublish.style.display = "none";
+      btnUnpublish.style.display = "flex";
+
+      pubPop.classList.remove("open");
+      renderGrid();
+    } catch(e){
+      alert(e.message);
+    } finally {
+      pubConfirm.textContent = "Publish";
+    }
+  };
+
+  /* ==========================================================
+      EVENTS (dock)
+     ========================================================== */
+  refAdd.addEventListener("click", () => fileEl.click());
+  fileEl.addEventListener("change", (e) => {
+    addFiles(e.target.files);
+    fileEl.value = "";
+  });
+
+  runBtn.addEventListener("click", async () => {
+    try{ await startJob(); } catch(e){ console.error(e); setStatus("Error", "err"); runBtn.disabled=false; gptBtn.disabled=false; }
+  });
+
+  gptBtn.addEventListener("click", async () => {
+    try{ await buildPrompt(); } catch(e){ console.error(e); setStatus("GPT error", "err"); }
+  });
+
+  function setupGridPagination(){
+    if(gridObserver) gridObserver.disconnect();
+    if(!gridSentinel) return;
+    gridObserver = new IntersectionObserver((entries) => {
+      if(entries.some((entry) => entry.isIntersecting)) loadNextPage();
+    }, { rootMargin: "220px 0px" });
+    gridObserver.observe(gridSentinel);
+  }
+
+  /* ==========================================================
+      INIT
+     ========================================================== */
+  // Default model state (nano)
+  selectModel("Nano Banana Pro", "nano_banana_pro");
+  calcCost();
+  renderRefbar();
+
+  // Initial grid load and auto refresh
+  setupGridPagination();
+  refreshStudioGrid();
+  setInterval(refreshOnlyProcessing, 8000);
+
+})();
+</script>
